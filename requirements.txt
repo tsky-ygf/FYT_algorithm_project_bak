@@ -1,6 +1,6 @@
 python-docx
-jieba~=0.42.1
-pandas~=1.4.1
-pymysql~=1.0.2
-fasttext~=0.9.2
-tqdm~=4.63.0
+jieba
+pandas
+pymysql
+fasttext
+tqdm
