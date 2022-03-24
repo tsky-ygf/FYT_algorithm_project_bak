@@ -63,7 +63,8 @@ def generate_train_data(json_path, save_path):
         for one_law in use_laws:
             if "诉讼" in one_law[0]['title']:
                 pass
-            law_list.append(one_law[0]['title'] + '###' + one_law[1])
+            else:
+                law_list.append(one_law[0]['title'] + '###' + one_law[1])
         # break
         seg = preprocess_text(facts, law_list, stopwords)
         # print(seg)

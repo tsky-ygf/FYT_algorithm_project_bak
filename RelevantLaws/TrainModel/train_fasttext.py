@@ -9,6 +9,8 @@ import jieba
 import fasttext
 from RelevantLaws.DataProcess.fasttext_train_data_process import read_stopwords
 
+fasttext.FastText.eprint = lambda x: None
+
 # 参数说明
 """
 训练一个监督模型, 返回一个模型对象
@@ -35,7 +37,7 @@ from RelevantLaws.DataProcess.fasttext_train_data_process import read_stopwords
 """
 
 
-def train_fasttext_model(train_data_path, dev_data_path, test_data_path):
+def train_fasttext_model(train_data_path):
     classifier = fasttext.train_supervised(train_data_path,
                                            label='__label__',
                                            wordNgrams=3,
@@ -46,17 +48,21 @@ def train_fasttext_model(train_data_path, dev_data_path, test_data_path):
 
     classifier.save_model('model/bxh_law_name_and_items/fasttext.bin')
 
-    train_result = classifier.test(train_path)
+
+def evaluate_result(train_data_path, dev_data_path, test_data_path):
+    classifier = fasttext.load_model('model/bxh_law_name_and_items/fasttext.bin')
+
+    train_result = classifier.test(train_data_path, k=3)
     print('train_precision:', train_result[1])
     print('train_recall:', train_result[2])
     print('Number of train examples:', train_result[0])
 
-    dev_result = classifier.test(dev_data_path)
+    dev_result = classifier.test(dev_data_path, k=3)
     print('dev_precision:', dev_result[1])
     print('dev_recall:', dev_result[2])
     print('Number of train examples:', dev_result[0])
 
-    test_result = classifier.test(test_data_path)
+    test_result = classifier.test(test_data_path, k=3)
     print('test_precision:', test_result[1])
     print('test_recall:', test_result[2])
     print('Number of test examples:', test_result[0])
@@ -64,7 +70,6 @@ def train_fasttext_model(train_data_path, dev_data_path, test_data_path):
 
 def infer_result(_texts, _stopword):
     # 结果
-    fasttext.FastText.eprint = lambda x: None
     classifier = fasttext.load_model('model/bxh_law_name_and_items/fasttext.bin')
 
     _texts = jieba.lcut(_texts)
@@ -72,7 +77,7 @@ def infer_result(_texts, _stopword):
     _texts = list(filter(lambda x: x not in _stopword, _texts))
 
     # texts = ''
-    labels = classifier.predict(' '.join(_texts))
+    labels = classifier.predict(' '.join(_texts),k=3)
     print(labels)
     # print(labels[0][0].strip('__label__'))
 
@@ -82,7 +87,8 @@ if __name__ == '__main__':
     dev_path = 'data/fyt_train_use_data/law_items_data/fasttext_use_small/dev_data.txt'
     test_path = 'data/fyt_train_use_data/law_items_data/fasttext_use_small/test_data.txt'
 
-    # train_fasttext_model(train_path, dev_path, test_path)
+    # train_fasttext_model(train_path)
+    # evaluate_result(train_path, dev_path, test_path)
 
     stopwords = read_stopwords("data/fyt_train_use_data/stopwords.txt")
     text = '原告廖淦流诉称：原、被告是多年朋友。2013年3月7日，被告向原告借款150000元，约定2个月限期还款' \
