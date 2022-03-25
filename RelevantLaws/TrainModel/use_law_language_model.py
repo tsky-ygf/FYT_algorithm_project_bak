@@ -5,7 +5,7 @@
 # @Site    : 
 # @File    : use_law_language_model.py
 # @Software: PyCharm
-from transformers import AutoModel,AutoTokenizer
+from transformers import AutoModel, AutoTokenizer
 
 tokenizer_path = "model/language_model/chinese-roberta-wwm-ext"
 model_path = "model/language_model/lawformer"
