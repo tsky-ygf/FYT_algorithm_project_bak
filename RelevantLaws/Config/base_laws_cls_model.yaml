@@ -1,0 +1,26 @@
+# log level
+log_level: "INFO"
+
+# training args
+train_batch_size: 2
+eval_batch_size: 2
+lr_scheduler_type: "linear"
+num_warmup_steps: 0
+gradient_accumulation_steps: 1
+weight_decay: 0.01
+learning_rate: 0.00005
+num_train_epochs: 20
+eval_every_number_of_epoch: 1
+early_stop_patience: 5
+max_len: 512
+
+# pre-train tokenizer
+pre_tokenizer:
+# pre-train model
+pre_model_path: "model/guwenbert-large/"
+
+# train data path
+train_data_path: "data/gw_experience_data/data_10000_train.txt"
+
+# output model path
+output_dir: "res_translation/experiment/base_sim_model/"

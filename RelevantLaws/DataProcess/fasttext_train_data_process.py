@@ -86,3 +86,4 @@ if __name__ == '__main__':
     generate_train_data(train_json_path, train_save_path)
     generate_train_data(dev_json_path, dev_save_path)
     generate_train_data(test_json_path, test_save_path)
+

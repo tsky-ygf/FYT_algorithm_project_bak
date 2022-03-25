@@ -77,7 +77,7 @@ def infer_result(_texts, _stopword):
     _texts = list(filter(lambda x: x not in _stopword, _texts))
 
     # texts = ''
-    labels = classifier.predict(' '.join(_texts),k=3)
+    labels = classifier.predict(' '.join(_texts), k=5)
     print(labels)
     # print(labels[0][0].strip('__label__'))
 
