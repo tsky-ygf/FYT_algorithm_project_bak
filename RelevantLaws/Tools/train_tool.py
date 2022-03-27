@@ -11,7 +11,7 @@ import math
 from tqdm.auto import tqdm
 
 import torch.utils.data as data
-from transformers import AdamW, get_scheduler
+from transformers import get_scheduler, default_data_collator
 from accelerate import Accelerator
 from Utils.logger import get_module_logger
 from Utils.parse_file import parse_config_file
@@ -28,14 +28,14 @@ class BaseTrainTool:
         self.train_dataset, self.eval_dataset = self.init_dataset()
         self.train_dataloader, self.eval_dataloader = self.init_dataloader()
 
-        self.optimizer = self.init_optimizer()
-        self.lr_scheduler = self.init_lr_scheduler()
-
         self.num_update_steps_per_epoch = math.ceil(
             len(self.train_dataloader) / self.config["gradient_accumulation_steps"])
         self.config["max_train_steps"] = self.config["num_train_epochs"] * self.num_update_steps_per_epoch
         self.process_bar = tqdm(range(self.config["max_train_steps"]),
                                 disable=not self.accelerator.is_local_main_process)
+
+        self.optimizer = self.init_optimizer()
+        self.lr_scheduler = self.init_lr_scheduler()
 
         self.completed_steps = 0
 
@@ -54,16 +54,20 @@ class BaseTrainTool:
     def init_dataset(self, *args, **kwargs):
         raise NotImplemented
 
-    def init_dataloader(self, data_collator=None):
+    def data_collator(self, *args, **kwargs):
+        self.logger.info("Use default data collator")
+        return default_data_collator(*args, **kwargs)
+
+    def init_dataloader(self):
         train_dataloader = data.DataLoader(
             dataset=self.train_dataset, shuffle=True,
-            collate_fn=data_collator,
+            collate_fn=self.data_collator,
             batch_size=self.config["train_batch_size"]
         )
 
         eval_dataloader = data.DataLoader(
             dataset=self.eval_dataset,
-            collate_fn=data_collator,
+            collate_fn=self.data_collator,
             batch_size=self.config["eval_batch_size"])
 
         return train_dataloader, eval_dataloader
@@ -82,7 +86,7 @@ class BaseTrainTool:
                 "weight_decay": 0.0,
             },
         ]
-        optimizer = AdamW(optimizer_grouped_parameters, lr=self.config["learning_rate"])
+        optimizer = torch.optim.AdamW(optimizer_grouped_parameters, lr=self.config["learning_rate"])
 
         return optimizer
 
