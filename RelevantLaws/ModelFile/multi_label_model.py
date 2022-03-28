@@ -16,14 +16,10 @@ class MultiLabelClsModel(nn.Module):
         super(MultiLabelClsModel, self).__init__()
         self.config = config
 
-        self.model = AutoModel.from_pretrained(self.config["pre_train_model_path"])
+        self.model = AutoModel.from_pretrained(self.config["pre_train_model"])
         hidden_size = self.model.config.hidden_size
         self.layer_norm = nn.LayerNorm(hidden_size)
         self.dropout = nn.Dropout(self.config["dropout"])
-        # self.fc1 = nn.Linear(hidden_size, self.config["feature_dim"])
-        # self.relu = nn.ReLU()
-        # self.dropout = nn.Dropout(self.config["dropout"])
-        # self.fc2 = nn.Linear(self.config["feature_dim"], self.config["num_labels"])
 
         self.dense = nn.Sequential(
             nn.Linear(hidden_size, self.config["feature_dim"]),
@@ -57,7 +53,4 @@ class MultiLabelClsModel(nn.Module):
         output = self.layer_norm(feature)
         output = self.dropout(output)
         output = self.dense(output)
-        # output = self.fc1(output)
-        # output = self.relu(output)
-        # output = self.fc2(output)
         return output

@@ -24,7 +24,8 @@ def prepare_input(tokenizer, text):
 
 
 class LawsThuNLPDataset(data.Dataset):
-    def __init__(self, tokenizer, data_path, mapping_path):
+    def __init__(self, tokenizer, data_path, mapping_path, logger):
+        self.logger = logger
         self.tokenizer = tokenizer
         with open(data_path, 'rb') as f:
             self.inputs = json.load(f)
@@ -46,17 +47,18 @@ class LawsThuNLPDataset(data.Dataset):
             if "诉讼" not in one_law[0]['title']:
                 label.append(one_law[0]['title'] + '###' + one_law[1])
 
-        label = [self.label_map[one] for one in label]
-
         inputs = prepare_input(self.tokenizer,
                                self.inputs[item]["fact"])
 
+        label = [self.label_map[one] for one in label]
         label = torch.tensor(label)
+
         try:
             y_onehot = torch.nn.functional.one_hot(label, num_classes=self.num_labels)
             y_onehot = y_onehot.sum(dim=0).float()
         except Exception as e:
-            print(e)
+            # print(e)
+            self.logger.debug(e)
             y_onehot = torch.tensor([0.0] * self.num_labels)
 
         inputs["labels"] = y_onehot

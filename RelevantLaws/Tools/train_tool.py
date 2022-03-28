@@ -5,6 +5,7 @@
 # @Site    : 
 # @File    : train_tool.py
 # @Software: PyCharm
+import os
 import sys
 import torch
 import math
@@ -36,6 +37,10 @@ class BaseTrainTool:
 
         self.optimizer = self.init_optimizer()
         self.lr_scheduler = self.init_lr_scheduler()
+
+        # Prepare everything with our `accelerator`.
+        self.model, self.optimizer, self.train_dataloader, self.eval_dataloader = \
+            self.accelerator.prepare(self.model, self.optimizer, self.train_dataloader, self.eval_dataloader)
 
         self.completed_steps = 0
 
@@ -128,9 +133,20 @@ class BaseTrainTool:
 
         return False
 
-    # TODO 优化逻辑到基础类
     def eval_epoch(self):
-        raise NotImplemented
+        self.model.eval()
+        eval_loss_res = 0
+
+        for step, batch in enumerate(self.eval_dataloader):
+            # input_data, targets = batch
+            # outputs = self.model(**input_data)
+            # predictions = torch.sigmoid(outputs.logits) > 0.5
+            # predictions = predictions.detach().numpy().astype(int)
+            eval_loss = self.cal_loss(batch)
+            eval_loss_res += eval_loss.item()
+
+        eval_loss_res /= len(self.eval_dataloader)
+        return eval_loss_res
 
     def save_model(self, model_path):
         self.accelerator.wait_for_everyone()
@@ -140,23 +156,23 @@ class BaseTrainTool:
             self.tokenizer.save_pretrained(model_path)
 
     def train_main(self):
-        best_eval_score = 0
+        best_eval_loss = float("inf")
         patience = 0
         for epoch in range(self.config["num_train_epochs"]):
             if patience > self.config["early_stop_patience"]:
                 break
             self.train_epoch()
             if epoch % self.config["eval_every_number_of_epoch"] == 0 and epoch > 0:
-                eval_mean_score = self.eval_epoch()
+                eval_loss = self.eval_epoch()
 
-                if eval_mean_score > best_eval_score:
+                if eval_loss < best_eval_loss:
                     if "output_dir" not in self.config:
                         self.logger.error("=========== no model save path ================")
                         sys.exit(1)
 
                     self.save_model(
-                        model_path=self.config["output_dir"] + "/epoch_{}_score_{}/".format(epoch, eval_mean_score))
-                    best_eval_score = eval_mean_score
+                        model_path=self.config["output_dir"] + "/epoch_{}_score_{}/".format(epoch, eval_loss))
+                    best_eval_loss = eval_loss
                     patience = 0
             else:
                 patience += 1

@@ -5,12 +5,16 @@
 # @Site    : 
 # @File    : train_laws_cls.py
 # @Software: PyCharm
+import os
 import torch
 
 from RelevantLaws.Tools.train_tool import BaseTrainTool
 from RelevantLaws.DataProcess.laws_model_dataset import LawsThuNLPDataset
-from RelevantLaws.ModelFile.multi_label_model import MultiLabelClsModel
-from transformers import AutoTokenizer
+# from RelevantLaws.ModelFile.multi_label_model import MultiLabelClsModel
+from transformers import AutoConfig, AutoTokenizer, AutoModelForSequenceClassification
+
+
+# os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
 
 class TrainLawsCls(BaseTrainTool):
@@ -20,18 +24,24 @@ class TrainLawsCls(BaseTrainTool):
 
     def init_model(self):
         tokenizer = AutoTokenizer.from_pretrained(self.config["pre_train_tokenizer"])
-        model = MultiLabelClsModel(self.config)
+        # model = MultiLabelClsModel(self.config)
+        model_config = AutoConfig.from_pretrained(self.config["pre_train_model"], num_labels=self.config["num_labels"])
+        model = AutoModelForSequenceClassification.from_pretrained(
+            self.config["pre_train_model"],
+            config=model_config,
+            from_tf=False,
+        )
         return tokenizer, model
 
     def init_dataset(self):
         train_dataset = LawsThuNLPDataset(self.tokenizer,
                                           self.config["train_data_path"],
-                                          self.config["label_mapping_path"]
-                                          )
+                                          self.config["label_mapping_path"],
+                                          self.logger, )
         valid_dataset = LawsThuNLPDataset(self.tokenizer,
                                           self.config["dev_data_path"],
-                                          self.config["label_mapping_path"]
-                                          )
+                                          self.config["label_mapping_path"],
+                                          self.logger, )
         return train_dataset, valid_dataset
 
     def data_collator(self, batch):
@@ -66,15 +76,12 @@ class TrainLawsCls(BaseTrainTool):
     def cal_loss(self, batch):
         # self.logger.info(batch)
         input_data, labels = batch
-        pred = self.model(input_data)
-        loss = self.criterion(torch.sigmoid(pred), labels)
+        pred = self.model(**input_data)
+        loss = self.criterion(torch.sigmoid(pred.logits), labels)
         self.logger.debug(loss)
-
         return loss
-
-    def eval_epoch(self):
-        pass
 
 
 if __name__ == '__main__':
     TrainLawsCls(config_path="RelevantLaws/Config/base_laws_cls_model.yaml").train_main()
+    # TrainLawsCls(config_path="RelevantLaws/Config/base_laws_cls_model.yaml").eval_epoch()
