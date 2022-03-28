@@ -37,11 +37,13 @@ class TrainLawsCls(BaseTrainTool):
         train_dataset = LawsThuNLPDataset(self.tokenizer,
                                           self.config["train_data_path"],
                                           self.config["label_mapping_path"],
-                                          self.logger, )
+                                          self.logger,
+                                          self.config)
         valid_dataset = LawsThuNLPDataset(self.tokenizer,
                                           self.config["dev_data_path"],
                                           self.config["label_mapping_path"],
-                                          self.logger, )
+                                          self.logger,
+                                          self.config)
         return train_dataset, valid_dataset
 
     def data_collator(self, batch):

@@ -1,9 +1,10 @@
 # log level
+is_debug: True
 log_level: "INFO"
 
 # training args
 train_batch_size: 32
-eval_batch_size: 32
+eval_batch_size: 4
 lr_scheduler_type: "linear"
 num_warmup_steps: 0
 gradient_accumulation_steps: 1

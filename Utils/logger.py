@@ -6,6 +6,7 @@
 # @File    : logger.py
 # @Software: PyCharm
 import logging
+import time
 
 
 # 打印日志
@@ -34,3 +35,13 @@ def get_module_logger(module_name, level="INFO"):
     module_logger.handlers.append(console_handler)
 
     return module_logger
+
+
+# 计算函数执行时间
+def print_run_time(func):
+    def wrapper(*args, **kw):
+        local_time = time.time()
+        func(*args, **kw)
+        print('current Function [%s] run time is %.2f' % (func.__name__, time.time() - local_time))
+
+    return wrapper

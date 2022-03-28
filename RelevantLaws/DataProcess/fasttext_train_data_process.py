@@ -12,7 +12,9 @@ from typing import List
 import random
 from tqdm.auto import tqdm
 
-stopwords_path = "data/fyt_train_use_data/stopwords.txt"
+from Utils.logger import print_run_time
+
+stopwords_path = "data/stopwords.txt"
 
 
 def read_stopwords(_stopwords_path):
@@ -51,6 +53,7 @@ def generate_model_data(sentences, save_path):
         print("done!")
 
 
+@print_run_time
 def generate_train_data(json_path, save_path):
     with open(json_path, 'rb') as f:
         load_list = json.load(f)
@@ -75,13 +78,21 @@ def generate_train_data(json_path, save_path):
 
 
 if __name__ == '__main__':
-    train_json_path = "data/fyt_train_use_data/CAIL-Long/civil/train.json"
-    dev_json_path = "data/fyt_train_use_data/CAIL-Long/civil/dev.json"
-    test_json_path = "data/fyt_train_use_data/CAIL-Long/civil/test.json"
+    # train_json_path = "data/fyt_train_use_data/CAIL-Long/civil/train.json"
+    # dev_json_path = "data/fyt_train_use_data/CAIL-Long/civil/dev.json"
+    # test_json_path = "data/fyt_train_use_data/CAIL-Long/civil/test.json"
 
-    train_save_path = 'data/fyt_train_use_data/law_items_data/fasttext_use_small/train_data.txt'
-    dev_save_path = 'data/fyt_train_use_data/law_items_data/fasttext_use_small/dev_data.txt'
-    test_save_path = 'data/fyt_train_use_data/law_items_data/fasttext_use_small/test_data.txt'
+    train_json_path = "data/fyt_train_use_data/CAIL-Long/criminal/train.json"
+    dev_json_path = "data/fyt_train_use_data/CAIL-Long/criminal/dev.json"
+    test_json_path = "data/fyt_train_use_data/CAIL-Long/criminal/test.json"
+
+    # train_save_path = 'data/fyt_train_use_data/law_items_data/fasttext_use_small/train_data.txt'
+    # dev_save_path = 'data/fyt_train_use_data/law_items_data/fasttext_use_small/dev_data.txt'
+    # test_save_path = 'data/fyt_train_use_data/law_items_data/fasttext_use_small/test_data.txt'
+
+    train_save_path = 'data/fyt_train_use_data/law_items_data/criminal_fasttext_use_small/train_data.txt'
+    dev_save_path = 'data/fyt_train_use_data/law_items_data/criminal_fasttext_use_small/dev_data.txt'
+    test_save_path = 'data/fyt_train_use_data/law_items_data/criminal_fasttext_use_small/test_data.txt'
 
     generate_train_data(train_json_path, train_save_path)
     generate_train_data(dev_json_path, dev_save_path)

@@ -1,0 +1,6 @@
+log_level: "Debug"
+
+infer_tokenizer: "model/ThuLawsCls/final"
+infer_model: "model/ThuLawsCls/final"
+
+max_len: 512

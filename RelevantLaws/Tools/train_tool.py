@@ -5,7 +5,6 @@
 # @Site    : 
 # @File    : train_tool.py
 # @Software: PyCharm
-import os
 import sys
 import torch
 import math
@@ -138,10 +137,6 @@ class BaseTrainTool:
         eval_loss_res = 0
 
         for step, batch in enumerate(self.eval_dataloader):
-            # input_data, targets = batch
-            # outputs = self.model(**input_data)
-            # predictions = torch.sigmoid(outputs.logits) > 0.5
-            # predictions = predictions.detach().numpy().astype(int)
             eval_loss = self.cal_loss(batch)
             eval_loss_res += eval_loss.item()
 
@@ -163,6 +158,7 @@ class BaseTrainTool:
                 break
             self.train_epoch()
             if epoch % self.config["eval_every_number_of_epoch"] == 0 and epoch > 0:
+                # torch.cuda.empty_cache()
                 eval_loss = self.eval_epoch()
 
                 if eval_loss < best_eval_loss:

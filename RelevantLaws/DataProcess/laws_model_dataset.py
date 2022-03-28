@@ -11,10 +11,10 @@ import pandas as pd
 import torch.utils.data as data
 
 
-def prepare_input(tokenizer, text):
+def prepare_input(text, tokenizer, max_len=512):
     inputs = tokenizer(text,
                        add_special_tokens=True,
-                       max_length=512,
+                       max_length=max_len,
                        padding="max_length",
                        truncation=True,
                        return_offsets_mapping=False,
@@ -24,11 +24,15 @@ def prepare_input(tokenizer, text):
 
 
 class LawsThuNLPDataset(data.Dataset):
-    def __init__(self, tokenizer, data_path, mapping_path, logger):
+    def __init__(self, tokenizer, data_path, mapping_path, logger, config):
         self.logger = logger
+        self.config = config
         self.tokenizer = tokenizer
         with open(data_path, 'rb') as f:
             self.inputs = json.load(f)
+
+        if self.config['is_debug'] is True:
+            self.inputs = self.inputs[:1000]
 
         map_df = pd.read_csv(mapping_path)
         self.label_map = dict(zip(map_df['laws'], map_df['index']))
@@ -47,8 +51,7 @@ class LawsThuNLPDataset(data.Dataset):
             if "诉讼" not in one_law[0]['title']:
                 label.append(one_law[0]['title'] + '###' + one_law[1])
 
-        inputs = prepare_input(self.tokenizer,
-                               self.inputs[item]["fact"])
+        inputs = prepare_input(self.inputs[item]["fact"], self.tokenizer, max_len=self.config["max_len"])
 
         label = [self.label_map[one] for one in label]
         label = torch.tensor(label)
