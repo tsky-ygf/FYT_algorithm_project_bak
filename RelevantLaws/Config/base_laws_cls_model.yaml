@@ -1,5 +1,5 @@
 # log level
-is_debug: True
+is_debug: Fasle
 log_level: "INFO"
 
 # training args
@@ -18,7 +18,7 @@ early_stop_patience: 5
 num_labels: 302
 max_len: 512
 dropout: 0.1
-feature_dim:  128
+feature_dim: 128
 
 pre_train_tokenizer: "model/language_model/chinese-roberta-wwm-ext/"
 pre_train_model: "model/language_model/lawformer"

@@ -5,7 +5,7 @@
 # @Site    : 
 # @File    : train_laws_cls.py
 # @Software: PyCharm
-import os
+# import os
 import torch
 
 from RelevantLaws.Tools.train_tool import BaseTrainTool

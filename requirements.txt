@@ -9,3 +9,5 @@ torch
 transformers
 accelerate
 ray
+streamlit
+scikit-learn

@@ -23,10 +23,39 @@ def prepare_input(text, tokenizer, max_len=512):
     return inputs
 
 
+class LawsThuTestDataset(data.Dataset):
+    def __init__(self, tokenizer, config, label_map):
+        self.config = config
+        self.tokenizer = tokenizer
+        self.label_map = label_map
+
+        with open(self.config["test_data_path"], 'rb') as f:
+            self.inputs = json.load(f)
+
+    def __len__(self):
+        return len(self.inputs)
+
+    def __getitem__(self, item):
+        label = list()
+
+        for one_law in self.inputs[item]['laws']:
+            if "诉讼" not in one_law[0]['title']:
+                # label.append(one_law[0]['title'] + '###' + one_law[1])
+                law_item = one_law[0]['title'] + '###' + one_law[1]
+                label.append(self.label_map[law_item])
+
+        inputs = prepare_input(self.inputs[item]["fact"], self.tokenizer, max_len=self.config["max_len"])
+
+        inputs['labels'] = label
+        return inputs
+
+
 class LawsThuNLPDataset(data.Dataset):
     def __init__(self, tokenizer, data_path, mapping_path, logger, config):
-        self.logger = logger
-        self.config = config
+        if logger is not None:
+            self.logger = logger
+        if config is not None:
+            self.config = config
         self.tokenizer = tokenizer
         with open(data_path, 'rb') as f:
             self.inputs = json.load(f)
@@ -76,6 +105,6 @@ if __name__ == '__main__':
     tokenizer_ = AutoTokenizer.from_pretrained(tokenizer_path)
     data_path_ = "data/fyt_train_use_data/CAIL-Long/civil/dev.json"
     mapping_path_ = "data/fyt_train_use_data/CAIL-Long/civil/label_mapping.csv"
-    tmp_dataset = LawsThuNLPDataset(tokenizer_, data_path_, mapping_path_)
+    tmp_dataset = LawsThuNLPDataset(tokenizer_, data_path_, mapping_path_, None, None)
     item_ = tmp_dataset[10]
     print(item_)
