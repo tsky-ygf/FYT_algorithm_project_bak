@@ -32,6 +32,10 @@ class LawsThuTestDataset(data.Dataset):
         with open(self.config["test_data_path"], 'rb') as f:
             self.inputs = json.load(f)
 
+        if self.config["log_level"].upper() == "DEBUG":
+            print("test data size:", len(self.inputs))
+            self.inputs = self.inputs[:100]
+
     def __len__(self):
         return len(self.inputs)
 

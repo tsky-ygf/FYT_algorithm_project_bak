@@ -1,4 +1,4 @@
-log_level: "Debug"
+log_level: "INFO"
 
 infer_tokenizer: "model/ThuLawsCls/final"
 infer_model: "model/ThuLawsCls/final"
@@ -6,5 +6,5 @@ infer_model: "model/ThuLawsCls/final"
 test_data_path: "data/fyt_train_use_data/CAIL-Long/civil/test.json"
 label_mapping_path: "data/fyt_train_use_data/CAIL-Long/civil/label_mapping.csv"
 
-batch_size: 4
+batch_size: 16
 max_len: 512
