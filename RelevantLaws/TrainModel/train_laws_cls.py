@@ -31,6 +31,11 @@ class TrainLawsCls(BaseTrainTool):
             config=model_config,
             from_tf=False,
         )
+        self.logger.debug(model)
+
+        for param in model.longformer.parameters():
+            param.requires_grad = False
+
         return tokenizer, model
 
     def init_dataset(self):

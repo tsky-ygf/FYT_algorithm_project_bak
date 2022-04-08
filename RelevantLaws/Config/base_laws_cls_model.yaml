@@ -30,4 +30,4 @@ test_data_path: "data/fyt_train_use_data/CAIL-Long/civil/test.json"
 label_mapping_path: "data/fyt_train_use_data/CAIL-Long/civil/label_mapping.csv"
 
 # output model path
-output_dir: "model/ThuLawsCls/"
+output_dir: "model/ThuLawsCls_freeze/"

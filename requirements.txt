@@ -11,3 +11,5 @@ accelerate
 ray
 streamlit
 scikit-learn
+elasticsearch
+hanlp

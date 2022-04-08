@@ -55,19 +55,25 @@ def evaluate_result(train_data_path, dev_data_path, test_data_path, _model_path)
     classifier = fasttext.load_model(_model_path)
 
     train_result = classifier.test(train_data_path, k=3)
+    print('Number of train examples:', train_result[0])
     print('train_precision:', train_result[1])
     print('train_recall:', train_result[2])
-    print('Number of train examples:', train_result[0])
+    train_f1 = 2 * train_result[1] * train_result[2] / (train_result[1] + train_result[2])
+    print('train_f1:', train_f1)
 
     dev_result = classifier.test(dev_data_path, k=3)
+    print('Number of train examples:', dev_result[0])
     print('dev_precision:', dev_result[1])
     print('dev_recall:', dev_result[2])
-    print('Number of train examples:', dev_result[0])
+    dev_f1 = 2 * dev_result[1] * dev_result[2] / (dev_result[1] + dev_result[2])
+    print('dev_f1:', dev_f1)
 
     test_result = classifier.test(test_data_path, k=3)
+    print('Number of test examples:', test_result[0])
     print('test_precision:', test_result[1])
     print('test_recall:', test_result[2])
-    print('Number of test examples:', test_result[0])
+    test_f1 = 2 * test_result[1] * test_result[2] / (test_result[1] + test_result[2])
+    print('test_f1:', test_f1)
 
 
 def infer_result(_texts, _stopword):
@@ -85,11 +91,11 @@ def infer_result(_texts, _stopword):
 
 
 if __name__ == '__main__':
-    train_path = 'data/fyt_train_use_data/law_items_data/criminal_fasttext_use_small/train_data.txt'
-    dev_path = 'data/fyt_train_use_data/law_items_data/criminal_fasttext_use_small/dev_data.txt'
-    test_path = 'data/fyt_train_use_data/law_items_data/criminal_fasttext_use_small/test_data.txt'
+    train_path = 'data/fyt_train_use_data/law_items_data/civil_fasttext_use_small/train_data.txt'
+    dev_path = 'data/fyt_train_use_data/law_items_data/civil_fasttext_use_small/dev_data.txt'
+    test_path = 'data/fyt_train_use_data/law_items_data/civil_fasttext_use_small/test_data.txt'
 
-    model_path = "model/bxh_law_name_and_items/criminal_fasttext.bin"
+    model_path = "model/bxh_law_name_and_items/civil_fasttext.bin"
     # train_fasttext_model(train_path, save_model_path=model_path)
     evaluate_result(train_path, dev_path, test_path, _model_path=model_path)
 
