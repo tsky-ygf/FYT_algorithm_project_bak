@@ -33,7 +33,7 @@ def get_fileter_data(_fact, _ner, is_tokenization=False):
     for one in resp["ner/msra"]:
         _fact = _fact.replace(one[0], '')
 
-    _fact = _fact.replace('、', '').replace('，，', '，').replace('  ', ' ')
+    _fact = _fact.replace('、', '').replace(',', '').replace('  ', ' ')
     # print(_fact)
     return _fact
 

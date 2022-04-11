@@ -5,6 +5,7 @@
 # @Site    : 
 # @File    : infer_tool.py
 # @Software: PyCharm
+import os
 import torch
 import pandas as pd
 
@@ -17,6 +18,8 @@ from Utils.parse_file import parse_config_file
 
 from RelevantLaws.DataProcess.laws_model_dataset import prepare_input, LawsThuTestDataset
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
+
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 
 class BaseInferTool:
