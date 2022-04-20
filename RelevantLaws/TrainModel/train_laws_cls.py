@@ -8,7 +8,7 @@
 # import os
 import torch
 
-from RelevantLaws.Tools.train_tool import BaseTrainTool
+from Tools.train_tool import BaseTrainTool
 from RelevantLaws.DataProcess.laws_model_dataset import LawsThuNLPDataset
 # from RelevantLaws.ModelFile.multi_label_model import MultiLabelClsModel
 from transformers import AutoConfig, AutoTokenizer, AutoModelForSequenceClassification
