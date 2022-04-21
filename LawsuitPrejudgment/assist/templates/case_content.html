@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Search</title>
+    <link rel="icon" href="data:;base64,=">
+    <!--<link rel="shortcut icon" href="http://www.google.com/favicon.ico" />-->
+    <style>
+        *{
+            padding: 0;
+            margin: 0;
+        }
+        .container{
+            position: fixed;
+            top: 0px;
+            width: 100%;
+            height: 60px;
+            margin: auto;
+            border-bottom: 1px solid #ccc;
+            min-width: 1200px;
+            box-shadow: 0px 0px 10px #ccc;
+            z-index:1;
+            background-color: white;
+        }
+        .search{
+            border: 1px solid #2d8cf0;
+            width: 500px;
+            height: 40px;
+            -webkit-appearance:none;
+            line-height: 40px;
+            outline: none;
+            border-radius: 25px 0 0 25px;
+            box-sizing: border-box;
+            position: absolute;
+            top: 10px;
+            left: 40px;
+            padding-left: 25px;
+        }
+        .btn{
+            background-color: #2d8cf0;
+            color:#fff;
+            text-align: center;
+            display: inline-block;
+            border-radius: 0 25px 25px 0;
+            width: 100px;
+            height: 40px;
+            line-height: 40px;
+            position: absolute;
+            top: 10px;
+            left: 540px;
+            cursor: pointer;
+        }
+        .btn:active{
+            background-color: #2b85e4;
+        }
+        .inputbox{
+            border: 1px solid #2d8cf0;
+            outline: none;
+            height: 30px;
+            border-radius: 3px;
+            box-sizing: border-box;
+            color: #515a6e;
+            padding-left: 10px;
+            width: 130px;
+        }
+        .date{
+            position: absolute;
+            top: 15px;
+            right: 289px;
+            color:#515a6e;
+        }
+        .date2{
+            right: 140px;
+        }
+        .number{
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            color:#515a6e;
+        }
+        .number>input{
+            width: 60px;
+        }
+        .resultbox{
+            margin-top: 70px;
+            padding: 20px;
+            min-width: 1200px;
+            z-index:0;
+        }
+        .result{
+            font-size: 20px;
+            font-weight: bold;
+            color: #2d8cf0;
+        }
+        .list{
+            position: relative;
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+            list-style:none;
+            line-height: 200%;
+            color: #666;
+        }
+        .num{
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 30px;
+            height: 30px;
+            background-color: #5cadff;
+            color: #fff;
+            border-radius: 50%;
+            line-height: 30px;
+            text-align: center;
+        }
+        .title{
+            color: #2d8cf0;
+        }
+        .title:hover{
+            cursor:pointer;
+            color: #2d8cf0;
+            text-decoration:underline;
+        }
+        .son-title{
+            font-size: 14px;
+            color: #888888;
+        }
+        .content{
+            margin-right: 30px;
+        }
+        .bottom{
+            color: #2d8cf0;
+            font-size: 15px;
+            font-weight: bold;
+        }
+        .bottom:hover{
+            cursor:pointer;
+            color: #2d8cf0;
+            text-decoration:underline;
+        }
+        .download{
+            margin-left: 30px;
+            color: #2d8cf0;
+            font-size: 15px;
+        }
+        .download:hover{
+            cursor:pointer;
+            color: #2d8cf0;
+            text-decoration:underline;
+        }
+        .next_page{
+            color: #2d8cf0;
+            font-size: 15px;
+        }
+        .next_page:hover{
+            cursor:pointer;
+            color: #2d8cf0;
+            text-decoration:underline;
+        }
+    </style>
+    <script src="/static/jquery-1.9.0.min.js"></script>
+    <script src='/static/template.js'></script>
+    <script>
+        <!--var baseurl = "http://127.0.0.1:5010/law/search_case";-->
+        var baseurl = "http://192.168.1.254:5010/law/search_case";
+        var downloadurl = "http://192.168.1.254:5010/law/download_case";
+        var current_page = 0;
+        var result = [];
+
+        function search_case(page){
+            current_page = page;
+            if(current_page==0){
+                result = [];
+            };
+            if($("#keywords").val().trim()){
+                $.ajax({
+                    url: baseurl + "?" + $("#searchform").serialize() + '&current_page=' + page,
+                    dataType: "json",
+                    success(res){
+                        result = result.concat(res.result);
+                        res.result = result;
+                        document.getElementById('resultbox').innerHTML = template('template', res);
+                    },
+                    error:function(e){
+                        console.log(e);
+                    }
+                })
+            }
+        };
+
+        function next_page(){
+            search_case(current_page + 1);
+        };
+
+        function show_content(serial){
+            if(document.getElementById(serial).style.display=='none'){
+                document.getElementById(serial).style.display = 'block';
+            }else{
+                document.getElementById(serial).style.display = 'none';
+            }
+        };
+
+        function download(){
+            serials = [];
+            for(const r of result){
+                serials.push(r.serial);
+            };
+            console.log(serials);
+            $.ajax({
+                url: downloadurl,
+                dataType: "json",
+                type : 'POST',
+                data: JSON.stringify({'serials': serials}),
+                success(res){
+                    console.log(res);
+                    window.open(downloadurl + '?filename=' + res.result);
+                },
+                error:function(e){
+                    console.log(e);
+                }
+            })
+        };
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <form action="" id="searchform">
+            <input type="search" class="search" id="keywords" name="keywords">
+            <span class="btn" id="btn" onclick="search_case(0)">案例搜索</span>
+        </form>
+    </div>
+
+    <div class="resultbox" id="resultbox">
+    </div>
+
+    <script id="template" type="text/html">
+        <div class="result">查询结果数：{{result.length}}
+        {{if download==1}}
+            <span class="download" onclick="download()">下载>></span>
+        {{/if}}
+        </div>
+        <ul style="margin-top: 20px; margin-bottom: 20px;">
+            {{each result as vs i}}
+            <li class="list">
+                <div class="body">
+                    <div class="title" onclick="show_content('{{vs.serial}}')">
+                        <strong>{{i+1}}. {{#vs.title}}</strong>
+                    </div>
+                    <div class="son-title">
+                        <span>{{#vs.anyou}}</span>
+                        <span>{{#vs.province}}</span>
+                        <span>{{#vs.court}}</span>
+                        <span>{{vs.date}}</span>
+                    </div>
+                    <div id="{{vs.serial}}" class="content" style="display: none;">
+                        {{#vs.content}}
+                    </div>
+                </div>
+            </li>
+            {{/each}}
+        </ul>
+        {{if next_page==1 & size==20}}
+            <span class="next_page" onclick="next_page()">加载更多>></span>
+        {{/if}}
+    </script>
+
+    <script>
+        if(window.location.search.search("serial=")!=-1){
+            $.ajax({
+                url: window.location.search + "&require_data=True",
+                dataType: "json",
+                success(res){
+                    document.getElementById('resultbox').innerHTML = template('template', res);
+                },
+                error:function(e){
+                    console.log(e);
+                }
+            });
+        };
+
+        $('#keywords').bind('keypress', function(event) {
+            if (event.keyCode == "13") {
+                event.preventDefault();
+                $('#btn').click();
+            }
+        });
+    </script>
+</body>
+
+</html>

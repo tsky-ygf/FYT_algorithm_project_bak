@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Search</title>
+    <link rel="icon" href="data:;base64,=">
+    <!--<link rel="shortcut icon" href="http://www.google.com/favicon.ico" />-->
+    <style>
+        *{
+            padding: 0;
+            margin: 0;
+        }
+        .resultbox{
+            padding: 20px;
+            min-width: 1200px;
+            z-index:0;
+        }
+        .list{
+            position: relative;
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+            list-style:none;
+            line-height: 200%;
+            color: #666;            
+        }
+        .num{
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 30px;
+            height: 30px;
+            background-color: #5cadff;
+            color: #fff;
+            border-radius: 50%;
+            line-height: 30px;
+            text-align: center;
+        }
+        .title{
+            margin-bottom: 20px;
+            color: #2d8cf0;
+        }
+        .lawname{
+            font-size: 19px;
+        }
+        .property{
+            font-size: 14px;
+            color: #888888;
+        }
+        .publish-date{
+            font-size: 14px;
+            color: #888888;
+        }
+        .size{
+            font-size: 14px;
+            color: #888888;
+        }
+        .son-title{
+            color: #2d8cf0;
+        }
+        .chapter{
+            font-size: 15px;
+        }
+        .clause{
+            font-size: 12px;
+        }
+        .content{
+            margin-right: 30px;
+        }
+    </style>
+    <script src="/static/jquery-1.9.0.min.js"></script>
+    <script src='/static/template.js'></script>
+</head>
+
+<body>
+    <div class="resultbox" id="resultbox">
+        <div class="body">
+            <div class="title">
+                <strong class="lawname">{{result.law_name}}</strong>
+                <span class="property">{{result.property}}</span>
+                <span class="publish-date">{{result.publish_date}}</span>
+                <span class="size">记录数：{{result.content | length}}</span>
+            </div>
+            <ul>
+                {% for v in result.content %}
+                <li class="list">
+                    <div class="son-title">
+                        <strong class="chapter">{{v.chapter}}</strong>
+                        <span class="clause">{{v.clause}}</span>
+                    </div>
+                    <div class="content">
+                        {{v.content | safe}}
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</body>
+
+</html>

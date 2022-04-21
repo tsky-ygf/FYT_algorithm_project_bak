@@ -1,0 +1,497 @@
+nohup: ignoring input
+[INFO] 2022-01-17 22:34:12 loaded 12 lexicon entries
+transfer_table_data_to_bert_format.started.
+../data/labelling/20190807/婚姻继承_文书信息15.csv
+source data: 5788
+data filter: 4987
+../data/labelling/20190807/婚姻继承_文书信息12.csv
+source data: 5624
+data filter: 4780
+../data/labelling/20190807/婚姻继承_文书信息14.csv
+source data: 5733
+data filter: 4858
+../data/labelling/20190807/婚姻继承_文书信息7.csv
+source data: 5709
+data filter: 4903
+../data/labelling/20190807/婚姻继承_文书信息8.csv
+source data: 5688
+data filter: 4903
+../data/labelling/20190807/婚姻继承_文书信息9.csv
+source data: 5759
+data filter: 4896
+../data/labelling/20190807/婚姻继承_文书信息16.csv
+source data: 5724
+data filter: 4876
+../data/labelling/20190807/婚姻继承_文书信息13.csv
+source data: 5724
+data filter: 4836
+../data/labelling/20190807/婚姻继承_文书信息6.csv
+source data: 5708
+data filter: 4897
+../data/labelling/20190807/婚姻继承_文书信息11.csv
+source data: 5688
+data filter: 4881
+../data/labelling/20190807/婚姻继承_文书信息17.csv
+source data: 5690
+data filter: 4856
+../data/labelling/20190807/婚姻继承_文书信息10.csv
+source data: 5755
+data filter: 4892
+../data/labelling/20190807/婚姻继承_文书信息5.csv
+source data: 11478
+data filter: 9454
+../data/labelling/20190807/婚姻继承_文书信息19.csv
+source data: 5592
+data filter: 4725
+../data/labelling/20190807/婚姻继承_文书信息18.csv
+source data: 5748
+data filter: 4913
+../data/labelling/20190807/婚姻继承_文书信息4.csv
+source data: 25522
+data filter: 21315
+../data/labelling/20190807/婚姻继承_文书信息1.csv
+source data: 46036
+data filter: 38593
+../data/labelling/20190807/婚姻继承_文书信息2.csv
+source data: 39598
+data filter: 33266
+../data/labelling/20190807/婚姻继承_文书信息3.csv
+source data: 37112
+data filter: 31192
+../data/labelling/20190807/婚姻继承_文书信息0.csv
+source data: 73298
+data filter: 61779
+../data/labelling/20190807/劳动社保_文书信息13.csv
+source data: 5604
+data filter: 4608
+../data/labelling/20190807/劳动社保_文书信息12.csv
+source data: 5759
+data filter: 4747
+../data/labelling/20190807/劳动社保_文书信息11.csv
+source data: 10074
+data filter: 8518
+../data/labelling/20190807/劳动社保_文书信息8.csv
+source data: 14892
+data filter: 12502
+../data/labelling/20190807/劳动社保_文书信息10.csv
+source data: 14835
+data filter: 12478
+../data/labelling/20190807/劳动社保_文书信息9.csv
+source data: 14911
+data filter: 12592
+../data/labelling/20190807/劳动社保_文书信息15.csv
+source data: 5764
+data filter: 4808
+../data/labelling/20190807/劳动社保_文书信息14.csv
+source data: 5651
+data filter: 4670
+../data/labelling/20190807/劳动社保_文书信息1.csv
+source data: 48336
+data filter: 40029
+../data/labelling/20190807/劳动社保_文书信息2.csv
+source data: 36780
+data filter: 31018
+../data/labelling/20190807/劳动社保_文书信息17.csv
+source data: 5686
+data filter: 4738
+../data/labelling/20190807/劳动社保_文书信息16.csv
+source data: 5733
+data filter: 4761
+../data/labelling/20190807/劳动社保_文书信息18.csv
+source data: 5727
+data filter: 4788
+../data/labelling/20190807/劳动社保_文书信息3.csv
+source data: 33301
+data filter: 28217
+../data/labelling/20190807/劳动社保_文书信息19.csv
+source data: 5649
+data filter: 4721
+../data/labelling/20190807/劳动社保_文书信息0.csv
+source data: 72837
+data filter: 56416
+../data/labelling/20190807/劳动社保_文书信息7.csv
+source data: 20079
+data filter: 17187
+../data/labelling/20190807/劳动社保_文书信息4.csv
+source data: 33208
+data filter: 28124
+../data/labelling/20190807/劳动社保_文书信息5.csv
+source data: 33300
+data filter: 28361
+../data/labelling/20190807/劳动社保_文书信息6.csv
+source data: 33272
+data filter: 28342
+../data/labelling/20190807/交通事故_文书信息0.csv
+source data: 8930
+data filter: 7988
+../data/labelling/20190807/交通事故_文书信息1.csv
+source data: 8941
+data filter: 8064
+../data/labelling/20190807/交通事故_文书信息2.csv
+source data: 8946
+data filter: 8026
+../data/labelling/20190807/交通事故_文书信息3.csv
+source data: 8941
+data filter: 8051
+../data/labelling/20190807/交通事故_文书信息4.csv
+source data: 8884
+data filter: 7984
+../data/labelling/20190807/交通事故_文书信息5.csv
+source data: 8878
+data filter: 7969
+../data/labelling/20190807/借贷纠纷_文书信息10.csv
+source data: 12933
+data filter: 10111
+../data/labelling/20190807/交通事故_文书信息6.csv
+source data: 8831
+data filter: 7952
+../data/labelling/20190807/交通事故_文书信息7.csv
+source data: 8792
+data filter: 7874
+../data/labelling/20190807/交通事故_文书信息8.csv
+source data: 8820
+data filter: 7985
+../data/labelling/20190807/交通事故_文书信息9.csv
+source data: 8811
+data filter: 7950
+../data/labelling/20190807/交通事故_文书信息10.csv
+source data: 8804
+data filter: 7894
+../data/labelling/20190807/交通事故_文书信息11.csv
+source data: 8864
+data filter: 7913
+../data/labelling/20190807/交通事故_文书信息12.csv
+source data: 8829
+data filter: 8011
+../data/labelling/20190807/交通事故_文书信息14.csv
+source data: 8879
+data filter: 7991
+../data/labelling/20190807/交通事故_文书信息13.csv
+source data: 8900
+data filter: 7992
+../data/labelling/20190807/交通事故_文书信息15.csv
+source data: 8951
+data filter: 8046
+../data/labelling/20190807/交通事故_文书信息16.csv
+source data: 8894
+data filter: 7977
+../data/labelling/20190807/交通事故_文书信息17.csv
+source data: 8936
+data filter: 8056
+../data/labelling/20190807/交通事故_文书信息18.csv
+source data: 8877
+data filter: 8003
+../data/labelling/20190807/交通事故_文书信息19.csv
+source data: 8864
+data filter: 8039
+../data/labelling/20190807/借贷纠纷_文书信息0.csv
+source data: 12942
+data filter: 10240
+../data/labelling/20190807/借贷纠纷_文书信息1.csv
+source data: 12984
+data filter: 10174
+../data/labelling/20190807/借贷纠纷_文书信息2.csv
+source data: 12991
+data filter: 10197
+../data/labelling/20190807/借贷纠纷_文书信息3.csv
+source data: 12890
+data filter: 10122
+../data/labelling/20190807/借贷纠纷_文书信息4.csv
+source data: 12937
+data filter: 10173
+../data/labelling/20190807/借贷纠纷_文书信息5.csv
+source data: 12863
+data filter: 10114
+../data/labelling/20190807/借贷纠纷_文书信息6.csv
+source data: 12869
+data filter: 10080
+../data/labelling/20190807/借贷纠纷_文书信息7.csv
+source data: 12954
+data filter: 10108
+../data/labelling/20190807/借贷纠纷_文书信息8.csv
+source data: 12912
+data filter: 10157
+../data/labelling/20190807/借贷纠纷_文书信息9.csv
+source data: 12913
+data filter: 10124
+../data/labelling/20190807/借贷纠纷_文书信息11.csv
+source data: 12980
+data filter: 10251
+../data/labelling/20190807/借贷纠纷_文书信息12.csv
+source data: 12946
+data filter: 10252
+../data/labelling/20190807/借贷纠纷_文书信息13.csv
+source data: 12807
+data filter: 10101
+../data/labelling/20190807/借贷纠纷_文书信息14.csv
+source data: 12766
+data filter: 10000
+../data/labelling/20190807/借贷纠纷_文书信息15.csv
+source data: 12975
+data filter: 10259
+../data/labelling/20190807/借贷纠纷_文书信息16.csv
+source data: 12975
+data filter: 10228
+../data/labelling/20190807/借贷纠纷_文书信息17.csv
+source data: 12942
+data filter: 10227
+../data/labelling/20190807/借贷纠纷_文书信息18.csv
+source data: 12985
+data filter: 10219
+../data/labelling/20190807/借贷纠纷_文书信息19.csv
+source data: 13013
+data filter: 10215
+../data/labelling/20190807/知识产权_文书信息10.csv
+source data: 88
+data filter: 78
+../data/labelling/20190807/知识产权_文书信息4.csv
+source data: 6241
+data filter: 5585
+../data/labelling/20190807/知识产权_文书信息3.csv
+source data: 6836
+data filter: 6133
+../data/labelling/20190807/知识产权_文书信息7.csv
+source data: 4066
+data filter: 3641
+../data/labelling/20190807/知识产权_文书信息8.csv
+source data: 3270
+data filter: 2905
+../data/labelling/20190807/知识产权_文书信息9.csv
+source data: 3343
+data filter: 2957
+../data/labelling/20190807/知识产权_文书信息5.csv
+source data: 6285
+data filter: 5694
+../data/labelling/20190807/知识产权_文书信息6.csv
+source data: 6355
+data filter: 5724
+../data/labelling/20190807/知识产权_文书信息2.csv
+source data: 12738
+data filter: 11401
+../data/labelling/20190807/知识产权_文书信息1.csv
+source data: 19553
+data filter: 17348
+../data/labelling/20190807/知识产权_文书信息0.csv
+source data: 39102
+data filter: 33271
+../data/labelling/20190807/租赁纠纷_文书信息0.csv
+../data/labelling/20190807/租赁纠纷_文书信息1.csv
+../data/labelling/20190807/租赁纠纷_文书信息2.csv
+../data/labelling/20190807/租赁纠纷_文书信息3.csv
+../data/labelling/20190807/租赁纠纷_文书信息4.csv
+../data/labelling/20190807/租赁纠纷_文书信息5.csv
+../data/labelling/20190807/租赁纠纷_文书信息6.csv
+../data/labelling/20190807/租赁纠纷_文书信息7.csv
+../data/labelling/20190807/租赁纠纷_文书信息8.csv
+../data/labelling/20190807/租赁纠纷_文书信息9.csv
+../data/labelling/20190807/租赁纠纷_文书信息10.csv
+../data/labelling/20190807/租赁纠纷_文书信息11.csv
+../data/labelling/20190807/租赁纠纷_文书信息12.csv
+../data/labelling/20190807/租赁纠纷_文书信息13.csv
+../data/labelling/20190807/租赁纠纷_文书信息14.csv
+../data/labelling/20190807/租赁纠纷_文书信息15.csv
+../data/labelling/20190807/租赁纠纷_文书信息16.csv
+../data/labelling/20190807/租赁纠纷_文书信息17.csv
+../data/labelling/20190807/租赁纠纷_文书信息18.csv
+../data/labelling/20190807/租赁纠纷_文书信息19.csv
+../data/labelling/20190807/租赁合同_文书信息0.csv
+source data: 11537
+data filter: 8587
+../data/labelling/20190807/租赁合同_文书信息1.csv
+source data: 11576
+data filter: 8664
+../data/labelling/20190807/租赁合同_文书信息2.csv
+source data: 11617
+data filter: 8667
+../data/labelling/20190807/租赁合同_文书信息3.csv
+source data: 11619
+data filter: 8673
+../data/labelling/20190807/租赁合同_文书信息4.csv
+source data: 11543
+data filter: 8693
+../data/labelling/20190807/租赁合同_文书信息5.csv
+source data: 11429
+data filter: 8498
+../data/labelling/20190807/租赁合同_文书信息7.csv
+source data: 11500
+data filter: 8630
+../data/labelling/20190807/租赁合同_文书信息6.csv
+source data: 11557
+data filter: 8638
+../data/labelling/20190807/租赁合同_文书信息8.csv
+source data: 11705
+data filter: 8764
+../data/labelling/20190807/租赁合同_文书信息9.csv
+source data: 11528
+data filter: 8623
+../data/labelling/20190807/租赁合同_文书信息10.csv
+source data: 11602
+data filter: 8655
+../data/labelling/20190807/租赁合同_文书信息11.csv
+source data: 11648
+data filter: 8674
+../data/labelling/20190807/租赁合同_文书信息12.csv
+source data: 11494
+data filter: 8591
+../data/labelling/20190807/租赁合同_文书信息13.csv
+source data: 11429
+data filter: 8538
+../data/labelling/20190807/租赁合同_文书信息14.csv
+source data: 11538
+data filter: 8687
+../data/labelling/20190807/租赁合同_文书信息15.csv
+source data: 11498
+data filter: 8667
+../data/labelling/20190807/租赁合同_文书信息16.csv
+source data: 11463
+data filter: 8599
+../data/labelling/20190807/租赁合同_文书信息17.csv
+source data: 11513
+data filter: 8633
+../data/labelling/20190807/租赁合同_文书信息18.csv
+source data: 11442
+data filter: 8537
+../data/labelling/20190807/租赁合同_文书信息19.csv
+source data: 11602
+data filter: 8595
+length of data from z_train_law_labelled_data before drop_duplicates: 1235894
+length of data from z_train_law_labelled_data after drop_duplicates: 1211132
+length of data from z_train_law_labelled_data after repeat_filter: 1121128
+data split: 1243660
+=================================================================================================
+just for debug purposes: print number of samples for each suqiu
+婚姻继承 离婚 1_num: 32600 ;0_num: 61905
+婚姻继承 确认婚姻无效 1_num: 1212 ;0_num: 305
+婚姻继承 返还彩礼 1_num: 24543 ;0_num: 1438
+婚姻继承 财产分割 1_num: 24757 ;0_num: 5629
+婚姻继承 房产分割 1_num: 9729 ;0_num: 1691
+婚姻继承 夫妻共同债务 1_num: 165 ;0_num: 521
+婚姻继承 确认抚养权 1_num: 25832 ;0_num: 39480
+婚姻继承 支付抚养费 1_num: 22919 ;0_num: 1886
+婚姻继承 增加抚养费 1_num: 1403 ;0_num: 231
+婚姻继承 减少抚养费 1_num: 31 ;0_num: 37
+婚姻继承 行使探望权 1_num: 2663 ;0_num: 125
+婚姻继承 支付赡养费 1_num: 16214 ;0_num: 568
+婚姻继承 确认遗嘱有效 1_num: 1196 ;0_num: 103
+婚姻继承 有遗嘱继承 1_num: 18285 ;0_num: 2704
+婚姻继承 无遗嘱继承 1_num: 30270 ;0_num: 4008
+劳动社保 缴纳社会保险 1_num: 307 ;0_num: 899
+劳动社保 享受养老保险 1_num: 313 ;0_num: 332
+劳动社保 享受医疗保险 1_num: 273 ;0_num: 254
+劳动社保 享受失业保险 1_num: 454 ;0_num: 400
+劳动社保 享受生育保险 1_num: 24 ;0_num: 13
+劳动社保 确认劳动劳务关系 1_num: 4366 ;0_num: 4146
+劳动社保 享受工伤保险 1_num: 8525 ;0_num: 1085
+劳动社保 劳动劳务致损赔偿 1_num: 1479 ;0_num: 160
+劳动社保 劳务受损赔偿 1_num: 57796 ;0_num: 3484
+劳动社保 确认劳动劳务关系 1_num: 4366 ;0_num: 4146
+劳动社保 支付劳动报酬 1_num: 49660 ;0_num: 3765
+劳动社保 支付劳务报酬 1_num: 68130 ;0_num: 4048
+劳动社保 确认劳动劳务关系 1_num: 4366 ;0_num: 4146
+劳动社保 支付加班工资 1_num: 882 ;0_num: 1516
+劳动社保 确认劳动劳务关系 1_num: 4366 ;0_num: 4146
+劳动社保 经济补偿金或赔偿金 1_num: 10760 ;0_num: 15197
+劳动社保 确认劳动劳务关系 1_num: 4366 ;0_num: 4146
+劳动社保 支付双倍工资 1_num: 631 ;0_num: 957
+交通事故 损害赔偿 1_num: 147454 ;0_num: 1577
+交通事故 损害赔偿 1_num: 147454 ;0_num: 1577
+交通事故 损害赔偿 1_num: 147454 ;0_num: 1577
+交通事故 违章扣分 1_num: 0 ;0_num: 0
+借贷纠纷 金融借贷还本付息 1_num: 91083 ;0_num: 868
+借贷纠纷 确认合同有效 1_num: 43 ;0_num: 1
+借贷纠纷 民间借贷还本付息 1_num: 102175 ;0_num: 2519
+知识产权 确认著作权归属 1_num: 255 ;0_num: 382
+知识产权 著作权侵权赔偿 1_num: 45066 ;0_num: 2287
+知识产权 确认专利权归属 1_num: 57 ;0_num: 113
+知识产权 专利权侵权赔偿 1_num: 5496 ;0_num: 1737
+知识产权 确认商标权归属 1_num: 2 ;0_num: 19
+知识产权 商标权侵权赔偿 1_num: 15438 ;0_num: 1248
+知识产权 不正当竞争损害赔偿 1_num: 3201 ;0_num: 610
+租赁合同 确认合同有效 1_num: 491 ;0_num: 365
+租赁合同 确认合同无效 1_num: 1846 ;0_num: 1772
+租赁合同 解除合同 1_num: 21584 ;0_num: 19313
+租赁合同 支付钱款 1_num: 112010 ;0_num: 17394
+租赁合同 返还原物 1_num: 15661 ;0_num: 11232
+租赁合同 返还钱款 1_num: 28814 ;0_num: 19241
+1_num_sum: 1318467 ;0_num_sum: 257303
+transfer_table_data_to_bert_format.ended.
+../data/prediction/result_train.csv
+(245359, 12)
+multiprocessing of extract feature.started;process_num: 30
+allocate work load finished. start map stage.
+multiprocessing of extract feature.ended.
+X shape: (245359, 201)
+data_x_kw:  (245359, 201)
+(213094, 12)
+multiprocessing of extract feature.started;process_num: 30
+allocate work load finished. start map stage.
+multiprocessing of extract feature.ended.
+X shape: (213094, 152)
+data_x_kw:  (213094, 152)
+(134997, 12)
+multiprocessing of extract feature.started;process_num: 30
+allocate work load finished. start map stage.
+multiprocessing of extract feature.ended.
+X shape: (134997, 122)
+data_x_kw:  (134997, 122)
+(90279, 12)
+multiprocessing of extract feature.started;process_num: 30
+allocate work load finished. start map stage.
+multiprocessing of extract feature.ended.
+X shape: (90279, 41)
+data_x_kw:  (90279, 41)
+(68395, 12)
+multiprocessing of extract feature.started;process_num: 30
+allocate work load finished. start map stage.
+multiprocessing of extract feature.ended.
+X shape: (68395, 197)
+data_x_kw:  (68395, 197)
+(153044, 12)
+multiprocessing of extract feature.started;process_num: 30
+allocate work load finished. start map stage.
+multiprocessing of extract feature.ended.
+X shape: (153044, 47)
+data_x_kw:  (153044, 47)
+../data/prediction/result_valid.csv
+(27274, 12)
+multiprocessing of extract feature.started;process_num: 30
+allocate work load finished. start map stage.
+multiprocessing of extract feature.ended.
+X shape: (27274, 201)
+data_x_kw:  (27274, 201)
+(23927, 12)
+multiprocessing of extract feature.started;process_num: 30
+allocate work load finished. start map stage.
+multiprocessing of extract feature.ended.
+X shape: (23927, 152)
+data_x_kw:  (23927, 152)
+(15003, 12)
+multiprocessing of extract feature.started;process_num: 30
+allocate work load finished. start map stage.
+multiprocessing of extract feature.ended.
+X shape: (15003, 122)
+data_x_kw:  (15003, 122)
+(9765, 12)
+multiprocessing of extract feature.started;process_num: 30
+allocate work load finished. start map stage.
+multiprocessing of extract feature.ended.
+X shape: (9765, 41)
+data_x_kw:  (9765, 41)
+(7516, 12)
+multiprocessing of extract feature.started;process_num: 30
+allocate work load finished. start map stage.
+multiprocessing of extract feature.ended.
+X shape: (7516, 197)
+data_x_kw:  (7516, 197)
+(17275, 12)
+multiprocessing of extract feature.started;process_num: 30
+allocate work load finished. start map stage.
+multiprocessing of extract feature.ended.
+X shape: (17275, 47)
+data_x_kw:  (17275, 47)
+婚姻继承 245359
+劳动社保 213094
+交通事故 134997
+借贷纠纷 90279
+知识产权 68395
+租赁合同 153044

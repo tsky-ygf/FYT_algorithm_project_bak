@@ -1,0 +1,2 @@
+id,name,description,doc_path,pattern,status
+1,违章扣分,违章情形计算扣分情况,道路交通安全违法行为记分分值.txt,行为之一，【结论】：【条件】。,1
