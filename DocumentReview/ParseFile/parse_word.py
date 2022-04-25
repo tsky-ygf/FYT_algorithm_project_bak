@@ -23,4 +23,6 @@ def read_docx_file(docx_path):
     return return_text_list
 
 
-read_docx_file(docx_path="DocumentReview/DocData/Sample/安保服务外包合同-甲方.docx")
+if __name__ == '__main__':
+    res = read_docx_file(docx_path="data/DocData/LaborContract/劳动合同.docx")
+    print(res)
