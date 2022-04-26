@@ -8,7 +8,6 @@
 import requests
 from Utils import print_run_time
 
-# ip = 'localhost'
 ip = '172.19.82.199'
 port = 6021
 
@@ -24,12 +23,16 @@ url1 = "http://%s:%s/getAnyou" % (ip, port)
 # test_service(url1)
 
 url2 = "http://%s:%s/getCaseFeature" % (ip, port)
-test_service(url2,data={"anyou": "劳动社保_享受失业保险"})
+# test_service(url2,data={"anyou": "劳动社保_享受失业保险"})
 
 url3 = "http://172.19.82.199:9500/keyword_feature_matching"
 request_data = {
     "sentence": "2014年6月，我借给了何三宇、冯群华20000元并写了借条，约定月息3%，在2014年10月14日前一次还清，同时谭学民、蔡金花作了担保人。到期后，何三宇、冯群华迟迟不还款，现在我想让他们按照约定，还我本金及利息。",
     "problem": "借贷纠纷",
-    "suqiu": "民间借贷"
+    "suqiu": None
 }
-test_service(url3, request_data)
+# test_service(url3, request_data)
+
+url4 = "http://%s:%s/getBaseData" % (ip, port)
+test_service(url4,data={"anyou": "借贷纠纷_民间借贷"})
+
