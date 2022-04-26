@@ -13,3 +13,5 @@ streamlit
 scikit-learn
 elasticsearch
 hanlp
+flask
+flask_cors
