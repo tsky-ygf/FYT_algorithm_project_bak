@@ -14,7 +14,7 @@ from flask_cors import CORS
 from DataCentric.AnnotationTool.CaseFeatureTool.entity_annotation import *
 
 """
-推理图谱的接口
+情形和特征标注工具服务
 """
 app = Flask(__name__)
 app.config['JSON_SORT_KEYS'] = False
@@ -79,9 +79,33 @@ def get_base_annotation():
             in_dict = json.loads(in_json.decode("utf-8"))
             anyou = in_dict['anyou']
             sentence = in_dict["sentence"]
+            # content_html = in_dict["contentHtml"]
             base_annotation_dict = get_base_annotation_dict(anyou_name=anyou, sentence=sentence)
             return json.dumps(
-                {"base_data": base_annotation_dict, "error_msg": "", "status": 0}, ensure_ascii=False)
+                {"base_data": base_annotation_dict['data'], "error_msg": "", "status": 0},
+                ensure_ascii=False)
+        else:
+            return json.dumps({"error_msg": "data is None", "status": 1}, ensure_ascii=False)
+
+    except Exception as e:
+        logging.info(traceback.format_exc())
+        return json.dumps({"error_msg": "error:" + repr(e), "status": 1}, ensure_ascii=False)
+
+
+@app.route('/insertAnnotationData', methods=["post"])
+def do_insert_annotation_data():
+    try:
+        in_json = request.get_data()
+        if in_json is not None:
+            in_dict = json.loads(in_json.decode("utf-8"))
+            anyou_name = in_dict['anyou_name']
+            source = in_dict['source']
+            content_html = in_dict['contentHtml']
+            insert_data = in_dict['insert_data']
+            # insert_data_list = insert_data['insert_data_list']
+            insert_data_to_mysql(anyou_name, source, insert_data)
+            return json.dumps(
+                {"insert_result": "success", "contentHtml": content_html, "status": 0}, ensure_ascii=False)
         else:
             return json.dumps({"error_msg": "data is None", "status": 1}, ensure_ascii=False)
 
