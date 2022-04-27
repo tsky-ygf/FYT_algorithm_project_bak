@@ -79,11 +79,11 @@ def get_base_annotation():
             in_dict = json.loads(in_json.decode("utf-8"))
             anyou = in_dict['anyou']
             sentence = in_dict["sentence"]
-            # content_html = in_dict["contentHtml"]
+            content_html = in_dict.get("contentHtml", "")
             base_annotation_dict = get_base_annotation_dict(anyou_name=anyou, sentence=sentence)
             return json.dumps(
-                {"base_data": base_annotation_dict['data'], "error_msg": "", "status": 0},
-                ensure_ascii=False)
+                {"base_data": {"contentHtml": content_html, "list": base_annotation_dict['data']},
+                 "error_msg": "", "status": 0}, ensure_ascii=False)
         else:
             return json.dumps({"error_msg": "data is None", "status": 1}, ensure_ascii=False)
 
