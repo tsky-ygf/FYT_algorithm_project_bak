@@ -98,6 +98,7 @@ def do_insert_annotation_data():
         in_json = request.get_data()
         if in_json is not None:
             in_dict = json.loads(in_json.decode("utf-8"))
+            # data_id = in_dict['id']
             anyou_name = in_dict['anyou_name']
             source = in_dict['source']
             content_html = in_dict['contentHtml']

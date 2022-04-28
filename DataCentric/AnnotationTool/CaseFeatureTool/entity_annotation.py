@@ -21,7 +21,6 @@ connect_big_data = pymysql.connect(host='172.19.82.227',
                                    user='root', password='Nblh@2022',
                                    db='big_data_ceshi227')
 
-cursor = connect_big_data.cursor()
 
 def get_anyou_list():
     anyou_list = []
@@ -59,6 +58,7 @@ def get_case_feature_dict(anyou_name):
 
 
 def get_base_data_dict(anyou_name, ):
+    cursor = connect_big_data.cursor()
     anyou_type, anyou_x = anyou_name.split('_')
     print(anyou_type, anyou_x)
     if anyou_name == "借贷纠纷_民间借贷":
@@ -89,6 +89,7 @@ def get_base_data_dict(anyou_name, ):
         connect_big_data.rollback()
         raise RuntimeError("更新数据库时间失败")
 
+    cursor.close()
     return base_data_dict
 
 
@@ -99,7 +100,7 @@ def get_base_annotation_dict(anyou_name, sentence):
     problem, suqiu = anyou_name.split('_')
     url = "http://172.19.82.199:9500/keyword_feature_matching"
     request_data = {
-        "sentence": "2014年6月，我借给了何三宇、冯群华20000元并写了借条，约定月息3%，在2014年10月14日前一次还清，同时谭学民、蔡金花作了担保人。到期后，何三宇、冯群华迟迟不还款，现在我想让他们按照约定，还我本金及利息。",
+        "sentence": sentence,
         "problem": problem,
         "suqiu": suqiu
     }
@@ -114,7 +115,8 @@ def get_base_annotation_dict(anyou_name, sentence):
 #                                         "在2014年10月14日前一次还清，同时谭学民、蔡金花作了担保人。到期后，何三宇、"
 #                                         "冯群华迟迟不还款，现在我想让他们按照约定，还我本金及利息。"))
 
-def insert_one_data_to_mysql(anyou_name, source, content, situation, factor, start_pos, end_pos, pos_neg):
+def insert_one_data_to_mysql(anyou_name, source, id, content, situation, factor, start_pos, end_pos, pos_or_neg):
+    cursor = connect_big_data.cursor()
     suqiu, jiufen_type = anyou_name.split('_')
 
     # source = "原告诉称"
@@ -130,10 +132,10 @@ def insert_one_data_to_mysql(anyou_name, source, content, situation, factor, sta
     # print(labelingdate)
 
     sql_con = """
-        INSERT INTO labels_marking_records.labels_law_entity_feature (suqiu,jiufen_type,source,content,situation,factor,
-        startposition,endpostion,pos_neg,labelingdate,labelingperson,checkperson) VALUES ('{}','{}','{}','{}','{}','{}',
+        INSERT INTO labels_marking_records.labels_law_entity_feature (id,suqiu,jiufen_type,source,content,situation,factor,
+        startposition,endpostion,pos_neg,labelingdate,labelingperson,checkperson) VALUES ({},'{}','{}','{}','{}','{}','{}',
         {},{},{},'{}',NULL,NULL); 
-    """.format(suqiu, jiufen_type, source, content, situation, factor, start_pos, end_pos, pos_neg, labelingdate)
+    """.format(id, suqiu, jiufen_type, source, content, situation, factor, start_pos, end_pos, pos_or_neg, labelingdate)
 
     # print(sql_con)
 
@@ -147,6 +149,8 @@ def insert_one_data_to_mysql(anyou_name, source, content, situation, factor, sta
         print(traceback.format_exc())
         connect_big_data.rollback()
         raise RuntimeError("导入数据库失败")
+
+    cursor.close()
 
 
 # insert_one_data_to_mysql(anyou_name="借贷纠纷_民间借贷",
@@ -162,4 +166,4 @@ def insert_data_to_mysql(anyou_name, source, data):
     for one_data in data:
         insert_one_data_to_mysql(anyou_name=anyou_name, source=source, **one_data)
 
-    connect_big_data.close()
+    # connect_big_data.close()

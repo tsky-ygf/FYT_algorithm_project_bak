@@ -72,17 +72,18 @@
 ### 插入标注结果  
 请求地址: `http://172.19.82.199:6021/insertAnnotationData/`  
 请求方式: `POST`    
-请求参数: `{
+请求参数: `{  
+            "anyou_name":"借贷纠纷_民间借贷",
+            "source":"原告诉称",
             "insert_data":[
-                    {
-                        "anyou_name":"借贷纠纷_民间借贷",
-                        "source":"原告诉称",
+                    {   
+                        "id":"",
                         "content":"",
                         "situation":"存在借款合同",
                         "factor":"存在借款合同",
                         "start_pos":8,
                         "end_pos":20,
-                        "pos_neg":1,
+                        "pos_or_neg":1,
                 },
             ...
                 ]
