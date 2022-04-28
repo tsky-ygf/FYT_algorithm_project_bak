@@ -104,6 +104,7 @@ def do_insert_annotation_data():
             content_html = in_dict['contentHtml']
             insert_data = in_dict['insert_data']
             # insert_data_list = insert_data['insert_data_list']
+            print('data is coming')
             insert_data_to_mysql(anyou_name, source, insert_data)
             return json.dumps(
                 {"insert_result": "success", "contentHtml": content_html, "status": 0}, ensure_ascii=False)
