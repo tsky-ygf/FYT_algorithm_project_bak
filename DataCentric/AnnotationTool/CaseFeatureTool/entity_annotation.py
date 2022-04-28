@@ -95,7 +95,7 @@ def get_base_data_dict(anyou_name, ):
 # print(get_base_data_dict("借贷纠纷_民间借贷"))
 
 def get_base_annotation_dict(anyou_name, sentence):
-    print(anyou_name, sentence)
+    # print(anyou_name, sentence)
     problem, suqiu = anyou_name.split('_')
     url = "http://172.19.82.199:9500/keyword_feature_matching"
     request_data = {
