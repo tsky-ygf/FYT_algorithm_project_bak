@@ -11,6 +11,7 @@ from xmindparser import xmind_to_dict
 
 
 def trans_xmind_csv(_xmind_file):
+    print(_xmind_file)
     anyou_dict_list = xmind_to_dict(_xmind_file)[0]['topic']['topics'][0]['topics']
 
     case_list = []
@@ -19,6 +20,7 @@ def trans_xmind_csv(_xmind_file):
 
     for one_case in anyou_dict_list:
         for one_features in one_case['topics']:
+            # print(one_features['title'])
             try:
                 for one_feature in one_features['topics'][0]['topics'][0]['topics'][0]['topics']:
                     if one_feature['title'] not in ["and", "or", "not"]:
@@ -42,7 +44,7 @@ def trans_xmind_csv(_xmind_file):
     return _anyou_df
 
 
-xmind_file = "data/LawsuitPrejudgment/config/借贷纠纷/借贷纠纷_确认合同有效.xmind"
+xmind_file = "data/LawsuitPrejudgment/config/借贷纠纷/借贷纠纷_民间借贷.xmind"
 trans_xmind_csv(xmind_file)
 
 xmind_config_path = Path("data/LawsuitPrejudgment/config/")

@@ -1,0 +1,35 @@
+#log_level:
+is_debug: Fasle
+log_level: "INFO"
+
+#training_args:
+train_batch_size: 128
+eval_batch_size: 128
+lr_scheduler_type: "linear"
+num_warmup_steps: 0
+gradient_accumulation_steps: 1
+weight_decay: 0.01
+learning_rate: 0.00002
+#crf_learning_rate: 0.001
+num_train_epochs: 50
+eval_every_number_of_epoch: 1
+early_stop_patience: 3
+
+#model args:
+num_labels: 11
+max_len: 512
+dropout: 0.1
+feature_dim: 768
+soft_label: True
+loss_type: "ce"
+
+pre_train_tokenizer: "model/language_model/bert-base-chinese"
+pre_train_model: "model/language_model/bert-base-chinese"
+
+#train_data_path: "data/fyt_train_use_data/CAIL-Long/civil/train.json"
+#dev_data_path: "data/fyt_train_use_data/CAIL-Long/civil/dev.json"
+#test_data_path: "data/fyt_train_use_data/CAIL-Long/civil/test.json"
+
+
+# output model path
+output_dir: "model/laws_ner_clue/"

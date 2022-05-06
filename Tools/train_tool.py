@@ -66,7 +66,7 @@ class BaseTrainTool:
         train_dataloader = data.DataLoader(
             dataset=self.train_dataset, shuffle=True,
             collate_fn=self.data_collator,
-            batch_size=self.config["train_batch_size"]
+            batch_size=self.config["train_batch_size"],
         )
 
         eval_dataloader = data.DataLoader(
@@ -123,7 +123,7 @@ class BaseTrainTool:
 
             if self.completed_steps % 500 == 0:
                 self.logger.info(
-                    f"epoch:{step / self.num_update_steps_per_epoch}"
+                    f"epoch:{self.completed_steps / self.num_update_steps_per_epoch}"
                     f"=====> step:{step} =====> loss: {loss}"
                     f"======> learning_rate:{self.optimizer.state_dict()['param_groups'][0]['lr']}")
 
@@ -154,12 +154,14 @@ class BaseTrainTool:
         best_eval_loss = float("inf")
         patience = 0
         for epoch in range(self.config["num_train_epochs"]):
+            # self.logger.info("epoch:{}=====patience:{}".format(epoch, patience))
             if patience > self.config["early_stop_patience"]:
                 break
             self.train_epoch()
             if epoch % self.config["eval_every_number_of_epoch"] == 0 and epoch > 0:
                 # torch.cuda.empty_cache()
                 eval_loss = self.eval_epoch()
+                self.logger.info("epoch:{}======>eval_loss: {}".format(epoch, eval_loss))
 
                 if eval_loss < best_eval_loss:
                     if "output_dir" not in self.config:
@@ -170,8 +172,8 @@ class BaseTrainTool:
                         model_path=self.config["output_dir"] + "/epoch_{}_score_{}/".format(epoch, eval_loss))
                     best_eval_loss = eval_loss
                     patience = 0
-            else:
-                patience += 1
+                else:
+                    patience += 1
 
-        self.save_model(model_path=self.config["output_dir"] + "/final/")
+        self.save_model(model_path=self.config["output_dir"] + "/final")
         torch.cuda.empty_cache()

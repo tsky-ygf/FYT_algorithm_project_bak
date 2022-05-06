@@ -222,7 +222,7 @@ def load_and_cache_examples(data_dir, data_type, tokenizer, max_seq_length=128):
     processor = CluenerProcessor()
 
     cached_features_file = os.path.join(data_dir, 'cached_span-{}_{}'.format('bert', 'cluener'))
-    print(cached_features_file)
+    # print(cached_features_file)
 
     if os.path.exists(cached_features_file):
         features = torch.load(cached_features_file)
