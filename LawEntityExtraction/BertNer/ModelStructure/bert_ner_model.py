@@ -9,9 +9,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from transformers import BertModel, BertPreTrainedModel, BertConfig
-from LawEntityExtraction.BertNer.layers import CRF, PoolerStartLogits, PoolerEndLogits
+from LawEntityExtraction.BertNer.ModelStructure.layers import CRF, PoolerStartLogits, PoolerEndLogits
 from torch.nn import CrossEntropyLoss
-from losses import FocalLoss, LabelSmoothingCrossEntropy
+from LawEntityExtraction.BertNer.ModelStructure.losses import FocalLoss, LabelSmoothingCrossEntropy
 
 
 class BertSoftmaxForNer(BertPreTrainedModel):

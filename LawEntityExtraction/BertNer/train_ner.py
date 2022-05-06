@@ -9,7 +9,7 @@ import torch
 
 from Tools.train_tool import BaseTrainTool
 from transformers import BertTokenizer
-from LawEntityExtraction.BertNer.bert_ner_model import BertSpanForNer
+from LawEntityExtraction.BertNer.ModelStructure.bert_ner_model import BertSpanForNer
 from LawEntityExtraction.BertNer.model_ner_dataset import ClueNerDataset
 
 
@@ -41,12 +41,6 @@ class TrainLawsNER(BaseTrainTool):
         """
         # self.logger.info(batch)
         input_ids, attention_mask, token_type_ids, start_ids, end_ids = map(torch.squeeze,map(torch.stack, zip(*batch)))
-        # exit()
-        # input_ids = torch.squeeze(input_ids)
-        # attention_mask = torch.squeeze(attention_mask)
-        # token_type_ids = torch.squeeze(token_type_ids)
-        # start_ids = torch.squeeze(start_ids)
-        # end_ids = torch.squeeze(end_ids)
 
         return input_ids, attention_mask, token_type_ids, start_ids, end_ids
 

@@ -3,8 +3,8 @@ is_debug: Fasle
 log_level: "INFO"
 
 #training_args:
-train_batch_size: 128
-eval_batch_size: 128
+train_batch_size: 24
+eval_batch_size: 24
 lr_scheduler_type: "linear"
 num_warmup_steps: 0
 gradient_accumulation_steps: 1

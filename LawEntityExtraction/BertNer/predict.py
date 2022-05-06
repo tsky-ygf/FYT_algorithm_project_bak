@@ -7,7 +7,7 @@
 # @Software: PyCharm
 import torch
 from transformers import BertTokenizer
-from LawEntityExtraction.BertNer.bert_ner_model import BertSpanForNer
+from LawEntityExtraction.BertNer.ModelStructure.bert_ner_model import BertSpanForNer
 from Utils.parse_file import parse_config_file
 
 
@@ -32,7 +32,7 @@ model.load_state_dict(torch.load("model/laws_ner_clue/final/pytorch_model.bin"))
 model.eval()
 # "text": "彭小军认为，国内银行现在走的是台湾的发卡模式，先通过跑马圈地再在圈的地里面选择客户，",
 # "label": {"address": {"台湾": [[15, 16]]}, "name": {"彭小军": [[0, 2]]}}
-txt = "他们将占据小组第一的位置。目前两队均在国内联赛中排名第三，上周末曼联强攻维拉未果，"
+txt = "姓名王飞性别女民族汉出生1992年8月18日住址辽宁省大连市甘井子区公民身份证号码52231589754511"
 inputs = tokenizer(txt, add_special_tokens=True,
                    # pahudding=True,
                    max_length=128,

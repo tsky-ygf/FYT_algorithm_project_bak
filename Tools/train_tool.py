@@ -6,6 +6,8 @@
 # @File    : train_tool.py
 # @Software: PyCharm
 import sys
+import os
+import shutil
 import torch
 import math
 from tqdm.auto import tqdm
@@ -153,6 +155,17 @@ class BaseTrainTool:
     def train_main(self):
         best_eval_loss = float("inf")
         patience = 0
+
+        if "output_dir" not in self.config:
+            # self.logger.error("=========== no model save path ================")
+            raise Exception("==========no model save path============")
+
+        if not os.path.exists(self.config["output_dir"]):
+            os.makedirs(self.config["output_dir"])
+        else:
+            shutil.rmtree(self.config["output_dir"])
+            os.makedirs(self.config["output_dir"])
+
         for epoch in range(self.config["num_train_epochs"]):
             # self.logger.info("epoch:{}=====patience:{}".format(epoch, patience))
             if patience > self.config["early_stop_patience"]:
@@ -164,10 +177,6 @@ class BaseTrainTool:
                 self.logger.info("epoch:{}======>eval_loss: {}".format(epoch, eval_loss))
 
                 if eval_loss < best_eval_loss:
-                    if "output_dir" not in self.config:
-                        self.logger.error("=========== no model save path ================")
-                        sys.exit(1)
-
                     self.save_model(
                         model_path=self.config["output_dir"] + "/epoch_{}_score_{}/".format(epoch, eval_loss))
                     best_eval_loss = eval_loss
