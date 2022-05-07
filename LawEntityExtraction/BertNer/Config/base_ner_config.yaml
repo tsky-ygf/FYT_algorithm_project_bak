@@ -17,7 +17,7 @@ early_stop_patience: 3
 
 #model args:
 num_labels: 11
-max_len: 512
+max_length: 128
 dropout: 0.1
 feature_dim: 768
 soft_label: True

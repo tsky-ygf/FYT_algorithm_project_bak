@@ -23,7 +23,7 @@ class ClueNerProcessor(DataProcessor):
 
     def get_test_examples(self, data_dir):
         """See base class."""
-        return self.create_examples(self.read_json(os.path.join(data_dir, "test.json")), "test")
+        return self.create_examples(self.read_json(os.path.join(data_dir, "dev.json")), "test")
 
     @staticmethod
     def get_labels():
@@ -56,6 +56,7 @@ class ClueNerProcessor(DataProcessor):
 class ClueNerDataset(Dataset):
     def __init__(self, data_dir, tokenizer, mode, max_length=128):
         self.processor = ClueNerProcessor()
+        self.mode = mode
         if mode == "train":
             self.examples = self.processor.get_train_examples(data_dir)
         elif mode == "dev":
@@ -102,7 +103,26 @@ class ClueNerDataset(Dataset):
         # print("end_ids: %s" % " ".join([str(x) for x in end_ids]))
         # labels = {"start_ids": torch.tensor(start_ids),
         #           "end_ids": torch.tensor(end_ids)}
-        return input_ids, attention_mask, token_type_ids, torch.tensor(start_ids), torch.tensor(end_ids)
+        if self.mode == "test":
+            return input_ids, attention_mask, token_type_ids, subjects
+        else:
+            return input_ids, attention_mask, token_type_ids, torch.tensor(start_ids), torch.tensor(end_ids)
+
+    @staticmethod
+    def data_collator(batch):
+        """
+        batch should be a list of (sequence, target, length) tuples...
+        Returns a padded tensor of sequences sorted from longest to shortest,
+        """
+        input_ids, attention_mask, token_type_ids, start_ids, end_ids = map(torch.squeeze,map(torch.stack, zip(*batch)))
+        return input_ids, attention_mask, token_type_ids, start_ids, end_ids
+
+    @staticmethod
+    def data_collator_test(batch):
+        in_data = [one[:3] for one in batch]
+        subjects = [one[3] for one in batch]
+        input_ids, attention_mask, token_type_ids = map(torch.squeeze, map(torch.stack, zip(*in_data)))
+        return input_ids, attention_mask, token_type_ids, subjects
 
 
 if __name__ == "__main__":

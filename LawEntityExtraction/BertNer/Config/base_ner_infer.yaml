@@ -1,0 +1,19 @@
+#log_level:
+is_debug: Fasle
+log_level: "INFO"
+
+#model args:
+num_labels: 11
+max_length: 128
+dropout: 0.1
+feature_dim: 768
+soft_label: True
+loss_type: "ce"
+
+test_batch_size: 32
+
+pre_train_tokenizer: "model/language_model/bert-base-chinese"
+pre_train_model: "model/language_model/bert-base-chinese"
+
+# model path
+model_path: "model/laws_ner_clue/final/pytorch_model.bin"

@@ -20,36 +20,30 @@ class TrainLawsNER(BaseTrainTool):
     def __init__(self, config_path):
         super(TrainLawsNER, self).__init__(config_path=config_path)
         self.logger.info(self.config)
+        # self.data_collator = ClueNerDataset.data_collator
 
     def init_model(self):
         tokenizer = BertTokenizer.from_pretrained(self.config["pre_train_tokenizer"])
         model = BertSpanForNer(self.config)
         return tokenizer, model
 
+    def data_collator(self, batch):
+        return ClueNerDataset.data_collator(batch)
+
     def init_dataset(self):
         train_dataset = ClueNerDataset(data_dir="data/cluener_public", tokenizer=self.tokenizer, mode="train",
-                                       max_length=128)
+                                       max_length=self.config["max_length"])
         dev_dataset = ClueNerDataset(data_dir="data/cluener_public", tokenizer=self.tokenizer, mode="dev",
-                                     max_length=128)
+                                     max_length=self.config["max_length"])
 
         return train_dataset, dev_dataset
-
-    def data_collator(self, batch):
-        """
-        batch should be a list of (sequence, target, length) tuples...
-        Returns a padded tensor of sequences sorted from longest to shortest,
-        """
-        # self.logger.info(batch)
-        input_ids, attention_mask, token_type_ids, start_ids, end_ids = map(torch.squeeze,map(torch.stack, zip(*batch)))
-
-        return input_ids, attention_mask, token_type_ids, start_ids, end_ids
 
     def cal_loss(self, batch):
         # pass
         # self.logger.info(batch)
         # exit()
         inputs = {"input_ids": batch[0], "attention_mask": batch[1],
-                  "token_type_ids":batch[2], "start_positions": batch[3],
+                  "token_type_ids": batch[2], "start_positions": batch[3],
                   "end_positions": batch[4]}
 
         outputs = self.model(**inputs)
@@ -84,5 +78,5 @@ class TrainLawsNER(BaseTrainTool):
 
 
 if __name__ == '__main__':
-    TrainLawsNER(config_path="LawEntityExtraction/BertNer/base_ner_config.yaml").train_main()
+    TrainLawsNER(config_path="LawEntityExtraction/BertNer/Config/base_ner_config.yaml").train_main()
     # TrainLawsCls(config_path="RelevantLaws/Config/base_laws_cls_model.yaml").eval_epoch()

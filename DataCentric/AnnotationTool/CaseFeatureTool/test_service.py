@@ -37,7 +37,7 @@ request_data = {
 # test_service(url3, request_data)
 
 url4 = "http://%s:%s/getBaseData" % (ip, port)
-# test_service(url4,data={"anyou": "借贷纠纷_民间借贷"})
+test_service(url4,data={"anyou": "借贷纠纷_民间借贷"})
 
 url5 = "http://%s:%s/getBaseAnnotation" % (ip, port)
 # test_service(url5, data={"anyou": "借贷纠纷_民间借贷", "sentence": sentence})
@@ -78,4 +78,4 @@ test_data = {
   ]
 }
 url6 = "http://%s:%s/insertAnnotationData" % (ip, port)
-test_service(url6, data=test_data)
+# test_service(url6, data=test_data)
