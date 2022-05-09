@@ -19,10 +19,9 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "3"
 class NerInferTool(BaseInferTool):
     def __init__(self, config_path):
         super(NerInferTool, self).__init__(config_path)
-        self.label_list = ["O", "address", "book", "company", 'game', 'government', 'movie', 'name', 'organization',
-                           'position', 'scene']
-        self.id2label = {i: label for i, label in enumerate(self.label_list)}
-        self.label2id = {label: i for i, label in enumerate(self.label_list)}
+        # self.label_list = self.test_dataset.label_list
+        self.id2label = self.test_dataset.id2label
+        self.label2id = self.test_dataset.label2id
 
         self.metric = SpanEntityScore(self.id2label)
 
@@ -34,7 +33,7 @@ class NerInferTool(BaseInferTool):
         return tokenizer, model
 
     def init_dataset(self, *args, **kwargs):
-        test_dataset = ClueNerDataset(data_dir="data/cluener_public",
+        test_dataset = ClueNerDataset(data_dir="data/cluener/dev.json",
                                       tokenizer=self.tokenizer,
                                       mode="test",
                                       max_length=self.config["max_length"])
@@ -111,6 +110,8 @@ class NerInferTool(BaseInferTool):
             eval_info, entity_info = self.metric.result()
             self.logger.info(eval_info)
             self.logger.info(entity_info)
+
+            return eval_info, entity_info
 
     @staticmethod
     def bert_extract_item(_start_logits, _end_logits):

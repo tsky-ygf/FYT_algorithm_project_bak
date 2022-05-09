@@ -25,15 +25,17 @@ class TrainLawsNER(BaseTrainTool):
     def init_model(self):
         tokenizer = BertTokenizer.from_pretrained(self.config["pre_train_tokenizer"])
         model = BertSpanForNer(self.config)
+        model.zero_grad()
         return tokenizer, model
 
     def data_collator(self, batch):
         return ClueNerDataset.data_collator(batch)
 
     def init_dataset(self):
-        train_dataset = ClueNerDataset(data_dir="data/cluener_public", tokenizer=self.tokenizer, mode="train",
+        train_dataset = ClueNerDataset(data_dir="data/cluener/train.json", tokenizer=self.tokenizer, mode="train",
                                        max_length=self.config["max_length"])
-        dev_dataset = ClueNerDataset(data_dir="data/cluener_public", tokenizer=self.tokenizer, mode="dev",
+
+        dev_dataset = ClueNerDataset(data_dir="data/cluener/dev.json", tokenizer=self.tokenizer, mode="dev",
                                      max_length=self.config["max_length"])
 
         return train_dataset, dev_dataset
@@ -52,7 +54,7 @@ class TrainLawsNER(BaseTrainTool):
 
     def init_optimizer(self):
         no_decay = ["bias", "LayerNorm.weight"]
-        bert_parameters = list(self.model.bert.named_parameters())
+        bert_parameters = self.model.bert.named_parameters()
         start_parameters = self.model.start_fc.named_parameters()
         end_parameters = self.model.end_fc.named_parameters()
         # linear_param_optimizer = list(self.model.classifier.named_parameters())

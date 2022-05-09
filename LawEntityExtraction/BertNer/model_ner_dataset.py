@@ -15,15 +15,15 @@ from torch.utils.data import Dataset
 class ClueNerProcessor(DataProcessor):
     def get_train_examples(self, data_dir):
         """See base class."""
-        return self.create_examples(self.read_json(os.path.join(data_dir, "train.json")), "train")
+        return self.create_examples(self.read_json(data_dir), "train")
 
     def get_dev_examples(self, data_dir):
         """See base class."""
-        return self.create_examples(self.read_json(os.path.join(data_dir, "dev.json")), "dev")
+        return self.create_examples(self.read_json(data_dir), "dev")
 
     def get_test_examples(self, data_dir):
         """See base class."""
-        return self.create_examples(self.read_json(os.path.join(data_dir, "dev.json")), "test")
+        return self.create_examples(self.read_json(data_dir), "test")
 
     @staticmethod
     def get_labels():
@@ -68,7 +68,9 @@ class ClueNerDataset(Dataset):
         self.tokenizer = tokenizer
         self.max_length = max_length
 
-        self.label2id = {label: i for i, label in enumerate(self.processor.get_labels())}
+        self.label_list = self.processor.get_labels()
+        self.id2label = {index: label for index, label in enumerate(self.label_list)}
+        self.label2id = {label: index for index, label in enumerate(self.label_list)}
 
     def __len__(self):
         return len(self.examples)
@@ -114,7 +116,8 @@ class ClueNerDataset(Dataset):
         batch should be a list of (sequence, target, length) tuples...
         Returns a padded tensor of sequences sorted from longest to shortest,
         """
-        input_ids, attention_mask, token_type_ids, start_ids, end_ids = map(torch.squeeze,map(torch.stack, zip(*batch)))
+        input_ids, attention_mask, token_type_ids, start_ids, end_ids = map(torch.squeeze,
+                                                                            map(torch.stack, zip(*batch)))
         return input_ids, attention_mask, token_type_ids, start_ids, end_ids
 
     @staticmethod
@@ -129,6 +132,6 @@ if __name__ == "__main__":
     from transformers import BertTokenizer
 
     tokenizer_ = BertTokenizer.from_pretrained('model/language_model/bert-base-chinese')
-    clue_ner_dataset = ClueNerDataset(data_dir="data/cluener_public", tokenizer=tokenizer_, mode="dev")
+    clue_ner_dataset = ClueNerDataset(data_dir="data/cluener", tokenizer=tokenizer_, mode="dev")
     for i in range(5):
         print(clue_ner_dataset[i])

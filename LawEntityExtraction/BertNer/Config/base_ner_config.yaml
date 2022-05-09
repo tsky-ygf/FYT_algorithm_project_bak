@@ -9,9 +9,8 @@ lr_scheduler_type: "linear"
 num_warmup_steps: 0
 gradient_accumulation_steps: 1
 weight_decay: 0.01
-learning_rate: 0.00002
-#crf_learning_rate: 0.001
-num_train_epochs: 50
+learning_rate: 0.00005
+num_train_epochs: 40
 eval_every_number_of_epoch: 1
 early_stop_patience: 3
 
@@ -19,7 +18,6 @@ early_stop_patience: 3
 num_labels: 11
 max_length: 128
 dropout: 0.1
-feature_dim: 768
 soft_label: True
 loss_type: "ce"
 
@@ -32,4 +30,4 @@ pre_train_model: "model/language_model/bert-base-chinese"
 
 
 # output model path
-output_dir: "model/laws_ner_clue/"
+output_dir: "model/laws_ner_clue/test1/"
