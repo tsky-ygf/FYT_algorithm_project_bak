@@ -33,7 +33,7 @@ class NerInferTool(BaseInferTool):
         return tokenizer, model
 
     def init_dataset(self, *args, **kwargs):
-        test_dataset = ClueNerDataset(data_dir="data/cluener/dev.json",
+        test_dataset = ClueNerDataset(data_dir="data/cluener/train.json",
                                       tokenizer=self.tokenizer,
                                       mode="test",
                                       max_length=self.config["max_length"])

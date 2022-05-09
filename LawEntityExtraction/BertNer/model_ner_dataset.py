@@ -79,12 +79,14 @@ class ClueNerDataset(Dataset):
         example = self.examples[item]
         text = example.text_a
         subjects = example.subject
+        # print(text)
         inputs = self.tokenizer(text,
                                 add_special_tokens=True,
                                 max_length=self.max_length,
                                 padding="max_length",
                                 truncation=True,
                                 return_tensors="pt",
+                                # We use this argument because the texts in our dataset are lists of words (with a label for each word).
                                 is_split_into_words=True)
 
         start_ids = [0] * self.max_length
@@ -132,6 +134,7 @@ if __name__ == "__main__":
     from transformers import BertTokenizer
 
     tokenizer_ = BertTokenizer.from_pretrained('model/language_model/bert-base-chinese')
-    clue_ner_dataset = ClueNerDataset(data_dir="data/cluener", tokenizer=tokenizer_, mode="dev")
-    for i in range(5):
-        print(clue_ner_dataset[i])
+    clue_ner_dataset = ClueNerDataset(data_dir="data/cluener/dev.json", tokenizer=tokenizer_, mode="dev")
+    # for i in range(5):
+    #     print(clue_ner_dataset[i])
+    print(clue_ner_dataset[4])

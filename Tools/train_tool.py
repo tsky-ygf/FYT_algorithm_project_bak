@@ -18,11 +18,17 @@ from accelerate import Accelerator
 from Utils.logger import get_module_logger
 from Utils.parse_file import parse_config_file
 
+from torch.utils.tensorboard import SummaryWriter
+
 
 class BaseTrainTool:
     def __init__(self, config_path):
         self.config = parse_config_file(config_path=config_path)
         self.logger = get_module_logger(module_name="Train", level=self.config.get("log_level", "INFO"))
+
+        # if os.path.exists(self.config["log_path"]):
+        #     shutil.rmtree(self.config["log_path"])
+        self.writer = SummaryWriter(log_dir=self.config["log_path"])
 
         self.accelerator = self.init_accelerator()
 
@@ -108,13 +114,16 @@ class BaseTrainTool:
     def cal_loss(self, *args, **kwargs):
         raise NotImplementedError
 
-    def train_epoch(self):
+    def train_epoch(self, epoch):
         self.model.train()
         for step, batch in enumerate(self.train_dataloader):
             loss = self.cal_loss(batch)
 
             loss = loss / self.config["gradient_accumulation_steps"]
             self.accelerator.backward(loss, retain_graph=False)
+            self.writer.add_scalar(tag="train_loss", scalar_value=loss.item(), global_step=self.completed_steps)
+            self.writer.add_scalar(tag="lr", scalar_value=self.optimizer.param_groups[0]["lr"],
+                                   global_step=self.completed_steps)
 
             if step % self.config["gradient_accumulation_steps"] == 0 or step == len(self.train_dataloader) - 1:
                 self.optimizer.step()
@@ -123,10 +132,12 @@ class BaseTrainTool:
                 self.process_bar.update(1)
                 self.completed_steps += 1
 
-            if self.completed_steps % 500 == 0:
+            if step % int(self.num_update_steps_per_epoch / 3) == 0:
                 self.logger.info(
-                    f"epoch:{self.completed_steps / self.num_update_steps_per_epoch}"
-                    f"=====> step:{step} =====> loss: {loss}"
+                    f"Train epoch:{epoch}======> epoch_setps:{self.num_update_steps_per_epoch}"
+                    f"======> step:{step}"
+                    # f"epoch:{self.completed_steps / self.num_update_steps_per_epoch}"
+                    f"======> loss: {loss.item():.4f}"
                     f"======> learning_rate:{self.optimizer.state_dict()['param_groups'][0]['lr']}")
 
             if self.completed_steps >= self.config["max_train_steps"]:
@@ -170,11 +181,12 @@ class BaseTrainTool:
             # self.logger.info("epoch:{}=====patience:{}".format(epoch, patience))
             if patience > self.config["early_stop_patience"]:
                 break
-            self.train_epoch()
-            if epoch % self.config["eval_every_number_of_epoch"] == 0 and epoch > 0:
+            self.train_epoch(epoch)
+            if epoch % self.config["eval_every_number_of_epoch"] == 0:  # and epoch > 0:
                 # torch.cuda.empty_cache()
                 eval_loss = self.eval_epoch()
                 self.logger.info("epoch:{}======>eval_loss: {}".format(epoch, eval_loss))
+                self.writer.add_scalar(tag="eval_loss", scalar_value=eval_loss, global_step=epoch)
 
                 if eval_loss < best_eval_loss:
                     self.save_model(

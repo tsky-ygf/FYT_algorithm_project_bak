@@ -12,7 +12,6 @@ from transformers import BertTokenizer
 from LawEntityExtraction.BertNer.ModelStructure.bert_ner_model import BertSpanForNer
 from LawEntityExtraction.BertNer.model_ner_dataset import ClueNerDataset
 
-
 # os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
 
@@ -65,17 +64,18 @@ class TrainLawsNER(BaseTrainTool):
                 , 'lr': self.config["learning_rate"]},
 
             {"params": [p for n, p in start_parameters if not any(nd in n for nd in no_decay)],
-             "weight_decay": self.config["weight_decay"], 'lr': 0.001},
+             "weight_decay": self.config["weight_decay"], 'lr': self.config['start_learning_rate']},
             {"params": [p for n, p in start_parameters if any(nd in n for nd in no_decay)], "weight_decay": 0.0
-                , 'lr': 0.001},
+                , 'lr': self.config['start_learning_rate']},
 
             {"params": [p for n, p in end_parameters if not any(nd in n for nd in no_decay)],
-             "weight_decay": self.config["weight_decay"], 'lr': 0.001},
+             "weight_decay": self.config["weight_decay"], 'lr': self.config['end_learning_rate']},
             {"params": [p for n, p in end_parameters if any(nd in n for nd in no_decay)], "weight_decay": 0.0
-                , 'lr': 0.001},
+                , 'lr': self.config['end_learning_rate']},
         ]
         optimizer = torch.optim.AdamW(optimizer_grouped_parameters,
-                                      lr=self.config["learning_rate"])  # eps=self.config["adam_epsilon"])
+                                      lr=self.config["learning_rate"],
+                                      eps=1e-8)  # eps=self.config["adam_epsilon"])
         return optimizer
 
 
