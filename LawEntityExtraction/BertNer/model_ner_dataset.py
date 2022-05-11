@@ -99,9 +99,9 @@ class ClueNerDataset(Dataset):
             start_ids[start] = self.label2id[label]
             end_ids[end] = self.label2id[label]
             # subjects_id.append((self.label2id[label], start, end))
-        input_ids = inputs["input_ids"]
-        attention_mask = inputs["attention_mask"]
-        token_type_ids = inputs["token_type_ids"]
+        input_ids = inputs["input_ids"].long().squeeze(0)
+        attention_mask = inputs["attention_mask"].long().squeeze(0)
+        token_type_ids = inputs["token_type_ids"].long().squeeze(0)
         # print("input_ids: %s", " ".join([str(x) for x in input_ids]))
         # print("start_ids: %s" % " ".join([str(x) for x in start_ids]))
         # print("end_ids: %s" % " ".join([str(x) for x in end_ids]))
@@ -118,15 +118,14 @@ class ClueNerDataset(Dataset):
         batch should be a list of (sequence, target, length) tuples...
         Returns a padded tensor of sequences sorted from longest to shortest,
         """
-        input_ids, attention_mask, token_type_ids, start_ids, end_ids = map(torch.squeeze,
-                                                                            map(torch.stack, zip(*batch)))
+        input_ids, attention_mask, token_type_ids, start_ids, end_ids = map(torch.stack, zip(*batch))
         return input_ids, attention_mask, token_type_ids, start_ids, end_ids
 
     @staticmethod
     def data_collator_test(batch):
         in_data = [one[:3] for one in batch]
         subjects = [one[3] for one in batch]
-        input_ids, attention_mask, token_type_ids = map(torch.squeeze, map(torch.stack, zip(*in_data)))
+        input_ids, attention_mask, token_type_ids = map(torch.stack, zip(*in_data))
         return input_ids, attention_mask, token_type_ids, subjects
 
 
@@ -134,7 +133,7 @@ if __name__ == "__main__":
     from transformers import BertTokenizer
 
     tokenizer_ = BertTokenizer.from_pretrained('model/language_model/bert-base-chinese')
-    clue_ner_dataset = ClueNerDataset(data_dir="data/cluener/dev.json", tokenizer=tokenizer_, mode="dev")
+    clue_ner_dataset = ClueNerDataset(data_dir="data/cluener/train.json", tokenizer=tokenizer_, mode="dev")
     # for i in range(5):
     #     print(clue_ner_dataset[i])
-    print(clue_ner_dataset[4])
+    print(clue_ner_dataset[0])

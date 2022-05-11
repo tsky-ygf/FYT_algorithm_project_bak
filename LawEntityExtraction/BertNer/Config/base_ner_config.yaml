@@ -4,18 +4,27 @@ log_level: "INFO"
 log_path: "log/tensorboard_log/law_entity_extraction/bert_ner_test"
 
 #training_args:
-train_batch_size: 128
-eval_batch_size: 128
+train_batch_size: 64
+eval_batch_size: 64
+learning_rate: 0.00002
+start_learning_rate: 0.003
+end_learning_rate: 0.003
+num_train_epochs: 20
+early_stop_patience: 3
+
 lr_scheduler_type: "linear"
-num_warmup_steps: 0
+warmup_ratio: 0.1
+#num_warmup_steps: 100
 gradient_accumulation_steps: 1
+max_grad_norm: 1.0
 weight_decay: 0.01
-learning_rate: 0.00004
-start_learning_rate: 0.001
-end_learning_rate: 0.001
-num_train_epochs: 30
 eval_every_number_of_epoch: 1
-early_stop_patience: 5
+
+accelerator_params:
+  fp16: True
+do_adv: True
+adv_name: "word_embeddings"
+adv_epsilon: 1.0
 
 #model args:
 num_labels: 11

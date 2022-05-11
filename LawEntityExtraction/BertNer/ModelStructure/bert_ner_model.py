@@ -8,7 +8,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from transformers import BertModel, BertPreTrainedModel, BertConfig
+from transformers import BertModel, BertPreTrainedModel, BertConfig, BertForMaskedLM
 from LawEntityExtraction.BertNer.ModelStructure.layers import CRF, PoolerStartLogits, PoolerEndLogits
 from torch.nn import CrossEntropyLoss
 from LawEntityExtraction.BertNer.ModelStructure.losses import FocalLoss, LabelSmoothingCrossEntropy
@@ -74,23 +74,22 @@ class BertCrfForNer(BertPreTrainedModel):
 
 
 class BertSpanForNer(BertPreTrainedModel):
-    def __init__(self, config):
-        pre_model_config = BertConfig.from_pretrained(config["pre_train_model"])
-        super(BertSpanForNer, self).__init__(pre_model_config)
-        self.bert = BertModel.from_pretrained(config["pre_train_model"])
-        self.soft_label = config["soft_label"]
-        self.num_labels = config["num_labels"]
-        self.loss_type = config["loss_type"]
-        self.dropout = nn.Dropout(config["dropout"])
-        self.start_fc = PoolerStartLogits(pre_model_config.hidden_size, self.num_labels)
+    def __init__(self, config,):
+        super(BertSpanForNer, self).__init__(config)
+        self.soft_label = config.soft_label
+        self.num_labels = config.num_labels
+        self.loss_type = config.loss_type
+        self.bert = BertModel(config)
+        self.dropout = nn.Dropout(config.hidden_dropout_prob)
+        self.start_fc = PoolerStartLogits(config.hidden_size, self.num_labels)
         if self.soft_label:
-            self.end_fc = PoolerEndLogits(pre_model_config.hidden_size + self.num_labels, self.num_labels)
+            self.end_fc = PoolerEndLogits(config.hidden_size + self.num_labels, self.num_labels)
         else:
-            self.end_fc = PoolerEndLogits(pre_model_config.hidden_size + 1, self.num_labels)
+            self.end_fc = PoolerEndLogits(config.hidden_size + 1, self.num_labels)
         self.init_weights()
 
-    def forward(self, input_ids, token_type_ids=None, attention_mask=None, start_positions=None, end_positions=None):
-        outputs = self.bert(input_ids=input_ids, attention_mask=attention_mask, token_type_ids=token_type_ids)
+    def forward(self, input_ids, token_type_ids=None, attention_mask=None, start_positions=None,end_positions=None):
+        outputs = self.bert(input_ids = input_ids,attention_mask=attention_mask,token_type_ids=token_type_ids)
         sequence_output = outputs[0]
         sequence_output = self.dropout(sequence_output)
         start_logits = self.start_fc(sequence_output)
@@ -113,7 +112,7 @@ class BertSpanForNer(BertPreTrainedModel):
 
         if start_positions is not None and end_positions is not None:
             assert self.loss_type in ['lsr', 'focal', 'ce']
-            if self.loss_type == 'lsr':
+            if self.loss_type =='lsr':
                 loss_fct = LabelSmoothingCrossEntropy()
             elif self.loss_type == 'focal':
                 loss_fct = FocalLoss()
@@ -133,3 +132,4 @@ class BertSpanForNer(BertPreTrainedModel):
             total_loss = (start_loss + end_loss) / 2
             outputs = (total_loss,) + outputs
         return outputs
+

@@ -8,7 +8,7 @@
 import os
 import torch
 from Tools.infer_tool import BaseInferTool
-from transformers import BertTokenizer
+from transformers import BertTokenizer,BertConfig
 from LawEntityExtraction.BertNer.ModelStructure.bert_ner_model import BertSpanForNer
 from LawEntityExtraction.BertNer.model_ner_dataset import ClueNerDataset
 from LawEntityExtraction.BertNer.metrics import SpanEntityScore
@@ -27,13 +27,16 @@ class NerInferTool(BaseInferTool):
 
     def init_model(self):
         tokenizer = BertTokenizer.from_pretrained(self.config['pre_train_tokenizer'])
-        model = BertSpanForNer(self.config)
-        model.load_state_dict(torch.load(self.config['model_path']))
 
+        bert_config = BertConfig.from_pretrained(self.config["pre_train_model"], num_labels=self.config["num_labels"])
+        bert_config.soft_label = self.config["soft_label"]
+        bert_config.loss_type = self.config["loss_type"]
+        model = BertSpanForNer.from_pretrained(self.config["pre_train_model"], config=bert_config)
+        model.load_state_dict(torch.load(self.config['model_path']))
         return tokenizer, model
 
     def init_dataset(self, *args, **kwargs):
-        test_dataset = ClueNerDataset(data_dir="data/cluener/train.json",
+        test_dataset = ClueNerDataset(data_dir="data/cluener/dev.json",
                                       tokenizer=self.tokenizer,
                                       mode="test",
                                       max_length=self.config["max_length"])
@@ -72,6 +75,7 @@ class NerInferTool(BaseInferTool):
     def infer(self, text):
         inputs = self.tokenizer(text, add_special_tokens=True,
                                 max_length=self.config["max_length"],
+                                truncation=True,
                                 return_offsets_mapping=False,
                                 return_tensors="pt")
 
