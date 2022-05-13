@@ -118,4 +118,4 @@ def do_insert_annotation_data():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=6021, debug=True)  # , use_reloader=False)
+    app.run(host="0.0.0.0", port=6021, debug=False)  # , use_reloader=False)

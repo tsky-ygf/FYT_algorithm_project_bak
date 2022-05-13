@@ -8,7 +8,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from transformers import BertModel, BertPreTrainedModel, BertConfig, BertForMaskedLM
+from transformers import BertModel, BertPreTrainedModel
 from LawEntityExtraction.BertNer.ModelStructure.layers import CRF, PoolerStartLogits, PoolerEndLogits
 from torch.nn import CrossEntropyLoss
 from LawEntityExtraction.BertNer.ModelStructure.losses import FocalLoss, LabelSmoothingCrossEntropy
@@ -53,24 +53,24 @@ class BertSoftmaxForNer(BertPreTrainedModel):
 
 class BertCrfForNer(BertPreTrainedModel):
     def __init__(self, config):
-        pre_model_config = BertConfig.from_pretrained(config["pre_train_model"])
-        super(BertCrfForNer, self).__init__(pre_model_config)
-        self.bert = BertModel.from_pretrained(config["pre_train_model"])
-        self.dropout = nn.Dropout(config["dropout"])
-        self.classifier = nn.Linear(config["feature_dim"], config["num_labels"])
-        self.crf = CRF(num_tags=config["num_labels"], batch_first=True)
+        super(BertCrfForNer, self).__init__(config)
+        self.bert = BertModel(config)
+        self.dropout = nn.Dropout(config.hidden_dropout_prob)
+        self.classifier = nn.Linear(config.hidden_size, config.num_labels)
+        self.crf = CRF(num_tags=config.num_labels, batch_first=True)
         self.init_weights()
 
-    def forward(self, input_ids, token_type_ids=None, attention_mask=None, labels=None):
-        outputs = self.bert(input_ids=input_ids, attention_mask=attention_mask, token_type_ids=token_type_ids)
+    def forward(self, input_ids, token_type_ids=None, attention_mask=None,labels=None):
+        outputs =self.bert(input_ids = input_ids,attention_mask=attention_mask,token_type_ids=token_type_ids)
         sequence_output = outputs[0]
         sequence_output = self.dropout(sequence_output)
         logits = self.classifier(sequence_output)
         outputs = (logits,)
         if labels is not None:
-            loss = self.crf(emissions=logits, tags=labels, mask=attention_mask)
-            outputs = (-1 * loss,) + outputs
-        return outputs  # (loss), scores
+            loss = self.crf(emissions = logits, tags=labels, mask=attention_mask)
+            outputs =(-1*loss,)+outputs
+        return outputs # (loss), scores
+
 
 
 class BertSpanForNer(BertPreTrainedModel):

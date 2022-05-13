@@ -32,9 +32,12 @@ class SpanEntityScore:
 
     def result(self):
         class_info = {}
-        origin_counter = Counter([self.id2label[x[0]] for x in self.origins])
-        found_counter = Counter([self.id2label[x[0]] for x in self.founds])
-        right_counter = Counter([self.id2label[x[0]] for x in self.rights])
+        # origin_counter = Counter([self.id2label[x[0]] for x in self.origins])
+        # found_counter = Counter([self.id2label[x[0]] for x in self.founds])
+        # right_counter = Counter([self.id2label[x[0]] for x in self.rights])
+        origin_counter = Counter([x[0] for x in self.origins])
+        found_counter = Counter([x[0] for x in self.founds])
+        right_counter = Counter([x[0] for x in self.rights])
         for type_, count in origin_counter.items():
             origin = count
             found = found_counter.get(type_, 0)

@@ -8,16 +8,65 @@
 import os
 import torch
 from Tools.infer_tool import BaseInferTool
-from transformers import BertTokenizer,BertConfig
-from LawEntityExtraction.BertNer.ModelStructure.bert_ner_model import BertSpanForNer
-from LawEntityExtraction.BertNer.model_ner_dataset import ClueNerDataset
+from transformers import BertTokenizer, BertConfig
+from LawEntityExtraction.BertNer.ModelStructure.bert_ner_model import BertSpanForNer, BertCrfForNer
+from LawEntityExtraction.BertNer.model_ner_dataset import ClueNerSpanDataset, ClueNerCRFDataset
 from LawEntityExtraction.BertNer.metrics import SpanEntityScore
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "3"
 
+MODEL_CLASSES = {
+    ## bert ernie bert_wwm bert_wwwm_ext
+    "bert_crf": (BertConfig, BertCrfForNer, BertTokenizer, ClueNerCRFDataset),
+    "bert_span": (BertConfig, BertSpanForNer, BertTokenizer, ClueNerSpanDataset),
+}
+
+def get_entity_bio(seq,id2label):
+    """Gets entities from sequence.
+    note: BIO
+    Args:
+        seq (list): sequence of labels.
+    Returns:
+        list: list of (chunk_type, chunk_start, chunk_end).
+    Example:
+        seq = ['B-PER', 'I-PER', 'O', 'B-LOC']
+        get_entity_bio(seq)
+        #output
+        [['PER', 0,1], ['LOC', 3, 3]]
+    """
+    chunks = []
+    chunk = [-1, -1, -1]
+    for indx, tag in enumerate(seq):
+        if not isinstance(tag, str):
+            tag = id2label[tag]
+        if tag.startswith("B-"):
+            if chunk[2] != -1:
+                chunks.append(chunk)
+            chunk = [-1, -1, -1]
+            chunk[1] = indx
+            chunk[0] = tag.split('-')[1]
+            chunk[2] = indx
+            if indx == len(seq) - 1:
+                chunks.append(chunk)
+        elif tag.startswith('I-') and chunk[1] != -1:
+            _type = tag.split('-')[1]
+            if _type == chunk[0]:
+                chunk[2] = indx
+
+            if indx == len(seq) - 1:
+                chunks.append(chunk)
+        else:
+            if chunk[2] != -1:
+                chunks.append(chunk)
+            chunk = [-1, -1, -1]
+    return chunks
 
 class NerInferTool(BaseInferTool):
     def __init__(self, config_path):
+        model_name = "bert_crf"
+        self.bert_config, self.bert_model, self.bert_tokenizer, self.bert_dataset = MODEL_CLASSES[model_name]
+        self.num_labels = len(self.bert_dataset.label_list)
+
         super(NerInferTool, self).__init__(config_path)
         # self.label_list = self.test_dataset.label_list
         self.id2label = self.test_dataset.id2label
@@ -26,25 +75,24 @@ class NerInferTool(BaseInferTool):
         self.metric = SpanEntityScore(self.id2label)
 
     def init_model(self):
-        tokenizer = BertTokenizer.from_pretrained(self.config['pre_train_tokenizer'])
-
-        bert_config = BertConfig.from_pretrained(self.config["pre_train_model"], num_labels=self.config["num_labels"])
-        bert_config.soft_label = self.config["soft_label"]
-        bert_config.loss_type = self.config["loss_type"]
-        model = BertSpanForNer.from_pretrained(self.config["pre_train_model"], config=bert_config)
+        tokenizer = self.bert_tokenizer.from_pretrained(self.config["pre_train_tokenizer"], do_lower_case=True)
+        bert_model_config = self.bert_config.from_pretrained(self.config["pre_train_model"], num_labels=self.num_labels)
+        bert_model_config.soft_label = self.config["soft_label"]
+        bert_model_config.loss_type = self.config["loss_type"]
+        model = self.bert_model.from_pretrained(self.config["pre_train_model"], config=bert_model_config)
         model.load_state_dict(torch.load(self.config['model_path']))
         return tokenizer, model
 
     def init_dataset(self, *args, **kwargs):
-        test_dataset = ClueNerDataset(data_dir="data/cluener/dev.json",
-                                      tokenizer=self.tokenizer,
-                                      mode="test",
-                                      max_length=self.config["max_length"])
+        test_dataset = self.bert_dataset(data_dir="data/cluener/dev.json",
+                                          tokenizer=self.tokenizer,
+                                          mode="test",
+                                          max_length=self.config["max_length"])
 
         return test_dataset
 
     def data_collator(self, batch):
-        return ClueNerDataset.data_collator_test(batch)
+        return self.bert_dataset.data_collator_test(batch)
 
     def pred_data_process(self, text, start_logits, end_logits):
         R = self.bert_extract_item(start_logits, end_logits)
@@ -79,9 +127,9 @@ class NerInferTool(BaseInferTool):
                                 return_offsets_mapping=False,
                                 return_tensors="pt")
 
-        outputs = self.model.forward(input_ids=inputs['input_ids'],
-                                     token_type_ids=inputs['token_type_ids'],
-                                     attention_mask=inputs['attention_mask'])
+        outputs = self.model(input_ids=inputs['input_ids'],
+                             token_type_ids=inputs['token_type_ids'],
+                             attention_mask=inputs['attention_mask'])
 
         start_logits, end_logits = outputs[:2]
         return self.pred_data_process(text, start_logits, end_logits)
@@ -117,6 +165,28 @@ class NerInferTool(BaseInferTool):
 
             return eval_info, entity_info
 
+    def test_crf_data(self):
+        for step, batch in enumerate(self.test_dataloader):
+            inputs = {"input_ids": batch[0], "attention_mask": batch[1],
+                      "token_type_ids": batch[2]}
+
+            outputs = self.model(**inputs)
+            # logits = outputs[:2]
+            tags = self.model.crf.decode(outputs[0], inputs['attention_mask'])
+            # out_label_ids = inputs['labels'].cpu().numpy().tolist()
+            tags = tags.squeeze(0).cpu().numpy().tolist()
+            for one_ids in range(batch[0].shape[0]):
+                # print(one_ids)
+                # R = self.bert_extract_item(one_start_logits, one_end_logits)
+                R = get_entity_bio(tags[one_ids],self.id2label)
+                T = get_entity_bio(batch[3][one_ids],self.id2label)
+                # T = batch[3][one_ids]
+                self.metric.update(true_subject=T, pred_subject=R)
+
+            eval_info, entity_info = self.metric.result()
+            self.logger.info(eval_info)
+            self.logger.info(entity_info)
+            return eval_info, entity_info
     @staticmethod
     def bert_extract_item(_start_logits, _end_logits):
         S = []
@@ -134,5 +204,6 @@ class NerInferTool(BaseInferTool):
 
 if __name__ == '__main__':
     ner_tool = NerInferTool(config_path="LawEntityExtraction/BertNer/Config/base_ner_infer.yaml")
-    # print(ner_tool.infer(text="彭小军认为，国内银行现在走的是台湾的发卡模式，先通过跑马圈地再在圈的地里面选择客户，"))
-    ner_tool.test_data()
+    # print(ner_tool.infer(text="突袭黑暗雅典娜》中Riddick发现之前抓住他的赏金猎人Johns，"))
+    # ner_tool.test_data()
+    ner_tool.test_crf_data()

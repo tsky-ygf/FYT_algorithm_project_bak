@@ -66,6 +66,11 @@ def get_base_data_dict(anyou_name, ):
         select f2,f13,f40,f44 from labels_marking_records.case_list_original_hetong 
         WHERE f12="民间借贷纠纷" AND f10="判决" AND (LENGTH(f40)>1) AND (f50 is NULL) limit 1;
         '''
+    elif anyou_type == "婚姻继承":
+        sql_con = '''
+        select f2,f13,f41,f44 from labels_marking_records.case_list_original_hunyinjiating 
+        WHERE f12="{}" AND f10="判决" AND (LENGTH(f40)>1) AND (f50 is NULL) limit 1;
+        '''.format(anyou_x)
     else:
         raise Exception("暂时不支持该案由")
 

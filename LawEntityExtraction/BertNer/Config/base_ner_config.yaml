@@ -6,10 +6,11 @@ log_path: "log/tensorboard_log/law_entity_extraction/bert_ner_test"
 #training_args:
 train_batch_size: 64
 eval_batch_size: 64
-learning_rate: 0.00002
-start_learning_rate: 0.003
-end_learning_rate: 0.003
-num_train_epochs: 20
+learning_rate: 0.00005
+start_learning_rate: 0.005
+end_learning_rate: 0.005
+crf_learning_rate: 0.001
+num_train_epochs: 4
 early_stop_patience: 3
 
 lr_scheduler_type: "linear"
@@ -27,7 +28,7 @@ adv_name: "word_embeddings"
 adv_epsilon: 1.0
 
 #model args:
-num_labels: 11
+#num_labels: 11
 max_length: 128
 dropout: 0.1
 soft_label: True

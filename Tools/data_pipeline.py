@@ -43,11 +43,6 @@ class DataProcessor(object):
         raise NotImplementedError()
 
     @staticmethod
-    def get_labels():
-        """Gets the list of labels for this data set."""
-        raise NotImplementedError()
-
-    @staticmethod
     def create_examples(lines, set_type):
         """Creates examples for the training and dev sets."""
         examples = []
