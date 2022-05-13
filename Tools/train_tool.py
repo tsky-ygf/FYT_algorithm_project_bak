@@ -170,6 +170,7 @@ class BaseTrainTool:
 
     def train_epoch(self, epoch):
         self.model.train()
+        # self.lr_scheduler.step()
         for step, batch in enumerate(self.train_dataloader):
             loss = self.cal_loss(batch)
 

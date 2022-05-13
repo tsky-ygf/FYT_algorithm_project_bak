@@ -4,9 +4,9 @@ log_level: "INFO"
 log_path: "log/tensorboard_log/law_entity_extraction/bert_ner_test"
 
 #training_args:
-train_batch_size: 64
-eval_batch_size: 64
-learning_rate: 0.00005
+train_batch_size: 24
+eval_batch_size: 24
+learning_rate: 0.00003
 start_learning_rate: 0.005
 end_learning_rate: 0.005
 crf_learning_rate: 0.001
@@ -23,7 +23,7 @@ eval_every_number_of_epoch: 1
 
 accelerator_params:
   fp16: True
-do_adv: True
+do_adv: False
 adv_name: "word_embeddings"
 adv_epsilon: 1.0
 

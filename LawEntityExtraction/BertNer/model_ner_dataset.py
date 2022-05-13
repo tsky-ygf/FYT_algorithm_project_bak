@@ -26,7 +26,7 @@ def get_crf_labels():
             'I-organization', 'I-position', 'I-scene',
             "S-address", "S-book", "S-company", 'S-game', 'S-government', 'S-movie',
             'S-name', 'S-organization', 'S-position',
-            'S-scene', 'O', "[START]", "[END]"]
+            'S-scene', 'O']
 
 
 class ClueNerProcessor(DataProcessor):
