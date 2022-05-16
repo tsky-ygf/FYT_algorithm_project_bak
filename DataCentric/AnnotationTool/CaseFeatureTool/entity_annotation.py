@@ -61,28 +61,39 @@ def get_base_data_dict(anyou_name, ):
     cursor = connect_big_data.cursor()
     anyou_type, anyou_x = anyou_name.split('_')
     # print(anyou_type, anyou_x)
-    if anyou_name == "借贷纠纷_民间借贷":
+    if anyou_type == "借贷纠纷":
         sql_con = '''
         select f2,f13,f40,f44 from labels_marking_records.case_list_original_hetong 
-        WHERE f12="民间借贷纠纷" AND f10="判决" AND (LENGTH(f40)>1) AND (f50 is NULL) limit 1;
-        '''
+        WHERE f12="{}纠纷" AND f10="判决" AND (LENGTH(f40)>1) AND (f50 is NULL) limit 1;
+        '''.format(anyou_x)
     elif anyou_type == "婚姻继承":
         sql_con = '''
-        select f2,f13,f41,f44 from labels_marking_records.case_list_original_hunyinjiating 
-        WHERE f12="{}" AND f10="判决" AND (LENGTH(f40)>1) AND (f50 is NULL) limit 1;
+        select f2,f30,f39,f40 from labels_marking_records.case_list_original_hunyinjiating 
+        WHERE f12="{}纠纷" AND f10="判决" AND (LENGTH(f40)>1) AND (f50 is NULL) limit 1;
         '''.format(anyou_x)
     else:
         raise Exception("暂时不支持该案由")
 
     data = pd.read_sql(sql_con, con=connect_big_data)
     # print(data)
-    base_data_dict = {
-        "case_id": data["f2"].values[0],
-        "data": [
-            {"name": "原告诉称", "content": data["f40"].values[0]},
-            {"name": "本院查明", "content": data["f44"].values[0]},
-            {"name": "本院认为", "content": data["f13"].values[0]}]
-    }
+    if anyou_type == "借贷纠纷":
+        base_data_dict = {
+            "case_id": data["f2"].values[0],
+            "data": [
+                {"name": "原告诉称", "content": data["f40"].values[0]},
+                {"name": "本院查明", "content": data["f44"].values[0]},
+                {"name": "本院认为", "content": data["f13"].values[0]}]
+        }
+    elif anyou_type == "婚姻继承":
+        base_data_dict = {
+            "case_id": data["f2"].values[0],
+            "data": [
+                {"name": "原告诉称", "content": data["f40"].values[0]},
+                {"name": "本院查明", "content": data["f30"].values[0]},
+                {"name": "本院认为", "content": data["f39"].values[0]}]
+        }
+    else:
+        base_data_dict = {}
 
     sql_update_con = '''
         UPDATE labels_marking_records.case_list_original_hetong SET f50='{}' WHERE f2='{}';
@@ -101,7 +112,7 @@ def get_base_data_dict(anyou_name, ):
     return base_data_dict
 
 
-# print(get_base_data_dict("借贷纠纷_民间借贷"))
+print(get_base_data_dict("婚姻继承_离婚"))
 
 def get_base_annotation_dict(anyou_name, sentence):
     # print(anyou_name, sentence)
