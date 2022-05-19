@@ -27,7 +27,7 @@ from LawEntityExtraction.BertNer.model_ner_dataset import ClueNerSpanDataset, Cl
 # unless you tell it to be deterministic
 # torch.backends.cudnn.deterministic = True
 
-# os.environ['CUDA_VISIBLE_DEVICES'] = '0'
+# os.environ['CUDA_VISIBLE_DEVICES'] = '3'
 MODEL_CLASSES = {
     ## bert ernie bert_wwm bert_wwwm_ext
     "bert_crf": (BertConfig, BertCrfForNer, BertTokenizer, ClueNerCRFDataset),

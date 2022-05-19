@@ -225,8 +225,9 @@ class BaseTrainTool:
         eval_loss_res = 0
 
         for step, batch in enumerate(self.eval_dataloader):
-            eval_loss = self.cal_loss(batch)
-            eval_loss_res += eval_loss.item()
+            with torch.no_grad():
+                eval_loss = self.cal_loss(batch)
+                eval_loss_res += eval_loss.item()
 
         eval_loss_res /= len(self.eval_dataloader)
         return eval_loss_res

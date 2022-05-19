@@ -21,12 +21,11 @@ class BaseInferTool:
         self.config = parse_config_file(config_file)
         self.logger = get_module_logger(module_name="Infer", level=self.config.get("log_level", "INFO"))
 
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
         self.logger.info(self.config)
 
         self.tokenizer, self.model = self.init_model()
         self.model.eval()
+        self.model.to(self.device)
 
         self.test_dataset = self.init_dataset()
         self.test_dataloader = self.init_dataloader()

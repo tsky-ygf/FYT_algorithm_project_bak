@@ -104,6 +104,9 @@ def get_base_data_dict(anyou_name, ):
         cursor.execute(sql_update_con)
         connect_big_data.commit()
     except:
+        # connect_big_data = pymysql.connect(host='172.19.82.227',
+        #                                    user='root', password='Nblh@2022',
+        #                                    db='big_data_ceshi227')
         print(traceback.format_exc())
         connect_big_data.rollback()
         raise RuntimeError("更新数据库时间失败")
@@ -112,7 +115,7 @@ def get_base_data_dict(anyou_name, ):
     return base_data_dict
 
 
-print(get_base_data_dict("婚姻继承_离婚"))
+# print(get_base_data_dict("婚姻继承_离婚"))
 
 def get_base_annotation_dict(anyou_name, sentence):
     # print(anyou_name, sentence)

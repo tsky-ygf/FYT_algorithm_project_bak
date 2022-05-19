@@ -13,7 +13,7 @@ from LawEntityExtraction.BertNer.ModelStructure.bert_ner_model import BertSpanFo
 from LawEntityExtraction.BertNer.model_ner_dataset import ClueNerSpanDataset, ClueNerCRFDataset
 from LawEntityExtraction.BertNer.metrics import SpanEntityScore
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "3"
+os.environ['CUDA_VISIBLE_DEVICES'] = '3'
 
 MODEL_CLASSES = {
     ## bert ernie bert_wwm bert_wwwm_ext
@@ -21,9 +21,10 @@ MODEL_CLASSES = {
     "bert_span": (BertConfig, BertSpanForNer, BertTokenizer, ClueNerSpanDataset),
 }
 
-def get_entity_bio(seq,id2label):
+
+def get_entity_bio(seq, id2label):
     """Gets entities from sequence.
-    note: BIO
+    note: BIO/home/fyt/code_hup/third_part_code/BERT-NER-Pytorch/run_ner_span.py
     Args:
         seq (list): sequence of labels.
     Returns:
@@ -61,12 +62,13 @@ def get_entity_bio(seq,id2label):
             chunk = [-1, -1, -1]
     return chunks
 
+
 class NerInferTool(BaseInferTool):
     def __init__(self, config_path):
         model_name = "bert_crf"
         self.bert_config, self.bert_model, self.bert_tokenizer, self.bert_dataset = MODEL_CLASSES[model_name]
         self.num_labels = len(self.bert_dataset.label_list)
-
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         super(NerInferTool, self).__init__(config_path)
         # self.label_list = self.test_dataset.label_list
         self.id2label = self.test_dataset.id2label
@@ -84,10 +86,10 @@ class NerInferTool(BaseInferTool):
         return tokenizer, model
 
     def init_dataset(self, *args, **kwargs):
-        test_dataset = self.bert_dataset(data_dir="data/cluener/train.json",
-                                          tokenizer=self.tokenizer,
-                                          mode="test",
-                                          max_length=self.config["max_length"])
+        test_dataset = self.bert_dataset(data_dir="data/cluener/dev.json",
+                                         tokenizer=self.tokenizer,
+                                         mode="test",
+                                         max_length=self.config["max_length"])
 
         return test_dataset
 
@@ -141,8 +143,9 @@ class NerInferTool(BaseInferTool):
                       "token_type_ids": batch[2]}
             # start_positions = batch[3]
             # end_positions = batch[4]
-
-            outputs = self.model(**inputs)
+            inputs = {k: v.to(self.device) for k, v in inputs.items()}
+            with torch.no_grad():
+                outputs = self.model(**inputs)
             # print(outputs)
             # start_logits, end_logits = outputs[:2]
 
@@ -170,7 +173,9 @@ class NerInferTool(BaseInferTool):
             inputs = {"input_ids": batch[0], "attention_mask": batch[1],
                       "token_type_ids": batch[2]}
 
-            outputs = self.model(**inputs)
+            inputs = {k: v.to(self.device) for k, v in inputs.items()}
+            with torch.no_grad():
+                outputs = self.model(**inputs)
             # logits = outputs[:2]
             tags = self.model.crf.decode(outputs[0], inputs['attention_mask'])
             # out_label_ids = inputs['labels'].cpu().numpy().tolist()
@@ -178,8 +183,8 @@ class NerInferTool(BaseInferTool):
             for one_ids in range(batch[0].shape[0]):
                 # print(one_ids)
                 # R = self.bert_extract_item(one_start_logits, one_end_logits)
-                R = get_entity_bio(tags[one_ids],self.id2label)
-                T = get_entity_bio(batch[3][one_ids],self.id2label)
+                R = get_entity_bio(tags[one_ids], self.id2label)
+                T = get_entity_bio(batch[3][one_ids], self.id2label)
                 # T = batch[3][one_ids]
                 self.metric.update(true_subject=T, pred_subject=R)
 
@@ -187,6 +192,7 @@ class NerInferTool(BaseInferTool):
             self.logger.info(eval_info)
             self.logger.info(entity_info)
             return eval_info, entity_info
+
     @staticmethod
     def bert_extract_item(_start_logits, _end_logits):
         S = []

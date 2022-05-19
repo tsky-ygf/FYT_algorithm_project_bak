@@ -26,7 +26,7 @@ def get_crf_labels():
             'I-organization', 'I-position', 'I-scene',
             "S-address", "S-book", "S-company", 'S-game', 'S-government', 'S-movie',
             'S-name', 'S-organization', 'S-position',
-            'S-scene', 'O']
+            'S-scene', 'O',"[START]", "[END]"]
 
 
 class ClueNerProcessor(DataProcessor):
@@ -205,7 +205,7 @@ class ClueNerCRFDataset(ClueNerDataset):
         # label_ids = label_ids[: (self.max_length - 2)]
         # label_ids += [self.label2id['O']]
         label_ids = label_ids[: (self.max_length - 2)]
-        label_ids = [self.label2id['O']] + label_ids + [self.label2id['O']]
+        label_ids = [self.label2id['[START]']] + label_ids + [self.label2id['[END]']]
         label_ids += [0] * (self.max_length - len(label_ids))
         # print(subjects)
         input_ids = inputs["input_ids"].long().squeeze(0)
@@ -215,7 +215,8 @@ class ClueNerCRFDataset(ClueNerDataset):
         if self.mode == "test":
             return input_ids, attention_mask, token_type_ids, label_ids
         else:
-            return input_ids, attention_mask, token_type_ids, torch.tensor(label_ids)
+            label_ids  = torch.tensor(label_ids).long().squeeze(0)
+            return input_ids, attention_mask, token_type_ids, label_ids
 
     @staticmethod
     def data_collator(batch):
