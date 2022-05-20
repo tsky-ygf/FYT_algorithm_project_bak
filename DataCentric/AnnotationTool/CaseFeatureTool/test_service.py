@@ -8,13 +8,15 @@
 import requests
 from Utils import print_run_time
 
-ip = '172.19.82.199'
+# ip = '172.19.82.199'
+ip = "localhost"
 port = 6021
 
 
 @print_run_time
 def test_service(url, data=None):
     r = requests.post(url, json=data)
+    print(f"response:{r}")
     result = r.json()
     print("输出:", result)
 
@@ -34,10 +36,10 @@ request_data = {
     "problem": "借贷纠纷",
     "suqiu": None
 }
-# test_service(url3, request_data)
+# test_service(url3, request_data)S
 
 url4 = "http://%s:%s/getBaseData" % (ip, port)
-# test_service(url4,data={"anyou": "婚姻继承_被继承人债务清偿"})
+# test_service(url4,data={"anyou": "借贷纠纷_民间借贷"})
 
 url5 = "http://%s:%s/getBaseAnnotation" % (ip, port)
 # test_service(url5, data={"anyou": "借贷纠纷_民间借贷", "sentence": sentence})
@@ -79,3 +81,12 @@ test_data = {
 }
 url6 = "http://%s:%s/insertAnnotationData" % (ip, port)
 # test_service(url6, data=test_data)
+
+# url17 = "http://%s:%s/getSecondCheck" % (ip, port)
+# test_service(url17, data={"anyou": "借贷纠纷_民间借贷"})
+
+# url18 = "http://%s:%s/getWorkCount" % (ip, port)
+# test_service(url18, data={"name": "汪丽浩"})
+#
+# url19 = "http://%s:%s/getSourceContent" % (ip, port)
+# test_service(url19, data={"key": "8d5e10b216d7402db6b4acbe00a676be"})

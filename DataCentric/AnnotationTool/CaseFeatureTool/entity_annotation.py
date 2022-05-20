@@ -6,21 +6,29 @@
 # @File    : entity_annotation.py
 # @Software: PyCharm
 import pymysql
+from pprint import pprint
 import pandas as pd
 from pathlib import Path
 import requests
 import traceback
 import datetime
+from loguru import logger
+
 
 pd.set_option('display.max_columns', None)
 
 __all__ = ['get_anyou_list', 'get_case_feature_dict', 'get_base_data_dict', 'get_base_annotation_dict',
-           'insert_data_to_mysql']
+           'insert_data_to_mysql','get_second_check','get_day_work_count','get_source_content']
 
 connect_big_data = pymysql.connect(host='172.19.82.227',
                                    user='root', password='Nblh@2022',
                                    db='big_data_ceshi227')
-
+connect_labels_marking_records = pymysql.connect(host='172.19.82.227',
+                                   user='root', password='Nblh@2022',
+                                   db='labels_marking_records')
+connect_big_data_ceshi = pymysql.connect(host='172.19.82.227',
+                                   user='root', password='Nblh@2022',
+                                   db='big_data_ceshi227')
 
 def get_anyou_list():
     anyou_list = []
@@ -61,39 +69,28 @@ def get_base_data_dict(anyou_name, ):
     cursor = connect_big_data.cursor()
     anyou_type, anyou_x = anyou_name.split('_')
     # print(anyou_type, anyou_x)
-    if anyou_type == "借贷纠纷":
+    if anyou_name == "借贷纠纷_民间借贷":
         sql_con = '''
         select f2,f13,f40,f44 from labels_marking_records.case_list_original_hetong 
-        WHERE f12="{}纠纷" AND f10="判决" AND (LENGTH(f40)>1) AND (f50 is NULL) limit 1;
-        '''.format(anyou_x)
+        WHERE f12="民间借贷纠纷" AND f10="判决" AND (LENGTH(f40)>1) AND (f50 is NULL) limit 1;
+        '''
     elif anyou_type == "婚姻继承":
         sql_con = '''
-        select f2,f30,f39,f40 from labels_marking_records.case_list_original_hunyinjiating 
-        WHERE f12="{}纠纷" AND f10="判决" AND (LENGTH(f40)>1) AND (f50 is NULL) limit 1;
+        select f2,f13,f41,f44 from labels_marking_records.case_list_original_hunyinjiating 
+        WHERE f12="{}" AND f10="判决" AND (LENGTH(f40)>1) AND (f50 is NULL) limit 1;
         '''.format(anyou_x)
     else:
         raise Exception("暂时不支持该案由")
 
     data = pd.read_sql(sql_con, con=connect_big_data)
     # print(data)
-    if anyou_type == "借贷纠纷":
-        base_data_dict = {
-            "case_id": data["f2"].values[0],
-            "data": [
-                {"name": "原告诉称", "content": data["f40"].values[0]},
-                {"name": "本院查明", "content": data["f44"].values[0]},
-                {"name": "本院认为", "content": data["f13"].values[0]}]
-        }
-    elif anyou_type == "婚姻继承":
-        base_data_dict = {
-            "case_id": data["f2"].values[0],
-            "data": [
-                {"name": "原告诉称", "content": data["f40"].values[0]},
-                {"name": "本院查明", "content": data["f30"].values[0]},
-                {"name": "本院认为", "content": data["f39"].values[0]}]
-        }
-    else:
-        base_data_dict = {}
+    base_data_dict = {
+        "case_id": data["f2"].values[0],
+        "data": [
+            {"name": "原告诉称", "content": data["f40"].values[0]},
+            {"name": "本院查明", "content": data["f44"].values[0]},
+            {"name": "本院认为", "content": data["f13"].values[0]}]
+    }
 
     sql_update_con = '''
         UPDATE labels_marking_records.case_list_original_hetong SET f50='{}' WHERE f2='{}';
@@ -104,9 +101,6 @@ def get_base_data_dict(anyou_name, ):
         cursor.execute(sql_update_con)
         connect_big_data.commit()
     except:
-        # connect_big_data = pymysql.connect(host='172.19.82.227',
-        #                                    user='root', password='Nblh@2022',
-        #                                    db='big_data_ceshi227')
         print(traceback.format_exc())
         connect_big_data.rollback()
         raise RuntimeError("更新数据库时间失败")
@@ -114,8 +108,72 @@ def get_base_data_dict(anyou_name, ):
     cursor.close()
     return base_data_dict
 
+def get_second_check(anyou):
+    print(anyou)
+    anyou_type, anyou_x = anyou.split('_')
+    print(anyou_type,anyou_x)
+    if anyou == "借贷纠纷_民间借贷":
+        try:
+            cursor = connect_labels_marking_records.cursor(cursor=pymysql.cursors.DictCursor)
+            sql = f"""
+            SELECT * FROM labels_law_entity_feature WHERE checkperson is null and suqiu='{anyou_type}' and jiufen_type='{anyou_x}';
+            """
+            cursor.execute(sql)
+            res = cursor.fetchall()
+        except Exception as e:
+            print(traceback.format_exc())
+            connect_big_data.rollback()
+            raise RuntimeError("查询数据库时间失败")
+        cursor.close()
+        return res
+    return ''
 
-# print(get_base_data_dict("婚姻继承_离婚"))
+def get_day_work_count(person):
+    # 当天时间 eg: 2022-05-18 00:00:00
+    this_day = datetime.datetime.now().strftime('%Y-%m-%d')
+    this_day = datetime.datetime.strptime(this_day, '%Y-%m-%d')
+    # 明天时间 eg: 2022-05-19 00:00:00
+    next_day = (datetime.datetime.now() + datetime.timedelta(days=1)).strftime('%Y-%m-%d')
+    next_day = datetime.datetime.strptime(next_day, '%Y-%m-%d')
+    cursor = connect_labels_marking_records.cursor(cursor=pymysql.cursors.DictCursor)
+    sql = f"""
+    select labelingperson,count(labelingperson) as num 
+    from labels_law_entity_feature
+    WHERE labelingperson ='{person}'
+    and labelingdate between '{this_day}' and '{next_day}' 
+    group by labelingperson;
+    """
+    try:
+        cursor.execute(sql)
+        res = cursor.fetchall()
+    except:
+        print(traceback.format_exc())
+        connect_big_data.rollback()
+        raise RuntimeError("查询数据库时间失败")
+    cursor.close()
+    return res
+
+def get_source_content(key):
+    cursor = connect_big_data_ceshi.cursor(cursor=pymysql.cursors.DictCursor)
+    sql = f"""
+        select f13
+        from case_list_original_base_info
+        where f2 = '{key}'
+        """
+    try:
+        cursor.execute(sql)
+        res = cursor.fetchall()
+    except:
+        print(traceback.format_exc())
+        connect_big_data.rollback()
+        raise RuntimeError("查询数据库时间失败")
+    cursor.close()
+    return res
+
+
+
+
+# print(get_base_data_dict("借贷纠纷_民间借贷"))
 
 def get_base_annotation_dict(anyou_name, sentence):
     # print(anyou_name, sentence)
@@ -226,3 +284,5 @@ def insert_data_to_mysql(anyou_name, source, labelingperson, data):
 # insert_data_to_mysql(anyou_name=test_data["anyou_name"],
 #                      source=test_data["source"],
 #                      data=test_data["insert_data"])
+if __name__ == '__main__':
+    pprint(get_day_work_count('汪丽浩'))

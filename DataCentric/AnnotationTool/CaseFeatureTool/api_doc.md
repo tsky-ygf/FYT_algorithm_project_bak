@@ -93,3 +93,51 @@
     "error_msg": "",
     "insert_result": "success", }
 }`
+
+### 统计当天工作量  
+请求地址: `http://172.19.82.199:6021/getWorkCount/`  
+请求方式: `POST`    
+请求参数: `{  
+            "name":"汪丽浩",
+         }`        
+返回参数: `{
+    "work_count": , 
+    "error_msg": "",
+    "status": 0, }
+}`
+异常参数: `{
+    "error_msg": "this person have no work",
+    "status": 1,
+}`
+
+### 二次审核  
+请求地址: `http://172.19.82.199:6021/getSecondCheck/`  
+请求方式: `POST`    
+请求参数: `{  
+            "anyou":"借贷纠纷_民间借贷",
+         }`        
+返回参数: `{
+    "data_list": , 
+    "error_msg": "",
+    "status": 0, }
+}`
+异常参数: `{
+    "error_msg": "no check",
+    "status": 1,
+}`
+
+### 展示原文（目前没确定查询那张表）  
+请求地址: `http://172.19.82.199:6021/getSourceContent/`  
+请求方式: `POST`    
+请求参数: `{  
+            "key":"8d5e10b216d7402db6b4acbe00a676be",
+         }`        
+返回参数: `{
+    "content": , 
+    "error_msg": "",
+    "status": 0, }
+}`
+异常参数: `{
+    "error_msg": "have no data",
+    "status": 1,
+}`
