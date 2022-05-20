@@ -116,7 +116,7 @@ def get_second_check(anyou):
         try:
             cursor = connect_labels_marking_records.cursor(cursor=pymysql.cursors.DictCursor)
             sql = f"""
-            SELECT * FROM labels_law_entity_feature WHERE checkperson is null and suqiu='{anyou_type}' and jiufen_type='{anyou_x}';
+            SELECT * FROM labels_law_entity_feature WHERE checkperson is null and suqiu='{anyou_type}' and jiufen_type='{anyou_x}' limit 1;
             """
             cursor.execute(sql)
             res = cursor.fetchall()
