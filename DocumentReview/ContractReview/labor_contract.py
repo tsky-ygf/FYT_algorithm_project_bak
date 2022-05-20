@@ -7,6 +7,7 @@
 # @Software: PyCharm
 import re
 from DocumentReview.ParseFile.parse_word import read_docx_file
+from collections import OrderedDict
 from pprint import pprint
 
 text_list = read_docx_file(docx_path="data/DocData/LaborContract/劳动合同.docx")
@@ -18,11 +19,20 @@ risk_point_dict = {
 }
 item_flag = False
 jia_flag = True
+break_flag = False
+
+item_content = OrderedDict()
 
 for index, text in enumerate(text_list):
     # print(index, "###", text)
     if index == 0:
         risk_point_dict["合同名称"] = text
+
+    if break_flag:
+        break
+
+    if len(re.findall(r"以下无正文", text)) > 0:
+        break_flag = True
 
     else:
         if text[:3] == "第一条":
@@ -52,6 +62,18 @@ for index, text in enumerate(text_list):
                     risk_point_dict["身份信息"]["乙方"]["通讯地址"] = text.split("：")[-1]
                 if len(re.findall(r"乙方.*电话｜联系方式|联系电话", text)) > 0:
                     risk_point_dict["身份信息"]["乙方"]["联系方式"] = text.split("：")[-1]
-                if len(re.findall(r"第一条", text)) > 0:
-                    pass
+
+        else:
+            # print(text)
+            if len(re.findall(r"第.*条", text[:10])) > 0:
+                # print(text)
+                item_content[text] = []
+            else:
+                item_content[list(item_content.keys())[-1]].append(text)
+
+# pprint(item_content)
+for key,value in item_content.items():
+    print(key)
+    print(value)
+
 pprint(risk_point_dict)
