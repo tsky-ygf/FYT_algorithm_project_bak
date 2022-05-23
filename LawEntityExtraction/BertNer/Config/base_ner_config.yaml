@@ -6,14 +6,14 @@ log_path: "log/tensorboard_log/law_entity_extraction/bert_ner_test"
 #training_args:
 train_batch_size: 24
 eval_batch_size: 24
-learning_rate: 0.00003
+learning_rate: 0.00002
 start_learning_rate: 0.005
 end_learning_rate: 0.005
 crf_learning_rate: 0.001
-num_train_epochs: 4
+num_train_epochs: 8
 early_stop_patience: 3
 
-lr_scheduler_type: "linear"
+lr_scheduler_type: "cosine" # "linear", "cosine", "cosine_with_restarts", "polynomial", "constant", "constant_with_warmup"
 warmup_ratio: 0.1
 #num_warmup_steps: 100
 gradient_accumulation_steps: 1
