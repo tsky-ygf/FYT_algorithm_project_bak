@@ -7,7 +7,7 @@
     "error_msg": "",    
     "AnyouList": [      
         "劳动社保_享受失业保险",  
-        "劳动社保_享受医疗保险",  
+        "劳动社保_享受医疗保险",  1
         ...
     ]
 }`
@@ -139,5 +139,60 @@
 }`
 异常参数: `{
     "error_msg": "have no data",
+    "status": 1,
+}`
+
+### 添加新用户
+请求地址: `http://172.19.82.199:6021/registerUser/`  
+请求方式: `POST`    
+请求参数: `{  
+            "username":"",
+            "password":"",
+         }`        
+返回参数: `{
+    "content": "register success", 
+    "error_msg": "",
+    "status": 0, }
+}`
+异常参数1: `{
+    "error_msg": "this user name is in use,repeat of user name",
+    "status": 1,
+}`
+异常参数2: `{
+    "error_msg": "no username or password",
+    "status": 1,
+}`
+异常参数3: `{
+    "error_msg": "data is not dictionary",
+    "status": 1,
+}`
+
+
+### 登录校验
+请求地址: `http://172.19.82.199:6021/loginCheck/`  
+请求方式: `POST`    
+请求参数: `{  
+            "username":"",
+            "password":"",
+         }`        
+返回参数: `{
+    "content": "login success", 
+    "error_msg": "",
+    "status": 0, }
+}`
+异常参数1: `{
+    "error_msg": "no username or password",
+    "status": 1,
+}`
+异常参数2: `{
+    "error_msg": "data is not dictionary",
+    "status": 1,
+}`
+异常参数3: `{
+    "error_msg": "Password error",
+    "status": 1,
+}`
+异常参数4: `{
+    "error_msg": "There is no such user",
     "status": 1,
 }`

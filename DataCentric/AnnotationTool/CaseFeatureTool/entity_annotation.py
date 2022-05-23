@@ -5,6 +5,8 @@
 # @Site    : 
 # @File    : entity_annotation.py
 # @Software: PyCharm
+import logging
+
 import pymysql
 from pprint import pprint
 import pandas as pd
@@ -18,7 +20,8 @@ from loguru import logger
 pd.set_option('display.max_columns', None)
 
 __all__ = ['get_anyou_list', 'get_case_feature_dict', 'get_base_data_dict', 'get_base_annotation_dict',
-           'insert_data_to_mysql','get_second_check','get_day_work_count','get_source_content']
+           'insert_data_to_mysql','get_second_check','get_day_work_count','get_source_content',
+           'check_username','get_login_password','save_username_password']
 
 connect_big_data = pymysql.connect(host='172.19.82.227',
                                    user='root', password='Nblh@2022',
@@ -29,6 +32,9 @@ connect_labels_marking_records = pymysql.connect(host='172.19.82.227',
 connect_big_data_ceshi = pymysql.connect(host='172.19.82.227',
                                    user='root', password='Nblh@2022',
                                    db='big_data_ceshi227')
+connect_login_uers_data = pymysql.connect(host='172.19.82.227',
+                                   user='root', password='Nblh@2022',
+                                   db='login_user_data')
 
 def get_anyou_list():
     anyou_list = []
@@ -289,5 +295,67 @@ def insert_data_to_mysql(anyou_name, source, labelingperson, data):
 # insert_data_to_mysql(anyou_name=test_data["anyou_name"],
 #                      source=test_data["source"],
 #                      data=test_data["insert_data"])
+
+def check_username(username):
+    # 判断用户名是否存在
+    # return: 存在:False 不存在:True
+    try:
+        cur = connect_login_uers_data.cursor()
+        sql = f"""select username from user_data where username='{username}'"""
+        res = cur.execute(sql)
+        return res
+    except pymysql.err.OperationalError:
+        print(traceback.format_exc())
+        raise ConnectionError("method_name:check_username, 连接数据库 login_user_data 异常，查看数据库链接信息是否有问题")
+    except Exception as e:
+        print(traceback.format_exc())
+        connect_big_data.rollback()
+        raise RuntimeError("查询数据库时间失败")
+
+
+    pass
+
+def get_login_password(username):
+    # 根据 用户名查找密码：
+    # return: 有密码 返回密码，没有密码返回‘’
+    try:
+        cursor = connect_login_uers_data.cursor(cursor=pymysql.cursors.DictCursor)
+        sql = f"""select password from user_data where username='{username}'"""
+        cursor.execute(sql)
+        res = cursor.fetchall()
+        if res:
+            return res[0].get('password')
+        else:
+            logger.info(f"username:{username},没找到密码")
+            return ''
+    except pymysql.err.OperationalError:
+        print(traceback.format_exc())
+        logger.error(f"链接数据库 login_user_data 异常，查看数据库链接信息是否有问题")
+        raise ConnectionError("method_name:check_username, 连接数据库 login_user_data 异常，查看数据库链接信息是否有问题")
+    except Exception as e:
+        print(traceback.format_exc())
+        connect_big_data.rollback()
+        raise RuntimeError("查询数据库时间失败")
+
+def save_username_password(username,password):
+    # 保存 用户 账号密码
+    # return: 正常返回 1
+    try:
+        cur = connect_login_uers_data.cursor(cursor=pymysql.cursors.DictCursor)
+        sql = f"""insert into user_data (username,password) value ('{username}','{password}')"""
+        res = cur.execute(sql)
+        connect_login_uers_data.commit()
+        cur.close()
+        connect_login_uers_data.close()
+        return res
+    except pymysql.err.OperationalError:
+        print(traceback.format_exc())
+        logger.error(f"链接数据库 login_user_data 异常，查看数据库链接信息是否有问题")
+        raise ConnectionError("method_name:check_username, 连接数据库 login_user_data 异常，查看数据库链接信息是否有问题")
+    except Exception as e:
+        print(traceback.format_exc())
+        connect_big_data.rollback()
+        raise RuntimeError("查询数据库时间失败")
+
 if __name__ == '__main__':
-    get_base_data_dict('婚姻继承_离婚')
+    print(check_username('b'))
