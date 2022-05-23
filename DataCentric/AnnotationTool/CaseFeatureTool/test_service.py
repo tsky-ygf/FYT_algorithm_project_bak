@@ -6,6 +6,7 @@
 # @File    : test_service.py
 # @Software: PyCharm
 import requests
+from pprint import pprint
 from Utils import print_run_time
 
 # ip = '172.19.82.199'
@@ -16,13 +17,13 @@ port = 6021
 @print_run_time
 def test_service(url, data=None):
     r = requests.post(url, json=data)
-    print(f"response:{r}")
+    # print(f"response:{r}")
     result = r.json()
-    print("输出:", result)
+    pprint(result)
 
 
 url1 = "http://%s:%s/getAnyou" % (ip, port)
-test_service(url1)
+# test_service(url1)
 
 url2 = "http://%s:%s/getCaseFeature" % (ip, port)
 # test_service(url2,data={"anyou": "劳动社保_享受失业保险"})
@@ -82,8 +83,8 @@ test_data = {
 url6 = "http://%s:%s/insertAnnotationData" % (ip, port)
 # test_service(url6, data=test_data)
 
-# url17 = "http://%s:%s/getSecondCheck" % (ip, port)
-# test_service(url17, data={"anyou": "借贷纠纷_民间借贷"})
+url17 = "http://%s:%s/getSecondCheck" % (ip, port)
+test_service(url17, data={"anyou": "借贷纠纷_民间借贷"})
 
 # url18 = "http://%s:%s/getWorkCount" % (ip, port)
 # test_service(url18, data={"name": "汪丽浩"})
