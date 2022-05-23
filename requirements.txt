@@ -20,3 +20,4 @@ PyYAML
 xmindparser
 requests
 pathos
+tensorboard

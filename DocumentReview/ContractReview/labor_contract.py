@@ -12,14 +12,25 @@ from pprint import pprint
 
 text_list = read_docx_file(docx_path="data/DocData/LaborContract/劳动合同.docx")
 
-risk_point_dict = {
-    "合同名称": "",
-    "身份信息": {"甲方": {}, "乙方": {}},
-    "具体条款": {},
-}
+risk_point_dict = OrderedDict()
+risk_point_dict["合同名称"]="",
+risk_point_dict["身份信息"]={"甲方": {}, "乙方": {}}
+risk_point_dict["具体条款"]=OrderedDict()
+
+
 item_flag = False
 jia_flag = True
 break_flag = False
+
+
+def regular_listr(patten, _text_list):
+    res = []
+    for _text in _text_list:
+        try:
+            res.append(re.search(patten, _text).group())
+        except:
+            pass
+    return res
 
 item_content = OrderedDict()
 
@@ -72,8 +83,74 @@ for index, text in enumerate(text_list):
                 item_content[list(item_content.keys())[-1]].append(text)
 
 # pprint(item_content)
-for key,value in item_content.items():
-    print(key)
-    print(value)
+# item_content = {k: "".join(v) for k, v in item_content.items() if len(v) > 0}
+
+for key, value in item_content.items():
+    title = key.replace(re.findall(r"第.*条", key[:10])[0], "")
+    # print(title)
+    # print(value)
+    if len(re.findall(r"期限", title)) > 0:
+        value_str = "".join(value)
+        if len(re.findall("无固定期限", value_str)) > 0:
+            risk_point_dict["具体条款"]["合同时间"] = "无固定期限"
+
+        else:
+            risk_point_dict["具体条款"]["合同时间"] = {}
+            htqx = re.search("(合同期|合同)[从自为]\d*年\d*月\d*日(起至|到)\d*年\d*月\d*日", value_str)
+            risk_point_dict["具体条款"]["合同时间"]["合同期限具体时间"] = htqx.group()
+
+            htsc_ori = re.search("(合同期|合同).*共\d*[年月日]", value_str)
+            htsc = re.search("共\d*[年月日]", htsc_ori.group())
+            risk_point_dict["具体条款"]["合同时间"]["合同时长"] = htsc.group()
+
+            syqx = re.search("(试用期|试用)[从自为]\d*年\d*月\d*日(起至|到)\d*年\d*月\d*日", value_str)
+            risk_point_dict["具体条款"]["合同时间"]["试用期具体时间"] = htqx.group()
+
+            sysc_ori = re.search("(试用期|试用).*共\d*个?[年月日]", value_str)
+            sysc = re.search("共\d*个?[年月日]", sysc_ori.group())
+            risk_point_dict["具体条款"]["合同时间"]["试用期时长"] = sysc.group()
+
+    if len(re.findall('工作内容', title)) > 0:
+        risk_point_dict["具体条款"]["工作内容"] = {}
+
+        # print(value_str)
+        risk_point_dict["具体条款"]["工作内容"]["从事工作"] = regular_listr("从事.*?(岗位|职位|工作)", value)[0]
+
+        if len(regular_listr("(同意|愿意).*(调岗|更换.*岗位|调换.*岗位|调配)", value)) > 0:
+            risk_point_dict["具体条款"]["工作内容"]["调换岗位"] = True
+        if len(regular_listr("(没有|未).*(同意|愿意).*(不得|不能).*(调岗|更换.*岗位|调换.*岗位)", value)) > 0:
+            risk_point_dict["具体条款"]["工作内容"]["调换岗位"] = False
+
+    if len(re.findall('工作地点', title)) > 0:
+        risk_point_dict["具体条款"]["工作地点"] = {}
+
+        risk_point_dict["具体条款"]["工作地点"]["工作地"] = regular_listr("(工作地点|工作地|上班地)在?.{2,5}[，。；,;.]", value)[0]
+
+        if len(regular_listr("(同意|愿意).*(更换|调换).*工作地", value)) > 0:
+            risk_point_dict["具体条款"]["工作地点"]["调换工作地点"] = True
+        if len(regular_listr("(没有|未).*(同意|愿意).*(不得|不能).*(更换|调换).*工作地", value)) > 0:
+            risk_point_dict["具体条款"]["工作地点"]["调换工作地点"] = False
+
+    if len(re.findall("劳动保护",title)) > 0:
+        # risk_point_dict["具体条款"]["劳动保护"] = {}
+
+        if len(regular_listr("劳动保护|安全防护措施|劳动安全卫生制度", value)) > 0:
+            risk_point_dict["具体条款"]["劳动保护"] = True
+
+    if len(re.findall("劳动条件",title)) > 0:
+        # risk_point_dict["具体条款"]["劳动条件"] = {}
+        if len(regular_listr("劳动条件|卫生条件", value)) > 0:
+            risk_point_dict["具体条款"]["劳动条件"] = True
+
+    if len(re.findall("职业危害防护",title)) > 0:
+        risk_point_dict["具体条款"]["职业危害防护"] = True
+
+    if len(re.findall("(工作时间|工时制度)",title)) > 0:
+        if len(regular_listr("(标准工作制|定时工作制)", value)) > 0:
+            risk_point_dict["具体条款"]["工作时间"] = "标准工作制"
+
+    if len(re.findall("劳动报酬",title)) > 0:
+        pass
+
 
 pprint(risk_point_dict)
