@@ -74,16 +74,16 @@ def get_base_data_dict(anyou_name, ):
         select f2,f13,f40,f44 from labels_marking_records.case_list_original_hetong 
         WHERE f12="民间借贷纠纷" AND f10="判决" AND (LENGTH(f40)>1) AND (f50 is NULL) limit 1;
         '''
-    elif anyou_type == "婚姻继承":
+    elif anyou_name == "婚姻继承_离婚":
         sql_con = '''
-        select f2,f13,f41,f44 from labels_marking_records.case_list_original_hunyinjiating 
-        WHERE f12="{}" AND f10="判决" AND (LENGTH(f40)>1) AND (f50 is NULL) limit 1;
-        '''.format(anyou_x)
+        select f2,f13,f40,f44 from labels_marking_records.case_list_original_hunyinjiating 
+        WHERE f12="离婚纠纷" AND f10="判决" AND (LENGTH(f40)>1) AND (f50 is NULL) limit 1;
+        '''
     else:
         raise Exception("暂时不支持该案由")
 
     data = pd.read_sql(sql_con, con=connect_big_data)
-    # print(data)
+    print(data)
     base_data_dict = {
         "case_id": data["f2"].values[0],
         "data": [
@@ -92,9 +92,14 @@ def get_base_data_dict(anyou_name, ):
             {"name": "本院认为", "content": data["f13"].values[0]}]
     }
 
-    sql_update_con = '''
-        UPDATE labels_marking_records.case_list_original_hetong SET f50='{}' WHERE f2='{}';
-    '''.format(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), data["f2"].values[0])
+    if anyou_name == "借贷纠纷_民间借贷":
+        sql_update_con = '''
+            UPDATE labels_marking_records.case_list_original_hetong SET f50='{}' WHERE f2='{}';
+        '''.format(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), data["f2"].values[0])
+    if anyou_name == "婚姻继承_离婚":
+        sql_update_con = '''
+            UPDATE labels_marking_records.case_list_original_hunyinjiating SET f50='{}' WHERE f2='{}';
+        '''.format(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), data["f2"].values[0])
 
     # print(data)
     try:
@@ -285,4 +290,4 @@ def insert_data_to_mysql(anyou_name, source, labelingperson, data):
 #                      source=test_data["source"],
 #                      data=test_data["insert_data"])
 if __name__ == '__main__':
-    pprint(get_day_work_count('汪丽浩'))
+    get_base_data_dict('婚姻继承_离婚')
