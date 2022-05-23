@@ -11,7 +11,7 @@ from pprint import pprint
 import traceback
 import logging
 import logging.handlers
-
+from loguru import logger
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from DataCentric.AnnotationTool.CaseFeatureTool.entity_annotation import *
@@ -145,6 +145,7 @@ def do_insert_annotation_data():
             return json.dumps({"error_msg": "data is None", "status": 1}, ensure_ascii=False)"""
 @app.route('/getSecondCheck',methods=['post'])
 def is_second_check():
+    # 二次审核
     in_json = request.get_data()
     if in_json:
         in_dict = json.loads(in_json.decode("utf-8"))
@@ -160,6 +161,7 @@ def is_second_check():
 #
 @app.route('/getWorkCount',methods=['post'])
 def get_work_count():
+    # 获取当日工作量
     data_json = request.get_data()
     if data_json:
         data_dict = json.loads(data_json.decode('utf-8'))
@@ -187,5 +189,52 @@ def get_source():
                                {"content": source_content[0].get('f13'), "error_msg": "", "status": 0}, ensure_ascii=False)
         else:
             return json.dumps({"error_msg": "have no data", "status": 1}, ensure_ascii=False, cls=DateEncoder)
+
+
+@app.route('/loginCheck',methods=['post'])
+def login_check():
+    # 登录 校验
+    data_json = request.get_data()
+    if not data_json:
+        logging.error(f"没有传入账号密码")
+        return json.dumps({"error_msg": "no username or password", "status": 1}, ensure_ascii=False, cls=DateEncoder)
+    try:
+        data_dict = json.loads(data_json.decode('utf-8'))
+    except:
+        return json.dumps({"error_msg": "data is not dictionary", "status": 1}, ensure_ascii=False, cls=DateEncoder)
+    print(f"type:{type(data_json)},data:{data_json}")
+    username = data_dict.get("username")
+    password = data_dict.get("password")
+    print(f"username:{username},password:{password}")
+    if check_username(username):
+        select_password = get_login_password(username)
+        if select_password == password:
+            return json.dumps(
+                {"content": "login success", "error_msg": "", "status": 0}, ensure_ascii=False)
+        else:
+            return json.dumps({"error_msg": "Password error", "status": 1}, ensure_ascii=False, cls=DateEncoder)
+    else:
+        return json.dumps({"error_msg": "There is no such user", "status": 1}, ensure_ascii=False, cls=DateEncoder)
+
+@app.route('/registerUser',methods=['post'])
+def register_user():
+    # 注册用户
+    data_json = request.get_data()
+    if not data_json:
+        logging.error(f"没有传入账号密码")
+        return json.dumps({"error_msg": "no username or password", "status": 1}, ensure_ascii=False, cls=DateEncoder)
+    try:
+        data_dict = json.loads(data_json.decode('utf-8'))
+    except:
+        return json.dumps({"error_msg": "data is not dictionary", "status": 1}, ensure_ascii=False, cls=DateEncoder)
+    print(f"type:{type(data_json)},data:{data_json}")
+    username = data_dict.get("username")
+    password = data_dict.get("password")
+    if check_username(username):
+        return json.dumps({"error_msg": "this user name is in use,repeat of user name", "status": 1}, ensure_ascii=False, cls=DateEncoder)
+    if save_username_password(username=username,password=password):
+        return json.dumps(
+            {"content": "register success", "error_msg": "", "status": 0}, ensure_ascii=False)
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=6021, debug=False)  # , use_reloader=False)
