@@ -21,7 +21,7 @@ pd.set_option('display.max_columns', None)
 
 __all__ = ['get_anyou_list', 'get_case_feature_dict', 'get_base_data_dict', 'get_base_annotation_dict',
            'insert_data_to_mysql','get_second_check','get_day_work_count','get_source_content',
-           'check_username','get_login_password','save_username_password']
+           'check_username','get_login_password','save_username_password','save_second_check_proson']
 
 connect_big_data = pymysql.connect(host='172.19.82.227',
                                    user='root', password='Nblh@2022',
@@ -357,5 +357,20 @@ def save_username_password(username,password):
         connect_big_data.rollback()
         raise RuntimeError("查询数据库时间失败")
 
-if __name__ == '__main__':
-    print(check_username('b'))
+def save_second_check_proson(id,checkperson):
+    cursor = connect_labels_marking_records.cursor()
+    sql_update_con = f'''
+                UPDATE labels_law_entity_feature SET checkperson='{checkperson}' WHERE id='{id}';
+            '''
+    try:
+        cursor.execute(sql_update_con)
+        connect_labels_marking_records.commit()
+        cursor.close()
+        connect_labels_marking_records.close()
+    except:
+        print(traceback.format_exc())
+        connect_labels_marking_records.rollback()
+        raise RuntimeError("更新数据库时间失败")
+
+# if __name__ == '__main__':
+#     save_second_check_proson("1651891677891",None)

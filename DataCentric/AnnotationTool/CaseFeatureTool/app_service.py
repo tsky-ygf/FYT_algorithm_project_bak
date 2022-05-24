@@ -158,7 +158,19 @@ def is_second_check():
                 {"data_list": second_check_data_dict, "error_msg": "", "status": 0}, ensure_ascii=False,cls=DateEncoder)
         else:
             return json.dumps({"error_msg": "no check", "status": 1}, ensure_ascii=False,cls=DateEncoder)
-#
+
+@app.route('/getSecondCheckTrue',methods=['post'])
+def get_true_check():
+    # 二次审核 确认
+    in_json = request.get_data()
+    if in_json:
+        in_dict = json.loads(in_json.decode("utf-8"))
+        checkperson = in_dict['checkperson']
+        id = in_dict['id']
+        save_second_check_proson(id,checkperson)
+        return json.dumps(
+            {"data_list": "update success", "error_msg": "", "status": 0}, ensure_ascii=False,cls=DateEncoder)
+
 @app.route('/getWorkCount',methods=['post'])
 def get_work_count():
     # 获取当日工作量
