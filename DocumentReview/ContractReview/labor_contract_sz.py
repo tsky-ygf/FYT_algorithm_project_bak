@@ -763,7 +763,7 @@ def main(docx_path,loc="浙江省"):
 
 
 if __name__ == '__main__':
-    doc_path = "data/DocData/LaborContract/劳动合同.docx"
+    doc_path = "data/DocData/LaborContract/劳动合同_hl.docx"
     # 合同处理
     loc = "广东省"
     main(doc_path, loc=loc)
