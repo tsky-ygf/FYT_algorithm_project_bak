@@ -9,13 +9,14 @@ from DocumentReview.ParseFile.parse_word import read_docx_file
 from pprint import pprint
 from paddlenlp import Taskflow
 
-text_list = read_docx_file(docx_path="data/DocData/LaborContract/劳动合同.docx")
-text = "\n".join(text_list)
+# text_list = read_docx_file(docx_path="data/DocData/LaborContract/劳动合同.docx")
+# text = "\n".join(text_list)
 # print(text)
 
-# text = "乙方的工作地点在杭州。随着甲方的经营范围的扩大,甲方根据生产经营需要，可委派乙方至其他城市工作，乙方愿意服从甲方的管理和安排。"
+text = "借条\n为购买房产，今收到好友张三（身份证号）以转账方式出借的人民币壹万元整（￥10000.00元），借期拾个月，月利率1%，于××××年××月××日到期时还本付息。、" \
+       "逾期未还，则按当期一年期贷款市场报价利率（LPR）的4倍计付逾期利息。"
 
-schema = ['工资','试用期工资']
+schema = ['标题' ,'借款人', '借款金额', '借款期限', '借款利率', '还款方式', '还款日期', '逾期利率', '逾期费用']
 ie = Taskflow('information_extraction', schema=schema, device_id=1)
 pprint(ie(text))
 
