@@ -18,6 +18,9 @@ handler = logging.handlers.TimedRotatingFileHandler('./service.log', when='D', i
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
+# handler2 = logging.StreamHandler()  # StreamHandler是输出到控制台
+# logger.addHandler(handler2)
+
 # 接口的格式
 # {“question_asked”: { < 问题和候选答案字符串串 >: < ⽤用户选择的答案 >},
 # “question_next”: ‘ < 问题和候选答案字符串串 >’,
@@ -71,4 +74,4 @@ def hello_world():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5080, debug=True)  # , use_reloader=False)
+    app.run(host="0.0.0.0", port=5090, debug=True)  # , use_reloader=False)

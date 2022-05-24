@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from asyncio.log import logger
 import os
 import sys
 import logging
@@ -14,9 +15,12 @@ from data_util import text_underline
 from bert_predict import predict as predict
 
 
+logging.basicConfig(level=logging.DEBUG)
+
 match_factor_group = {
     '劳动社保': [['养老保险', '医疗保险', '失业保险', '生育保险']],
-    '借贷纠纷': [['金融借贷', '个人之间借贷','企业之间借贷','个人与企业之间借贷']]
+    '借贷纠纷': [['金融借贷', '个人之间借贷','企业之间借贷','个人与企业之间借贷']],
+    # "租赁合同":[[]],
 }
 
 
@@ -33,6 +37,15 @@ def predict_fn(problem, claim_list, fact, question_answers, factor_sentence_list
     """
     #####################################################################################################################
 
+    # 原来的租赁纠纷改成了租赁合同
+    if problem == "租赁纠纷":
+        problem = "租赁合同"
+    if problem == "买卖纠纷":
+        problem = "买卖合同"
+
+
+    claim_list=['减少租金或者不支付租金' if c =='减少租金或则不支付租金' else c for c in claim_list]
+
     # 1. 初始化诉求结果
     logging.info('5.1. initial suqiu result')
     logic_problem_suqius = []
@@ -41,23 +54,12 @@ def predict_fn(problem, claim_list, fact, question_answers, factor_sentence_list
             continue
         logic_problem_suqius += user_ps2logic_ps[problem+'_'+suqiu]
 
-    # Kiwi Debug
-    logging.info('logic_problem_suqius:')
-    logging.info(str(logic_problem_suqius))
-    print('logic_problem_suqius:')
-    print(logic_problem_suqius)
-
     prob_problem_suqius = []
     for suqiu in user_ps[problem]:
         if suqiu not in claim_list:
             continue
         prob_problem_suqius += user_ps2prob_ps[problem+'_'+suqiu]
 
-    # Kiwi Debug
-    logging.info('prob_problem_suqius:')
-    logging.info(str(prob_problem_suqius))
-    print('prob_problem_suqius:')
-    print(prob_problem_suqius)
 
     # 2. 诉求选择对应的默认特征
     logging.info('5.2. add logic suqiu factor')
@@ -66,12 +68,6 @@ def predict_fn(problem, claim_list, fact, question_answers, factor_sentence_list
         if ps in logic_ps_factor:
             for f, v in logic_ps_factor[ps].items(): # 诉求配置中的logic_ps_factor
                 suqiu_factor[f] = v
-
-    # Kiwi Debug
-    logging.info('suqiu_factor:')
-    logging.info(str(suqiu_factor))
-    print('suqiu_factor:')
-    print(suqiu_factor)
 
     # 3. 特征匹配
     logging.info('5.3. factor match')
@@ -97,12 +93,6 @@ def predict_fn(problem, claim_list, fact, question_answers, factor_sentence_list
                         for f in factor_group:
                             if f not in factor_sentence_list:
                                 factor_sentence_list[f] = [sentence_matched, -1]
-
-    # Kiwi Debug
-    logging.info('factor_sentence_list:')
-    logging.info(str(factor_sentence_list))
-    print('factor_sentence_list:')
-    print(factor_sentence_list)
 
     # 4. 设置树的状态, 并提取下一个问题
     logging.info('5.4. create tree and get next question')
@@ -151,17 +141,7 @@ def predict_fn(problem, claim_list, fact, question_answers, factor_sentence_list
                     if factor in factor_sentence_list:
                         continue
                     factor_sentence_list[factor] = [tree.factor_sentence[factor], flag]
-
-    # Kiwi Debug
-    logging.info('suqiu_tree:')
-    logging.info(str(suqiu_tree))
-    print('suqiu_tree')
-    print(suqiu_tree)
-    # Kiwi Debug
-    logging.info('suqiu_result:')
-    logging.info(str(suqiu_result))
-    print('suqiu_result:')
-    print(suqiu_result)
+    # logger.debug(factor_sentence_list)
 
     # 5. 如果没有问题了，那么需要出评估报告
     logging.info('5.5. return result dict')
@@ -259,44 +239,62 @@ def reason_probability_correct(suqiu, inputs, support, reason, probability, debu
 
 
 if __name__=='__main__':
-    claim_list=["离婚", "财产分割"] # "离婚",
-    fact="男女双方自愿/不自愿（不自愿的原因）登记结婚，婚后育有x子/女，现 x岁， 因xx原因离婚。婚姻/同居期间，有存款x元、房屋x处、车子x辆、债务x元。（双方是否对子女、财产、债务等达成协议或已有法院判决，协议或判决内容，双方对协议或判决的履行情况）。"
-    problem="婚姻家庭"
+    # claim_list=["离婚", "财产分割"] # "离婚",
+    # fact="男女双方自愿/不自愿（不自愿的原因）登记结婚，婚后育有x子/女，现 x岁， 因xx原因离婚。婚姻/同居期间，有存款x元、房屋x处、车子x辆、债务x元。（双方是否对子女、财产、债务等达成协议或已有法院判决，协议或判决内容，双方对协议或判决的履行情况）。"
+    # problem="婚姻家庭"
+    # factor_sentence_list= []
+    # question_answers={}
+    # result_0 = predict_fn(problem, claim_list, fact, question_answers, factor_sentence_list)
+    # print("###第0次调用输入。problem:", problem, ";claim_list:", claim_list, ";fact:", fact, ";question_answers:", question_answers, ";factor_sentence_list:", factor_sentence_list)
+    # print("###第0次调用结果:", result_0)
+
+    # # # 第一次调用
+    # problem = '婚姻家庭'
+    # claim_list = ["离婚"]
+    # fact="男女双方自愿/不自愿（不自愿的原因）登记结婚，婚后育有x子/女，现 x岁， 因xx原因离婚。婚姻/同居期间，有存款x元、房屋x处、车子x辆、债务x元。（双方是否对子女、财产、债务等达成协议或已有法院判决，协议或判决内容，双方对协议或判决的履行情况）。"
+    # question_answers = {}  # {'房子登记在谁的名下？:您;对方;双方;其他人':'对方','由谁付的？:您;对方;双方;您父母;双方父母;对方父母':'对方父母'}
+    # factor_sentence_list = []
+    # result_1 = predict_fn(problem, claim_list, fact, question_answers, factor_sentence_list)
+    # print("###第一次调用输入。problem:", problem, ";claim_list:", claim_list, ";fact:", fact, ";question_answers:", question_answers, ";factor_sentence_list:", factor_sentence_list)
+    # print("###第一次调用结果:", result_1)
+    # print("---------------------------------------------------------------------------")
+
+    # # 第二次调用
+    # problem = '婚姻家庭'
+    # claim_list = ['房产分割']
+    # fact = '婚后男的方父母出资首得到付，夫妻名义贷款还贷，房产证只写男方名，离婚后财产如何分配'
+    # question_answers = {'由谁付的首付？:您;对方;双方;您父母;双方父母;对方父母': '对方父母'}
+    # factor_sentence_list = [['婚后男的方父母出资首得到付', '婚后购买', 1, ''], ['房产证只写男方名', '有房产证', 1, ''], ['房产证只写男方名', '登记在对方名下', 1, ''], ['夫妻名义贷款还贷', '首付', 1, '']]
+    # result_2 = predict_fn(problem, claim_list, fact, question_answers, factor_sentence_list)
+    # print("####第二次调用输入。problem:", problem, ";claim_list:", claim_list, ";fact:", fact, ";question_answers:", question_answers, ";factor_sentence_list:", factor_sentence_list)
+    # print("###第二次调用结果:", result_2)
+    # print("---------------------------------------------------------------------------")
+
+    # 第三次调用
+    # problem = '婚姻家庭'
+    # claim_list = ['房产分割']
+    # fact = '婚后男的方父母出资首得到付，夫妻名义贷款还贷，房产证只写男方名，离婚后财产如何分配'
+    # question_answers = {'由谁付的首付？:您;对方;双方;您父母;双方父母;对方父母': '对方父母','房子登记在谁的名下？:男方;女方;双方;其他人':'男方'}
+    # factor_sentence_list = [['婚后男的方父母出资首得到付', '婚后购买', 1, ''], ['房产证只写男方名', '有房产证', 1, ''], ['房产证只写男方名', '登记在对方名下', 1, ''], ['夫妻名义贷款还贷', '首付', 1, '']]
+    # result_2 = predict_fn(problem, claim_list, fact, question_answers, factor_sentence_list)
+    # print("####第三次调用输入。problem:", problem, ";claim_list:", claim_list, ";fact:", fact, ";question_answers:", question_answers, ";factor_sentence_list:", factor_sentence_list)
+    # print("###第三次调用结果:", result_2)
+    # print("---------------------------------------------------------------------------")
+
+    # claim_list=["减少租金或者不支付租金"] # "离婚",
+    # fact="减少租金可以吗"
+    # problem="租赁纠纷"
+    # factor_sentence_list= []
+    # question_answers={}
+    # result_0 = predict_fn(problem, claim_list, fact, question_answers, factor_sentence_list)
+    # print("###第0次调用输入。problem:", problem, ";claim_list:", claim_list, ";fact:", fact, ";question_answers:", question_answers, ";factor_sentence_list:", factor_sentence_list)
+    # print("###第0次调用结果:", result_0)
+
+    claim_list=["减少租金或者不支付租金"] # "离婚",
+    fact="11111111"
+    problem="租赁合同"
     factor_sentence_list= []
     question_answers={}
     result_0 = predict_fn(problem, claim_list, fact, question_answers, factor_sentence_list)
     print("###第0次调用输入。problem:", problem, ";claim_list:", claim_list, ";fact:", fact, ";question_answers:", question_answers, ";factor_sentence_list:", factor_sentence_list)
     print("###第0次调用结果:", result_0)
-
-    # 第一次调用
-    problem = '婚姻家庭'
-    claim_list = ['房产分割']
-    fact = '婚后男的方父母出资首得到付，夫妻名义贷款还贷，房产证只写男方名，离婚后财产如何分配'
-    question_answers = {}  # {'房子登记在谁的名下？:您;对方;双方;其他人':'对方','由谁付的？:您;对方;双方;您父母;双方父母;对方父母':'对方父母'}
-    factor_sentence_list = []
-    result_1 = predict_fn(problem, claim_list, fact, question_answers, factor_sentence_list)
-    print("###第一次调用输入。problem:", problem, ";claim_list:", claim_list, ";fact:", fact, ";question_answers:", question_answers, ";factor_sentence_list:", factor_sentence_list)
-    print("###第一次调用结果:", result_1)
-    print("---------------------------------------------------------------------------")
-
-    # 第二次调用
-    problem = '婚姻家庭'
-    claim_list = ['房产分割']
-    fact = '婚后男的方父母出资首得到付，夫妻名义贷款还贷，房产证只写男方名，离婚后财产如何分配'
-    question_answers = {'由谁付的首付？:您;对方;双方;您父母;双方父母;对方父母': '对方父母'}
-    factor_sentence_list = [['婚后男的方父母出资首得到付', '婚后购买', 1, ''], ['房产证只写男方名', '有房产证', 1, ''], ['房产证只写男方名', '登记在对方名下', 1, ''], ['夫妻名义贷款还贷', '首付', 1, '']]
-    result_2 = predict_fn(problem, claim_list, fact, question_answers, factor_sentence_list)
-    print("####第二次调用输入。problem:", problem, ";claim_list:", claim_list, ";fact:", fact, ";question_answers:", question_answers, ";factor_sentence_list:", factor_sentence_list)
-    print("###第二次调用结果:", result_2)
-    print("---------------------------------------------------------------------------")
-
-    # 第三次调用
-    problem = '婚姻家庭'
-    claim_list = ['房产分割']
-    fact = '婚后男的方父母出资首得到付，夫妻名义贷款还贷，房产证只写男方名，离婚后财产如何分配'
-    question_answers = {'由谁付的首付？:您;对方;双方;您父母;双方父母;对方父母': '对方父母','房子登记在谁的名下？:男方;女方;双方;其他人':'男方'}
-    factor_sentence_list = [['婚后男的方父母出资首得到付', '婚后购买', 1, ''], ['房产证只写男方名', '有房产证', 1, ''], ['房产证只写男方名', '登记在对方名下', 1, ''], ['夫妻名义贷款还贷', '首付', 1, '']]
-    result_2 = predict_fn(problem, claim_list, fact, question_answers, factor_sentence_list)
-    print("####第三次调用输入。problem:", problem, ";claim_list:", claim_list, ";fact:", fact, ";question_answers:", question_answers, ";factor_sentence_list:", factor_sentence_list)
-    print("###第三次调用结果:", result_2)
-    print("---------------------------------------------------------------------------")

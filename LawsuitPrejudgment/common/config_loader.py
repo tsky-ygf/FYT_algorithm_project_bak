@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+from asyncio.log import logger
+from turtle import st
+from regex import sub
 from xmindparser import xmind_to_dict
 import pandas as pd
 import re
@@ -275,7 +278,11 @@ def get_factor_base_keyword(sentences):
             for st in re.findall('\[([^\[\]]*)\]', sub_sentence):
                 if st=='没有':
                     continue
-                keywords.append(sentence_keyword_dict[st])
+                if st in sentence_keyword_dict:
+                    keywords.append(sentence_keyword_dict[st])
+                else:
+                    logger.warning(st)
+                    # keywords.append("("+st+")")
         keyword_list.append(keywords)
     return keyword_list
 
@@ -287,7 +294,11 @@ def get_factor_positive_keyword(sentences):
         for sub_sentence in re.findall('【([^【】]*)】', sentence):
             keyword = []
             for sub_st in re.findall('\[([^\[\]]*)\]', sub_sentence):
-                keyword.append(sentence_keyword_dict[sub_st].replace('.*', '[^。；，：,;:？！!?\s]*'))
+                if sub_st in sentence_keyword_dict:
+                    keyword.append(sentence_keyword_dict[sub_st].replace('.*', '[^。；，：,;:？！!?\s]*'))
+                else:
+                    logger.warning(sub_st)
+                    # keyword.append('(' + sub_st + ')')
             keywords.append('(' + '[^。；，：,;:？！!?\s]*'.join(keyword) + ')')
 
         for k in permutations(keywords):
@@ -303,13 +314,13 @@ def get_factor_negative_keyword(sentences):
         for i in range(len(sentence)):
             if '[没有]' not in sentence[i]:
                 for sub_st in re.findall('\[([^\[\]]*)\]', sentence[i]):
-                    if sentence_has_neg_dict[sub_st]==1:
+                    if sub_st in sentence_has_neg_dict and sentence_has_neg_dict[sub_st]==1:
                         temp = sentence.copy()
                         temp[i] = temp[i].replace('['+sub_st+']', '[没有]['+sub_st+']')
                         negative_sentence.append(temp)
             elif '[没有]' in sentence[i]:
                 for sub_st in re.findall('\[([^\[\]]*)\]', sentence[i]):
-                    if sentence_has_neg_dict[sub_st]==1:
+                    if sub_st in sentence_has_neg_dict and sentence_has_neg_dict[sub_st]==1:
                         temp = sentence.copy()
                         temp[i] = temp[i].replace('[没有]', '')
                         negative_sentence.append(temp)
@@ -321,7 +332,11 @@ def get_factor_negative_keyword(sentences):
             for sub_sentence in sentence:
                 k = []
                 for sub_st in re.findall('\[([^\[\]]*)\]', sub_sentence):
-                    k.append(sentence_keyword_dict[sub_st].replace('.*', '[^。；，：,;:？！!?\s]*'))
+                    if sub_st in sentence_keyword_dict:
+                        k.append(sentence_keyword_dict[sub_st].replace('.*', '[^。；，：,;:？！!?\s]*'))
+                    else:
+                        logger.warning(sub_st)
+                        # k.append('('+sub_st+')')
                 if len(k) > 0:
                     keyword.append('(' + '[^。；，：,;:？！!?\s]*'.join(k) + ')')
             if len(keyword) > 0:

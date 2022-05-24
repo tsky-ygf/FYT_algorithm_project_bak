@@ -210,7 +210,15 @@ def match_sentence_by_keyword(sentence, key_word):
     if sentence_keyword_dict['没有'] not in key_word:
         return result, 1
     else:
-        index = key_word.index('(没|未|不|非|无)[^。；，：,;:？！!?\s]*') + len('(没|未|不|非|无)[^。；，：,;:？！!?\s]*')
+        # index = key_word.index('(没|未|不|非|无)[^。；，：,;:？！!?\s]*') + len('(没|未|不|非|无)[^。；，：,;:？！!?\s]*')
+        # index = key_word.index('(没有|没|未|不|非|无|未经|怠于)[^。；，：,;:？！!?\\s]*') + len('(没有|没|未|不|非|无|未经|怠于)[^。；，：,;:？！!?\\s]*')
+        try:
+            index = key_word.index('(没有|没|未|不|非|无|未经|怠于)[^。；，：,;:？！!?\\s]*') + len('(没有|没|未|不|非|无|未经|怠于)[^。；，：,;:？！!?\\s]*')
+        except:
+            logger.error(traceback.format_exc())
+            logger.warning(key_word)
+            index = key_word.index('(没有|没|未|不|非|无|未经|怠于)')
+            
         tag = 1
         pattern = key_word[index]
         while tag>0:

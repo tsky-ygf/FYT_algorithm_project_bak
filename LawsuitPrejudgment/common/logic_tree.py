@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from config_loader import *
 from data_util import text_underline
-
+import logging
 
 class Node(object):
     def __init__(self, index, name, type, question=None, answer=None):
@@ -28,6 +28,11 @@ class Node(object):
 
 class LogicTree(object):
     def __init__(self, problem, suqiu, debug=True):
+        # Kiwi Debug
+        logging.info('LogicTree Creation:')
+        logging.info('problem:' + str(problem))
+        logging.info('suqiu:' + str(suqiu))
+
         # 读取配置文件
         self.problem = problem
         self.suqiu = suqiu
@@ -464,11 +469,14 @@ class LogicTree(object):
         """
         获取下一个问题。
         过滤掉所有有特征为-1的路径。如果单个prediction的所有路径均为-1，则返回不满足前提
-        过滤掉所有特征均为0的路径。对于未匹配到信息的路径，认为和用户情形无关，不去提问
+        过滤掉所有特征均为0的路径。对于未匹配到信息的路径，认为和用户情形无关，不去提问 TODO:过滤所有特征均为0的路径，这种做法，认为是有问题的。
         计算剩余路径中每个特征的最少问答次数和总共出现次数，优先问问答次数最少的，问答次数相同问总共出现次数最高的
         如果没有剩余路径，则表示用户情形不满足支持条件，返回不支持结果
         :return: [问题, 结果]
         """
+        # KIWI
+        print("已有的特征：")
+        print(self.factor_flag)
         # 过滤不满足前提的路径
         precondition_path, paths = self._filter_path_by_precondition(self.paths)
 
@@ -494,6 +502,7 @@ class LogicTree(object):
                     if node.question is None:
                         if_pass = True
                         break
+                    # if_ask = True
                     temp_unmatch.append(node)
             if if_pass:
                 continue
@@ -526,43 +535,61 @@ class LogicTree(object):
         # 大前提不满足返回结果
         if len(paths) == 0 and len(precondition_path) > 0:
             self.logic_result = self.get_precondition_result(precondition_path[0])
+            # KIWI
+            print("get_next_question: 大前提不满足返回结果")
             return None
 
         # 有不支持路径连通返回结果
         if unsupport_path is not None:
             self.logic_result = self.get_support_result(unsupport_path, self.debug)
+            # KIWI
+            print("get_next_question: 有不支持路径连通返回结果")
             return None
-
-        # 提问不支持路径的问题
-        if unsupport_question is not None:
-            return unsupport_question
 
         # 有路径连通返回结果
         if support_path is not None:
             self.logic_result = self.get_support_result(support_path, self.debug)
             self.support_proof = self.get_support_proof(support_path)
+            # KIWI
+            print("get_next_question: 有路径连通返回结果")
             return None
+
+        # 提问不支持路径的问题
+        if unsupport_question is not None:
+            # KIWI
+            print("get_next_question: 提问不支持路径的问题")
+            return unsupport_question
 
         # 提问有父特征的问题
         if father_question is not None:
+            # KIWI
+            print("get_next_question: 提问有父特征的问题")
             return father_question
 
         # 有问题要提问，则按照最短路径和出现次数进行排序提问
         if len(questions) > 0:
             question = sorted(questions.items(), key=lambda x: x[1][0] * 50000 - x[1][1] * 5000 - x[1][2]/100)[0][0]
+            # KIWI
+            print("get_next_question: 有问题要提问，则按照最短路径和出现次数进行排序提问")
             return question
 
         # 未匹配到特征提问候选问题
         if not self.match_flag:
+            # KIWI
+            print("get_next_question: 未匹配到特征提问候选问题")
             return self.candidate_question
 
         # 没有问题要提问，判断是否有前提未满足
         if len(precondition_path) > 0:
             self.logic_result = self.get_precondition_result(precondition_path[0])
+            # KIWI
+            print("get_next_question: 没有问题要提问，判断是否有前提未满足")
             return None
 
         # 根据上一个问题获取结果
         self.logic_result = self.get_unsupport_result(paths)
+        # KIWI
+        print("get_next_question: 根据上一个问题获取结果")
         return None
 
     def get_precondition_result(self, path):
@@ -683,5 +710,5 @@ class LogicTree(object):
 
 
 if __name__=='__main__':
-    tree = LogicTree('交通事故', '赔偿主体')
+    tree = LogicTree('借贷纠纷', '确认合同有效')
     tree.export_paths()

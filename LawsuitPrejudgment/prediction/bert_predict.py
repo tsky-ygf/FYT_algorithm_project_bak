@@ -271,6 +271,4 @@ def predict(problem, suqiu, inputs):
 
 
 if __name__ == "__main__":
-    print(predict('婚姻继承', '离婚', '分居两年办，想离婚'))#0.30897593
-    # print(predict('婚姻继承', '离婚', '经常被家暴，对方是个人渣，想离婚'))#0.07145668
-    # print(predict('婚姻继承', '离婚', '婚姻和睦，闹别扭了，想离婚。'))#0.04396314
+    print(predict('婚姻继承', '离婚', '分居两年办，想离婚'))

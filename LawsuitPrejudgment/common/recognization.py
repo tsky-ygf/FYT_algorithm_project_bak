@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from cmath import log
+import logging
 import numpy as np
 import traceback
 import multiprocessing
@@ -86,7 +88,7 @@ def match_sentence_by_keyword(sentence, key_word):
     # if len(re.findall('(约定|要求|认为|应当|应该|如果).*' + key_word, sentence)) > 0:
     #     return 0
     flag_positive = len(re.findall(key_word, sentence)) > 0
-    if not flag_positive:
+    if not flag_positive or key_word == "()":
         return None, 0
 
     # 2.匹配负向
@@ -101,7 +103,14 @@ def match_sentence_by_keyword(sentence, key_word):
     if sentence_keyword_dict['没有'] not in key_word:
         return result, 1
     else:
-        index = key_word.index('(没|未|不|非|无)[^。；，：,;:？！!?\s]*') + len('(没|未|不|非|无)[^。；，：,;:？！!?\s]*')
+        # index = key_word.index('(没|未|不|非|无)[^。；，：,;:？！!?\s]*') + len('(没|未|不|非|无)[^。；，：,;:？！!?\s]*')
+        try:
+            index = key_word.index('(没有|没|未|不|非|无|未经|怠于)[^。；，：,;:？！!?\\s]*') + len('(没有|没|未|不|非|无|未经|怠于)[^。；，：,;:？！!?\\s]*')
+        except:
+            logger.error(traceback.format_exc())
+            logger.warning(key_word)
+            index = key_word.index('(没有|没|未|不|非|无|未经|怠于)')
+
         tag = 1
         pattern = key_word[index]
         while tag>0:
