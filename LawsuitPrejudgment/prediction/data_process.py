@@ -224,7 +224,7 @@ def wenshu_information_generate(target_file, start_index, num, problem):
 
 def wenshu_information_multi_processing_generate(problem_list, data_path, process_num=20, number_example=10000):
     if not os.path.exists(data_path):
-        os.mkdir(data_path)
+        os.makedirs(data_path, exist_ok=True)
     for i, problem in enumerate(problem_list):
         # wenshu_information_generate(data_path + problem + '_文书信息.csv', 0, number_example, problem)
         pool = multiprocessing.Pool(processes=process_num)
@@ -334,7 +334,7 @@ def transfer_file_data_to_training_data(data_path, problem_list, target_path):
     tmp_valid_serials = valid_serials[len(valid_serials)//2:]
 
     if not os.path.exists(target_path):
-        os.mkdir(target_path)
+        os.makedirs(target_path, exist_ok=True)
     # 测试集保存
     result_test = result[result['serial'].isin(test_serials)]
     result_test.to_csv(target_path+'result_test.csv', index=False, encoding='utf-8')
@@ -356,7 +356,7 @@ def transfer_file_data_to_training_data(data_path, problem_list, target_path):
 
 def feature_x_multi_processing_generate(problem_list, data_raw_file, target_path, set_type, process_num=30):
     if not os.path.exists(target_path):
-        os.mkdir(target_path)
+        os.makedirs(target_path, exist_ok=True)
 
     # 读取训练原始数据
     print(data_raw_file)

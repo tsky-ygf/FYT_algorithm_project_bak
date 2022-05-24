@@ -13,6 +13,7 @@ from data_util import text_underline
 # from prediction import support_possibility_fasttext as predict
 # from fasttext_predict import predict as predict
 from bert_predict import predict as predict
+import collections
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -54,6 +55,10 @@ def predict_fn(problem, claim_list, fact, question_answers, factor_sentence_list
             continue
         logic_problem_suqius += user_ps2logic_ps[problem+'_'+suqiu]
 
+    # Kiwi Debug
+    logging.info('logic_problem_suqius:')
+    logging.info(str(logic_problem_suqius))
+
     prob_problem_suqius = []
     for suqiu in user_ps[problem]:
         if suqiu not in claim_list:
@@ -73,6 +78,7 @@ def predict_fn(problem, claim_list, fact, question_answers, factor_sentence_list
     logging.info('5.3. factor match')
     factor_sentence_list = {}
     if len(factor_sentence_list_)>0 or len(question_answers)>0:
+        # KIWI:不是首轮，已经匹配过特征，直接取出来就行。
         for factor_flags in factor_sentence_list_:
             sentence_matched, factor, flag, _ = factor_flags
             factor_sentence_list[factor] = [sentence_matched, flag]
@@ -83,6 +89,9 @@ def predict_fn(problem, claim_list, fact, question_answers, factor_sentence_list
             for factor, sentence in sentence_factor_dict.items():
                 sentence_matched, flag = sentence
                 factor_sentence_list[factor] = [sentence_matched, flag]
+
+                # KIWI:我理解是，如['金融借贷', '个人之间借贷','企业之间借贷','个人与企业之间借贷']是互斥的。
+                # KIWI:正向匹配到其中一个特征，则设置其余特征为负向匹配。
                 if flag==-1:
                     continue
                 if problem not in match_factor_group:
@@ -101,8 +110,17 @@ def predict_fn(problem, claim_list, fact, question_answers, factor_sentence_list
     question_answer_str = ''
     suqiu_tree = {}
     suqiu_result = {}
+    # KIWI
+    # logging.info('logic_ps_result:' + ' ' + str(logic_ps_result))
+    debug_info = collections.OrderedDict()
+
     for ps in logic_problem_suqius:
         problem, suqiu = ps.split('_')
+        # KIWI
+        logging.info('当前诉求:' + ' ' + str(suqiu))
+        suqiu_debug_info = None
+        next_question_debug_info = None
+
         next = get_next_suqiu_or_factor(ps, suqiu_result, suqiu_factor, question_answers, factor_sentence_list)
         if next is None:    # 有前置诉求或特征并且不满足
             suqiu_result[suqiu] = -1
@@ -110,9 +128,24 @@ def predict_fn(problem, claim_list, fact, question_answers, factor_sentence_list
                 tree = LogicTree(problem, suqiu, debug)
                 tree.logic_result = ['不满足前提', logic_ps_result[ps], tree.suqiu_advice]
                 suqiu_tree[ps] = tree
+                # KIWI
+                logging.info('前提不满足' + ' ' + str(suqiu))
+                suqiu_debug_info = "诉求处理情况: 前提不满足。"
+                debug_info[str(suqiu)] = suqiu_debug_info
+            else:
+                # KIWI
+                logging.info('前提不满足且不在logic_ps_result中。' + ' ' + str(suqiu))
+                suqiu_debug_info = "诉求处理情况: 前提不满足且不在logic_ps_result中。"
+                debug_info[str(suqiu)] = suqiu_debug_info
         elif next[0] == 'factor':   # 有factor不确定的情况
             question_next = factor_question_dict[ps][next[1]]
             question_type = '1' if question_next not in question_multiple_dict[ps] else '2'
+            # KIWI
+            logging.info('前置factor不确定' + ' factor:' + str(next[1]))
+            suqiu_debug_info = '诉求处理情况: 前置特征不确定。'
+            next_question_debug_info = "对前置特征【{}】提问，问题来自特征表。".format(str(next[1]))
+            suqiu_debug_info = suqiu_debug_info + '\n' + next_question_debug_info
+            debug_info[str(suqiu)] = suqiu_debug_info
             break
         else:   # next = ('suqiu', suqiu)
             tree = LogicTree(problem, next[1], debug)
@@ -127,9 +160,16 @@ def predict_fn(problem, claim_list, fact, question_answers, factor_sentence_list
                 factors = tree.add_question_result(question, answers.split(';'))
                 question_answer_str += '。'.join(factors) + '。'
 
-            question_next = tree.get_next_question()
+            next_question_debug_info = []
+            question_next = tree.get_next_question(next_question_debug_info)
             if question_next is not None:
                 question_type = '1' if question_next not in question_multiple_dict[ps] else '2'
+
+                # KIWI
+                logging.info('对诉求提问' + ' suqiu:' + str(next[1]))
+                suqiu_debug_info = '诉求处理情况: 对诉求提问。'
+                suqiu_debug_info = suqiu_debug_info + '\n' + '\n'.join(next_question_debug_info)
+                debug_info[str(suqiu)] = suqiu_debug_info
                 break
             else:
                 result, _, _, _, _ = tree.get_logic_result()
@@ -141,7 +181,11 @@ def predict_fn(problem, claim_list, fact, question_answers, factor_sentence_list
                     if factor in factor_sentence_list:
                         continue
                     factor_sentence_list[factor] = [tree.factor_sentence[factor], flag]
-    # logger.debug(factor_sentence_list)
+
+                # KIWI
+                logging.info('诉求有结论' + ' suqiu: ' + str(next[1]) + '\t' + 'result: ' + str(result))
+                suqiu_debug_info = '诉求处理情况: 诉求有结论。' + '诉求: ' + str(next[1]) + '\t' + 'result: ' + str(result)
+                debug_info[str(suqiu)] = suqiu_debug_info
 
     # 5. 如果没有问题了，那么需要出评估报告
     logging.info('5.5. return result dict')
@@ -204,6 +248,8 @@ def predict_fn(problem, claim_list, fact, question_answers, factor_sentence_list
 
     result_dict['factor_sentence_list'] = [[s[0], f, s[1], ''] for f, s in factor_sentence_list.items()]  # 匹配到短语的列表，去重
     result_dict['result'] = report_dict     # 评估报告，包括评估理由、证据模块、法律建议、支持与否
+
+    result_dict['debug_info'] = debug_info  #记录中间信息，方便定位问题
     return result_dict
 
 

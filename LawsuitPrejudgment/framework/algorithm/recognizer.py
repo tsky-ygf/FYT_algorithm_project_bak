@@ -4,6 +4,7 @@ import traceback
 import multiprocessing
 from config_loader import *
 from data_util import cut_words, date_filter
+from asyncio.log import logger
 
 
 node_path = '../config/node.csv'

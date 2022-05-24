@@ -124,6 +124,8 @@ def match_sentence_by_keyword(sentence, key_word):
         # pattern = re.findall('(' + key_word.replace(r'(没|未|不|非|无)[^。；，：,;:？！!?\s]*', '') + ')', result)[0][0]
         if pattern == '成年' and '未成年' in result:
             return result, 1
+
+        # 对于存在否定词的情形，调用ltp句法分析包进行句法分析，如果否定词修饰的词在正则里才表示否定意义
         words = cut_words(result)  # 分词 元芳你怎么看
         postags = list(postagger.postag(words))  # 词性标注
         arcs = parser.parse(words, postags)  # 句法分析

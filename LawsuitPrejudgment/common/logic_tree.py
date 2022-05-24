@@ -266,6 +266,7 @@ class LogicTree(object):
             p += str(node.index) + node.name + '+'
         p = p[:-1] + '-->' + path[0].father.father.name
         print(p)
+        return p
 
     def _set_match_flag(self, factor, flag):
         """
@@ -465,7 +466,7 @@ class LogicTree(object):
         # 默认返回所有支持路径
         return [], paths
 
-    def get_next_question(self):
+    def get_next_question(self, next_question_debug_info=None):
         """
         获取下一个问题。
         过滤掉所有有特征为-1的路径。如果单个prediction的所有路径均为-1，则返回不满足前提
@@ -477,6 +478,9 @@ class LogicTree(object):
         # KIWI
         print("已有的特征：")
         print(self.factor_flag)
+        if next_question_debug_info is not None:
+            next_question_debug_info.append("特征状态:\n{}".format(str(self.factor_flag)))
+            candicate_path_debug_info = []
         # 过滤不满足前提的路径
         precondition_path, paths = self._filter_path_by_precondition(self.paths)
 
@@ -514,7 +518,9 @@ class LogicTree(object):
                 continue
             if if_ask:
                 if self.debug:
-                    self.print_path(path)
+                    path_content = self.print_path(path)
+                    if next_question_debug_info is not None:
+                        candicate_path_debug_info.append(path_content)
                 for node in temp_unmatch:
                     # 如果节点存在父节点，则判断父节点flag是否为1，为1直接提问该节点的问题
                     if node.name in self.factor_pre:
@@ -532,11 +538,15 @@ class LogicTree(object):
                     else:
                         questions[node.question] = [len(temp_unmatch), len(temp_match), weight]
 
+        if next_question_debug_info is not None:
+            next_question_debug_info.append("候选路径:\n{}".format('\n'.join(candicate_path_debug_info)))
         # 大前提不满足返回结果
         if len(paths) == 0 and len(precondition_path) > 0:
             self.logic_result = self.get_precondition_result(precondition_path[0])
             # KIWI
             print("get_next_question: 大前提不满足返回结果")
+            if next_question_debug_info is not None:
+                next_question_debug_info.append("诉求产生结果，结束提问。原因: 大前提不满足。")
             return None
 
         # 有不支持路径连通返回结果
@@ -544,6 +554,8 @@ class LogicTree(object):
             self.logic_result = self.get_support_result(unsupport_path, self.debug)
             # KIWI
             print("get_next_question: 有不支持路径连通返回结果")
+            if next_question_debug_info is not None:
+                next_question_debug_info.append("诉求产生结果，结束提问。原因: 有不支持路径连通。")
             return None
 
         # 有路径连通返回结果
@@ -552,18 +564,24 @@ class LogicTree(object):
             self.support_proof = self.get_support_proof(support_path)
             # KIWI
             print("get_next_question: 有路径连通返回结果")
+            if next_question_debug_info is not None:
+                next_question_debug_info.append("诉求产生结果，结束提问。原因: 有路径连通。")
             return None
 
         # 提问不支持路径的问题
         if unsupport_question is not None:
             # KIWI
             print("get_next_question: 提问不支持路径的问题")
+            if next_question_debug_info is not None:
+                next_question_debug_info.append("产生下一个问题。原因: 提问不支持路径的问题。")
             return unsupport_question
 
         # 提问有父特征的问题
         if father_question is not None:
             # KIWI
             print("get_next_question: 提问有父特征的问题")
+            if next_question_debug_info is not None:
+                next_question_debug_info.append("产生下一个问题。原因: 提问有父特征的问题。")
             return father_question
 
         # 有问题要提问，则按照最短路径和出现次数进行排序提问
@@ -571,12 +589,16 @@ class LogicTree(object):
             question = sorted(questions.items(), key=lambda x: x[1][0] * 50000 - x[1][1] * 5000 - x[1][2]/100)[0][0]
             # KIWI
             print("get_next_question: 有问题要提问，则按照最短路径和出现次数进行排序提问")
+            if next_question_debug_info is not None:
+                next_question_debug_info.append("产生下一个问题。原因: 有问题要提问，则按照最短路径和出现次数进行排序提问。")
             return question
 
         # 未匹配到特征提问候选问题
         if not self.match_flag:
             # KIWI
             print("get_next_question: 未匹配到特征提问候选问题")
+            if next_question_debug_info is not None:
+                next_question_debug_info.append("产生下一个问题。原因: 未匹配到特征，提问候选问题。")
             return self.candidate_question
 
         # 没有问题要提问，判断是否有前提未满足
@@ -584,12 +606,16 @@ class LogicTree(object):
             self.logic_result = self.get_precondition_result(precondition_path[0])
             # KIWI
             print("get_next_question: 没有问题要提问，判断是否有前提未满足")
+            if next_question_debug_info is not None:
+                next_question_debug_info.append("诉求产生结果，结束提问。原因: 没有问题要提问，再次判断是否有前提未满足。")
             return None
 
         # 根据上一个问题获取结果
         self.logic_result = self.get_unsupport_result(paths)
         # KIWI
         print("get_next_question: 根据上一个问题获取结果")
+        if next_question_debug_info is not None:
+            next_question_debug_info.append("诉求产生结果，结束提问。原因: 没有符合条件的路径。")
         return None
 
     def get_precondition_result(self, path):
