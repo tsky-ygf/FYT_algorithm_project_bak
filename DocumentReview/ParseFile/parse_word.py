@@ -8,6 +8,16 @@
 from docx import Document
 
 
+# def get_text_from_docx(path):
+#     """
+#     docx文件 提取 文本内容, 不做任何的加工处理
+#     """
+#     document = Document(path)
+#     # 读取每段资料
+#     texts = [paragraph.text for paragraph in document.paragraphs]
+#     return texts
+
+
 # 读取docx 文件
 def read_docx_file(docx_path):
     document = Document(docx_path)

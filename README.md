@@ -2,6 +2,11 @@
 用于法域通的相关算法代码
 
 ### 目录结构
+- DataCentric 数据标注模块
 - DocumentReview 智能文档审核模块
-- FromBXH 包小黑过渡部分代码
+- LawEntityExtraction 法律实体抽取模块
+- LawsuitPrejudgment 法律诉讼预判模块
+- ProfessionalSearch 智能专业检索模块
 - RelevantLaws 相关法条模块
+- Tools 训练工具模块
+- Utils 工具模块

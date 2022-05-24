@@ -150,5 +150,6 @@ class TrainCrfForNer(TrainLawsNER):
 
 
 if __name__ == '__main__':
-    # TrainSpanForNer(config_path="LawEntityExtraction/BertNer/Config/base_ner_config.yaml").train_main()
-    TrainCrfForNer(config_path="LawEntityExtraction/BertNer/Config/base_ner_config.yaml").train_main()
+    TrainSpanForNer(config_path="LawEntityExtraction/BertNer/Config/base_ner_config.yaml").train_main()
+    # TrainCrfForNer(config_path="LawEntityExtraction/BertNer/Config/base_ner_config.yaml").train_main()
+#

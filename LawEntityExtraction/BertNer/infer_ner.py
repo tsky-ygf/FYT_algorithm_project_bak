@@ -65,7 +65,7 @@ def get_entity_bio(seq, id2label):
 
 class NerInferTool(BaseInferTool):
     def __init__(self, config_path):
-        model_name = "bert_crf"
+        model_name = "bert_span"
         self.bert_config, self.bert_model, self.bert_tokenizer, self.bert_dataset = MODEL_CLASSES[model_name]
         self.num_labels = len(self.bert_dataset.label_list)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -211,5 +211,5 @@ class NerInferTool(BaseInferTool):
 if __name__ == '__main__':
     ner_tool = NerInferTool(config_path="LawEntityExtraction/BertNer/Config/base_ner_infer.yaml")
     # print(ner_tool.infer(text="突袭黑暗雅典娜》中Riddick发现之前抓住他的赏金猎人Johns，"))
-    # ner_tool.test_data()
-    ner_tool.test_crf_data()
+    ner_tool.test_data()
+    # ner_tool.test_crf_data()

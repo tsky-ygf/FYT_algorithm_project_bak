@@ -21,3 +21,6 @@ xmindparser
 requests
 pathos
 tensorboard
+plotly
+ipython
+six
