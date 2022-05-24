@@ -126,6 +126,20 @@
     "status": 1,
 }`
 
+### 二次审核  确认
+请求地址: `http://172.19.82.199:6021/getSecondCheckTrue/`  
+请求方式: `POST`    
+请求参数: `{  
+            "checkperson":"",
+            "id":"",
+         }`        
+返回参数: `{
+    "data_list": update success, 
+    "error_msg": "",
+    "status": 0, }
+}`
+
+
 ### 展示原文（目前没确定查询那张表）  
 请求地址: `http://172.19.82.199:6021/getSourceContent/`  
 请求方式: `POST`    
