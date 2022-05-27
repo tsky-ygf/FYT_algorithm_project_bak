@@ -28,7 +28,7 @@ class LoanAcknowledgement:
         for index, row in self.config.iterrows():
             # self.logger.debug("row: {}".format(row))
             result_dict = OrderedDict()
-            regular_res = self.regular_check_data(row["关键词（正则）"])
+            regular_res = self.check_data_func(row["关键词（正则）"])
 
             if regular_res != "":
                 # self.logger.debug(regular_res)
@@ -46,7 +46,7 @@ class LoanAcknowledgement:
 
         return review_result
 
-    def regular_check_data(self, regular_str):
+    def check_data_func(self, regular_str):
         res = ""
         for data in self.data_list:
             # self.logger.debug("data: {}".format(data))
@@ -75,7 +75,29 @@ class LoanAcknowledgement:
         return text_list
 
 
+class LoanUIEAcknowledgement(LoanAcknowledgement):
+    def __init__(self, config_path, content, mode="text"):
+        super().__init__(config_path=config_path, content=content, mode=mode)
+
+    def check_data_func(self, regular_str):
+        res = ""
+        for data in self.data_list:
+            self.logger.debug("data: {}".format(data))
+            self.logger.debug("regular_str: {}".format(regular_str))
+        return res
+
+    def review_main(self):
+        review_result = OrderedDict()
+        for index, row in self.config.iterrows():
+            self.logger.debug("row: {}".format(row))
+
+
+
+
 if __name__ == '__main__':
-    loan_acknowledgement = LoanAcknowledgement("DocumentReview/Config/loan.csv", content="data/DocData/IOU.docx",
-                                               mode="docx")
+    # loan_acknowledgement = LoanAcknowledgement("DocumentReview/Config/loan.csv", content="data/DocData/IOU.docx",
+    #                                            mode="docx")
+    loan_acknowledgement = LoanUIEAcknowledgement("DocumentReview/Config/LoanConfig/jietiao_rule.csv",
+                                                  content="data/DocData/IOU.docx",
+                                                  mode="docx")
     pprint(loan_acknowledgement.review_main())
