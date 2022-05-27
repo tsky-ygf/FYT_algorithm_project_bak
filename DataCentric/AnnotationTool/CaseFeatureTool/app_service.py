@@ -7,7 +7,6 @@
 # @Software: PyCharm
 import json
 import re
-from pprint import pprint
 import traceback
 import logging
 import logging.handlers
@@ -121,7 +120,7 @@ def do_insert_annotation_data():
             insert_data = in_dict['insert_data']
             labelingperson = in_dict['labelingperson']
             # insert_data_list = insert_data['insert_data_list']
-            print('data is coming')
+            logger.info('data is coming')
             insert_data_to_mysql(anyou_name, source, labelingperson, insert_data)
             return json.dumps(
                 {"insert_result": "success", "contentHtml": content_html, "status": 0}, ensure_ascii=False)
@@ -150,9 +149,9 @@ def is_second_check():
     if in_json:
         in_dict = json.loads(in_json.decode("utf-8"))
         anyou = in_dict['anyou']
-        # print(f"anyou:{anyou}")
+
         second_check_data_dict = get_second_check(anyou)
-        # print(f"run sql result:{second_check_data_dict}")
+        # logger.info(f"run sql result:{second_check_data_dict}")
         if second_check_data_dict:
             return json.dumps(
                 {"data_list": second_check_data_dict, "error_msg": "", "status": 0}, ensure_ascii=False,cls=DateEncoder)
@@ -165,11 +164,17 @@ def get_true_check():
     in_json = request.get_data()
     if in_json:
         in_dict = json.loads(in_json.decode("utf-8"))
-        checkperson = in_dict['checkperson']
-        id = in_dict['id']
-        save_second_check_proson(id,checkperson)
+        check_result = in_dict.get('checkResult')
+        checkperson = in_dict.get('checkperson')
+        if not checkperson:
+            return json.dumps({"error_msg": "no check person", "status": 1}, ensure_ascii=False,
+                              cls=DateEncoder)
+        if check_result:
+            in_dict['checkResult'] = 'error'
+        # logger.info(f"type: {type(in_dict)} , {in_dict}")
+        save_second_check_proson(in_dict)
         return json.dumps(
-            {"data_list": "update success", "error_msg": "", "status": 0}, ensure_ascii=False,cls=DateEncoder)
+            {"result": "update success", "error_msg": "", "status": 0}, ensure_ascii=False,cls=DateEncoder)
 
 @app.route('/getWorkCount',methods=['post'])
 def get_work_count():
@@ -178,9 +183,9 @@ def get_work_count():
     if data_json:
         data_dict = json.loads(data_json.decode('utf-8'))
         name = data_dict.get('name')
-        pprint(f"decode_name:{name}")
+        logger.info(f"decode_name:{name}")
         second_check_data_dict = get_day_work_count(name)
-        pprint(second_check_data_dict)
+        logger.info(second_check_data_dict)
         if second_check_data_dict:
             return json.dumps(
                                {"work_count": second_check_data_dict[0].get('num'), "error_msg": "", "status": 0}, ensure_ascii=False)
@@ -193,9 +198,9 @@ def get_source():
     if data_json:
         data_dict = json.loads(data_json.decode('utf-8'))
         key = data_dict.get('key')
-        pprint(f"decode_key:{key}")
+        logger.info(f"decode_key:{key}")
         source_content = get_source_content(key)
-        # pprint(second_check_data_dict)
+        # plogger.info(second_check_data_dict)
         if source_content:
             return json.dumps(
                                {"content": source_content[0].get('f13'), "error_msg": "", "status": 0}, ensure_ascii=False)
@@ -214,10 +219,10 @@ def login_check():
         data_dict = json.loads(data_json.decode('utf-8'))
     except:
         return json.dumps({"error_msg": "data is not dictionary", "status": 1}, ensure_ascii=False, cls=DateEncoder)
-    print(f"type:{type(data_json)},data:{data_json}")
+    logger.info(f"type:{type(data_json)},data:{data_json}")
     username = data_dict.get("username")
     password = data_dict.get("password")
-    print(f"username:{username},password:{password}")
+    logger.info(f"username:{username},password:{password}")
     if check_username(username):
         select_password = get_login_password(username)
         if select_password == password:
@@ -239,7 +244,7 @@ def register_user():
         data_dict = json.loads(data_json.decode('utf-8'))
     except:
         return json.dumps({"error_msg": "data is not dictionary", "status": 1}, ensure_ascii=False, cls=DateEncoder)
-    print(f"type:{type(data_json)},data:{data_json}")
+    logger.info(f"type:{type(data_json)},data:{data_json}")
     username = data_dict.get("username")
     password = data_dict.get("password")
     if check_username(username):

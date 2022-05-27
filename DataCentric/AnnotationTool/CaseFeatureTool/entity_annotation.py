@@ -8,7 +8,7 @@
 import logging
 
 import pymysql
-from pprint import pprint
+# from plogger.info import plogger.info
 import pandas as pd
 from pathlib import Path
 import requests
@@ -44,20 +44,19 @@ def get_anyou_list():
     return anyou_list
 
 
-# print(get_anyou_list())
+# logger.info(get_anyou_list())
 def get_case_feature_dict(anyou_name):
-    # print(anyou_name)
+    # logger.info(anyou_name)
     anyou_case_feature_dict = {}
     df = pd.read_csv(Path("data/LawsuitPrejudgment/CaseFeatureConfig/") / (anyou_name + ".csv"))
     for index, row in df.iterrows():
-        # print(row['case'],row['feature'])
+        # logger.info(row['case'],row['feature'])
         if row['case'] not in anyou_case_feature_dict:
             anyou_case_feature_dict[row['case']] = []
         anyou_case_feature_dict[row['case']].append(row['feature'])
     return anyou_case_feature_dict
 
-
-# print(get_case_feature(anyou_name="借贷纠纷_民间借贷"))
+# logger.info(get_case_feature(anyou_name="借贷纠纷_民间借贷"))
 
 
 # def read_data_from_mysql():
@@ -70,11 +69,9 @@ def get_case_feature_dict(anyou_name):
 #     # connect_big_data.close()
 #     return data
 
-
-def get_base_data_dict(anyou_name, ):
+def get_base_data_dict(anyou_name):
     cursor = connect_big_data.cursor()
     anyou_type, anyou_x = anyou_name.split('_')
-    # print(anyou_type, anyou_x)
     if anyou_name == "借贷纠纷_民间借贷":
         sql_con = '''
         select f2,f13,f40,f44 from labels_marking_records.case_list_original_hetong 
@@ -89,7 +86,6 @@ def get_base_data_dict(anyou_name, ):
         raise Exception("暂时不支持该案由")
 
     data = pd.read_sql(sql_con, con=connect_big_data)
-    print(data)
     base_data_dict = {
         "case_id": data["f2"].values[0],
         "data": [
@@ -107,62 +103,15 @@ def get_base_data_dict(anyou_name, ):
             UPDATE labels_marking_records.case_list_original_hunyinjiating SET f50='{}' WHERE f2='{}';
         '''.format(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), data["f2"].values[0])
 
-    # print(data)
     try:
         cursor.execute(sql_update_con)
         connect_big_data.commit()
     except:
-        print(traceback.format_exc())
         connect_big_data.rollback()
         raise RuntimeError("更新数据库时间失败")
 
     cursor.close()
     return base_data_dict
-
-def get_second_check(anyou):
-    print(anyou)
-    anyou_type, anyou_x = anyou.split('_')
-    print(anyou_type,anyou_x)
-    if anyou == "借贷纠纷_民间借贷":
-        try:
-            cursor = connect_labels_marking_records.cursor(cursor=pymysql.cursors.DictCursor)
-            sql = f"""
-            SELECT * FROM labels_law_entity_feature WHERE checkperson is null and suqiu='{anyou_type}' and jiufen_type='{anyou_x}' limit 1;
-            """
-            cursor.execute(sql)
-            res = cursor.fetchall()
-        except Exception as e:
-            print(traceback.format_exc())
-            connect_big_data.rollback()
-            raise RuntimeError("查询数据库时间失败")
-        cursor.close()
-        return res
-    return ''
-
-def get_day_work_count(person):
-    # 当天时间 eg: 2022-05-18 00:00:00
-    this_day = datetime.datetime.now().strftime('%Y-%m-%d')
-    this_day = datetime.datetime.strptime(this_day, '%Y-%m-%d')
-    # 明天时间 eg: 2022-05-19 00:00:00
-    next_day = (datetime.datetime.now() + datetime.timedelta(days=1)).strftime('%Y-%m-%d')
-    next_day = datetime.datetime.strptime(next_day, '%Y-%m-%d')
-    cursor = connect_labels_marking_records.cursor(cursor=pymysql.cursors.DictCursor)
-    sql = f"""
-    select labelingperson,count(labelingperson) as num 
-    from labels_law_entity_feature
-    WHERE labelingperson ='{person}'
-    and labelingdate between '{this_day}' and '{next_day}' 
-    group by labelingperson;
-    """
-    try:
-        cursor.execute(sql)
-        res = cursor.fetchall()
-    except:
-        print(traceback.format_exc())
-        connect_big_data.rollback()
-        raise RuntimeError("查询数据库时间失败")
-    cursor.close()
-    return res
 
 def get_source_content(key):
     cursor = connect_big_data_ceshi.cursor(cursor=pymysql.cursors.DictCursor)
@@ -175,19 +124,12 @@ def get_source_content(key):
         cursor.execute(sql)
         res = cursor.fetchall()
     except:
-        print(traceback.format_exc())
         connect_big_data.rollback()
         raise RuntimeError("查询数据库时间失败")
     cursor.close()
     return res
 
-
-
-
-# print(get_base_data_dict("借贷纠纷_民间借贷"))
-
 def get_base_annotation_dict(anyou_name, sentence):
-    # print(anyou_name, sentence)
     problem, suqiu = anyou_name.split('_')
     url = "http://172.19.82.199:9500/keyword_feature_matching"
     request_data = {
@@ -200,8 +142,7 @@ def get_base_annotation_dict(anyou_name, sentence):
 
     return base_annotation_dict
 
-
-# print(get_base_annotation_dict(anyou_name="借贷纠纷_民间借贷",
+# logger.info(get_base_annotation_dict(anyou_name="借贷纠纷_民间借贷",
 #                                sentence="2014年6月，我借给了何三宇、冯群华20000元并写了借条，约定月息3%，"
 #                                         "在2014年10月14日前一次还清，同时谭学民、蔡金花作了担保人。到期后，何三宇、"
 #                                         "冯群华迟迟不还款，现在我想让他们按照约定，还我本金及利息。"))
@@ -221,7 +162,7 @@ def insert_one_data_to_mysql(anyou_name, source, id, content, mention, situation
     # pos_neg = 1
     labelingdate = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     # labelingdate = datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d %H:%M:%S')
-    # print(labelingdate)
+    # logger.info(labelingdate)
     factor = "###".join(factor)
 
     sql_con = """
@@ -231,7 +172,7 @@ def insert_one_data_to_mysql(anyou_name, source, id, content, mention, situation
     """.format(id, suqiu, jiufen_type, source, content, mention, situation, factor, start_pos, end_pos, pos_or_neg,
                labelingdate, labelingperson)
 
-    # print(sql_con)
+    # logger.info(sql_con)
 
     try:
         # 执行sql语句
@@ -240,12 +181,10 @@ def insert_one_data_to_mysql(anyou_name, source, id, content, mention, situation
         connect_big_data.commit()
     except:
         # 发生错误时回滚
-        print(traceback.format_exc())
         connect_big_data.rollback()
         raise RuntimeError("导入数据库失败")
 
     cursor.close()
-
 
 # insert_one_data_to_mysql(anyou_name="借贷纠纷_民间借贷",
 #                          source="原告诉称",
@@ -305,10 +244,10 @@ def check_username(username):
         res = cur.execute(sql)
         return res
     except pymysql.err.OperationalError:
-        print(traceback.format_exc())
+        logger.info(traceback.format_exc())
         raise ConnectionError("method_name:check_username, 连接数据库 login_user_data 异常，查看数据库链接信息是否有问题")
     except Exception as e:
-        print(traceback.format_exc())
+        logger.info(traceback.format_exc())
         connect_big_data.rollback()
         raise RuntimeError("查询数据库时间失败")
 
@@ -329,11 +268,11 @@ def get_login_password(username):
             logger.info(f"username:{username},没找到密码")
             return ''
     except pymysql.err.OperationalError:
-        print(traceback.format_exc())
+        logger.info(traceback.format_exc())
         logger.error(f"链接数据库 login_user_data 异常，查看数据库链接信息是否有问题")
         raise ConnectionError("method_name:check_username, 连接数据库 login_user_data 异常，查看数据库链接信息是否有问题")
     except Exception as e:
-        print(traceback.format_exc())
+        logger.info(traceback.format_exc())
         connect_big_data.rollback()
         raise RuntimeError("查询数据库时间失败")
 
@@ -346,31 +285,111 @@ def save_username_password(username,password):
         res = cur.execute(sql)
         connect_login_uers_data.commit()
         cur.close()
-        connect_login_uers_data.close()
+        # connect_login_uers_data.close()
         return res
     except pymysql.err.OperationalError:
-        print(traceback.format_exc())
+        logger.info(traceback.format_exc())
         logger.error(f"链接数据库 login_user_data 异常，查看数据库链接信息是否有问题")
         raise ConnectionError("method_name:check_username, 连接数据库 login_user_data 异常，查看数据库链接信息是否有问题")
     except Exception as e:
-        print(traceback.format_exc())
+        logger.info(traceback.format_exc())
         connect_big_data.rollback()
         raise RuntimeError("查询数据库时间失败")
 
-def save_second_check_proson(id,checkperson):
+def get_dict_value(data_dict,key):
+    value = data_dict.get(key)
+    if value:
+        if isinstance(value, str):
+            return f"\'{value}\'"
+        elif isinstance(value,int):
+            return f"{value}"
+        elif isinstance(value,datetime.datetime):
+            return f"\'{value}\'"
+        else:
+            return value
+    else:
+        return 'NULL'
+
+def get_day_work_count(person):
+    # 当天时间 eg: 2022-05-18 00:00:00
+    this_day = datetime.datetime.now().strftime('%Y-%m-%d')
+    this_day = datetime.datetime.strptime(this_day, '%Y-%m-%d')
+    # 明天时间 eg: 2022-05-19 00:00:00
+    next_day = (datetime.datetime.now() + datetime.timedelta(days=1)).strftime('%Y-%m-%d')
+    next_day = datetime.datetime.strptime(next_day, '%Y-%m-%d')
+    cursor = connect_labels_marking_records.cursor(cursor=pymysql.cursors.DictCursor)
+    sql = f"""
+    select labelingperson,count(labelingperson) as num 
+    from labels_law_entity_feature
+    WHERE labelingperson ='{person}'
+    and labelingdate between '{this_day}' and '{next_day}' 
+    group by labelingperson;
+    """
+    try:
+        cursor.execute(sql)
+        res = cursor.fetchall()
+        # logger.info(f"res:{res}")
+    except:
+        connect_big_data.rollback()
+        raise RuntimeError("查询数据库时间失败")
+    cursor.close()
+    return res
+
+def get_second_check(anyou):
+    anyou_type, anyou_x = anyou.split('_')
+    if anyou == "借贷纠纷_民间借贷":
+        try:
+            cursor = connect_labels_marking_records.cursor(cursor=pymysql.cursors.DictCursor)
+            sql = f"""
+            SELECT * 
+            FROM labels_law_entity_feature 
+            WHERE suqiu='{anyou_type}' 
+            and jiufen_type='{anyou_x}' 
+            and checkperson is null 
+            limit 1;
+            """
+            cursor.execute(sql)
+            res = cursor.fetchall()
+        except Exception as e:
+            connect_big_data.rollback()
+            raise RuntimeError("查询数据库时间失败")
+        cursor.close()
+        return res
+    return ''
+
+def save_second_check_proson(data_dict):
     cursor = connect_labels_marking_records.cursor()
     sql_update_con = f'''
-                UPDATE labels_law_entity_feature SET checkperson='{checkperson}' WHERE id='{id}';
-            '''
+                        UPDATE labels_law_entity_feature
+                        SET
+                            suqiu={get_dict_value(data_dict, 'suqiu')},
+                            jiufen_type={get_dict_value(data_dict, 'jiufen_type')},
+                            source={get_dict_value(data_dict, 'source')},
+                            content={get_dict_value(data_dict, 'content')},
+                            mention={get_dict_value(data_dict, 'mention')},
+                            situation={get_dict_value(data_dict, 'situation')},
+                            factor={get_dict_value(data_dict, 'factor')},
+                            startposition={get_dict_value(data_dict, 'startposition')},
+                            endpostion={get_dict_value(data_dict, 'endpostion')},
+                            pos_neg={get_dict_value(data_dict, 'pos_neg')},
+                            labelingdate={get_dict_value(data_dict, 'labelingdate')},
+                            labelingperson={get_dict_value(data_dict, 'labelingperson')},
+                            checkperson={get_dict_value(data_dict, 'checkperson')},
+                            checkResult={get_dict_value(data_dict, 'checkResult')}
+                         WHERE id={get_dict_value(data_dict, 'id')};
+                    '''
     try:
         cursor.execute(sql_update_con)
         connect_labels_marking_records.commit()
         cursor.close()
-        connect_labels_marking_records.close()
     except:
-        print(traceback.format_exc())
+        logger.error(traceback.format_exc())
         connect_labels_marking_records.rollback()
         raise RuntimeError("更新数据库时间失败")
 
 # if __name__ == '__main__':
-#     save_second_check_proson("1651891677891",None)
+#     print(get_day_work_count('shj'))
+#     # def get_second_check(anyou):
+#     #     anyou_type, anyou_x = anyou.split('_')
+#     #     if anyou == "借贷纠纷_民间借贷":
+
