@@ -17,7 +17,7 @@ text = "借条\n为购买房产，今收到好友张三（身份证号）以转�
        "逾期未还，则按当期一年期贷款市场报价利率（LPR）的4倍计付逾期利息。"
 
 schema = ['标题' ,'借款人', '借款金额', '借款期限', '借款利率', '还款方式', '还款日期', '逾期利率', '逾期费用']
-ie = Taskflow('information_extraction', schema=schema, device_id=1)
+ie = Taskflow('information_extraction', schema=schema, device_id=1, task_path="model/uie_model/model_best/")
 pprint(ie(text))
 
 # dict1 = {"id": 1, "text": "昨天晚上十点加班打车回家58元", "relations": [],

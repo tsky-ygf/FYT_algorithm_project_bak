@@ -44,8 +44,8 @@ def trans_xmind_csv(_xmind_file):
     return _anyou_df
 
 
-xmind_file = "data/LawsuitPrejudgment/config/借贷纠纷/借贷纠纷_民间借贷.xmind"
-trans_xmind_csv(xmind_file)
+# xmind_file = "data/LawsuitPrejudgment/config/借贷纠纷/借贷纠纷_民间借贷.xmind"
+# trans_xmind_csv(xmind_file)
 
 xmind_config_path = Path("data/LawsuitPrejudgment/config/")
 for xmind_path in xmind_config_path.glob("**/*.xmind"):

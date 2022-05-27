@@ -9,7 +9,9 @@ import re
 import pandas as pd
 from collections import OrderedDict
 from pprint import pprint
+from pprint import pformat
 
+from paddlenlp import Taskflow
 from Utils.logger import get_module_logger
 from DocumentReview.ParseFile.parse_word import read_docx_file
 
@@ -46,18 +48,8 @@ class LoanAcknowledgement:
 
         return review_result
 
-    def check_data_func(self, regular_str):
-        res = ""
-        for data in self.data_list:
-            # self.logger.debug("data: {}".format(data))
-            # self.logger.debug("regular_str: {}".format(regular_str))
-            try:
-                res = re.search(regular_str, data).group()
-            except:
-                pass
-            # self.logger.debug("res: {}".format(res))
-
-        return res
+    def check_data_func(self, *args, **kwargs): # 审核数据
+        raise NotImplementedError
 
     def rule_judge(self, regular_res, rule_str):
         self.logger.debug("匹配关键词 {} ==== 对应规则 {}".format(regular_res, rule_str))
@@ -78,26 +70,32 @@ class LoanAcknowledgement:
 class LoanUIEAcknowledgement(LoanAcknowledgement):
     def __init__(self, config_path, content, mode="text"):
         super().__init__(config_path=config_path, content=content, mode=mode)
+        self.schema = list(set(self.config['schema'].tolist()))
+        self.logger.debug("schema: {}".format(self.schema))
+        # exit()
+        self.ie = Taskflow('information_extraction', schema=self.schema, device_id=1,
+                           task_path="model/uie_model/model_best/")
 
-    def check_data_func(self, regular_str):
-        res = ""
-        for data in self.data_list:
-            self.logger.debug("data: {}".format(data))
-            self.logger.debug("regular_str: {}".format(regular_str))
+    def check_data_func(self):
+        data = '\n'.join(self.data_list)
+        res = self.ie(data)
         return res
 
     def review_main(self):
         review_result = OrderedDict()
-        for index, row in self.config.iterrows():
-            self.logger.debug("row: {}".format(row))
+        res = self.check_data_func()
+        self.logger.debug(res)
+        # for index, row in self.config.iterrows():
+        #     self.logger.debug(pformat(row.to_dict()))
+        #     break
 
-
+        return review_result
 
 
 if __name__ == '__main__':
     # loan_acknowledgement = LoanAcknowledgement("DocumentReview/Config/loan.csv", content="data/DocData/IOU.docx",
     #                                            mode="docx")
-    loan_acknowledgement = LoanUIEAcknowledgement("DocumentReview/Config/LoanConfig/jietiao_rule.csv",
+    loan_acknowledgement = LoanUIEAcknowledgement("DocumentReview/Config/LoanConfig/jietiao_rule_20220525.csv",
                                                   content="data/DocData/IOU.docx",
                                                   mode="docx")
     pprint(loan_acknowledgement.review_main())

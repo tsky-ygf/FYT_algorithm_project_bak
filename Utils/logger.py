@@ -7,34 +7,82 @@
 # @Software: PyCharm
 import logging
 import time
+import colorlog
+
+log_colors_config = {
+    'DEBUG': 'white',  # cyan white
+    'INFO': 'green',
+    'WARNING': 'yellow',
+    'ERROR': 'red',
+    'CRITICAL': 'bold_red',
+}
 
 
 # 打印日志
-def get_module_logger(module_name, level="INFO"):
-    module_name = "tst.{}".format(module_name)
-    module_logger = logging.getLogger(module_name)
+def get_module_logger(module_name, level="INFO", console=True, logger_file=None):
+    # global console_handler, file_handler
+    logger = logging.getLogger(module_name)
+    console_handler = None
+    file_handler = None
+    # 输出到控制台
+    if console:
+        console_handler = logging.StreamHandler()
+    # 输出到文件
+    if logger_file is not None:
+        file_handler = logging.FileHandler(filename=logger_file, mode='a', encoding='utf8')
 
     if level.upper() == "INFO":
-        module_logger.setLevel(logging.INFO)
+        logger.setLevel(logging.INFO)
+        if console:
+            console_handler.setLevel(logging.INFO)
+        if logger_file is not None:
+            file_handler.setLevel(logging.INFO)
     elif level.upper() == "DEBUG":
-        module_logger.setLevel(logging.DEBUG)
+        logger.setLevel(logging.DEBUG)
+        if console:
+            console_handler.setLevel(logging.DEBUG)
+        if logger_file is not None:
+            file_handler.setLevel(logging.DEBUG)
     elif level.upper() == "WARNING":
-        module_logger.setLevel(logging.WARNING)
+        logger.setLevel(logging.WARNING)
+        if console:
+            console_handler.setLevel(logging.WARNING)
+        if logger_file is not None:
+            file_handler.setLevel(logging.WARNING)
     elif level.upper() == "ERROR":
-        module_logger.setLevel(logging.ERROR)
+        logger.setLevel(logging.ERROR)
+        if console:
+            console_handler.setLevel(logging.ERROR)
+        if logger_file is not None:
+            file_handler.setLevel(logging.ERROR)
 
-    module_logger.propagate = False
-
-    formatter = logging.Formatter(
-        "%(asctime)s [%(levelname)s] %(filename)s %(lineno)s :\n %(message)s \n"
-        "----------------------------------------------------------------------"
+    # 日志输出格式
+    file_formatter = logging.Formatter(
+        fmt='[%(asctime)s.%(msecs)03d] %(filename)s -> %(funcName)s line:%(lineno)d [%(levelname)s] : %(message)s',
+        datefmt='%Y-%m-%d  %H:%M:%S'
     )
+    console_formatter = colorlog.ColoredFormatter(
+        fmt='%(log_color)s[%(asctime)s.%(msecs)03d] %(filename)s -> %(funcName)s line:%(lineno)d [%(levelname)s] : %(message)s',
+        datefmt='%Y-%m-%d  %H:%M:%S',
+        log_colors=log_colors_config
+    )
+    if console:
+        console_handler.setFormatter(console_formatter)
+    if logger_file is not None:
+        file_handler.setFormatter(file_formatter)
 
-    console_handler = logging.StreamHandler()
-    console_handler.setFormatter(formatter)
-    module_logger.handlers.append(console_handler)
+    if not logger.handlers:
+        if console:
+            logger.addHandler(console_handler)
+        if logger_file is not None:
+            logger.addHandler(file_handler)
 
-    return module_logger
+    if console:
+        console_handler.close()
+    if logger_file is not None:
+        file_handler.close()
+
+    return logger
 
 
 # 计算函数执行时间

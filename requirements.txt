@@ -24,3 +24,4 @@ tensorboard
 plotly
 ipython
 six
+regex
