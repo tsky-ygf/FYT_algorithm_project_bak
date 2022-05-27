@@ -20,6 +20,14 @@ log_colors_config = {
 
 # 打印日志
 def get_module_logger(module_name, level="INFO", console=True, logger_file=None):
+    """
+
+    :param module_name: module name
+    :param level: logger level
+    :param console: use console or not
+    :param logger_file: write log to file or not
+    :return:
+    """
     # global console_handler, file_handler
     logger = logging.getLogger(module_name)
     console_handler = None
