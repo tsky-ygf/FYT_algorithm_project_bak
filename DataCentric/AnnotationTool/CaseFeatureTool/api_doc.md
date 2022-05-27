@@ -130,13 +130,29 @@
 请求地址: `http://172.19.82.199:6021/getSecondCheckTrue/`  
 请求方式: `POST`    
 请求参数: `{  
-            "checkperson":"",
+            "suqiu":"",
+            "jiufen_type":"",
+            "source":"",
+            "content":"",
+            "mention":"",
+            "situation":"",
+            "startposition":"",
+            "endpostion":"",
+            "pos_neg":"",
+            "labelingdate":"",
+            "labelingperson":"",
+            "checkperson":"",  
+            "checkResult":"",      不填:二次审核正确，填写(可以填任何内容):审核有问题
             "id":"",
          }`        
 返回参数: `{
-    "data_list": update success, 
+    "result": update success, 
     "error_msg": "",
     "status": 0, }
+}`
+异常参数: `{
+    "error_msg": "no check person",
+    "status": 1,
 }`
 
 
