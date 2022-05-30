@@ -336,16 +336,16 @@ def get_day_work_count(person):
     return res
 
 def get_second_check(anyou):
-    anyou_type, anyou_x = anyou.split('_')
     if anyou == "借贷纠纷_民间借贷":
         try:
             cursor = connect_labels_marking_records.cursor(cursor=pymysql.cursors.DictCursor)
             sql = f"""
             SELECT * 
             FROM labels_law_entity_feature 
-            WHERE suqiu='{anyou_type}' 
-            and jiufen_type='{anyou_x}' 
+            WHERE suqiu='借贷纠纷' 
+            and jiufen_type='民间借贷' 
             and checkperson is null 
+            order by id
             limit 1;
             """
             cursor.execute(sql)
@@ -387,9 +387,11 @@ def save_second_check_proson(data_dict):
         connect_labels_marking_records.rollback()
         raise RuntimeError("更新数据库时间失败")
 
-# if __name__ == '__main__':
-#     print(get_day_work_count('shj'))
-#     # def get_second_check(anyou):
-#     #     anyou_type, anyou_x = anyou.split('_')
-#     #     if anyou == "借贷纠纷_民间借贷":
+if __name__ == '__main__':
+    pass
+#     print(get_case_feature_dict1('婚姻继承_离婚'))
+    # print(get_second_check('借贷纠纷_民间借贷'))
+    # def get_second_check(anyou):
+    #     anyou_type, anyou_x = anyou.split('_')
+    #     if anyou == "借贷纠纷_民间借贷":
 
