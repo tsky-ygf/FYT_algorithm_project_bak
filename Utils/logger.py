@@ -5,9 +5,140 @@
 # @Site    : 
 # @File    : logger.py
 # @Software: PyCharm
+import contextlib
+import functools
 import logging
 import time
+import threading
+# from typing import List
+
 import colorlog
+# from colorama import Fore
+
+# loggers = {}
+
+log_config = {
+    'DEBUG': {
+        'level': 10,
+        'color': 'purple'
+    },
+    'INFO': {
+        'level': 20,
+        'color': 'green'
+    },
+    'TRAIN': {
+        'level': 21,
+        'color': 'cyan'
+    },
+    'EVAL': {
+        'level': 22,
+        'color': 'blue'
+    },
+    'WARNING': {
+        'level': 30,
+        'color': 'yellow'
+    },
+    'ERROR': {
+        'level': 40,
+        'color': 'red'
+    },
+    'CRITICAL': {
+        'level': 50,
+        'color': 'bold_red'
+    }
+}
+
+
+class Logger(object):
+    """
+    Deafult logger in FYT_Project
+    Args:
+        name(str) : Logger name, default is 'FYTProject'
+    """
+
+    def __init__(self, name: str=None, level: str='INFO'):
+        name = 'FYTProject' if not name else name
+        self.logger = logging.getLogger(name)
+
+        for key, conf in log_config.items():
+            logging.addLevelName(conf['level'], key)
+            self.__dict__[key] = functools.partial(self.__call__, conf['level'])
+            self.__dict__[key.lower()] = functools.partial(self.__call__,
+                                                           conf['level'])
+
+        self.format = colorlog.ColoredFormatter(
+            '%(log_color)s[%(asctime)-15s] [%(levelname)8s]%(reset)s - %(message)s',
+            log_colors={
+                key: conf['color']
+                for key, conf in log_config.items()
+            })
+
+        self.handler = logging.StreamHandler()
+        self.handler.setFormatter(self.format)
+
+        self.logger.addHandler(self.handler)
+        self.logLevel = level
+        if level.upper() == "INFO":
+            self.logger.setLevel(logging.INFO)
+        elif level.upper() == "DEBUG":
+            self.logger.setLevel(logging.DEBUG)
+        elif level.upper() == "WARNING":
+            self.logger.setLevel(logging.WARNING)
+        elif level.upper() == "ERROR":
+            self.logger.setLevel(logging.ERROR)
+
+        self.logger.propagate = False
+        self._is_enable = True
+
+    def disable(self):
+        self._is_enable = False
+
+    def enable(self):
+        self._is_enable = True
+
+    @property
+    def is_enable(self) -> bool:
+        return self._is_enable
+
+    def __call__(self, log_level: str, msg: str):
+        if not self.is_enable:
+            return
+
+        self.logger.log(log_level, msg)
+
+    @contextlib.contextmanager
+    def use_terminator(self, terminator: str):
+        old_terminator = self.handler.terminator
+        self.handler.terminator = terminator
+        yield
+        self.handler.terminator = old_terminator
+
+    @contextlib.contextmanager
+    def processing(self, msg: str, interval: float=0.1):
+        """
+        Continuously print a progress bar with rotating special effects.
+        Args:
+            msg(str): Message to be printed.
+            interval(float): Rotation interval. Default to 0.1.
+        """
+        end = False
+
+        def _printer():
+            index = 0
+            flags = ['\\', '|', '/', '-']
+            while not end:
+                flag = flags[index % len(flags)]
+                with self.use_terminator('\r'):
+                    self.info('{}: {}'.format(msg, flag))
+                time.sleep(interval)
+                index += 1
+
+        t = threading.Thread(target=_printer)
+        t.start()
+        yield
+        end = True
+
+# logger = Logger()
 
 log_colors_config = {
     'DEBUG': 'white',  # cyan white
@@ -21,7 +152,6 @@ log_colors_config = {
 # 打印日志
 def get_module_logger(module_name, level="INFO", console=True, logger_file=None):
     """
-
     :param module_name: module name
     :param level: logger level
     :param console: use console or not
@@ -91,7 +221,6 @@ def get_module_logger(module_name, level="INFO", console=True, logger_file=None)
         file_handler.close()
 
     return logger
-
 
 # 计算函数执行时间
 def print_run_time(func):
