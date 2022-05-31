@@ -99,6 +99,11 @@ class LoanUIEAcknowledgement(LoanAcknowledgement):
                     self.review_result[row["schema"]]["审核结果"] = "没有该项目内容"
                     self.review_result[row["schema"]]["法律建议"] = row["neg legal advice"]
 
+                # if row['neg reule'] == "未识别":
+                #     self.review_result[row["schema"]]["内容"] = row["schema"]
+                #     self.review_result[row["schema"]]["审核结果"] = "没有该项目内容"
+                #     self.review_result[row["schema"]]["法律建议"] = row["neg legal advice"]
+
                 continue
             if row["pos rule"] == "识别":
                 self.review_result[row["schema"]]["内容"] = extraction_res[row["schema"]][0]["text"]
@@ -211,7 +216,7 @@ class LoanUIEAcknowledgement(LoanAcknowledgement):
         #     break
 
 
-loan_acknowledgement = LoanUIEAcknowledgement("DocumentReview/Config/LoanConfig/jietiao_20220527.csv")
+loan_acknowledgement = LoanUIEAcknowledgement("DocumentReview/Config/LoanConfig/jietiao_20220530.csv")
 
 if __name__ == '__main__':
     # loan_acknowledgement = LoanAcknowledgement("DocumentReview/Config/loan.csv", content="data/DocData/IOU.docx",
