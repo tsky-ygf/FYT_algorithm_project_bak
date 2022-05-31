@@ -4,23 +4,23 @@ import os
 import sys
 import logging
 import numpy as np
+import collections
+
 sys.path.append(os.path.abspath('../'))
 sys.path.append(os.path.abspath('../common'))
 sys.path.append(os.path.abspath('../prediction'))
-from config_loader import *
-from common import single_case_match, LogicTree, get_next_suqiu_or_factor
-from data_util import text_underline
+from LawsuitPrejudgment.common.config_loader import *
+from LawsuitPrejudgment.common import single_case_match, LogicTree, get_next_suqiu_or_factor
+from LawsuitPrejudgment.common.data_util import text_underline
 # from prediction import support_possibility_fasttext as predict
 # from fasttext_predict import predict as predict
-from bert_predict import predict as predict
-import collections
-
+from LawsuitPrejudgment.prediction.bert_predict import predict as predict
 
 logging.basicConfig(level=logging.DEBUG)
 
 match_factor_group = {
     '劳动社保': [['养老保险', '医疗保险', '失业保险', '生育保险']],
-    '借贷纠纷': [['金融借贷', '个人之间借贷','企业之间借贷','个人与企业之间借贷']],
+    '借贷纠纷': [['金融借贷', '个人之间借贷', '企业之间借贷', '个人与企业之间借贷']],
     # "租赁合同":[[]],
 }
 
@@ -48,7 +48,7 @@ def predict_fn(problem, claim_list, fact, question_answers, factor_sentence_list
     if problem == "合伙协议纠纷":
         problem = "合伙协议"
 
-    claim_list=['减少租金或者不支付租金' if c =='减少租金或则不支付租金' else c for c in claim_list]
+    claim_list = ['减少租金或者不支付租金' if c == '减少租金或则不支付租金' else c for c in claim_list]
 
     # 1. 初始化诉求结果
     logging.info('5.1. initial suqiu result')
@@ -56,7 +56,7 @@ def predict_fn(problem, claim_list, fact, question_answers, factor_sentence_list
     for suqiu in user_ps[problem]:
         if suqiu not in claim_list:
             continue
-        logic_problem_suqius += user_ps2logic_ps[problem+'_'+suqiu]
+        logic_problem_suqius += user_ps2logic_ps[problem + '_' + suqiu]
 
     # Kiwi Debug
     logging.info('logic_problem_suqius:')
@@ -66,21 +66,20 @@ def predict_fn(problem, claim_list, fact, question_answers, factor_sentence_list
     for suqiu in user_ps[problem]:
         if suqiu not in claim_list:
             continue
-        prob_problem_suqius += user_ps2prob_ps[problem+'_'+suqiu]
-
+        prob_problem_suqius += user_ps2prob_ps[problem + '_' + suqiu]
 
     # 2. 诉求选择对应的默认特征
     logging.info('5.2. add logic suqiu factor')
     suqiu_factor = {}
     for ps in logic_problem_suqius:
         if ps in logic_ps_factor:
-            for f, v in logic_ps_factor[ps].items(): # 诉求配置中的logic_ps_factor
+            for f, v in logic_ps_factor[ps].items():  # 诉求配置中的logic_ps_factor
                 suqiu_factor[f] = v
 
     # 3. 特征匹配
     logging.info('5.3. factor match')
     factor_sentence_list = {}
-    if len(factor_sentence_list_)>0 or len(question_answers)>0:
+    if len(factor_sentence_list_) > 0 or len(question_answers) > 0:
         # KIWI:不是首轮，已经匹配过特征，直接取出来就行。
         for factor_flags in factor_sentence_list_:
             sentence_matched, factor, flag, _ = factor_flags
@@ -95,7 +94,7 @@ def predict_fn(problem, claim_list, fact, question_answers, factor_sentence_list
 
                 # KIWI:我理解是，如['金融借贷', '个人之间借贷','企业之间借贷','个人与企业之间借贷']是互斥的。
                 # KIWI:正向匹配到其中一个特征，则设置其余特征为负向匹配。
-                if flag==-1:
+                if flag == -1:
                     continue
                 if problem not in match_factor_group:
                     continue
@@ -125,7 +124,7 @@ def predict_fn(problem, claim_list, fact, question_answers, factor_sentence_list
         next_question_debug_info = None
 
         next = get_next_suqiu_or_factor(ps, suqiu_result, suqiu_factor, question_answers, factor_sentence_list)
-        if next is None:    # 有前置诉求或特征并且不满足
+        if next is None:  # 有前置诉求或特征并且不满足
             suqiu_result[suqiu] = -1
             if ps in logic_ps_result:
                 tree = LogicTree(problem, suqiu, debug)
@@ -140,7 +139,7 @@ def predict_fn(problem, claim_list, fact, question_answers, factor_sentence_list
                 logging.info('前提不满足且不在logic_ps_result中。' + ' ' + str(suqiu))
                 suqiu_debug_info = "诉求处理情况: 前提不满足且不在logic_ps_result中。"
                 debug_info[str(suqiu)] = suqiu_debug_info
-        elif next[0] == 'factor':   # 有factor不确定的情况
+        elif next[0] == 'factor':  # 有factor不确定的情况
             question_next = factor_question_dict[ps][next[1]]
             question_type = '1' if question_next not in question_multiple_dict[ps] else '2'
             # KIWI
@@ -150,13 +149,13 @@ def predict_fn(problem, claim_list, fact, question_answers, factor_sentence_list
             suqiu_debug_info = suqiu_debug_info + '\n' + next_question_debug_info
             debug_info[str(suqiu)] = suqiu_debug_info
             break
-        else:   # next = ('suqiu', suqiu)
+        else:  # next = ('suqiu', suqiu)
             tree = LogicTree(problem, next[1], debug)
 
             # 将特征结果加入
-            for factor, flag in suqiu_factor.items(): # 特征默认值
+            for factor, flag in suqiu_factor.items():  # 特征默认值
                 tree.add_match_result(factor, flag, None)
-            for factor, sentence in factor_sentence_list.items():   # 用户输入的特征
+            for factor, sentence in factor_sentence_list.items():  # 用户输入的特征
                 sentence_matched, flag = sentence
                 tree.add_match_result(factor, flag, sentence_matched)
             for question, answers in question_answers.items():  # 问答的输入特征
@@ -228,7 +227,7 @@ def predict_fn(problem, claim_list, fact, question_answers, factor_sentence_list
                     legal_advice.append(advice)
                     support_value.append(support)
 
-            if len(result_value)==0:
+            if len(result_value) == 0:
                 continue
 
             result = result_value[0]
@@ -238,7 +237,8 @@ def predict_fn(problem, claim_list, fact, question_answers, factor_sentence_list
             support = support_value[0]
 
             support_or_not = '支持' if result == 1 else '不支持'
-            reason, possibility_support = reason_probability_correct(prob_suqiu, inputs, support, reason, possibility_support, debug)
+            reason, possibility_support = reason_probability_correct(prob_suqiu, inputs, support, reason,
+                                                                     possibility_support, debug)
             report_dict[prob_suqiu] = {'reason_of_evaluation': reason,
                                        'evidence_module': proof,
                                        'legal_advice': advice,
@@ -250,9 +250,9 @@ def predict_fn(problem, claim_list, fact, question_answers, factor_sentence_list
     result_dict['question_type'] = question_type  # 下一个要问的问题的类型
 
     result_dict['factor_sentence_list'] = [[s[0], f, s[1], ''] for f, s in factor_sentence_list.items()]  # 匹配到短语的列表，去重
-    result_dict['result'] = report_dict     # 评估报告，包括评估理由、证据模块、法律建议、支持与否
+    result_dict['result'] = report_dict  # 评估报告，包括评估理由、证据模块、法律建议、支持与否
 
-    result_dict['debug_info'] = debug_info  #记录中间信息，方便定位问题
+    result_dict['debug_info'] = debug_info  # 记录中间信息，方便定位问题
     return result_dict
 
 
@@ -280,14 +280,14 @@ def reason_probability_correct(suqiu, inputs, support, reason, probability, debu
     elif support == '不满足前提':
         probability = probability / 2
 
-    probability = min(probability, 0.85+np.random.random()*0.05)  # 最后输出不会超过0.93
-    probability = max(probability, 0.1+np.random.random()*0.05)
+    probability = min(probability, 0.85 + np.random.random() * 0.05)  # 最后输出不会超过0.93
+    probability = max(probability, 0.1 + np.random.random() * 0.05)
     if not debug:
         reason = text_underline(reason)
     return reason, probability
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     # claim_list=["离婚", "财产分割"] # "离婚",
     # fact="男女双方自愿/不自愿（不自愿的原因）登记结婚，婚后育有x子/女，现 x岁， 因xx原因离婚。婚姻/同居期间，有存款x元、房屋x处、车子x辆、债务x元。（双方是否对子女、财产、债务等达成协议或已有法院判决，协议或判决内容，双方对协议或判决的履行情况）。"
     # problem="婚姻家庭"
@@ -339,11 +339,12 @@ if __name__=='__main__':
     # print("###第0次调用输入。problem:", problem, ";claim_list:", claim_list, ";fact:", fact, ";question_answers:", question_answers, ";factor_sentence_list:", factor_sentence_list)
     # print("###第0次调用结果:", result_0)
 
-    claim_list=["减少租金或者不支付租金"] # "离婚",
-    fact="11111111"
-    problem="租赁合同"
-    factor_sentence_list= []
-    question_answers={}
+    claim_list = ["减少租金或者不支付租金"]  # "离婚",
+    fact = "11111111"
+    problem = "租赁合同"
+    factor_sentence_list = []
+    question_answers = {}
     result_0 = predict_fn(problem, claim_list, fact, question_answers, factor_sentence_list)
-    print("###第0次调用输入。problem:", problem, ";claim_list:", claim_list, ";fact:", fact, ";question_answers:", question_answers, ";factor_sentence_list:", factor_sentence_list)
+    print("###第0次调用输入。problem:", problem, ";claim_list:", claim_list, ";fact:", fact, ";question_answers:",
+          question_answers, ";factor_sentence_list:", factor_sentence_list)
     print("###第0次调用结果:", result_0)

@@ -5,7 +5,7 @@ import logging
 import logging.handlers
 from flask import Flask
 from flask import request
-from reasoning_graph_predict import predict_fn
+from LawsuitPrejudgment.main.reasoning_graph_predict import predict_fn
 
 """
 推理图谱的接口

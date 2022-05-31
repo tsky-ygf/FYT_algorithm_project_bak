@@ -5,8 +5,8 @@ import logging
 import logging.handlers
 from flask import Flask
 from flask import request
-from reasoning_graph_predict import predict_fn
-
+from LawsuitPrejudgment.main.reasoning_graph_predict import predict_fn
+from LawsuitPrejudgment.common.config_loader import *
 """
 推理图谱的接口，添加了中间过程信息，用于测试。
 """
@@ -37,7 +37,7 @@ logger.addHandler(handler)
 # }
 
 
-@app.route('/reasoning_graph_testing_result', methods=["post"])  # "service_type":'ft'
+@app.route('/reasoning_graph_testing/get_result', methods=["post"])  # "service_type":'ft'
 def hello_world():
     try:
         in_json = request.get_data()
@@ -71,6 +71,21 @@ def hello_world():
     except Exception as e:
        logging.info(traceback.format_exc())
        return json.dumps({"error_msg": "unknown error:" + repr(e), "status": 1}, ensure_ascii=False)
+
+
+@app.route('/reasoning_graph_testing/get_anyou_list', methods=["get"])
+def get_anyou_list():
+    return {
+        "anyou_list": user_ps.keys().tolist()
+    }
+
+
+@app.route('/reasoning_graph_testing/get_suqiu_list', methods=["get"])
+def get_suqiu_list():
+    anyou = request.args.get("anyou")
+    return {
+        "suqiu_list": user_ps[anyou]
+    }
 
 
 if __name__ == "__main__":

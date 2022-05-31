@@ -5,8 +5,9 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "6"
 import sys
 sys.path.append(os.path.abspath('../'))
 sys.path.append(os.path.abspath('../common'))
-from reasoning_graph_predict import predict_fn
-from config_loader import *
+from LawsuitPrejudgment.main.reasoning_graph_predict import predict_fn
+from LawsuitPrejudgment.common.config_loader import *
+
 logging.basicConfig(level=logging.DEBUG)
 
 
@@ -18,7 +19,7 @@ def demo():
     # 选择诉求
     print('可选诉求: ', ';'.join(user_ps[problem]))
     suqius = input('请输入您的诉求: ')
-    claim_list = [suqiu.strip() for suqiu in suqius.split(';') if len(suqiu.strip())>0]
+    claim_list = [suqiu.strip() for suqiu in suqius.split(';') if len(suqiu.strip()) > 0]
     sentence = input('请输入遇到的问题: ')
 
     question_answers = {}
@@ -52,7 +53,7 @@ def demo():
         print('result_dict:')
         print(result_dict)
     for suqiu, result in result_dict['result'].items():
-        print('*'*50)
+        print('*' * 50)
         print(suqiu, result['support_or_not'], result['possibility_support'])
         print(result['reason_of_evaluation'])
         print()
