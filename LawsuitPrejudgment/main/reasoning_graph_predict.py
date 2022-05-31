@@ -45,6 +45,8 @@ def predict_fn(problem, claim_list, fact, question_answers, factor_sentence_list
         problem = "买卖合同"
     if problem == "服务合同纠纷":
         problem = "服务合同"
+    if problem == "合伙协议纠纷":
+        problem = "合伙协议"
 
     claim_list=['减少租金或者不支付租金' if c =='减少租金或则不支付租金' else c for c in claim_list]
 
