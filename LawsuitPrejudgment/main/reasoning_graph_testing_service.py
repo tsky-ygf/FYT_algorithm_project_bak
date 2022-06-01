@@ -55,7 +55,7 @@ def hello_world():
             logging.info("3.fact: %s" % (fact))
             logging.info("4.question_answers: %s" % (question_answers))
 
-            result_dict = predict_fn(problem, claim_list, fact, question_answers, factor_sentence_list)
+            result_dict = predict_fn(problem, claim_list, fact, question_answers, factor_sentence_list, True)
 
             logging.info("5.result.result_dict: %s" % (result_dict))
 
