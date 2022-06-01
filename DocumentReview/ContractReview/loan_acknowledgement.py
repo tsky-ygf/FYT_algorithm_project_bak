@@ -54,9 +54,9 @@ class LoanAcknowledgement:
 
 
 class LoanUIEAcknowledgement(LoanAcknowledgement):
-    def __init__(self, config_path):
+    def __init__(self, config_path, log_level="INFO"):
         super().__init__(config_path=config_path)
-        self.logger = Logger(name="LoanAcknowledgement", level="info").logger
+        self.logger = Logger(name="LoanAcknowledgement", level=log_level).logger
         self.schema = list(set(self.config['schema'].tolist()))
         # self.logger.debug("schema: {}".format(self.schema))
         # exit(
@@ -76,7 +76,7 @@ class LoanUIEAcknowledgement(LoanAcknowledgement):
         return res
 
     def rule_judge(self, extraction_res):
-        self.logger.info(pformat(extraction_res))
+        # self.logger.info(pformat(extraction_res))
 
         for index, row in self.config.iterrows():
             # self.logger.debug(pformat(row.to_dict()))
@@ -99,7 +99,7 @@ class LoanUIEAcknowledgement(LoanAcknowledgement):
                     self.review_result[row["schema"]]["审核结果"] = "没有该项目内容"
                     self.review_result[row["schema"]]["法律建议"] = row["neg legal advice"]
 
-                # if row['neg reule'] == "未识别":
+                # if row['neg rule'] == "未识别":
                 #     self.review_result[row["schema"]]["内容"] = row["schema"]
                 #     self.review_result[row["schema"]]["审核结果"] = "没有该项目内容"
                 #     self.review_result[row["schema"]]["法律建议"] = row["neg legal advice"]
@@ -112,10 +112,10 @@ class LoanUIEAcknowledgement(LoanAcknowledgement):
 
             if row["pos rule"] == "匹配":
                 keyword_list = row["pos keywords"].split("|")
-                if row["schema"] == "标题":
-                    self.logger.debug(pformat(keyword_list))
-                    self.logger.debug(pformat(extraction_res[row["schema"]]))
-                    # exit()
+                # if row["schema"] == "标题":
+                #     self.logger.debug(pformat(keyword_list))
+                #     self.logger.debug(pformat(extraction_res[row["schema"]]))
+                # exit()
                 if extraction_res[row["schema"]][0]["text"] in keyword_list:
                     self.review_result[row["schema"]]["内容"] = extraction_res[row["schema"]][0]["text"]
                     self.review_result[row["schema"]]["审核结果"] = "通过"
@@ -190,9 +190,18 @@ class LoanUIEAcknowledgement(LoanAcknowledgement):
 
             if row["schema"] == "逾期利率":
                 if row['schema'] in extraction_res.keys() and "借款利率" in extraction_res.keys():
+                    self.logger.debug(extraction_res[row['schema']][0]['text'])
+                    if 'LPR' in extraction_res[row["schema"]][0]["text"].upper():
+                        multiple = re.search("\d+", extraction_res[row["schema"]][0]["text"]).group()
+                        self.logger.debug(multiple)
+                        if float(multiple) > 4:
+                            self.review_result[row["schema"]]["审核结果"] = "不通过"
+                        else:
+                            self.review_result[row["schema"]]["审核结果"] = "通过"
                     self.review_result[row["schema"]]["内容"] = extraction_res[row["schema"]][0]["text"]
-                    self.review_result[row["schema"]]["审核结果"] = "通过"
                     self.review_result[row["schema"]]["法律建议"] = "借贷双方对逾期利率有约定的，从其约定，但是以不超过合同成立时一年期贷款市场报价利率四倍为限。"
+                    # self.logger.info(extraction_res[row["schema"]][0]["text"])
+
                 elif "借款利率" not in extraction_res.keys():
                     self.review_result[row["schema"]]["内容"] = extraction_res[row["schema"]][0]["text"]
                     self.review_result[row["schema"]]["审核结果"] = "约定逾期利息,但约定了借款利息"
@@ -216,7 +225,7 @@ class LoanUIEAcknowledgement(LoanAcknowledgement):
         #     break
 
 
-loan_acknowledgement = LoanUIEAcknowledgement("DocumentReview/Config/LoanConfig/jietiao_20220530.csv")
+loan_acknowledgement = LoanUIEAcknowledgement("DocumentReview/Config/LoanConfig/jietiao_20220531.csv",log_level="INFO")
 
 if __name__ == '__main__':
     # loan_acknowledgement = LoanAcknowledgement("DocumentReview/Config/loan.csv", content="data/DocData/IOU.docx",

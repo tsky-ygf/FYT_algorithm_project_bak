@@ -7,7 +7,6 @@
 # @Software: PyCharm
 import streamlit as st
 from RelevantLaws.LegalLibrary.read_legal_from_db import search_data_from_es
-from RelevantLaws.LegalLibrary import templates
 from pprint import pprint
 
 legal_type = st.sidebar.selectbox("请选择法条种类", ["不指定", "宪法"], key="legal_type")
@@ -25,7 +24,7 @@ if isVaild == "缺失":
 
 if run:
     if text is not None:
-        query_list.append({"match": {"resultClause": text}})
+        query_list.append({"match": {"resultClause": text.replace(" ", "")}})
     if isVaild is not None and isVaild != "不指定":
         query_list.append({"term": {"isValid.keyword": isVaild}})
     if legal_type is not None and isVaild != "不指定":
@@ -43,6 +42,7 @@ if run:
         res_dict = {'标号': index, '标题': row['title'], '法律类别': row['source'], '时效性': row['isValid'],
                     '法条章节': row['resultChapter'], '法条条目': row['resultSection'], '法条内容': row['resultClause'], }
         st.write(res_dict)
+        st.write("-" * 20 + "我是分割线" + "-" * 20)
         # st.write(row['resultClause'])res_dict
         # st.write(templates.search_result(index, **res), unsafe_allow_html=True)
         # st.write(templates.tag_boxes(text, 'xxxxx', ''), unsafe_allow_html=True)

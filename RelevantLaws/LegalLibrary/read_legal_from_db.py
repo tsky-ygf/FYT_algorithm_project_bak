@@ -74,6 +74,7 @@ def search_data_from_es(query_body, _index_name='fvfg'):
     # print("Got %d Hits:" % res['hits']['total']['value'])
     res_list = [hit['_source'] for hit in res['hits']['hits']]
     df = pd.DataFrame(res_list)
+    df.fillna('', inplace=True)
     # pprint(res_list[0])
     return df
     # for index, hit in enumerate(res['hits']['hits']):

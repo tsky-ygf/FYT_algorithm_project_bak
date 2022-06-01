@@ -13,6 +13,7 @@ import threading
 # from typing import List
 
 import colorlog
+
 # from colorama import Fore
 
 # loggers = {}
@@ -56,7 +57,7 @@ class Logger(object):
         name(str) : Logger name, default is 'FYTProject'
     """
 
-    def __init__(self, name: str=None, level: str='INFO'):
+    def __init__(self, name: str = None, level: str = 'INFO'):
         name = 'FYTProject' if not name else name
         self.logger = logging.getLogger(name)
 
@@ -67,7 +68,9 @@ class Logger(object):
                                                            conf['level'])
 
         self.format = colorlog.ColoredFormatter(
-            '%(log_color)s[%(asctime)-15s] [%(levelname)8s]%(reset)s - %(message)s',
+            '%(log_color)s[%(asctime)-12s] [%(levelname)4s][%(filename)s -> %(funcName)s line:%(lineno)d]%(reset)s - '
+            '%(message)s',
+            datefmt='%Y-%m-%d  %H:%M:%S',
             log_colors={
                 key: conf['color']
                 for key, conf in log_config.items()
@@ -114,7 +117,7 @@ class Logger(object):
         self.handler.terminator = old_terminator
 
     @contextlib.contextmanager
-    def processing(self, msg: str, interval: float=0.1):
+    def processing(self, msg: str, interval: float = 0.1):
         """
         Continuously print a progress bar with rotating special effects.
         Args:
@@ -137,6 +140,7 @@ class Logger(object):
         t.start()
         yield
         end = True
+
 
 # logger = Logger()
 
@@ -221,6 +225,7 @@ def get_module_logger(module_name, level="INFO", console=True, logger_file=None)
         file_handler.close()
 
     return logger
+
 
 # 计算函数执行时间
 def print_run_time(func):
