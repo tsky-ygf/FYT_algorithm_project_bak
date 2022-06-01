@@ -63,9 +63,10 @@ def hello_world():
             question_next = result_dict['question_next']  # 下一个要问的问题
             question_type = result_dict['question_type']
             factor_sentence_list = result_dict['factor_sentence_list']   # 匹配到短语的列表
+            debug_info = result_dict['debug_info']
             result = result_dict['result']
             logging.info("6.service.result: %s" % (result))
-            return json.dumps({'question_asked': question_asked, 'question_next': question_next, "question_type": question_type, "factor_sentence_list": factor_sentence_list, "result": result, "error_msg": "", "status": 0}, ensure_ascii=False)
+            return json.dumps({'question_asked': question_asked, 'question_next': question_next, "question_type": question_type, "factor_sentence_list": factor_sentence_list, "debug_info": debug_info, "result": result, "error_msg": "", "status": 0}, ensure_ascii=False)
         else:
             return json.dumps({"error_msg": "data is None", "status": 1}, ensure_ascii=False)
     except Exception as e:
