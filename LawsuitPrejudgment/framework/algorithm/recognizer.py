@@ -214,11 +214,11 @@ def match_sentence_by_keyword(sentence, key_word):
         # index = key_word.index('(没|未|不|非|无)[^。；，：,;:？！!?\s]*') + len('(没|未|不|非|无)[^。；，：,;:？！!?\s]*')
         # index = key_word.index('(没有|没|未|不|非|无|未经|怠于)[^。；，：,;:？！!?\\s]*') + len('(没有|没|未|不|非|无|未经|怠于)[^。；，：,;:？！!?\\s]*')
         try:
-            index = key_word.index('(没有|没|未|不|非|无|未经|怠于)[^。；，：,;:？！!?\\s]*') + len('(没有|没|未|不|非|无|未经|怠于)[^。；，：,;:？！!?\\s]*')
+            index = key_word.index(str(sentence_keyword_dict['没有'])+'[^。；，：,;:？！!?\\s]*') + len(str(sentence_keyword_dict['没有'])+'[^。；，：,;:？！!?\\s]*')
         except:
             logger.error(traceback.format_exc())
             logger.warning(key_word)
-            index = key_word.index('(没有|没|未|不|非|无|未经|怠于)')
+            index = key_word.index(str(sentence_keyword_dict['没有']))
             
         tag = 1
         pattern = key_word[index]
