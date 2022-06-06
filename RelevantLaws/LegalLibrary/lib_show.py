@@ -30,20 +30,51 @@ text = st.text_input("请输入法条内容", value="", key="text")
 run = st.button("查询", key="run")
 # print(legal_type)
 # print(isValid)
-query_list = []
+sxx_list = []
+if yx:
+    sxx_list.append('有效')
+if yxg:
+    sxx_list.append('已修改')
+if swsx:
+    sxx_list.append('尚未生效')
+if yfz:
+    sxx_list.append('已废止')
 
+legal_list = []
+if xf:
+    legal_list.append('宪法')
+if fv:
+    legal_list.append('法律')
+if xzfg:
+    legal_list.append('行政法规')
+if jcfg:
+    legal_list.append('监察法规')
+if sfjs:
+    legal_list.append('司法解释')
+if dfxfg:
+    legal_list.append('地方性法规')
+
+query_list = []
 if run:
-    if text is not None:
-        query_list.append({"match": {"resultClause": text.replace(" ", "")}})
-    if isValid is not None and isValid != "不指定":
-        query_list.append({"term": {"isValid.keyword": isValid}})
-    if legal_type is not None and legal_type != "不指定":
-        query_list.append({"term": {"source.keyword": legal_type}})
+    text_list = text.split(' ')
+
+    if len(text_list) > 0:
+        for one_text in text_list:
+            query_list.append({"match_phrase": {"resultClause": one_text}})
+    if len(sxx_list) > 0:
+        query_list.append({"terms": {"isValid.keyword": sxx_list}})
+    if len(legal_list) > 0:
+        query_list.append({"terms": {"source.keyword": legal_list}})
 
     query_dict = {
-        "query": {"bool": {"must": query_list}},
-        "size": 10,
+        "query": {"bool": {"must": query_list, }},
+        "sort": [
+            {"isValid_weight": {"order": "asc"}},
+            {"legal_type_weight": {"order": "asc"}},
+        ],
+        "size": size,
     }
+
     pprint(query_dict)
     res = search_data_from_es(query_dict)
     # st.write(res)

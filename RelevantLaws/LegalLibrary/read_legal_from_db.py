@@ -26,10 +26,11 @@ index_name = "flfg"
 # legal_type = st.sidebar.selectbox("请选择法条种类", ["不指定", "宪法"], key="legal_type")
 # isValid = st.sidebar.selectbox("选择法律时效性", ["不指定", "有效", "已修改", "尚未生效", "已废止"], key="text")
 valid_mapping = {'有效': 0, '': 1, '已修改': 2, '尚未生效': 3, '已废止': 4}
-legal_mapping = {'宪法': 0, '法律': 1, '行政法规': 2, '监察法规': 3, '司法解释': 4, '地方性法规': 5}
+legal_mapping = {'宪法': 0, '法律': 1, '行政法规': 2, '监察法规': 3, '司法解释': 4, '地方法律法规': 5}
 
 db_name = 'test_falvfagui_data'
-table_name_list = ['test_flfg_result_xf', 'test_flfg_result_xzfg', 'test_flfg_result_falv']
+table_name_list = ['test_flfg_result_xf', 'test_flfg_result_xzfg', 'test_flfg_result_falv', 'test_flfg_result_dfxfg',
+                   'test_flfg_result_sfjs']
 
 
 # sqlcmd = """select * from test_falvfagui_data.test_flfg_result_xf"""
@@ -56,7 +57,8 @@ def handle_es(df_data):
     # 构造迭代器
     for index, row in df_data.iterrows():
         data_ori = row.to_dict()
-        use_data = ['isValid', 'resultChapter', 'resultClause', 'resultSection', 'title', 'md5Clause', 'source']
+        use_data = ['isValid', 'resultChapter', 'resultClause', 'resultSection', 'title', 'md5Clause', 'source',
+                    'locality']
         data_body = {key: value for key, value in data_ori.items() if key in use_data}
         data_body['isValid_weight'] = valid_mapping[data_body['isValid']]
         data_body['legal_type_weight'] = legal_mapping[data_body['source']]
@@ -101,9 +103,8 @@ def search_data_from_es(query_body, _index_name='flfg'):
 if __name__ == '__main__':
     # es_init()
     # es = Elasticsearch(hosts="127.0.0.1:9200")
-    # es.indices.delete(index='test-index', ignore=[400, 404])
     # print(es.cat.indices())
-    # insert_data_to_es()
+    insert_data_to_es()
     query_dict = {
         "query": {
             "bool": {
@@ -124,8 +125,8 @@ if __name__ == '__main__':
 
     # pd.set_option('display.width', 1000)
     # res_df = search_data_from_es({"query": {"match_all": {}}, "size": 10})
-    res_df = search_data_from_es(query_dict)
-    for index, row in res_df.iterrows():
-        pprint(row.to_dict())
-    #     print(row['resultClause'])
-    #     print('-' * 100)
+    # res_df = search_data_from_es(query_dict)
+    # for index, row in res_df.iterrows():
+    #     pprint(row.to_dict())
+    # #     print(row['resultClause'])
+    # #     print('-' * 100)
