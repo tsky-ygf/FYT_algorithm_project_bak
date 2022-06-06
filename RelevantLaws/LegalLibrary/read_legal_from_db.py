@@ -104,7 +104,7 @@ if __name__ == '__main__':
     # es_init()
     # es = Elasticsearch(hosts="127.0.0.1:9200")
     # print(es.cat.indices())
-    insert_data_to_es()
+    # insert_data_to_es()
     query_dict = {
         "query": {
             "bool": {
