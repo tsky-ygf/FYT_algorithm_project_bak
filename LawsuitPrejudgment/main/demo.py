@@ -3,8 +3,10 @@ import logging
 import os
 os.environ["CUDA_VISIBLE_DEVICES"] = "6"
 import sys
+sys.path.append(os.path.abspath('../../'))
 sys.path.append(os.path.abspath('../'))
 sys.path.append(os.path.abspath('../common'))
+sys.path.append(os.path.abspath('../prediction'))
 from LawsuitPrejudgment.main.reasoning_graph_predict import predict_fn
 from LawsuitPrejudgment.common.config_loader import *
 

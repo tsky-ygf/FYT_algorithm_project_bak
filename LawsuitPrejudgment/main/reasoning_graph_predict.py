@@ -6,6 +6,7 @@ import logging
 import numpy as np
 import collections
 
+sys.path.append(os.path.abspath('../../'))
 sys.path.append(os.path.abspath('../'))
 sys.path.append(os.path.abspath('../common'))
 sys.path.append(os.path.abspath('../prediction'))
@@ -47,6 +48,8 @@ def predict_fn(problem, claim_list, fact, question_answers, factor_sentence_list
         problem = "服务合同"
     if problem == "合伙协议纠纷":
         problem = "合伙协议"
+    if problem == "房产纠纷":
+        problem = "房屋买卖合同"
 
     claim_list = ['减少租金或者不支付租金' if c == '减少租金或则不支付租金' else c for c in claim_list]
 
