@@ -26,7 +26,8 @@ index_name = "flfg"
 # legal_type = st.sidebar.selectbox("请选择法条种类", ["不指定", "宪法"], key="legal_type")
 # isValid = st.sidebar.selectbox("选择法律时效性", ["不指定", "有效", "已修改", "尚未生效", "已废止"], key="text")
 valid_mapping = {'有效': 0, '': 1, '已修改': 2, '尚未生效': 3, '已废止': 4}
-legal_mapping = {'宪法': 0, '法律': 1, '行政法规': 2, '监察法规': 3, '司法解释': 4, '地方法律法规': 5}
+# legal_mapping = {'宪法': 0, '法律': 1, '行政法规': 2, '监察法规': 3, '司法解释': 4, '地方法律法规': 5}
+legal_mapping = {'法律': 0, '行政法规': 1, '监察法规': 2, '司法解释': 3, '宪法': 5, '地方性法规': 4}
 
 db_name = 'test_falvfagui_data'
 table_name_list = ['test_flfg_result_xf', 'test_flfg_result_xzfg', 'test_flfg_result_falv', 'test_flfg_result_dfxfg',
@@ -104,7 +105,7 @@ if __name__ == '__main__':
     # es_init()
     # es = Elasticsearch(hosts="127.0.0.1:9200")
     # print(es.cat.indices())
-    # insert_data_to_es()
+    insert_data_to_es()
     query_dict = {
         "query": {
             "bool": {

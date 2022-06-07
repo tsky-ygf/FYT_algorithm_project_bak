@@ -80,8 +80,12 @@ if run:
     # st.write(res)
     for index, row in res.iterrows():
         # pprint(row.to_dict())
-        res_dict = {'标号': index, '标题': row['title'], '法律类别': row['source'], '时效性': row['isValid'],
-                    '法条章节': row['resultChapter'], '法条条目': row['resultSection'], '法条内容': row['resultClause'], }
+        # break
+        if row['isValid'] == '有效':
+            row['isValid'] = '现行有效'
+        res_dict = {'标号': index, 'md5': row['md5Clause'], '标题': row['title'], '法律类别': row['source'],
+                    '时效性': row['isValid'], '使用范围': row['locality'], '法条章节': row['resultChapter'],
+                    '法条条目': row['resultSection'], '法条内容': row['resultClause'], }
         st.write(res_dict)
         st.write("-" * 20 + "我是分割线" + "-" * 20)
         # st.write(row['resultClause'])res_dict
