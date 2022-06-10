@@ -60,7 +60,10 @@ if run:
 
     if len(text_list) > 0:
         for one_text in text_list:
-            query_list.append({"match_phrase": {"resultClause": one_text}})
+            # query_list.append({'multi_match': {"query": one_text, "fields": ["title", "resultClause"],
+            #                                    "minimum_should_match": "100%"}})、
+            query_list.append({'bool': {'should': [{'match_phrase': {'resultClause': one_text}},
+                                                   {'match_phrase': {'title': one_text}}]}})
     if len(sxx_list) > 0:
         query_list.append({"terms": {"isValid.keyword": sxx_list}})
     if len(legal_list) > 0:
@@ -75,7 +78,9 @@ if run:
         "size": size,
     }
 
+    print("查询语句:")
     pprint(query_dict)
+    print('-' * 50)
     res = search_data_from_es(query_dict)
     # st.write(res)
     for index, row in res.iterrows():
@@ -83,6 +88,8 @@ if run:
         # break
         if row['isValid'] == '有效':
             row['isValid'] = '现行有效'
+        if row['locality'] == '':
+            row['locality'] = '全国'
         res_dict = {'标号': index, 'md5': row['md5Clause'], '标题': row['title'], '法律类别': row['source'],
                     '时效性': row['isValid'], '使用范围': row['locality'], '法条章节': row['resultChapter'],
                     '法条条目': row['resultSection'], '法条内容': row['resultClause'], }

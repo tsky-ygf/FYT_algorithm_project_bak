@@ -1,15 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @Time    : 2022/5/19 09:16
+# @Time    : 2022/6/8 14:24
 # @Author  : Adolf
 # @Site    : 
-# @File    : uie_extraction.py
+# @File    : test_app.py
 # @Software: PyCharm
-from DocumentReview.ParseFile.parse_word import read_docx_file
-from pprint import pprint
-from paddlenlp import Taskflow
+import requests
 
-text = '''执法部门:【浙江省杭州市临安区】浙江省杭州市临安区综合行政执法局
+url = "http://172.19.82.199:7998/administrative"
+r = requests.post(url, json={"content": '''执法部门:【浙江省杭州市临安区】浙江省杭州市临安区综合行政执法局
 行政处罚决定书:经查明，当事人楼国军于2022年04月24日驾驶车牌号为***A6J8C6的蓝
 色轻型自卸货车在杭州市*********的项目工地内运载工程渣土（碎石）到杭州市*********
 公墓西侧的场地内进行倾倒，共倾倒五车，于2022年04月25日11时18分被本局通过监控
@@ -20,8 +19,6 @@ text = '''执法部门:【浙江省杭州市临安区】浙江省杭州市临安
 ），当事人及时改正了违法行为。另经查证，当事人为本年度第一次从事该性质的违法行
 为，源头为区内且存在倾倒情形。现根据《杭州市城市市容和环境卫生管理条例》第六十
 一条第二款之规定，结合《杭州市城市管理行政处罚自由裁量权实施办法》，经本局负责
-人批准，决定对当事人作出如下行政处罚：罚款人民币贰仟元整（￥2000）。'''
-
-schema = ['行政主体', '行为', '尺度', '处罚', '证据', '法律依据', '违法行为']
-ie = Taskflow('information_extraction', schema=schema, device_id=1, task_path="model/uie_model/xz2/model_best")
-pprint(ie(text))
+人批准，决定对当事人作出如下行政处罚：罚款人民币贰仟元整（￥2000）。'''})
+result = r.json()
+print(result)

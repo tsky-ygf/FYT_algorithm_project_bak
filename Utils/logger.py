@@ -12,6 +12,7 @@ import time
 import threading
 # from typing import List
 
+import uuid
 import colorlog
 
 # from colorama import Fore
@@ -52,14 +53,22 @@ log_config = {
 
 class Logger(object):
     """
-    Deafult logger in FYT_Project
+    Default logger in FYT_Project
     Args:
         name(str) : Logger name, default is 'FYTProject'
     """
 
     def __init__(self, name: str = None, level: str = 'INFO'):
-        name = 'FYTProject' if not name else name
+        name = 'FYTProject-{}'.format(uuid.uuid1()) if not name else name
         self.logger = logging.getLogger(name)
+        # self.logger.propagate = False
+
+        # logging.Logger.manager.loggerDict.pop(__name__)
+        # 将当前文件的handlers 清空
+        # self.logger.handlers = []
+        # 然后再次移除当前文件logging配置
+        # self.logger.removeHandler(self.logger.handlers)
+        # self.logger.handlers.clear()
 
         for key, conf in log_config.items():
             logging.addLevelName(conf['level'], key)
@@ -76,10 +85,11 @@ class Logger(object):
                 for key, conf in log_config.items()
             })
 
-        self.handler = logging.StreamHandler()
-        self.handler.setFormatter(self.format)
+        if not self.logger.handlers:
+            self.handler = logging.StreamHandler()
+            self.handler.setFormatter(self.format)
+            self.logger.addHandler(self.handler)
 
-        self.logger.addHandler(self.handler)
         self.logLevel = level
         if level.upper() == "INFO":
             self.logger.setLevel(logging.INFO)

@@ -49,3 +49,6 @@ def get_translation_res():
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=7999, debug=False)  # , use_reloader=False)
+    # en_res = translation1('你好世界')[0]['translation_text']
+    # ch_res = translation2(en_res)[0]['translation_text']
+    # print(ch_res)

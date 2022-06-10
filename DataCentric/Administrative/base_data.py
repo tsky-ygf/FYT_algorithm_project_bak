@@ -24,13 +24,15 @@ connect_big_data = pymysql.connect(host='172.19.82.227',
 sqlcmd = """select * from test_falvfagui_data.xzcf_data limit 120"""
 df = pd.read_sql(sqlcmd, connect_big_data)
 
+# print(df)
+#
 for index, row in df.iterrows():
     content = row.to_dict()
-    # pprint(content)
+    pprint(content)
     section = content['section']
     event_text = content['event_text']
-    # print(section)
-    # print(event_text)
-    file = Path('data/doccano_data/input_xz/') / 'xz_{}.txt'.format(index)
-    file.write_text('执法部门:{}\n行政处罚决定书:{}'.format(section, event_text))
+#     # print(section)
+#     # print(event_text)
+#     file = Path('data/doccano_data/input_xz/') / 'xz_{}.txt'.format(index)
+#     file.write_text('执法部门:{}\n行政处罚决定书:{}'.format(section, event_text))
     # break

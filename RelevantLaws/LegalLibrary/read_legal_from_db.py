@@ -105,29 +105,25 @@ if __name__ == '__main__':
     # es_init()
     # es = Elasticsearch(hosts="127.0.0.1:9200")
     # print(es.cat.indices())
-    insert_data_to_es()
-    query_dict = {
-        "query": {
-            "bool": {
-                "must": [
-                    {"match_phrase": {"resultClause": "中国"}},
-                    # {'terms': {'isValid.keyword': ['有效', '']}},
-                    # {"term": {"source.keyword": "宪法"}},
-                ],
-            }
-        },
-        "sort": [
-            {"isValid_weight": {"order": "asc"}},
-            {"legal_type_weight": {"order": "asc"}},
-        ],
-        "size": 10,
-    }
+    # insert_data_to_es()
+    query_dict = {'query': {'bool':
+        {'must': [
+            {'bool': {'should': [{'match_phrase': {'resultClause': "涉外"}},
+                                 {'match_phrase': {'title': "涉外"}}]}},
+            {'bool': {'should': [{'match_phrase': {'resultClause': "离婚"}},
+                                 {'match_phrase': {'title': "离婚"}}]}},
+            {'terms': {'isValid.keyword': ['有效']}},
+            {'terms': {'source.keyword': ['法律']}}]}},
+        'size': 10,
+        'sort': [{'isValid_weight': {'order': 'asc'}},
+                 {'legal_type_weight': {'order': 'asc'}}]}
+
     # # print(get_df_from_sql(table_name_list[0]))
 
     # pd.set_option('display.width', 1000)
     # res_df = search_data_from_es({"query": {"match_all": {}}, "size": 10})
-    # res_df = search_data_from_es(query_dict)
-    # for index, row in res_df.iterrows():
-    #     pprint(row.to_dict())
-    # #     print(row['resultClause'])
-    # #     print('-' * 100)
+    res_df = search_data_from_es(query_dict)
+    for index, row in res_df.iterrows():
+        pprint(row.to_dict())
+        # #     print(row['resultClause'])
+        # #     print('-' * 100)
