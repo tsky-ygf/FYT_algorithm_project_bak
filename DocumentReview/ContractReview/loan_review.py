@@ -73,12 +73,13 @@ class LoanUIEAcknowledgement(BasicUIEAcknowledgement):
             if row["schema"] == "借款金额":
                 # self.logger.debug(row)
                 self.logger.debug(extraction_res[row["schema"]])
-                if len(row["schema"]) == 1:
+                if len(extraction_res[row["schema"]]) == 1:
                     amount = float(re.search("\d+(.\d{2})?", extraction_res[row["schema"]][0]['text']).group())
                     chinese_amount = "".join(re.findall("[\u4e00-\u9fa5]", extraction_res[row["schema"]][0]['text']))
                     # chinese_amount.replace("人民币", "")
                 else:
                     if len(re.findall('\d+(.\d{2})?', extraction_res[row["schema"]][0]['text'])) > 0:
+                        # self.logger.debug()
                         amount = extraction_res[row['schema']][0]['text']
                         chinese_amount = extraction_res[row["schema"]][1]['text']
                     else:
@@ -140,7 +141,7 @@ if __name__ == '__main__':
     #                                            mode="docx")
     # print(10000)
     acknowledgement = LoanUIEAcknowledgement(config_path="DocumentReview/Config/LoanConfig/jietiao_20220531.csv",
-                                             log_level="info",
+                                             log_level="debug",
                                              model_path="model/uie_model/model_best/")
 
     text = "借条\n本人王志伟（身份证号码：7836728790127862234），因家庭生活困难，于2022年5月9日向金珉宇（身份证号码：278368\
@@ -149,6 +150,6 @@ if __name__ == '__main__':
         担保费等相关费用。\n借款人确认浙江省宁波市北仑区解放路811号地址作为送达催款函以及法院送达文书诉讼文书的地址，若借款人未及时书面告\
         知出借人变更后的地址，导致相关文书及诉讼文书未能实际被接收的、邮寄送达的，相关文书及诉讼文书退回之日即视为送达之日。\n借款人：王志伟\
         \n2021年5月9日"
-    # loan_acknowledgement.review_main(content="data/DocData/IOU.docx", mode="docx")
-    acknowledgement.review_main(content=text, mode="text")
+    acknowledgement.review_main(content="data/DocData/jkht/借 条.docx", mode="docx")
+    # acknowledgement.review_main(content=text, mode="text")
     pprint(acknowledgement.review_result)

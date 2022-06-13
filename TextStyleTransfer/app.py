@@ -14,6 +14,10 @@ import json
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 from transformers import pipeline
 
+import os
+
+os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
+
 app = Flask(__name__)
 app.config['JSON_SORT_KEYS'] = False
 CORS(app)
