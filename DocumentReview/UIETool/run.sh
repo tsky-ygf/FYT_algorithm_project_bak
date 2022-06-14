@@ -1,10 +1,11 @@
-python DocumentReview/UIETool/doccano.py --doccano_file data/doccano_data/jkht/jk1.json \
-      --task_type "ext" --save_dir data/doccano_data/jkht/ --splits 0.7 0.3 0
+#python DocumentReview/UIETool/doccano.py --doccano_file data/doccano_data/labor/labor.json \
+#      --task_type "ext" --save_dir data/doccano_data/labor/ --splits 0.7 0.3 0
 
-python DocumentReview/UIETool/finetune.py \
-    --train_path "data/doccano_data/jkht/train.txt" \
-    --dev_path "data/doccano_data/jkht/dev.txt" \
-    --save_dir "model/uie_model/jkht" \
+export CUDA_VISIBLE_DEVICES=2;
+python -m pdb DocumentReview/UIETool/finetune.py \
+    --train_path "data/doccano_data/labor/train.txt" \
+    --dev_path "data/doccano_data/labor/dev.txt" \
+    --save_dir "model/uie_model/labor" \
     --learning_rate 1e-5 \
     --batch_size 16 \
     --max_seq_len 512 \
