@@ -15,6 +15,7 @@ from Utils import Logger
 from DocumentReview.ParseFile.parse_word import read_docx_file
 
 from paddlenlp import Taskflow
+from id_validator import validator
 
 
 class BasicAcknowledgement:
@@ -121,6 +122,13 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
                 self.review_result[row["schema"]]["审核结果"] = "通过"
                 self.review_result[row["schema"]]["法律建议"] = row["pos legal advice"]
 
+        if row["pos rule"] == "正则匹配":
+            # if extraction_res[row["schema"]][0]["text"] in keyword_list:
+            if len(re.findall(row["pos keywords"], extraction_res[row["schema"]][0]["text"])) > 0:
+                self.review_result[row["schema"]]["内容"] = extraction_res[row["schema"]][0]["text"]
+                self.review_result[row["schema"]]["审核结果"] = "通过"
+                self.review_result[row["schema"]]["法律建议"] = row["pos legal advice"]
+
         if row["neg rule"] == "匹配":
             neg_keyword_list = row["neg keywords"].split("|")
             legal_advice_list = row["neg legal advice"].split("|")
@@ -146,3 +154,20 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
                 continue
 
             self.specific_rule(row, extraction_res)
+
+    def id_card_rule(self, row, extraction_res):
+        if row['schema'] == "身份证号码/统一社会信用代码":
+            if "身份证号码/统一社会信用代码" in extraction_res or '身份证号' in extraction_res:
+                id_card = extraction_res[row["schema"]][0]["text"]
+                if validator.is_valid(id_card):
+                    self.review_result[row["schema"]]["内容"] = extraction_res[row["schema"]][0]["text"]
+                    self.review_result[row["schema"]]["审核结果"] = "通过"
+                    self.review_result[row["schema"]]["法律建议"] = row["pos legal advice"]
+                else:
+                    self.review_result[row["schema"]]["内容"] = extraction_res[row["schema"]][0]["text"]
+                    self.review_result[row["schema"]]["审核结果"] = "不通过"
+                    self.review_result[row["schema"]]["法律建议"] = "输入的身份证账号存在错误"
+            else:
+                self.review_result[row["schema"]]["内容"] = "未识别到该项内容"
+                self.review_result[row["schema"]]["审核结果"] = "不通过"
+                self.review_result[row["schema"]]["法律建议"] = row["neg legal advice"]

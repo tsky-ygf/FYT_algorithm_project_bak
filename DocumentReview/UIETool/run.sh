@@ -1,8 +1,8 @@
 #python DocumentReview/UIETool/doccano.py --doccano_file data/doccano_data/labor/labor.json \
-#      --task_type "ext" --save_dir data/doccano_data/labor/ --splits 0.7 0.3 0
+#      --task_type "ext" --save_dir data/doccano_data/labor/ --splits 0.8 0.2 0
 
 export CUDA_VISIBLE_DEVICES=2;
-python -m pdb DocumentReview/UIETool/finetune.py \
+python DocumentReview/UIETool/finetune.py \
     --train_path "data/doccano_data/labor/train.txt" \
     --dev_path "data/doccano_data/labor/dev.txt" \
     --save_dir "model/uie_model/labor" \

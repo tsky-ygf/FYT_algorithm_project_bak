@@ -3,7 +3,7 @@
 # @Time    : 2022/5/25 16:12
 # @Author  : Adolf
 # @Site    : 
-# @File    : data_hadle.py
+# @File    : data_handle.py
 # @Software: PyCharm
 from pathlib import Path
 
@@ -41,4 +41,26 @@ def trans_csv_txt(csv_path):
     # print(df)
 
 
-trans_csv_txt("data/DocData/origin.csv")
+# trans_csv_txt("data/DocData/origin.csv")
+
+
+def handle_txt(txt_path):
+    txt_path = Path(txt_path)
+    for index, ht_file in enumerate(list(txt_path.glob('*.txt'))):
+        try:
+            content = ht_file.read_text(encoding='utf-8')
+            content = content.replace(' ', '').replace('\u3000', '').replace('\t', '').replace('\n\n', '\n')
+            content = content.replace('\n\n', '').replace('?', '')
+        except Exception as e:
+            print(index)
+            print(e)
+            print('-' * 50)
+            continue
+        # print(repr(content))
+        # break
+        file = Path('data/doccano_data/input_labor') / 'labor_{}.txt'.format(index)
+        file.write_text(content)
+        # index += 1
+
+
+handle_txt(txt_path='data/doccano_data/input_labor')

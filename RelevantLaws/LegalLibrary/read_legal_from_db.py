@@ -105,7 +105,7 @@ if __name__ == '__main__':
     # es_init()
     # es = Elasticsearch(hosts="127.0.0.1:9200")
     # print(es.cat.indices())
-    # insert_data_to_es()
+    insert_data_to_es()
     query_dict = {'query': {'bool':
         {'must': [
             {'bool': {'should': [{'match_phrase': {'resultClause': "涉外"}},
@@ -122,8 +122,8 @@ if __name__ == '__main__':
 
     # pd.set_option('display.width', 1000)
     # res_df = search_data_from_es({"query": {"match_all": {}}, "size": 10})
-    res_df = search_data_from_es(query_dict)
-    for index, row in res_df.iterrows():
-        pprint(row.to_dict())
+    # res_df = search_data_from_es(query_dict)
+    # for index, row in res_df.iterrows():
+    #     pprint(row.to_dict())
         # #     print(row['resultClause'])
         # #     print('-' * 100)
