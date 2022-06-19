@@ -5,25 +5,19 @@
 # @Site    : 
 # @File    : trainer.py
 # @Software: PyCharm
+# import traceback
+
+# try:
+from regex import F
 from Tools.train_tool import BaseTrainTool
-from transformers import (
-    CONFIG_MAPPING,
-    MODEL_FOR_MASKED_LM_MAPPING,
-    AutoConfig,
-    AutoModelForMaskedLM,
-    AutoTokenizer,
-    HfArgumentParser,
-    TrainingArguments,
-    default_data_collator,
-    set_seed,
-    BertForPreTraining,
-)
+
+from transformers import AutoTokenizer,BertForPreTraining
 from BasicTask.SentenceEmbedding.simcse.models import RobertaForCL, BertForCL
 
 
 
 class TrainSimces(BaseTrainTool):
-    def __init__(self, config_path, model_name):
+    def __init__(self, config_path):
         # self.bert_config, self.bert_model, self.bert_tokenizer, self.bert_dataset = MODEL_CLASSES[model_name]
         # self.num_labels = len(self.bert_dataset.label_list)
         super(TrainSimces, self).__init__(config_path=config_path)
@@ -32,20 +26,43 @@ class TrainSimces(BaseTrainTool):
 
     def init_model(self):
         tokenizer_kwargs = {
-            "cache_dir": self.config.cache_dir,
-            "use_fast": self.config.use_fast_tokenizer,
-            "revision": self.config.model_revision,
-            "use_auth_token": True if self.config.use_auth_token else None,
+            "cache_dir": self.config['tokenizer_cache_dir'],
+            "use_fast": self.config['use_fast_tokenizer'],
+            "revision": self.config['model_revision'],
+            "use_auth_token": True if self.config['use_auth_token'] else None,
         }
-        if self.config.tokenizer_name:
-            tokenizer = AutoTokenizer.from_pretrained(self.config.tokenizer_name, **tokenizer_kwargs)
-        elif self.config.model_name_or_path:
-            tokenizer = AutoTokenizer.from_pretrained(self.config.model_name_or_path, **tokenizer_kwargs)
+
+        if 'pre_train_tokenizer' in self.config:
+            tokenizer = AutoTokenizer.from_pretrained(self.config['pre_train_tokenizer'], **tokenizer_kwargs)
         else:
-            raise ValueError(
-                "You are instantiating a new tokenizer from scratch. This is not supported by this script."
-                "You can do it from another script, save it, and load it from here, using --tokenizer_name."
-            )
+            tokenizer = AutoTokenizer.from_pretrained(self.config['pre_train_model'], **tokenizer_kwargs)
+
+        if 'pre_train_model' in self.config:
+            if 'roberta' in self.config['pre_train_model']:
+                model = RobertaForCL.from_pretrained(
+                    self.config['pre_train_model'],
+                    from_tf=False,
+                    config=config,
+                    cache_dir=model_args.cache_dir,
+                    revision=self.config['model_revision'],
+                    use_auth_token=True if self.config['use_auth_token'] else None,
+                    model_args=model_args                  
+                )
+            elif 'bert' in self.config['pre_train_model']:
+                model = BertForCL.from_pretrained(
+                    self.config['pre_train_model'],
+                    from_tf=False,
+                    config=config,
+                    cache_dir=model_args.cache_dir,
+                    revision=self.config['model_revision'],
+                    use_auth_token=True if self.config['use_auth_token'] else None,
+                    model_args=model_args
+                )
+                if model_args.do_mlm:
+                    pretrained_model = BertForPreTraining.from_pretrained(self.config['pre_train_model'])
+                    model.lm_head.load_state_dict(pretrained_model.cls.predictions.state_dict())
+
+        model.resize_token_embeddings(len(tokenizer))
         return tokenizer, model
 
     # def data_collator(self, batch):
@@ -70,3 +87,7 @@ class TrainSimces(BaseTrainTool):
     # outputs = self.model(**inputs)
     # loss = outputs[0]
     # return loss
+
+if __name__ == '__main__':
+    TrainSimces(config_path="BasicTask/SentenceEmbedding/simcse/config.yaml").train_main()
+
