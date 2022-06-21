@@ -1,5 +1,5 @@
 #log_level:
-is_debug: Fasle
+is_debug: False
 log_level: "INFO"
 log_path: "log/tensorboard_log/simcse"
 
@@ -24,20 +24,30 @@ do_adv: False
 adv_name: "word_embeddings"
 adv_epsilon: 1.0
 
+# data args:
+preprocessing_num_workers: null
+pad_to_max_length: False
+overwrite_cache: False
+
 #model args:
 #num_labels: 11
 max_length: 128
 dropout: 0.1
-soft_label: True
-loss_type: "ce"
+cache_dir: null
+pooler_type: "cls"
+mlm_weight: 0.1
+temp: 0.05
+
 #tokenizer args:
-tokenizer_cache_dir: null
 use_fast_tokenizer: True
 model_revision: main
 use_auth_token: False
+
+
+do_mlm: False
 
 pre_train_tokenizer: "model/language_model/bert-base-chinese"
 pre_train_model: "model/language_model/bert-base-chinese"
 
 # output model path
-output_dir: ""
+output_dir: "model/tmp/nizhu"

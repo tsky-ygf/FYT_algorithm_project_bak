@@ -115,7 +115,7 @@ class BaseTrainTool:
         raise NotImplemented
 
     def data_collator(self, *args, **kwargs):
-        self.logger.info("Use default data collator")
+        self.logger.debug("Use default data collator")
         return default_data_collator(*args, **kwargs)
 
     def init_dataloader(self):

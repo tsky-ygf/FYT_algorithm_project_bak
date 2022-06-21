@@ -25,3 +25,7 @@ plotly
 ipython
 six
 regex
+colorlog
+datasets
+cn2an
+googletrans

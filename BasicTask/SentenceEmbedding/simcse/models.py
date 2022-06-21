@@ -92,11 +92,11 @@ def cl_init(cls, config):
     """
     Contrastive learning class init function.
     """
-    cls.pooler_type = cls.model_args.pooler_type
-    cls.pooler = Pooler(cls.model_args.pooler_type)
-    if cls.model_args.pooler_type == "cls":
+    cls.pooler_type = cls.model_args['pooler_type']
+    cls.pooler = Pooler(cls.model_args['pooler_type'])
+    if cls.model_args['pooler_type'] == "cls":
         cls.mlp = MLPLayer(config)
-    cls.sim = Similarity(temp=cls.model_args.temp)
+    cls.sim = Similarity(temp=cls.model_args['temp'])
     cls.init_weights()
 
 
@@ -138,7 +138,7 @@ def cl_forward(cls,
         head_mask=head_mask,
         inputs_embeds=inputs_embeds,
         output_attentions=output_attentions,
-        output_hidden_states=True if cls.model_args.pooler_type in ['avg_top2', 'avg_first_last'] else False,
+        output_hidden_states=True if cls.model_args['pooler_type'] in ['avg_top2', 'avg_first_last'] else False,
         return_dict=True,
     )
 
@@ -153,7 +153,7 @@ def cl_forward(cls,
             head_mask=head_mask,
             inputs_embeds=inputs_embeds,
             output_attentions=output_attentions,
-            output_hidden_states=True if cls.model_args.pooler_type in ['avg_top2', 'avg_first_last'] else False,
+            output_hidden_states=True if cls.model_args['pooler_type'] in ['avg_top2', 'avg_first_last'] else False,
             return_dict=True,
         )
 
@@ -283,10 +283,10 @@ class BertForCL(BertPreTrainedModel):
 
     def __init__(self, config, *model_args, **model_kargs):
         super().__init__(config)
-        self.model_args = model_kargs["model_args"]
+        self.model_args = model_kargs['model_kargs']
         self.bert = BertModel(config, add_pooling_layer=False)
 
-        if self.model_args.do_mlm:
+        if self.model_args['do_mlm']:
             self.lm_head = BertLMPredictionHead(config)
 
         cl_init(self, config)
@@ -334,7 +334,7 @@ class RobertaForCL(RobertaPreTrainedModel):
         self.model_args = model_kargs["model_args"]
         self.roberta = RobertaModel(config, add_pooling_layer=False)
 
-        if self.model_args.do_mlm:
+        if self.model_args['do_mlm']:
             self.lm_head = RobertaLMHead(config)
 
         cl_init(self, config)
