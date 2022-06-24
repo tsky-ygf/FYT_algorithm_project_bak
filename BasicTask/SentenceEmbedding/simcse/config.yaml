@@ -10,7 +10,7 @@ learning_rate: 0.00002
 num_train_epochs: 8
 early_stop_patience: 3
 
-lr_scheduler_type: "cosine" # "linear", "cosine", "cosine_with_restarts", "polynomial", "constant", "constant_with_warmup"
+lr_scheduler_type: "linear" # "linear", "cosine", "cosine_with_restarts", "polynomial", "constant", "constant_with_warmup"
 warmup_ratio: 0.1
 #num_warmup_steps: 100
 gradient_accumulation_steps: 1

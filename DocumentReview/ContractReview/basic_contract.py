@@ -17,6 +17,8 @@ from DocumentReview.ParseFile.parse_word import read_docx_file
 from paddlenlp import Taskflow
 from id_validator import validator
 
+from pprint import pprint, pformat
+
 
 class BasicAcknowledgement:
     def __init__(self, config_path, log_level):
@@ -60,8 +62,9 @@ class BasicAcknowledgement:
 class BasicUIEAcknowledgement(BasicAcknowledgement):
     def __init__(self, model_path='', device_id=0, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.schema = list(set(self.config['schema'].tolist()))
-        self.review_result = {schema: {} for schema in self.schema}
+        # self.schema = list(set(self.config['schema'].tolist()))
+        self.schema = self.config['schema'].tolist()
+        self.review_result = OrderedDict({schema: {} for schema in self.schema})
 
         self.data = ""
         # self.ie = Taskflow('information_extraction', schema=self.schema, device_id=1,
@@ -87,7 +90,7 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
         if row['pos rule'] == "关键词匹配":
             if len(re.findall(row["pos keywords"], self.data)) > 0:
                 # self.logger.debug("pos keywords match")
-                self.review_result[row["schema"]]["内容"] = row["schema"]
+                self.review_result[row["schema"]]["内容"] = row["pos keywords"]
                 self.review_result[row['schema']]["审核结果"] = "通过"
             else:
                 self.review_result[row["schema"]]["内容"] = row["schema"]
@@ -124,10 +127,16 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
 
         if row["pos rule"] == "正则匹配":
             # if extraction_res[row["schema"]][0]["text"] in keyword_list:
+            self.logger.debug(row['schema'])
+            self.logger.debug(extraction_res)
             if len(re.findall(row["pos keywords"], extraction_res[row["schema"]][0]["text"])) > 0:
                 self.review_result[row["schema"]]["内容"] = extraction_res[row["schema"]][0]["text"]
                 self.review_result[row["schema"]]["审核结果"] = "通过"
                 self.review_result[row["schema"]]["法律建议"] = row["pos legal advice"]
+            else:
+                self.review_result[row["schema"]]["内容"] = row["schema"]
+                self.review_result[row["schema"]]["审核结果"] = "没有该项目内容"
+                self.review_result[row["schema"]]["法律建议"] = row["neg legal advice"]
 
         if row["neg rule"] == "匹配":
             neg_keyword_list = row["neg keywords"].split("|")
@@ -154,6 +163,11 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
                 continue
 
             self.specific_rule(row, extraction_res)
+
+        self.logger.debug(self.review_result)
+        # self.logger.debug(self.schema)
+        # return_review_result = {key: self.review_result[key] for key in self.schema}
+        # self.logger.debug(pformat(return_review_result))
 
     def id_card_rule(self, row, extraction_res):
         if row['schema'] == "身份证号码/统一社会信用代码":

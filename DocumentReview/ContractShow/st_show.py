@@ -8,7 +8,7 @@
 import streamlit as st
 from DocumentReview.ParseFile.parse_word import read_docx_file
 
-contract_type = st.sidebar.selectbox("请选择合同类型", ["借条", "借款合同", "劳动合同"], key="合同类型")
+contract_type = st.sidebar.selectbox("请选择合同类型", ["借条", "借款合同", "劳动合同", '租房合同'], key="合同类型")
 mode_type = st.sidebar.selectbox("请选择上传数据格式", ["text", "docx"], key="text")
 
 if contract_type == '借条':
@@ -30,6 +30,12 @@ elif contract_type == '劳动合同':
     acknowledgement = LaborUIEAcknowledgement(config_path="DocumentReview/Config/LaborConfig/labor_20220615.csv",
                                               log_level="info",
                                               model_path="model/uie_model/labor/model_best")
+elif contract_type == '租房合同':
+    from DocumentReview.ContractReview.lease_review import LeaseUIEAcknowledgement
+
+    acknowledgement = LeaseUIEAcknowledgement(config_path="DocumentReview/Config/LeaseConfig/fangwu.csv",
+                                              log_level="debug",
+                                              model_path="model/uie_model/fwzl/model_best")
 else:
     raise Exception("暂时不支持该合同类型")
 
@@ -97,6 +103,9 @@ if mode_type == "text":
                      行。\n第五条双方解除或终止劳动合同应按法定程序办理，甲方为乙方出具终止、解除劳动合同的通知书或相关证明。符合法律、法规规定的，支付乙方经济\
                      补偿。\n第六条其他未尽事项按照国家及地方现行有关规定执行。\n第七条双方其他约定\n第八条本合同双方各执一份，涂改或未经授权代签无效。\n甲方签\
                      字(盖章)乙方签字\n签订时间：2022年1月1日\n劳动者合同文本已领签字", key="text")
+    elif contract_type == '租房合同':
+        text = st.text_area(label="请输入文本内容", height=600,
+                            value="", key="text")
     else:
         raise Exception("暂时不支持该合同类型")
 
