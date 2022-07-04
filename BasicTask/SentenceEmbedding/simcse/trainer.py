@@ -6,7 +6,6 @@
 # @File    : trainer.py
 # @Software: PyCharm
 # import traceback
-
 from Tools.train_tool import BaseTrainTool
 
 from transformers import AutoTokenizer, BertForPreTraining, AutoConfig

@@ -29,3 +29,4 @@ colorlog
 datasets
 cn2an
 googletrans
+docarray
