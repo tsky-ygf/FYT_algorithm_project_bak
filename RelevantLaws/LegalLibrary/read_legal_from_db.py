@@ -29,9 +29,9 @@ valid_mapping = {'有效': 0, '': 1, '已修改': 2, '尚未生效': 3, '已废�
 # legal_mapping = {'宪法': 0, '法律': 1, '行政法规': 2, '监察法规': 3, '司法解释': 4, '地方法律法规': 5}
 legal_mapping = {'法律': 0, '行政法规': 1, '监察法规': 2, '司法解释': 3, '宪法': 5, '地方性法规': 4}
 
-db_name = 'test_falvfagui_data'
-table_name_list = ['test_flfg_result_xf', 'test_flfg_result_xzfg', 'test_flfg_result_falv', 'test_flfg_result_dfxfg',
-                   'test_flfg_result_sfjs']
+db_name = 'falvfagui_data'
+table_name_list = ['flfg_result_dfxfg', 'flfg_result_falv', 'flfg_result_sfjs', 'flfg_result_xf',
+                   'flfg_result_xzfg']
 
 
 # sqlcmd = """select * from test_falvfagui_data.test_flfg_result_xf"""
@@ -125,5 +125,5 @@ if __name__ == '__main__':
     # res_df = search_data_from_es(query_dict)
     # for index, row in res_df.iterrows():
     #     pprint(row.to_dict())
-        # #     print(row['resultClause'])
-        # #     print('-' * 100)
+    # #     print(row['resultClause'])
+    # #     print('-' * 100)

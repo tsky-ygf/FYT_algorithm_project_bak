@@ -34,7 +34,7 @@ elif contract_type == '租房合同':
     from DocumentReview.ContractReview.lease_review import LeaseUIEAcknowledgement
 
     acknowledgement = LeaseUIEAcknowledgement(config_path="DocumentReview/Config/LeaseConfig/fangwu.csv",
-                                              log_level="debug",
+                                              log_level="info",
                                               model_path="model/uie_model/fwzl/model_best")
 else:
     raise Exception("暂时不支持该合同类型")

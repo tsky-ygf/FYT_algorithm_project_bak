@@ -1,5 +1,5 @@
-#python DocumentReview/UIETool/doccano.py --doccano_file data/doccano_data/maimai/maimai.json \
-#      --task_type "ext" --save_dir data/doccano_data/maimai/ --splits 0.8 0.2 0
+python DocumentReview/UIETool/doccano.py --doccano_file data/doccano_data/maimai/maimai.json \
+      --task_type "ext" --save_dir data/doccano_data/maimai/ --splits 0.8 0.2 0
 
 export CUDA_VISIBLE_DEVICES=2;
 python DocumentReview/UIETool/finetune.py \

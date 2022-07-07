@@ -5,9 +5,14 @@
 # @Site    : 
 # @File    : lib_show.py
 # @Software: PyCharm
+import jieba
 import streamlit as st
 from RelevantLaws.LegalLibrary.read_legal_from_db import search_data_from_es
 from pprint import pprint
+
+from Utils.logger import Logger
+
+logger = Logger(name='law-lib', level='debug').logger
 
 # legal_type = st.sidebar.selectbox("请选择法条种类", ["不指定", "宪法"], key="legal_type")
 st.sidebar.write('选择法条种类')
@@ -56,7 +61,11 @@ if dfxfg:
 
 query_list = []
 if run:
+    text = " ".join(jieba.cut(text))
+    logger.info(text)
     text_list = text.split(' ')
+
+    logger.info('查询的'.format(text_list))
 
     if len(text_list) > 0:
         for one_text in text_list:

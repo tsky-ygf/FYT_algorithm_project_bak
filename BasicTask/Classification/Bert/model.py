@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @Time    : 2022/3/25 23:15
+# @Time    : 2022/7/7 14:53
 # @Author  : Adolf
 # @Site    : 
-# @File    : multi_label_model.py
+# @File    : model.py
 # @Software: PyCharm
-import torch
 from torch import nn
 from transformers import AutoModel
 

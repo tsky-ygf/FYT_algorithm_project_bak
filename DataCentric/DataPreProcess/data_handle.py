@@ -20,9 +20,12 @@ def trans_docx_to_txt(docx_path):
         # print(read_docx_file(jt_file))
         # break
         # print(jt_file)
-        file = Path('data/DocData/result2') / 'jietiao_{}.txt'.format(index)
-        file.write_text("\n".join(read_docx_file(jt_file)))
+        file = Path('data/doccano_data/car2') / 'car_{}.txt'.format(index)
+        file.write_text("".join(read_docx_file(jt_file)).replace('\t', '').replace('\n', ''))
         index += 1
+
+
+trans_docx_to_txt(docx_path='data/doccano_data/car')
 
 
 def trans_csv_txt(csv_path):
@@ -49,8 +52,8 @@ def handle_txt(txt_path):
     for index, ht_file in enumerate(list(txt_path.glob('*.txt'))):
         try:
             content = ht_file.read_text(encoding='utf-8')
-            content = content.replace(' ', '').replace('\u3000', '').replace('\t', '').replace('\n\n', '\n')
-            content = content.replace('\n\n', '').replace('?', '')
+            content = content.replace(' ', '').replace('\u3000', '').replace('\t', '').replace('\n', '')
+            content = content.replace('?', '')
         except Exception as e:
             print(index)
             print(e)
@@ -58,9 +61,8 @@ def handle_txt(txt_path):
             continue
         # print(repr(content))
         # break
-        file = Path('data/doccano_data/input_labor') / 'labor_{}.txt'.format(index)
+        file = Path('data/doccano_data/input_maimai_v2') / 'maimai_{}.txt'.format(index)
         file.write_text(content)
         # index += 1
 
-
-handle_txt(txt_path='data/doccano_data/input_labor')
+# handle_txt(txt_path='data/doccano_data/input_maimai')
