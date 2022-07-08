@@ -49,7 +49,6 @@ def create_examples(data_path, set_tpye):
 class LawsClsTrainer(TrainClassification):
     def __init__(self, config):
         super(LawsClsTrainer, self).__init__(config, create_examples=create_examples)
-        self.create_examples = create_examples
 
 
 class LawsClsInfer(INferClassification):
