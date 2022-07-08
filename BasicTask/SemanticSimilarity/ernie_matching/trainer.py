@@ -3,7 +3,7 @@
 # @Time    : 2022/6/30 15:08
 # @Author  : Adolf
 # @Site    : 
-# @File    : trainer.py
+# @File    : relevant_law.py
 # @Software: PyCharm
 import pandas as pd
 import torch

@@ -14,10 +14,10 @@ import torch.utils.data as data
 class InputExample:
     """A single training/test example for token classification."""
 
-    def __init__(self, guid, text_a, subject):
+    def __init__(self, guid, text, label):
         self.guid = guid
-        self.text_a = text_a
-        self.subject = subject
+        self.text = text
+        self.label = label
 
     def __repr__(self):
         return str(self.to_json_string())
@@ -35,37 +35,45 @@ class InputExample:
 class DataProcessor:
     """Base class for data converters for sequence classification data sets."""
 
+    def __init__(self, create_examples=None):
+        if create_examples is not None:
+            self.create_examples = create_examples
+        else:
+            self.create_examples = self.read_examples
+
     def get_train_examples(self, data_dir):
         """Gets a collection of `InputExample`s for the train set."""
-        return self.create_examples(self.read_data(data_dir), "train")
+        return self.create_examples(data_dir, "train")
 
     def get_dev_examples(self, data_dir):
         """Gets a collection of `InputExample`s for the dev set."""
-        return self.create_examples(self.read_data(data_dir), "dev")
+        return self.create_examples(data_dir, "dev")
 
     def get_test_examples(self, data_dir):
         """Gets a collection of `InputExample`s for the test set."""
-        return self.create_examples(self.read_data(data_dir), "test")
+        return self.create_examples(data_dir, "test")
 
     @staticmethod
-    def create_examples(lines, set_type):
+    def read_examples(data_path, set_type):
         """Creates examples for the training and dev sets."""
+        with open(data_path, 'rb') as f:
+            lines = json.load(f)
         examples = []
         for (i, line) in enumerate(lines):
             guid = "%s-%s" % (set_type, i)
-            text_a = line['text']
-            subject = line['labels']
-            examples.append(InputExample(guid=guid, text_a=text_a, subject=subject))
+            text = line['text']
+            label = line['label']
+            examples.append(InputExample(guid=guid, text=text, label=label))
         return examples
 
-    @staticmethod
-    def read_data(data_dir):
-        raise NotImplementedError()
+    # @staticmethod
+    # def read_data(data_dir):
+    #     raise NotImplementedError()
 
 
 class BaseDataset(data.Dataset):
-    def __init__(self, data_dir_dict, tokenizer, mode, max_length=128, processor=None):
-        self.processor = processor
+    def __init__(self, data_dir_dict, tokenizer, mode, max_length=128, create_examples=None, is_debug=False):
+        self.processor = DataProcessor(create_examples=create_examples)
         self.mode = mode
 
         if mode == "train":
@@ -78,6 +86,8 @@ class BaseDataset(data.Dataset):
             raise ValueError("Invalid mode: %s" % mode)
         self.tokenizer = tokenizer
         self.max_length = max_length
+        if is_debug:
+            self.examples = self.examples[:100]
 
     def __len__(self):
         return len(self.examples)
@@ -88,8 +98,8 @@ class BaseDataset(data.Dataset):
 
     @staticmethod
     def prepare_input(example, tokenizer, max_len=512):
-        text = example['text']
-        label = example['subject']
+        text = example.text
+        label = example.label
 
         inputs = tokenizer(text,
                            add_special_tokens=True,
@@ -98,6 +108,6 @@ class BaseDataset(data.Dataset):
                            truncation=True,
                            return_offsets_mapping=False,
                            return_tensors="pt")
-        inputs['labels'] = label
+        inputs['label'] = label
 
         return inputs

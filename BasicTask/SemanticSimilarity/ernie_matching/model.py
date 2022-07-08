@@ -3,7 +3,7 @@
 # @Time    : 2022/6/30 14:16
 # @Author  : Adolf
 # @Site    : 
-# @File    : model.py
+# @File    : cls_model.py
 # @Software: PyCharm
 import torch
 import torch.nn as nn

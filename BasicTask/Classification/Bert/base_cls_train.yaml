@@ -1,6 +1,5 @@
 # log level
-is_debug: Fasle
-log_level: "INFO"
+is_debug: False
 
 # training args
 train_batch_size: 32

@@ -5,7 +5,7 @@
 # @Site    : 
 # @File    : train_tool.py
 # @Software: PyCharm
-import sys
+# import sys
 import os
 import shutil
 import torch
@@ -19,6 +19,8 @@ from Utils.logger import get_module_logger
 from Utils.parse_file import parse_config_file
 
 from torch.utils.tensorboard import SummaryWriter
+
+from Tools.data_pipeline import BaseDataset
 
 
 class FGM:
@@ -65,18 +67,19 @@ class FGM:
 
 
 class BaseTrainTool:
-    def __init__(self, config_path):
-        self.config = parse_config_file(config_path=config_path)
-        self.logger = get_module_logger(module_name="Train", level=self.config.get("log_level", "INFO"))
+    def __init__(self, config, create_examples=None):
+        self.config = parse_config_file(config)
+        self.logger = get_module_logger(module_name="Train", level="DEBUG" if self.config["is_debug"] else "INFO")
 
-        if os.path.exists(self.config["log_path"]):
+        if "log_path" in self.config and os.path.exists(self.config["log_path"]):
             shutil.rmtree(self.config["log_path"])
-        self.writer = SummaryWriter(log_dir=self.config["log_path"])
+            self.writer = SummaryWriter(log_dir=self.config["log_path"])
 
         self.accelerator = self.init_accelerator()
 
         self.tokenizer, self.model = self.init_model()
         self.train_dataset, self.eval_dataset = self.init_dataset()
+
         self.train_dataloader, self.eval_dataloader = self.init_dataloader()
 
         self.num_update_steps_per_epoch = math.ceil(
@@ -88,12 +91,13 @@ class BaseTrainTool:
         self.optimizer = self.init_optimizer()
         self.lr_scheduler = self.init_lr_scheduler()
 
+        self.create_examples = create_examples
         # Prepare everything with our `accelerator`.
         self.model, self.optimizer, self.train_dataloader, self.eval_dataloader, self.lr_scheduler = \
             self.accelerator.prepare(self.model, self.optimizer, self.train_dataloader, self.eval_dataloader,
                                      self.lr_scheduler)
 
-        if self.config["do_adv"]:
+        if "do_adv" in self.config and self.config["do_adv"]:
             self.fgm = FGM(self.model, emb_name=self.config["adv_name"], epsilon=self.config["adv_epsilon"])
 
         self.completed_steps = 0
@@ -112,7 +116,23 @@ class BaseTrainTool:
         raise NotImplemented
 
     def init_dataset(self, *args, **kwargs):
-        raise NotImplemented
+        data_dir_dict = {'train': self.config['train_data_path'],
+                         'dev': self.config['dev_data_path'],
+                         'test': self.config['test_data_path']}
+
+        train_dataset = BaseDataset(data_dir_dict,
+                                    tokenizer=self.tokenizer,
+                                    mode='train',
+                                    max_length=self.config['max_len'],
+                                    create_examples=self.create_examples,
+                                    is_debug=self.config['is_debug'])
+        eval_dataset = BaseDataset(data_dir_dict,
+                                   tokenizer=self.tokenizer,
+                                   mode='dev',
+                                   max_length=128,
+                                   create_examples=self.create_examples,
+                                   is_debug=self.config['is_debug'])
+        return train_dataset, eval_dataset
 
     def data_collator(self, *args, **kwargs):
         self.logger.debug("Use default data collator")
@@ -178,19 +198,22 @@ class BaseTrainTool:
             # self.accelerator.backward(loss, retain_graph=False)
             self.accelerator.backward(loss)
 
-            if self.config["do_adv"]:
+            if "do_adv" in self.config and self.config["do_adv"]:
                 self.fgm.attack()
                 loss_adv = self.cal_loss(batch)
                 loss_adv = loss_adv / self.config["gradient_accumulation_steps"]
                 self.accelerator.backward(loss_adv)
                 self.fgm.restore()
 
-            self.writer.add_scalar(tag="train_loss", scalar_value=loss.item(), global_step=self.completed_steps)
-            self.writer.add_scalar(tag="lr", scalar_value=self.optimizer.param_groups[0]["lr"],
-                                   global_step=self.completed_steps)
+            # if "log_path" in self.config:
+            if hasattr(self, "writer"):
+                self.writer.add_scalar(tag="train_loss", scalar_value=loss.item(), global_step=self.completed_steps)
+                self.writer.add_scalar(tag="lr", scalar_value=self.optimizer.param_groups[0]["lr"],
+                                       global_step=self.completed_steps)
 
             if step % self.config["gradient_accumulation_steps"] == 0 or step == len(self.train_dataloader) - 1:
-                torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.config["max_grad_norm"])
+                if hasattr(self, 'max_grad_norm'):
+                    torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.config["max_grad_norm"])
 
                 self.optimizer.step()
                 self.lr_scheduler.step()
@@ -239,7 +262,7 @@ class BaseTrainTool:
         if self.accelerator.is_main_process:
             self.tokenizer.save_pretrained(model_path)
 
-    def train_main(self):
+    def run(self):
         best_eval_loss = float("inf")
         patience = 0
 
@@ -263,7 +286,8 @@ class BaseTrainTool:
                 # torch.cuda.empty_cache()
                 eval_loss = self.eval_epoch()
                 self.logger.info("epoch:{}======>eval_loss: {}".format(epoch, eval_loss))
-                self.writer.add_scalar(tag="eval_loss", scalar_value=eval_loss, global_step=epoch)
+                if hasattr(self, 'writer'):
+                    self.writer.add_scalar(tag="eval_loss", scalar_value=eval_loss, global_step=epoch)
 
                 if eval_loss < best_eval_loss:
                     # self.save_model(
@@ -275,4 +299,3 @@ class BaseTrainTool:
                     self.save_model(model_path=self.config["output_dir"] + "/final")
                 else:
                     patience += 1
-

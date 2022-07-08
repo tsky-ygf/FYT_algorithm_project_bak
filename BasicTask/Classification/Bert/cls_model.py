@@ -3,7 +3,7 @@
 # @Time    : 2022/7/7 14:53
 # @Author  : Adolf
 # @Site    : 
-# @File    : model.py
+# @File    : cls_model.py
 # @Software: PyCharm
 from torch import nn
 from transformers import AutoModel
@@ -15,8 +15,8 @@ class MultiLabelClsModel(nn.Module):
         super(MultiLabelClsModel, self).__init__()
         self.config = config
 
-        self.model = AutoModel.from_pretrained(self.config["pre_train_model"])
-        hidden_size = self.model.config.hidden_size
+        self.ptm = AutoModel.from_pretrained(self.config["pre_train_model"])
+        hidden_size = self.ptm.config.hidden_size
         self.layer_norm = nn.LayerNorm(hidden_size)
         self.dropout = nn.Dropout(self.config["dropout"])
 
@@ -43,7 +43,7 @@ class MultiLabelClsModel(nn.Module):
     #         module.weight.data.fill_(1.0)
 
     def feature(self, inputs):
-        outputs = self.model(**inputs)
+        outputs = self.ptm(**inputs)
         last_hidden_states = outputs['last_hidden_state']
         return last_hidden_states
 

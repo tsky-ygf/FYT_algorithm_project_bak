@@ -3,7 +3,7 @@
 # @Time    : 2022/6/17 11:34
 # @Author  : Adolf
 # @Site    : 
-# @File    : trainer.py
+# @File    : relevant_law.py
 # @Software: PyCharm
 # import traceback
 from Tools.train_tool import BaseTrainTool
@@ -70,7 +70,7 @@ class TrainSimces(BaseTrainTool):
             )
             if self.config['do_mlm']:
                 pretrained_model = BertForPreTraining.from_pretrained(self.config['pre_train_model'])
-                model.lm_head.load_state_dict(pretrained_model.cls.predictions.state_dict())
+                model.lm_head.lod_state_dict(pretrained_model.cls.predictions.state_dict())
         else:
             raise ValueError('Not Implemented Another Model')
 

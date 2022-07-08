@@ -1,15 +1,17 @@
 from loguru import logger
 
+
 class Node:
-    def __init__(self,data):
+    def __init__(self, data):
         self.data = data
         self.next = None
 
-    def has_value(self,value):
+    def has_value(self, value):
         if self.data == value:
             return True
         else:
             return False
+
 
 class Singlelink():
 
@@ -22,8 +24,8 @@ class Singlelink():
     def is_empty(self):
         return self.length == 0
 
-    def add_node(self,item):
-        if not isinstance(item,Node):
+    def add_node(self, item):
+        if not isinstance(item, Node):
             item = Node(item)
         if self.head == None:
             self.head = item
@@ -33,7 +35,7 @@ class Singlelink():
             self.tail = item
         self.length += 1
 
-    def delete_node(self,index:int):
+    def delete_node(self, index: int):
         if self.is_empty():
             logger.info(f"'this link is empty")
             return
@@ -52,7 +54,7 @@ class Singlelink():
             del node
             self.length -= 1
 
-    def insert_node(self,index,data):
+    def insert_node(self, index, data):
         if self.is_empty():
             logger.info(f"'this link is empty")
             return
