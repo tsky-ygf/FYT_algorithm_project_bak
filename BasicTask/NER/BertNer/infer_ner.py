@@ -9,9 +9,9 @@ import os
 import torch
 from Tools.infer_tool import BaseInferTool
 from transformers import BertTokenizer, BertConfig
-from LawEntityExtraction.BertNer.ModelStructure.bert_ner_model import BertSpanForNer, BertCrfForNer
-from LawEntityExtraction.BertNer.model_ner_dataset import ClueNerSpanDataset, ClueNerCRFDataset
-from LawEntityExtraction.BertNer.metrics import SpanEntityScore
+from BasicTask.NER.BertNer.ModelStructure.bert_ner_model import BertSpanForNer, BertCrfForNer
+from BasicTask.NER.BertNer.model_ner_dataset import ClueNerSpanDataset, ClueNerCRFDataset
+from BasicTask.NER.BertNer.metrics import SpanEntityScore
 
 os.environ['CUDA_VISIBLE_DEVICES'] = '3'
 
@@ -128,10 +128,11 @@ class NerInferTool(BaseInferTool):
                                 truncation=True,
                                 return_offsets_mapping=False,
                                 return_tensors="pt")
-
-        outputs = self.model(input_ids=inputs['input_ids'],
-                             token_type_ids=inputs['token_type_ids'],
-                             attention_mask=inputs['attention_mask'])
+        # 加上inputs.to方法，防止two device, cuda, cpu
+        intputs_cuda = inputs.to(device=torch.device('cuda' if torch.cuda.is_available() else 'cpu'))
+        outputs = self.model(input_ids=intputs_cuda['input_ids'],
+                             token_type_ids=intputs_cuda['token_type_ids'],
+                             attention_mask=intputs_cuda['attention_mask'])
 
         start_logits, end_logits = outputs[:2]
         return self.pred_data_process(text, start_logits, end_logits)
@@ -209,7 +210,8 @@ class NerInferTool(BaseInferTool):
 
 
 if __name__ == '__main__':
-    ner_tool = NerInferTool(config_path="LawEntityExtraction/BertNer/Config/base_ner_infer.yaml")
+    # ner_tool = NerInferTool(config_path="/home/fyt/huangyulin/project/fyt/LawEntityExtraction/BertNer/Config/base_ner_infer.yaml")
     # print(ner_tool.infer(text="突袭黑暗雅典娜》中Riddick发现之前抓住他的赏金猎人Johns，"))
-    ner_tool.test_data()
-    # ner_tool.test_crf_data()
+    NerInferTool = NerInferTool(config_path="/home/fyt/huangyulin/project/fyt/BasicTask/NER/BertNer/Config/base_ner_infer.yaml")
+    NerInferTool.test_data()
+    # NerInferTool.test_crf_data()

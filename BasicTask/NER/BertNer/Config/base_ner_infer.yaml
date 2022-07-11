@@ -9,7 +9,7 @@ dropout: 0.1
 soft_label: True
 loss_type: "ce"
 
-test_batch_size: 32
+test_batch_size: 24
 
 pre_train_tokenizer: "model/language_model/bert-base-chinese"
 pre_train_model: "model/language_model/bert-base-chinese"
