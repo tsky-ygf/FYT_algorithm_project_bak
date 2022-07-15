@@ -26,24 +26,6 @@ handler.setFormatter(formatter)
 logger.addHandler(handler)
 
 
-# handler2 = logging.StreamHandler()  # StreamHandler是输出到控制台
-# logger.addHandler(handler2)
-
-# 接口的格式
-# {“question_asked”: { < 问题和候选答案字符串串 >: < ⽤用户选择的答案 >},
-# “question_next”: ‘ < 问题和候选答案字符串串 >’,
-# “factor_sentence_list": [ [“ < ⽤用户输⼊入匹配到的短句句 > ", " < 特征名 > ", <整数>, “<特征对应的正则>”]],
-# "result": {“诉求1": {
-# “reason_of_evaluation”: ’ < 评估理理由 >’,
-# "evidence_module": ‘ < 证据模块 >’,
-# “legal_advice: '<法律律建议>',
-# "possibility_support": < 0到1之间的数字 >,
-# “support_or_not: '<⽀支持或不不⽀支持>'
-# }}
-# "error_msg": "",
-# "status": 0
-# }
-
 @app.route('/get_civil_problem_summary', methods=["get"])
 def get_civil_problem_summary():
     try:
@@ -82,16 +64,73 @@ def reasoning_graph_result():
             question_type = result_dict['question_type']
             factor_sentence_list = result_dict['factor_sentence_list']  # 匹配到短语的列表
             result = result_dict['result']
+            if len(result) == 0:
+                result = None
+            else:
+                parsed_result = []
+                for suqiu, report in result.items():
+                    parsed_result.append({
+                        "claim": suqiu,
+                        "support_or_not": report.get("support_or_not"),
+                        "possibility_support": report.get("possibility_support"),
+                        "reason_of_evaluation": report.get("reason_of_evaluation"),
+                        "evidence_module": report.get("evidence_module"),
+                        "legal_advice": report.get("legal_advice"),
+                        "applicable_law": [{
+                                "law_name": "《中华人民共和国民法典》",
+                                "law_item": "第一千零八十九条",
+                                "law_content": "离婚时,夫妻共同债务应当共同偿还。共同财产不足清偿或者财产归各自所有的，由双方协议清偿;协议不成的，由人民法院判决。"
+                            },
+                            {
+                                "law_name": "《最高人民法院关于适用《中华人民共和国婚姻法》若干问题的解释(二)》",
+                                "law_item": "第十条",
+                                "law_content": "当事人请求返还按照习俗给付的彩礼的，如果查明属于以下情形，人民法院应当予以支持：（一）双方未办理结婚登记手续的；（二）双方办理结婚登记手续但确未共同生活的；（三）婚前给付并导致给付人生活困难的。适用前款第（二）、（三）项的规定，应当以双方离婚为条件。"
+                            }
+                        ],
+                        "similar_case": [{
+                                "doc_id": "2b2ed441-4a86-4f7e-a604-0251e597d85e",
+                                "similar_rate": "88%",
+                                "title": "原告王某某与被告郝某某等三人婚约财产纠纷一等婚约财产纠纷一审民事判决书",
+                                "court": "公主岭市人民法院",
+                                "judge_date": "2016-04-11",
+                                "case_number": "（2016）吉0381民初315号",
+                                "tag": "彩礼 证据 结婚 给付 协议 女方 当事人 登记 离婚",
+                                "win_or_not": True
+                            },
+                            {
+                                "doc_id": "ws_c4b1e568-b253-4ac3-afd7-437941f1b17a",
+                                "similar_rate": "80%",
+                                "title": "原告彭华刚诉被告王金梅、王本忠、田冬英婚约财产纠纷一案",
+                                "court": "龙山县人民法院",
+                                "judge_date": "2011-07-12",
+                                "case_number": "（2011）龙民初字第204号",
+                                "tag": "彩礼 酒席 结婚 费用 订婚 电视 女方 买家 猪肉",
+                                "win_or_not": False
+                            }
+                        ]
+                    })
+                result = parsed_result
             logging.info("6.service.result: %s" % (result))
-            return json.dumps(
-                {'question_asked': question_asked, 'question_next': question_next, "question_type": question_type,
-                 "factor_sentence_list": factor_sentence_list, "result": result, "error_msg": "", "status": 0},
-                ensure_ascii=False)
+            return json.dumps({
+                "success": True,
+                "error_msg": "",
+                "question_asked": question_asked,
+                "question_next": question_next,
+                "question_type": question_type,
+                "factor_sentence_list": factor_sentence_list,
+                "result": result
+            }, ensure_ascii=False)
         else:
-            return json.dumps({"error_msg": "data is None", "status": 1}, ensure_ascii=False)
+            return json.dumps({
+                "success": False,
+                "error_msg": "request data is none."
+            }, ensure_ascii=False)
     except Exception as e:
         logging.info(traceback.format_exc())
-        return json.dumps({"error_msg": "unknown error:" + repr(e), "status": 1}, ensure_ascii=False)
+        return json.dumps({
+            "success": False,
+            "error_msg": "unknown error:" + repr(e)
+        }, ensure_ascii=False)
 
 
 if __name__ == "__main__":
