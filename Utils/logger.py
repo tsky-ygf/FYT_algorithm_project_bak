@@ -77,7 +77,7 @@ class Logger(object):
                                                            conf['level'])
 
         self.format = colorlog.ColoredFormatter(
-            '\n%(log_color)s[%(asctime)-12s] [%(levelname)4s][%(filename)s -> %(funcName)s line:%(lineno)d]%(reset)s - '
+            '\n%(log_color)s[%(asctime)-12s] [%(levelname)4s][%(filename)s -> %(funcName)s line:%(lineno)d]%(reset)s \n'
             '%(message)s',
             datefmt='%Y-%m-%d  %H:%M:%S',
             log_colors={

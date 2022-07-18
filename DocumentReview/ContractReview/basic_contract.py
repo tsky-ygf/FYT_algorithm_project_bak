@@ -54,6 +54,11 @@ class BasicAcknowledgement:
             text_list = content.split("\n")
         elif mode == "docx":
             text_list = read_docx_file(docx_path=content)
+        elif mode == "txt":
+            # text_list = content.split("\n")
+            with open(content, encoding='utf-8', mode='r') as f:
+                text_list = f.readlines()
+                text_list = [line.strip() for line in text_list]
         else:
             raise Exception("mode error")
         return text_list
@@ -63,8 +68,9 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
     def __init__(self, model_path='', device_id=0, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # self.schema = list(set(self.config['schema'].tolist()))
+        self.usr = None
         self.schema = self.config['schema'].tolist()
-        self.review_result = OrderedDict({schema: {} for schema in self.schema})
+        self.review_result = {schema: {} for schema in self.schema}
 
         self.data = ""
         # self.ie = Taskflow('information_extraction', schema=self.schema, device_id=1,
@@ -77,15 +83,19 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
                                task_path=model_path)
 
         self.logger.info(model_path)
+
         # exit()
 
     def check_data_func(self):
         res = self.ie(self.data)
+        self.logger.info(pformat(res))
         return res
 
-    def basic_rule(self, row, extraction_res):
+    def basic_rule(self, row, extraction_res, pos_legal_advice, neg_legel_advice):
         self.review_result[row["schema"]]["法律依据"] = row["legal basis"]
         self.review_result[row["schema"]]["风险等级"] = row["risk level"]
+        if "risk statement" in row:
+            self.review_result[row["schema"]]["风险提示"] = row["risk statement"]
 
         if row['pos rule'] == "关键词匹配":
             if len(re.findall(row["pos keywords"], self.data)) > 0:
@@ -95,13 +105,13 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
             else:
                 self.review_result[row["schema"]]["内容"] = row["schema"]
                 self.review_result[row['schema']]["审核结果"] = "没有该项内容"
-            self.review_result[row["schema"]]["法律建议"] = row["pos legal advice"]
+            self.review_result[row["schema"]]["法律建议"] = pos_legal_advice
 
         if row['schema'] not in extraction_res.keys():
             if row["pos rule"] in ["识别", "比对"]:
                 self.review_result[row["schema"]]["内容"] = row["schema"]
                 self.review_result[row["schema"]]["审核结果"] = "没有该项目内容"
-                self.review_result[row["schema"]]["法律建议"] = row["neg legal advice"]
+                self.review_result[row["schema"]]["法律建议"] = neg_legel_advice
 
             # if row['neg rule'] == "未识别":
             #     self.review_result[row["schema"]]["内容"] = row["schema"]
@@ -112,7 +122,7 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
         if row["pos rule"] == "识别":
             self.review_result[row["schema"]]["内容"] = extraction_res[row["schema"]][0]["text"]
             self.review_result[row["schema"]]["审核结果"] = "通过"
-            self.review_result[row["schema"]]["法律建议"] = row["pos legal advice"]
+            self.review_result[row["schema"]]["法律建议"] = pos_legal_advice
 
         if row["pos rule"] == "匹配":
             keyword_list = row["pos keywords"].split("|")
@@ -123,7 +133,7 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
             if extraction_res[row["schema"]][0]["text"] in keyword_list:
                 self.review_result[row["schema"]]["内容"] = extraction_res[row["schema"]][0]["text"]
                 self.review_result[row["schema"]]["审核结果"] = "通过"
-                self.review_result[row["schema"]]["法律建议"] = row["pos legal advice"]
+                self.review_result[row["schema"]]["法律建议"] = pos_legal_advice
 
         if row["pos rule"] == "正则匹配":
             # if extraction_res[row["schema"]][0]["text"] in keyword_list:
@@ -132,11 +142,11 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
             if len(re.findall(row["pos keywords"], extraction_res[row["schema"]][0]["text"])) > 0:
                 self.review_result[row["schema"]]["内容"] = extraction_res[row["schema"]][0]["text"]
                 self.review_result[row["schema"]]["审核结果"] = "通过"
-                self.review_result[row["schema"]]["法律建议"] = row["pos legal advice"]
+                self.review_result[row["schema"]]["法律建议"] = pos_legal_advice
             else:
                 self.review_result[row["schema"]]["内容"] = row["schema"]
                 self.review_result[row["schema"]]["审核结果"] = "没有该项目内容"
-                self.review_result[row["schema"]]["法律建议"] = row["neg legal advice"]
+                self.review_result[row["schema"]]["法律建议"] = neg_legel_advice
 
         if row["neg rule"] == "匹配":
             neg_keyword_list = row["neg keywords"].split("|")
@@ -149,34 +159,45 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
                     self.review_result[row["schema"]]["法律建议"] = legal_advice_list[
                         neg_keyword_list.index(extraction_res[row["schema"]][0]["text"])]
                 else:
-                    self.review_result[row["schema"]]["法律建议"] = row["neg legal advice"]
+                    self.review_result[row["schema"]]["法律建议"] = neg_legel_advice
         return True
 
-    def specific_rule(self, row, extraction_res):
+    def specific_rule(self, row, extraction_res, pos_legal_advice, neg_legel_advice):
         raise NotImplementedError
 
     def rule_judge(self, extraction_res):
         # self.logger.info(pformat(extraction_res))
         for index, row in self.config.iterrows():
             # self.logger.debug(pformat(row.to_dict()))
-            if not self.basic_rule(row, extraction_res):
+            if self.usr == 'Part A':
+                pos_legal_advice = row['Part A pos legal advice']
+                neg_legel_advice = row['Part A neg legal advice']
+            elif self.usr == 'Part B':
+                pos_legal_advice = row['Part B pos legal advice']
+                neg_legel_advice = row['Part B neg legal advice']
+            else:
+                self.logger.info("本合同的出发点为中立的第三方")
+                pos_legal_advice = row['pos legal advice']
+                neg_legel_advice = row['neg legal advice']
+
+            if not self.basic_rule(row, extraction_res, pos_legal_advice, neg_legel_advice):
                 continue
 
-            self.specific_rule(row, extraction_res)
+            self.specific_rule(row, extraction_res, pos_legal_advice, neg_legel_advice)
 
         self.logger.debug(self.review_result)
         # self.logger.debug(self.schema)
         # return_review_result = {key: self.review_result[key] for key in self.schema}
         # self.logger.debug(pformat(return_review_result))
 
-    def id_card_rule(self, row, extraction_res):
+    def id_card_rule(self, row, extraction_res, pos_legal_advice, neg_legel_advice):
         if row['schema'] == "身份证号码/统一社会信用代码":
             if "身份证号码/统一社会信用代码" in extraction_res or '身份证号' in extraction_res:
                 id_card = extraction_res[row["schema"]][0]["text"]
                 if validator.is_valid(id_card):
                     self.review_result[row["schema"]]["内容"] = extraction_res[row["schema"]][0]["text"]
                     self.review_result[row["schema"]]["审核结果"] = "通过"
-                    self.review_result[row["schema"]]["法律建议"] = row["pos legal advice"]
+                    self.review_result[row["schema"]]["法律建议"] = pos_legal_advice
                 else:
                     self.review_result[row["schema"]]["内容"] = extraction_res[row["schema"]][0]["text"]
                     self.review_result[row["schema"]]["审核结果"] = "不通过"
@@ -184,4 +205,4 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
             else:
                 self.review_result[row["schema"]]["内容"] = "未识别到该项内容"
                 self.review_result[row["schema"]]["审核结果"] = "不通过"
-                self.review_result[row["schema"]]["法律建议"] = row["neg legal advice"]
+                self.review_result[row["schema"]]["法律建议"] = neg_legel_advice
