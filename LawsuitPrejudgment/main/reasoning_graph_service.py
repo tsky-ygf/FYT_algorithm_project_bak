@@ -69,6 +69,19 @@ def get_claim_list_by_problem_id():
     pass
 
 
+@app.route('/get_claim_by_claim_id', methods=["get"])
+def get_claim_by_claim_id():
+    # mock data
+    return json.dumps({
+        "success": True,
+        "error_msg": "",
+        "value": {
+            "claim": "离婚"
+        }
+    }, ensure_ascii=False)
+    pass
+
+
 @app.route('/reasoning_graph_result', methods=["post"])  # "service_type":'ft'
 def reasoning_graph_result():
     try:
