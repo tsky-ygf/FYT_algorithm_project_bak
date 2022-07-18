@@ -9,10 +9,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from transformers import BertModel, BertPreTrainedModel
-from LawEntityExtraction.BertNer.ModelStructure.layers import CRF, PoolerStartLogits, PoolerEndLogits
+from BasicTask.NER.BertNer.ModelStructure.layers import CRF, PoolerStartLogits, PoolerEndLogits
 from torch.nn import CrossEntropyLoss
-from LawEntityExtraction.BertNer.ModelStructure.losses import FocalLoss, LabelSmoothingCrossEntropy
-
+from BasicTask.NER.BertNer.ModelStructure.losses import FocalLoss, LabelSmoothingCrossEntropy
 
 class BertSoftmaxForNer(BertPreTrainedModel):
     def __init(self, config):
@@ -50,7 +49,6 @@ class BertSoftmaxForNer(BertPreTrainedModel):
             outputs = (loss,) + outputs
         return outputs  # (loss), scores, (hidden_states), (attentions)
 
-
 class BertCrfForNer(BertPreTrainedModel):
     def __init__(self, config):
         super(BertCrfForNer, self).__init__(config)
@@ -70,7 +68,6 @@ class BertCrfForNer(BertPreTrainedModel):
             loss = self.crf(emissions=logits, tags=labels, mask=attention_mask)
             outputs = (-1 * loss,) + outputs
         return outputs  # (loss), scores
-
 
 class BertSpanForNer(BertPreTrainedModel):
     def __init__(self, config, ):
@@ -92,6 +89,7 @@ class BertSpanForNer(BertPreTrainedModel):
         sequence_output = outputs[0]
         sequence_output = self.dropout(sequence_output)
         start_logits = self.start_fc(sequence_output)
+
         if start_positions is not None and self.training:
             if self.soft_label:
                 batch_size = input_ids.size(0)

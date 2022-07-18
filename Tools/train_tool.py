@@ -14,6 +14,7 @@ from tqdm.auto import tqdm
 
 import torch.utils.data as data
 from transformers import get_scheduler, default_data_collator
+
 from accelerate import Accelerator
 from Utils.logger import get_module_logger
 from Utils.parse_file import parse_config_file
@@ -189,9 +190,10 @@ class BaseTrainTool:
         raise NotImplementedError
 
     def train_epoch(self, epoch):
-        self.model.train()
+
         # self.lr_scheduler.step()
         for step, batch in enumerate(self.train_dataloader):
+            self.model.train()
             loss = self.cal_loss(batch)
 
             loss = loss / self.config["gradient_accumulation_steps"]
@@ -244,10 +246,11 @@ class BaseTrainTool:
         return False
 
     def eval_epoch(self):
-        self.model.eval()
+
         eval_loss_res = 0
 
         for step, batch in enumerate(self.eval_dataloader):
+            self.model.eval()
             with torch.no_grad():
                 eval_loss = self.cal_loss(batch)
                 eval_loss_res += eval_loss.item()
@@ -299,3 +302,4 @@ class BaseTrainTool:
                     self.save_model(model_path=self.config["output_dir"] + "/final")
                 else:
                     patience += 1
+

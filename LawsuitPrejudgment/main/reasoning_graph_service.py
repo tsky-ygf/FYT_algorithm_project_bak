@@ -7,6 +7,7 @@ from flask import Flask
 from flask import request
 import sys
 import os
+
 sys.path.append(os.path.abspath('../../'))
 sys.path.append(os.path.abspath('../'))
 sys.path.append(os.path.abspath('../common'))
@@ -23,6 +24,7 @@ logger.setLevel(logging.INFO)
 handler = logging.handlers.TimedRotatingFileHandler('./service.log', when='D', interval=1)
 handler.setFormatter(formatter)
 logger.addHandler(handler)
+
 
 # handler2 = logging.StreamHandler()  # StreamHandler是输出到控制台
 # logger.addHandler(handler2)
@@ -42,9 +44,19 @@ logger.addHandler(handler)
 # "status": 0
 # }
 
+@app.route('/get_civil_problem_summary', methods=["get"])
+def get_civil_problem_summary():
+    try:
+        with open("civil_problem_summary.json") as json_data:
+            problem_summary = json.load(json_data)["value"]
+        return json.dumps({"success": True, "error_msg": "", "value": problem_summary}, ensure_ascii=False)
+    except Exception as e:
+        logging.info(traceback.format_exc())
+        return json.dumps({"success": False, "error_msg": repr(e), "value": None}, ensure_ascii=False)
+
 
 @app.route('/reasoning_graph_result', methods=["post"])  # "service_type":'ft'
-def hello_world():
+def reasoning_graph_result():
     try:
         in_json = request.get_data()
         if in_json is not None:
@@ -65,18 +77,21 @@ def hello_world():
 
             logging.info("5.result.result_dict: %s" % (result_dict))
 
-            question_asked = result_dict['question_asked']   # 问过的问题
+            question_asked = result_dict['question_asked']  # 问过的问题
             question_next = result_dict['question_next']  # 下一个要问的问题
             question_type = result_dict['question_type']
-            factor_sentence_list = result_dict['factor_sentence_list']   # 匹配到短语的列表
+            factor_sentence_list = result_dict['factor_sentence_list']  # 匹配到短语的列表
             result = result_dict['result']
             logging.info("6.service.result: %s" % (result))
-            return json.dumps({'question_asked': question_asked, 'question_next': question_next, "question_type": question_type, "factor_sentence_list": factor_sentence_list, "result": result, "error_msg": "", "status": 0}, ensure_ascii=False)
+            return json.dumps(
+                {'question_asked': question_asked, 'question_next': question_next, "question_type": question_type,
+                 "factor_sentence_list": factor_sentence_list, "result": result, "error_msg": "", "status": 0},
+                ensure_ascii=False)
         else:
             return json.dumps({"error_msg": "data is None", "status": 1}, ensure_ascii=False)
     except Exception as e:
-       logging.info(traceback.format_exc())
-       return json.dumps({"error_msg": "unknown error:" + repr(e), "status": 1}, ensure_ascii=False)
+        logging.info(traceback.format_exc())
+        return json.dumps({"error_msg": "unknown error:" + repr(e), "status": 1}, ensure_ascii=False)
 
 
 if __name__ == "__main__":
