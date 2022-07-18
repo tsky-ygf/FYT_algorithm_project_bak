@@ -8,8 +8,9 @@
 import streamlit as st
 from DocumentReview.ParseFile.parse_word import read_docx_file
 
-contract_type = st.sidebar.selectbox("请选择合同类型", ["借条", "借款合同", "劳动合同", '租房合同'], key="合同类型")
+contract_type = st.sidebar.selectbox("请选择合同类型", ["借条", "借款合同", "劳动合同", '租房合同', '买卖合同'], key="合同类型")
 mode_type = st.sidebar.selectbox("请选择上传数据格式", ["text", "docx"], key="text")
+usr = st.sidebar.selectbox("请选择立场", ['中立方', '甲方', '乙方'], key="中立方")
 
 if contract_type == '借条':
     from DocumentReview.ContractReview.loan_review import LoanUIEAcknowledgement
@@ -36,6 +37,15 @@ elif contract_type == '租房合同':
     acknowledgement = LeaseUIEAcknowledgement(config_path="DocumentReview/Config/LeaseConfig/fangwu.csv",
                                               log_level="info",
                                               model_path="model/uie_model/fwzl/model_best")
+elif contract_type == '买卖合同':
+    from DocumentReview.ContractReview.maimai_review import BusinessUIEAcknowledgement
+
+    acknowledgement = BusinessUIEAcknowledgement(config_path="DocumentReview/Config/BusinessConfig/maimai.csv",
+                                                 log_level="info",
+                                                 model_path="model/uie_model/fwzl/model_best",
+                                                 usr="Part A")
+    acknowledgement.review_main(content="data/DocData/Business/maimai-2.txt", mode="txt")
+    # pprint(acknowledgement.review_result, sort_dicts=False)
 else:
     raise Exception("暂时不支持该合同类型")
 
