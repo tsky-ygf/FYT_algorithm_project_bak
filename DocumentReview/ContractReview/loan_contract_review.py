@@ -13,21 +13,21 @@ class LoanContractUIEAcknowledgement(LoanUIEAcknowledgement):
     # def __init__(self, *args, **kwargs):
     #     super().__init__(*args, **kwargs)
 
-    def specific_rule_add(self, row, extraction_res):
+    def specific_rule_add(self, row, extraction_res, pos_legal_advice, neg_legel_advice):
         self.logger.debug(pformat(extraction_res))
         # exit()
         # self.logger.debug(row)
-        self.id_card_rule(row, extraction_res)
+        self.id_card_rule(row, extraction_res, pos_legal_advice, neg_legel_advice)
 
-    def rule_judge(self, extraction_res):
-        # self.logger.info(pformat(extraction_res))
-        for index, row in self.config.iterrows():
-            # self.logger.debug(pformat(row.to_dict()))
-            if not self.basic_rule(row, extraction_res):
-                continue
-
-            self.specific_rule(row, extraction_res)
-            self.specific_rule_add(row, extraction_res)
+    # def rule_judge(self, extraction_res,pos_legal_advice, neg_legel_advice):
+    #     # self.logger.info(pformat(extraction_res))
+    #     for index, row in self.config.iterrows():
+    #         # self.logger.debug(pformat(row.to_dict()))
+    #         if not self.basic_rule(row, extraction_res,pos_legal_advice, neg_legel_advice):
+    #             continue
+    #
+    #         self.specific_rule(row, extraction_res)
+    #         self.specific_rule_add(row, extraction_res)
 
 
 if __name__ == '__main__':

@@ -79,8 +79,14 @@ if run:
         # st.markdown("- {}".format(fenxian.replace("\n", "")))
         st.write('刑法内容:')
         # st.write(info_data[situation]['涉刑风险'][fenxian])
-        st.write(':'.join(info_data[situation]['涉刑风险'][fenxian]))
-        # st.write(info_data[situation]['法条依据'][one_law])
+        # st.write(':'.join(info_data[situation]['涉刑风险'][fenxian]))
+        fenxian_con = ':'.join(info_data[situation]['涉刑风险'][fenxian])
+        one_law_list = fenxian_con.replace('【', '|').replace('】', '|').split('|')
+        try:
+            annotated_text(one_law_list[0], (one_law_list[1], "刑法依据", "#e6be3e"), one_law_list[2])
+        except Exception as e:
+            print(e)
+            st.write(fenxian_con)
         st.write("")
 
     st.markdown("### 七、相似类案")

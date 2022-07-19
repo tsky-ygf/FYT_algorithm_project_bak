@@ -52,7 +52,7 @@ class LoanUIEAcknowledgement(BasicUIEAcknowledgement):
             else:
                 return True
 
-    def specific_rule(self, row, extraction_res):
+    def specific_rule(self, row, extraction_res, pos_legal_advice, neg_legel_advice):
         if row['pos rule'] == "比对":
             # self.logger.debug(row["pos keywords"])
             # self.logger.debug(extraction_res[row["schema"]][0]["text"])
@@ -63,11 +63,11 @@ class LoanUIEAcknowledgement(BasicUIEAcknowledgement):
                 if self.check_interest_rate(extraction_res[row["schema"]][0]['text']):
                     self.review_result[row["schema"]]["内容"] = extraction_res[row["schema"]][0]["text"]
                     self.review_result[row["schema"]]["审核结果"] = "通过"
-                    self.review_result[row["schema"]]["法律建议"] = row["pos legal advice"]
+                    self.review_result[row["schema"]]["法律建议"] = pos_legal_advice
                 else:
                     self.review_result[row["schema"]]["内容"] = extraction_res[row["schema"]][0]["text"]
                     self.review_result[row["schema"]]["审核结果"] = "不通过"
-                    self.review_result[row["schema"]]["法律建议"] = row["neg legal advice"]
+                    self.review_result[row["schema"]]["法律建议"] = neg_legel_advice
 
                 # exit()
             if row["schema"] == "借款金额":
@@ -101,15 +101,15 @@ class LoanUIEAcknowledgement(BasicUIEAcknowledgement):
                     if 'list_c' in locals().keys() and len(list_c) == 0:
                         self.review_result[row["schema"]]["内容"] = extraction_res[row["schema"]][0]["text"]
                         self.review_result[row["schema"]]["审核结果"] = "请使用中文大写"
-                        self.review_result[row["schema"]]["法律建议"] = row["pos legal advice"]
+                        self.review_result[row["schema"]]["法律建议"] = pos_legal_advice
                     else:
                         self.review_result[row["schema"]]["内容"] = extraction_res[row["schema"]][0]["text"]
                         self.review_result[row["schema"]]["审核结果"] = "通过"
-                        self.review_result[row["schema"]]["法律建议"] = row["pos legal advice"]
+                        self.review_result[row["schema"]]["法律建议"] = pos_legal_advice
                 else:
                     self.review_result[row["schema"]]["内容"] = extraction_res[row["schema"]][0]["text"]
                     self.review_result[row["schema"]]["审核结果"] = "不通过"
-                    self.review_result[row["schema"]]["法律建议"] = row["neg legal advice"]
+                    self.review_result[row["schema"]]["法律建议"] = neg_legel_advice
 
         if row["schema"] == "逾期利率":
             if row['schema'] in extraction_res.keys() and "借款利率" in extraction_res.keys():
@@ -119,7 +119,7 @@ class LoanUIEAcknowledgement(BasicUIEAcknowledgement):
                     self.review_result[row["schema"]]["法律建议"] = "借贷双方对逾期利率有约定的，从其约定，但是以不超过合同成立时一年期贷款市场报价利率四倍为限。"
                 else:
                     self.review_result[row["schema"]]["审核结果"] = "不通过"
-                    self.review_result[row["schema"]]["法律建议"] = row["neg legal advice"]
+                    self.review_result[row["schema"]]["法律建议"] = neg_legel_advice
                 self.review_result[row["schema"]]["内容"] = extraction_res[row["schema"]][0]["text"]
                 # self.review_result[row["schema"]]["法律建议"] = "借贷双方对逾期利率有约定的，从其约定，但是以不超过合同成立时一年期贷款市场报价利率四倍为限。"
                 # self.logger.info(extraction_res[row["schema"]][0]["text"])
