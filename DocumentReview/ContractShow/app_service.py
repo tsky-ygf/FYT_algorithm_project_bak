@@ -32,24 +32,24 @@ def get_translation_res():
             # print(text)
             print(contract_type)
             if contract_type == '借条':
-                from DocumentReview.ContractReview.loan_review import LoanUIEAcknowledgement
+                from DocumentReview.ContractReview_bak.loan_review import LoanUIEAcknowledgement
 
                 acknowledgement = LoanUIEAcknowledgement(
-                    config_path="DocumentReview/Config/LoanConfig/jietiao_20220531.csv",
+                    config_path="DocumentReview/Config_bak/LoanConfig/jietiao_20220531.csv",
                     log_level="info",
                     model_path="model/uie_model/model_best/")
             elif contract_type == '借款合同':
-                from DocumentReview.ContractReview.loan_contract_review import LoanContractUIEAcknowledgement
+                from DocumentReview.ContractReview_bak.loan_contract_review import LoanContractUIEAcknowledgement
 
                 acknowledgement = LoanContractUIEAcknowledgement(
-                    config_path="DocumentReview/Config/LoanConfig/jiekuan_20220605.csv",
+                    config_path="DocumentReview/Config_bak/LoanConfig/jiekuan_20220605.csv",
                     log_level="info",
                     model_path="model/uie_model/jkht/model_best")
             elif contract_type == '劳动合同':
-                from DocumentReview.ContractReview.labor_review import LaborUIEAcknowledgement
+                from DocumentReview.ContractReview_bak.labor_review import LaborUIEAcknowledgement
 
                 acknowledgement = LaborUIEAcknowledgement(
-                    config_path="DocumentReview/Config/LaborConfig/labor_20220615.csv",
+                    config_path="DocumentReview/Config_bak/LaborConfig/labor_20220615.csv",
                     log_level="info",
                     model_path="model/uie_model/labor/model_best")
             else:

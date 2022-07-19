@@ -7,7 +7,7 @@
 # @Software: PyCharm
 from pprint import pprint, pformat
 
-from DocumentReview.ContractReview.basic_contract import BasicUIEAcknowledgement
+from DocumentReview.ContractReview_bak.basic_contract import BasicUIEAcknowledgement
 
 
 class BusinessUIEAcknowledgement(BasicUIEAcknowledgement):
@@ -27,7 +27,7 @@ class BusinessUIEAcknowledgement(BasicUIEAcknowledgement):
 
 
 if __name__ == '__main__':
-    acknowledgement = BusinessUIEAcknowledgement(config_path="DocumentReview/Config/BusinessConfig/maimai.csv",
+    acknowledgement = BusinessUIEAcknowledgement(config_path="DocumentReview/Config_bak/BusinessConfig/maimai.csv",
                                                  log_level="info",
                                                  model_path="model/uie_model/fwzl/model_best",
                                                  usr="Part A")

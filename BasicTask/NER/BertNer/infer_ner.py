@@ -210,8 +210,8 @@ class NerInferTool(BaseInferTool):
 
 
 if __name__ == '__main__':
-    # ner_tool = NerInferTool(config_path="/home/fyt/huangyulin/project/fyt/LawEntityExtraction/BertNer/Config/base_ner_infer.yaml")
+    # ner_tool = NerInferTool(config_path="/home/fyt/huangyulin/project/fyt/LawEntityExtraction/BertNer/Config_bak/base_ner_infer.yaml")
     # print(ner_tool.infer(text="突袭黑暗雅典娜》中Riddick发现之前抓住他的赏金猎人Johns，"))
-    NerInferTool = NerInferTool(config_path="/home/fyt/huangyulin/project/fyt/BasicTask/NER/BertNer/Config/base_ner_infer.yaml")
+    NerInferTool = NerInferTool(config_path="/home/fyt/huangyulin/project/fyt/BasicTask/NER/BertNer/Config_bak/base_ner_infer.yaml")
     NerInferTool.test_data()
     # NerInferTool.test_crf_data()

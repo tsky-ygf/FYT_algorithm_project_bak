@@ -40,4 +40,4 @@ class TrainLawsCls(BaseTrainTool):
 
 
 if __name__ == '__main__':
-    TrainLawsCls(config_path="ProfessionalSearch/Config/anyou_cls.yaml").train_main()
+    TrainLawsCls(config_path="ProfessionalSearch/Config_bak/anyou_cls.yaml").train_main()

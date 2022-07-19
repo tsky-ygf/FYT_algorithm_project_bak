@@ -49,4 +49,4 @@ class TrainClassification(BaseTrainTool):
 
 # if __name__ == '__main__':
 #     TrainClassification(config_path="BasicTask/Classification/Bert/base_cls_train.yaml").train_main()
-#     # TrainLawsCls(config_path="RelevantLaws/Config/base_cls_train.yaml").eval_epoch()
+#     # TrainLawsCls(config_path="RelevantLaws/Config_bak/base_cls_train.yaml").eval_epoch()

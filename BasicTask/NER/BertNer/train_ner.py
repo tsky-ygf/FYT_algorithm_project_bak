@@ -341,10 +341,10 @@ class TrainCrfForNerClue(TrainLawsNER):
 
 
 if __name__ == '__main__':
-    TraSpan = TrainSpanForNerLoan(config_path="BasicTask/NER/BertNer/Config/base_ner_config.yaml")
+    TraSpan = TrainSpanForNerLoan(config_path="BasicTask/NER/BertNer/Config_bak/base_ner_config.yaml")
     TraSpan.train_main()
     print(TraSpan.metric.result())
-    # TrainSpanForNer(config_path="huangyulin/project/fyt/LawEntityExtraction/BertNer/Config/base_ner_config.yaml").train_main()
+    # TrainSpanForNer(config_path="huangyulin/project/fyt/LawEntityExtraction/BertNer/Config_bak/base_ner_config.yaml").train_main()
 
 
-    # TrainCrfForNer(config_path="huangyulin/project/fyt/LawEntityExtraction/BertNer/Config/base_ner_config.yaml").train_main()
+    # TrainCrfForNer(config_path="huangyulin/project/fyt/LawEntityExtraction/BertNer/Config_bak/base_ner_config.yaml").train_main()

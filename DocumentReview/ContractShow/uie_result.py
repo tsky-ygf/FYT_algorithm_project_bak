@@ -11,27 +11,27 @@ from paddlenlp import Taskflow
 
 contract_type = st.sidebar.selectbox("请选择合同类型", ["房屋租赁", "劳动雇佣", "借款合同", '劳动合同', '一般买卖', '欠条'], key="合同类型")
 if contract_type == '房屋租赁':
-    config_path = 'DocumentReview/Config/LeaseConfig/fangwu.csv'
+    config_path = 'DocumentReview/Config_bak/LeaseConfig/fangwu.csv'
     model_path = 'model/uie_model/fwzl/model_best'
 
 elif contract_type == '劳动雇佣':
-    config_path = 'DocumentReview/Config/LaborConfig/laowu.csv'
+    config_path = 'DocumentReview/Config_bak/LaborConfig/laowu.csv'
     model_path = 'model/uie_model/guyong/model_best'
 
 elif contract_type == '借款合同':
-    config_path = 'DocumentReview/Config/LoanConfig/jiekuan_20220615.csv'
+    config_path = 'DocumentReview/Config_bak/LoanConfig/jiekuan_20220615.csv'
     model_path = 'model/uie_model/jkht/model_best'
 
 elif contract_type == '劳动合同':
-    config_path = 'DocumentReview/Config/LaborConfig/labor_20220615.csv'
+    config_path = 'DocumentReview/Config_bak/LaborConfig/labor_20220615.csv'
     model_path = 'model/uie_model/labor/model_best'
 
 elif contract_type == '一般买卖':
-    config_path = 'DocumentReview/Config/BusinessConfig/maimai.csv'
+    config_path = 'DocumentReview/Config_bak/BusinessConfig/maimai.csv'
     model_path = 'model/uie_model/maimai/model_best'
 
 elif contract_type == '欠条':
-    config_path = 'DocumentReview/Config/LoanConfig/jietiao_20220531.csv'
+    config_path = 'DocumentReview/Config_bak/LoanConfig/jietiao_20220531.csv'
     model_path = 'model/uie_model/model_best'
 
 else:

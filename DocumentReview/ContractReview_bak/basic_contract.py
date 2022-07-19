@@ -190,7 +190,7 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
         # return_review_result = {key: self.review_result[key] for key in self.schema}
         # self.logger.debug(pformat(return_review_result))
 
-    def id_card_rule(self, row, extraction_res, pos_legal_advice, neg_legel_advice):
+    def id_card_rule(self, row, extraction_res, pos_legal_advice, neg_legal_advice):
         if row['schema'] == "身份证号码/统一社会信用代码":
             if "身份证号码/统一社会信用代码" in extraction_res or '身份证号' in extraction_res:
                 id_card = extraction_res[row["schema"]][0]["text"]
@@ -205,4 +205,4 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
             else:
                 self.review_result[row["schema"]]["内容"] = "未识别到该项内容"
                 self.review_result[row["schema"]]["审核结果"] = "不通过"
-                self.review_result[row["schema"]]["法律建议"] = neg_legel_advice
+                self.review_result[row["schema"]]["法律建议"] = neg_legal_advice

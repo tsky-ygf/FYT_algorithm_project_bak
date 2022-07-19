@@ -6,7 +6,7 @@
 # @File    : loan_contract_review.py
 # @Software: PyCharm
 from pprint import pprint, pformat
-from DocumentReview.ContractReview.loan_review import LoanUIEAcknowledgement
+from DocumentReview.ContractReview_bak.loan_review import LoanUIEAcknowledgement
 
 
 class LoanContractUIEAcknowledgement(LoanUIEAcknowledgement):
@@ -32,7 +32,7 @@ class LoanContractUIEAcknowledgement(LoanUIEAcknowledgement):
 
 if __name__ == '__main__':
     acknowledgement = LoanContractUIEAcknowledgement(
-        config_path="DocumentReview/Config/LoanConfig/jiekuan_20220605.csv",
+        config_path="DocumentReview/Config_bak/LoanConfig/jiekuan_20220605.csv",
         log_level="debug",
         model_path="model/uie_model/jkht/model_best")
     acknowledgement.review_main(content="data/DocData/jkht/jkht.docx", mode="docx")

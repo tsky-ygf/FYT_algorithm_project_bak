@@ -7,7 +7,7 @@
 # @Software: PyCharm
 from pprint import pprint, pformat
 
-from DocumentReview.ContractReview.basic_contract import BasicUIEAcknowledgement
+from DocumentReview.ContractReview_bak.basic_contract import BasicUIEAcknowledgement
 
 
 class LaborUIEAcknowledgement(BasicUIEAcknowledgement):
@@ -24,7 +24,7 @@ class LaborUIEAcknowledgement(BasicUIEAcknowledgement):
 
 
 if __name__ == '__main__':
-    acknowledgement = LaborUIEAcknowledgement(config_path="DocumentReview/Config/LaborConfig/labor_20220615.csv",
+    acknowledgement = LaborUIEAcknowledgement(config_path="DocumentReview/Config_bak/LaborConfig/labor_20220615.csv",
                                               log_level="debug",
                                               model_path="model/uie_model/labor/model_best")
     acknowledgement.review_main(content="data/DocData/LaborContract/劳动合同.docx", mode="docx")

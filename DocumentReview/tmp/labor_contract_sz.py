@@ -15,7 +15,7 @@ from DocumentReview.ParseFile.parse_word import read_docx_file
 from pprint import pprint
 
 loc_salary = {}
-df = pd.read_csv("DocumentReview/Config/LaborConfig/salary.csv", index_col=0, header=0, encoding="utf-8")
+df = pd.read_csv("DocumentReview/Config_bak/LaborConfig/salary.csv", index_col=0, header=0, encoding="utf-8")
 for index, row in df.iterrows():
     loc = row[0]
     salary = row[1]
@@ -734,7 +734,7 @@ def score_review_results(review_results):
 
 
 def main(docx_path,loc="浙江省"):
-    review_items = load_review_items("DocumentReview/Config/LaborConfig/review_labor_sz.csv")
+    review_items = load_review_items("DocumentReview/Config_bak/LaborConfig/review_labor_sz.csv")
     text_list = read_docx_file(docx_path=docx_path)
 
     text = "\n".join(text_list)

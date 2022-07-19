@@ -7,7 +7,7 @@
 # @Software: PyCharm
 from pprint import pprint, pformat
 
-from DocumentReview.ContractReview.basic_contract import BasicUIEAcknowledgement
+from DocumentReview.ContractReview_bak.basic_contract import BasicUIEAcknowledgement
 
 
 class LeaseUIEAcknowledgement(BasicUIEAcknowledgement):
@@ -22,7 +22,7 @@ class LeaseUIEAcknowledgement(BasicUIEAcknowledgement):
 
 
 if __name__ == '__main__':
-    acknowledgement = LeaseUIEAcknowledgement(config_path="DocumentReview/Config/LeaseConfig/fangwu.csv",
+    acknowledgement = LeaseUIEAcknowledgement(config_path="DocumentReview/Config_bak/LeaseConfig/fangwu.csv",
                                               log_level="debug",
                                               model_path="model/uie_model/fwzl/model_best")
     acknowledgement.review_main(content="data/DocData/Lease/fw_test.docx", mode="docx")

@@ -9,7 +9,7 @@ import re
 from pprint import pprint
 from pprint import pformat
 
-from DocumentReview.ContractReview.basic_contract import BasicUIEAcknowledgement
+from DocumentReview.ContractReview_bak.basic_contract import BasicUIEAcknowledgement
 import cn2an
 
 upper_num = {"壹": "一", "贰": "二", "叁": "三", "肆": "四", "伍": "五", "陆": "六",
@@ -137,10 +137,10 @@ class LoanUIEAcknowledgement(BasicUIEAcknowledgement):
 
 
 if __name__ == '__main__':
-    # loan_acknowledgement = LoanAcknowledgement("DocumentReview/Config/loan.csv", content="data/DocData/IOU.docx",
+    # loan_acknowledgement = LoanAcknowledgement("DocumentReview/Config_bak/loan.csv", content="data/DocData/IOU.docx",
     #                                            mode="docx")
     # print(10000)
-    acknowledgement = LoanUIEAcknowledgement(config_path="DocumentReview/Config/LoanConfig/jietiao_20220531.csv",
+    acknowledgement = LoanUIEAcknowledgement(config_path="DocumentReview/Config_bak/LoanConfig/jietiao_20220531.csv",
                                              log_level="debug",
                                              model_path="model/uie_model/model_best/")
 

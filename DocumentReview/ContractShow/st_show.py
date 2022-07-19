@@ -13,34 +13,34 @@ mode_type = st.sidebar.selectbox("请选择上传数据格式", ["text", "docx"]
 usr = st.sidebar.selectbox("请选择立场", ['中立方', '甲方', '乙方'], key="中立方")
 
 if contract_type == '借条':
-    from DocumentReview.ContractReview.loan_review import LoanUIEAcknowledgement
+    from DocumentReview.ContractReview_bak.loan_review import LoanUIEAcknowledgement
 
-    acknowledgement = LoanUIEAcknowledgement(config_path="DocumentReview/Config/LoanConfig/jietiao_20220531.csv",
+    acknowledgement = LoanUIEAcknowledgement(config_path="DocumentReview/Config_bak/LoanConfig/jietiao_20220531.csv",
                                              log_level="info",
                                              model_path="model/uie_model/model_best/")
 elif contract_type == '借款合同':
-    from DocumentReview.ContractReview.loan_contract_review import LoanContractUIEAcknowledgement
+    from DocumentReview.ContractReview_bak.loan_contract_review import LoanContractUIEAcknowledgement
 
     acknowledgement = LoanContractUIEAcknowledgement(
-        config_path="DocumentReview/Config/LoanConfig/jiekuan_20220605.csv",
+        config_path="DocumentReview/Config_bak/LoanConfig/jiekuan_20220605.csv",
         log_level="info",
         model_path="model/uie_model/jkht/model_best")
 elif contract_type == '劳动合同':
-    from DocumentReview.ContractReview.labor_review import LaborUIEAcknowledgement
+    from DocumentReview.ContractReview_bak.labor_review import LaborUIEAcknowledgement
 
-    acknowledgement = LaborUIEAcknowledgement(config_path="DocumentReview/Config/LaborConfig/labor_20220615.csv",
+    acknowledgement = LaborUIEAcknowledgement(config_path="DocumentReview/Config_bak/LaborConfig/labor_20220615.csv",
                                               log_level="info",
                                               model_path="model/uie_model/labor/model_best")
 elif contract_type == '租房合同':
-    from DocumentReview.ContractReview.lease_review import LeaseUIEAcknowledgement
+    from DocumentReview.ContractReview_bak.lease_review import LeaseUIEAcknowledgement
 
-    acknowledgement = LeaseUIEAcknowledgement(config_path="DocumentReview/Config/LeaseConfig/fangwu.csv",
+    acknowledgement = LeaseUIEAcknowledgement(config_path="DocumentReview/Config_bak/LeaseConfig/fangwu.csv",
                                               log_level="info",
                                               model_path="model/uie_model/fwzl/model_best")
 elif contract_type == '买卖合同':
-    from DocumentReview.ContractReview.maimai_review import BusinessUIEAcknowledgement
+    from DocumentReview.ContractReview_bak.maimai_review import BusinessUIEAcknowledgement
 
-    acknowledgement = BusinessUIEAcknowledgement(config_path="DocumentReview/Config/BusinessConfig/maimai.csv",
+    acknowledgement = BusinessUIEAcknowledgement(config_path="DocumentReview/Config_bak/BusinessConfig/maimai.csv",
                                                  log_level="info",
                                                  model_path="model/uie_model/fwzl/model_best",
                                                  usr="Part A")
