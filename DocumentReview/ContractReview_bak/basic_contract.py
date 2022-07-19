@@ -55,7 +55,6 @@ class BasicAcknowledgement:
         elif mode == "docx":
             text_list = read_docx_file(docx_path=content)
         elif mode == "txt":
-            # text_list = content.split("\n")
             with open(content, encoding='utf-8', mode='r') as f:
                 text_list = f.readlines()
                 text_list = [line.strip() for line in text_list]
