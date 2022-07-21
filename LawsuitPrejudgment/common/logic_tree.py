@@ -389,6 +389,7 @@ class LogicTree(object):
                         #         self._set_factor_flag(f, -1, question + ':' + ans)
                         break
                 if not add:
+                    # 这句会把候选问题未选择的特征，都置为-1。
                     self._set_factor_flag(factor, -1, None)
             self.match_flag = True
             return factors
