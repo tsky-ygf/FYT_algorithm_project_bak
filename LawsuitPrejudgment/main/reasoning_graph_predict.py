@@ -206,6 +206,7 @@ def predict_fn(problem, claim_list, fact, question_answers, factor_sentence_list
                 # KIWI
                 logging.info('诉求有结论' + ' suqiu: ' + str(next[1]) + '\t' + 'result: ' + str(result))
                 suqiu_debug_info = '诉求处理情况: 诉求有结论。' + '诉求: ' + str(next[1]) + '\t' + 'result: ' + str(result)
+                suqiu_debug_info = suqiu_debug_info + '\n' + '\n'.join(next_question_debug_info)
                 debug_info[str(suqiu)] = suqiu_debug_info
 
     # 5. 如果没有问题了，那么需要出评估报告
