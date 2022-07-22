@@ -3,6 +3,7 @@ from config_loader import *
 from data_util import text_underline
 import logging
 
+
 class Node(object):
     def __init__(self, index, name, type, question=None, answer=None):
         self.index = index  # 唯一索引
@@ -37,8 +38,8 @@ class LogicTree(object):
         self.problem = problem
         self.suqiu = suqiu
         self.debug = debug
-        self.suqiu_advice = logic_ps_advice[problem+'_'+suqiu]
-        self.suqiu_proof = logic_ps_proof[problem+'_'+suqiu]
+        self.suqiu_advice = logic_ps_advice[problem + '_' + suqiu]
+        self.suqiu_proof = logic_ps_proof[problem + '_' + suqiu]
         self.logic = logic_dict[problem + '_' + suqiu]
 
         self.question_factor = question_factor_dict[problem + '_' + suqiu]
@@ -59,6 +60,7 @@ class LogicTree(object):
 
         self.candidate_question = candidate_question_dict[problem + '_' + suqiu]
         self.candidate_factor = candidate_factor_dict[problem + '_' + suqiu]
+        self.return_candidate_question_flag = False  # 记录返回的next_question是否为候选问题
 
         # 初始化树
         self.root = None  # 根节点
@@ -253,7 +255,8 @@ class LogicTree(object):
                     p += path[i].name + '\t'
                 else:
                     p += '\t'
-            p = p + path[0].father.father.name + '\t' + path[0].father.name.replace('\n', ' ') + '\t' + path[0].name.replace('\n', ' ')
+            p = p + path[0].father.father.name + '\t' + path[0].father.name.replace('\n', ' ') + '\t' + path[
+                0].name.replace('\n', ' ')
             print(p)
 
     def print_path(self, path):
@@ -415,13 +418,13 @@ class LogicTree(object):
             if not add:
                 self._set_factor_flag(factor, -1, None)
                 if self.factor_answer[factor] == '是':
-                    factors.append(question.split(':')[0].replace('是否', '没有').replace('？',''))
+                    factors.append(question.split(':')[0].replace('是否', '没有').replace('？', ''))
                 elif self.factor_answer[factor] == '否':
-                    factors.append(question.split(':')[0].replace('是否', '').replace('？',''))
+                    factors.append(question.split(':')[0].replace('是否', '').replace('？', ''))
                 elif self.factor_answer[factor] == '有':
-                    factors.append(question.split(':')[0].replace('有没有', '没有').replace('？',''))
+                    factors.append(question.split(':')[0].replace('有没有', '没有').replace('？', ''))
                 elif self.factor_answer[factor] == '没有':
-                    factors.append(question.split(':')[0].replace('有没有', '有').replace('？',''))
+                    factors.append(question.split(':')[0].replace('有没有', '有').replace('？', ''))
         return factors
 
     def _filter_path_by_precondition(self, paths):
@@ -460,7 +463,8 @@ class LogicTree(object):
                         for n3 in n2.sons:
                             for n4 in n3.sons:
                                 indices.append(n4.index)
-            paths = [path for path in paths if path[0].index not in indices and path[0].father.father.name not in ['前提', '大前提']]
+            paths = [path for path in paths if
+                     path[0].index not in indices and path[0].father.father.name not in ['前提', '大前提']]
             return prediction_path, paths
 
         paths = [path for path in paths if path[0].father.father.name not in ['前提', '大前提']]
@@ -482,6 +486,8 @@ class LogicTree(object):
         if next_question_debug_info is not None:
             next_question_debug_info.append("特征状态:\n{}".format(str(self.factor_flag)))
             candicate_path_debug_info = []
+        self.return_candidate_question_flag = False
+
         # 过滤不满足前提的路径
         precondition_path, paths = self._filter_path_by_precondition(self.paths)
 
@@ -587,7 +593,7 @@ class LogicTree(object):
 
         # 有问题要提问，则按照最短路径和出现次数进行排序提问
         if len(questions) > 0:
-            question = sorted(questions.items(), key=lambda x: x[1][0] * 50000 - x[1][1] * 5000 - x[1][2]/100)[0][0]
+            question = sorted(questions.items(), key=lambda x: x[1][0] * 50000 - x[1][1] * 5000 - x[1][2] / 100)[0][0]
             # KIWI
             print("get_next_question: 有问题要提问，则按照最短路径和出现次数进行排序提问")
             if next_question_debug_info is not None:
@@ -600,6 +606,7 @@ class LogicTree(object):
             print("get_next_question: 未匹配到特征提问候选问题")
             if next_question_debug_info is not None:
                 next_question_debug_info.append("产生下一个问题。原因: 未匹配到特征，提问候选问题。")
+            self.return_candidate_question_flag = True
             return self.candidate_question
 
         # 没有问题要提问，判断是否有前提未满足
@@ -639,7 +646,7 @@ class LogicTree(object):
                 if p.name in self.factor_replace:
                     result = result.replace('[FF]', p.name)
         advice = path[0].name
-        if len(advice)<10:
+        if len(advice) < 10:
             advice = self.suqiu_advice
         if debug:
             return [path[0].father.father.name, '+'.join(p.name for p in path[1:]) + '-->\n' + result, advice]
@@ -663,7 +670,7 @@ class LogicTree(object):
                     proof += '%d. %s等，用以证明%s的事实；\n' % (count + 1, self.factor_proof[factor], factor)
                 count += 1
         proof = proof[:-2] + '。'
-        if len(self.suqiu_proof)>0:
+        if len(self.suqiu_proof) > 0:
             proof += '\n' + self.suqiu_proof
         return proof
 
@@ -685,7 +692,8 @@ class LogicTree(object):
                     factors2 = [p.name for p in path[1:] if self.factor_flag[p.name] == -1]
                     if len(factors1) == 0 or len(factors2) == 0:
                         continue
-                    return ['不支持', '根据您的描述，虽然满足【%s】，但由于不满足【%s】的条件，理论上您的诉求支持率不高。' % (factors1[0], factors2[0]), self.suqiu_advice]
+                    return ['不支持', '根据您的描述，虽然满足【%s】，但由于不满足【%s】的条件，理论上您的诉求支持率不高。' % (factors1[0], factors2[0]),
+                            self.suqiu_advice]
         return ['不支持', '缺少关键信息，无法给出准确评估。', self.suqiu_advice]
 
     def get_logic_result(self):
@@ -700,7 +708,7 @@ class LogicTree(object):
         elif self.logic_result[0] == '支持':
             result = 1
             reason = self.logic_result[1]
-            if len(self.support_proof)>0:
+            if len(self.support_proof) > 0:
                 proof = self.support_proof
             else:
                 proof = ''
@@ -718,7 +726,8 @@ class LogicTree(object):
             reason = text_underline(reason)
             proof = text_underline(proof)
             advice = text_underline(advice)
-        if self.problem=='婚姻继承' and self.suqiu=='房产分割' and len(re.findall('属于.{0,5}个人财产', reason))>0 and '夫妻共同财产' not in reason:
+        if self.problem == '婚姻继承' and self.suqiu == '房产分割' and len(
+                re.findall('属于.{0,5}个人财产', reason)) > 0 and '夫妻共同财产' not in reason:
             result = -1
             support = '不支持'
         return result, reason, proof, advice, support
@@ -735,7 +744,10 @@ class LogicTree(object):
         print('法律建议: %s' % (advice))
         return result
 
+    def next_question_is_candidate_question(self):
+        return self.return_candidate_question_flag
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     tree = LogicTree('借贷纠纷', '确认合同有效')
     tree.export_paths()

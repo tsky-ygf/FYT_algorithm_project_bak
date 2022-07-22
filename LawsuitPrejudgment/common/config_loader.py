@@ -376,6 +376,7 @@ for problem, suqius in logic_ps.items():
 
 candidate_question_dict = {}
 candidate_factor_dict = {}
+candidate_multiple_dict = {}
 for problem, suqius in logic_ps.items():
     # 问题配置表
     df_question = pd.read_csv(config_path + problem + '/' + problem + '候选问答.csv', encoding='utf-8')
@@ -384,7 +385,9 @@ for problem, suqius in logic_ps.items():
         df = df_question[df_question['suqiu'] == suqiu]
         candidate_question_dict[problem + '_' + suqiu] = df['question_answer'].drop_duplicates().values[0]
         candidate_factor_dict[problem + '_' + suqiu] = df['factor_answer'].groupby(df['factor'], sort=False).agg(lambda x: list(x)[0])
-
+        # 多选问题
+        temp = df[df['multiple_choice'] == 1]
+        candidate_multiple_dict[problem + '_' + suqiu] = temp['question_answer'].values
 
 
 ########################################################################################################################

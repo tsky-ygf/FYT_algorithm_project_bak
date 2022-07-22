@@ -184,7 +184,12 @@ def predict_fn(problem, claim_list, fact, question_answers, factor_sentence_list
             next_question_debug_info = []
             question_next = tree.get_next_question(next_question_debug_info)
             if question_next is not None:
-                question_type = '1' if question_next not in question_multiple_dict[ps] else '2'
+                # 如果是候选问题，应该根据候选问答表，来决定question_type的值。
+                if tree.next_question_is_candidate_question():
+                    question_type = '1' if question_next not in candidate_multiple_dict[ps] else '2'
+                # 否则，应该根据特征表，来决定question_type的值。
+                else:
+                    question_type = '1' if question_next not in question_multiple_dict[ps] else '2'
 
                 # KIWI
                 logging.info('对诉求提问' + ' suqiu:' + str(next[1]))
