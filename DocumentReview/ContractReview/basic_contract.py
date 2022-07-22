@@ -138,7 +138,7 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
                 res_dict["审核结果"] = "通过"
                 res_dict["内容"] = row['schema']
 
-            elif row['neg rule'] == "未识别，不作审核":
+            elif row['neg rule'] == "未识别，不作审核" or row['neg rule'] == "未识别，不做审核":
                 res_dict = {}
 
             else:

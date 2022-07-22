@@ -166,7 +166,7 @@ upper_num = {"壹": "一", "贰": "二", "叁": "三", "肆": "四", "伍": "五
 # 金额审核
 def check_amount_equal(row, extraction_con, res_dict):
     print(extraction_con)
-    exit()
+    # exit()
     if len(extraction_con) == 1:
         amount = float(re.search("\d+(.\d{2})?", extraction_con[0]['text']).group())
         chinese_amount = "".join(re.findall("[\u4e00-\u9fa5]", extraction_con[0]['text']))
@@ -193,12 +193,12 @@ def check_amount_equal(row, extraction_con, res_dict):
         if 'list_c' in locals().keys() and len(list_c) == 0:
             res_dict["内容"] = extraction_con[0]["text"]
             res_dict["审核结果"] = "请使用中文大写"
-            res_dict["法律建议"] = row["pos legal advice"]
+            # res_dict["法律建议"] = row["pos legal advice"]
         else:
             res_dict["内容"] = extraction_con[0]["text"]
             res_dict["审核结果"] = "通过"
-            res_dict["法律建议"] = row["pos legal advice"]
+            # res_dict["法律建议"] = row["pos legal advice"]
     else:
         res_dict["内容"] = extraction_con[0]["text"]
         res_dict["审核结果"] = "不通过"
-        res_dict["法律建议"] = row['neg legal advice']
+        res_dict["法律建议"] = row['jiaoyan error advice']
