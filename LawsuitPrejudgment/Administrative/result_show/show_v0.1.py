@@ -3,24 +3,34 @@
 # @Time    : 2022/7/15 10:34
 # @Author  : Adolf
 # @Site    : 
-# @File    : tax_v0.1_show.py
+# @File    : show_v0.1.py
 # @Software: PyCharm
 import json
 # import pandas as pd
 import streamlit as st
-from pprint import pprint
+# from pprint import pprint
 from annotated_text import annotated_text
 
-st.markdown("# 税务处罚预判")
+big_type = st.sidebar.selectbox("请选择你遇到的问题", ["税务处罚预判", "公安处罚预判", "道路运输处罚预判"])
+
+st.title(big_type)
 
 # st.write("请选择你遇到的问题：")
-# tax_config = pd.read_csv("LawsuitPrejudgment/Administrative/tax/tax_config.csv")
+# tax_config = pd.read_csv("LawsuitPrejudgment/Administrative/result_show/tax_config.csv")
 
+if big_type == "税务处罚预判":
+    con = "tax"
+elif big_type == "公安处罚预判":
+    con = "police"
+elif big_type == "道路运输处罚预判":
+    con = "transportation"
+else:
+    raise Exception("请选择正确的预判类型")
 
-with open('LawsuitPrejudgment/Administrative/tax/tax_config.json', 'r') as f1:
+with open('LawsuitPrejudgment/Administrative/result_show/{}_config.json'.format(con), 'r') as f1:
     info_data = json.load(f1)
 
-with open('LawsuitPrejudgment/Administrative/tax/tax_type.json', 'r') as f2:
+with open('LawsuitPrejudgment/Administrative/result_show/{}_type.json'.format(con), 'r') as f2:
     type_data = json.load(f2)
 
 # pprint(type_data)
@@ -77,7 +87,7 @@ if run:
         if fenxian == '暂无':
             continue
         # st.markdown("- {}".format(fenxian.replace("\n", "")))
-        st.write('刑法内容:')
+        # st.write('刑法内容:')
         # st.write(info_data[situation]['涉刑风险'][fenxian])
         # st.write(':'.join(info_data[situation]['涉刑风险'][fenxian]))
         fenxian_con = ':'.join(info_data[situation]['涉刑风险'][fenxian])
