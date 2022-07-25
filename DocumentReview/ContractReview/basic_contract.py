@@ -6,7 +6,7 @@
 # @File    : basic_contract.py
 # @Software: PyCharm
 import re
-import uuid
+# import uuid
 
 import pandas as pd
 from collections import OrderedDict
@@ -23,7 +23,7 @@ from DocumentReview.ContractReview import rule_func
 
 class BasicAcknowledgement:
     def __init__(self, config_path, log_level='INFO', *args, **kwargs):
-        self.logger = Logger(name="Contract_{}".format(uuid.uuid1()), level=log_level).logger
+        self.logger = Logger(name="ContractReview", level=log_level).logger
         self.logger.info(self.logger.name)
         self.logger.info("log level:{}".format(log_level))
         self.config = pd.read_csv(config_path)
@@ -42,6 +42,8 @@ class BasicAcknowledgement:
         extraction_res = self.check_data_func()
         self.rule_judge(extraction_res[0])
 
+        self.review_result = {key: value for key, value in self.review_result.items() if value != {}}
+
     def check_data_func(self, *args, **kwargs):  # 审核数据
         raise NotImplementedError
 
@@ -49,8 +51,8 @@ class BasicAcknowledgement:
         raise NotImplementedError
 
     def read_origin_content(self, content="", mode="text"):
-        self.logger.debug("mode: {}".format(mode))
-        self.logger.debug("content: {}".format(content))
+        # self.logger.debug("mode: {}".format(mode))
+        # self.logger.debug("content: {}".format(content))
 
         if mode == "text":
             content = content.replace(" ", "").replace("\u3000", "")
@@ -64,7 +66,8 @@ class BasicAcknowledgement:
         else:
             raise Exception("mode error")
 
-        self.logger.info("text_list: {}".format(text_list))
+        self.logger.debug("text_list: {}".format(text_list))
+
         return text_list
 
 
@@ -88,30 +91,72 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
 
     def check_data_func(self):
         res = self.ie(self.data)
-        self.logger.info(pformat(res))
+        self.logger.debug(pformat(res))
         return res
 
     def rule_judge(self, extraction_res):
         self.logger.debug("res: {}".format(extraction_res))
         for index, row in self.config.iterrows():
-            # self.logger.debug("row: {}".format(row))
-            if row["schema"] == "识别":
-                rule_res = rule_func.check_identify(row, extraction_res, self.usr)
-            elif row["schema"] == "身份证校验":
-                rule_res = rule_func.check_id_card(row, extraction_res, self.usr)
-            else:
-                raise Exception("schema error")
-            # result_dict.update(rule_res)
-            rule_res['法律依据'] = row['legal basis']
-            rule_res['风险等级'] = row['risk level']
+            res_dict = {}
 
-            self.review_result[row['schema']].update(rule_res)
+            if row['schema'] in extraction_res:
+                if self.usr == "Part A":
+                    res_dict["法律建议"] = row["A pos legal advice"]
+                else:
+                    res_dict["法律建议"] = row["B pos legal advice"]
+
+                extraction_con = extraction_res[row['schema']]
+
+                if "身份证校验" == row["pos rule"]:
+                    rule_func.check_id_card(row, extraction_con, res_dict)
+                elif "用途审核" == row["pos rule"]:
+                    rule_func.check_application(row, extraction_con, res_dict)
+                elif "日期关联" in row["pos rule"]:
+                    rule_func.check_date_relation(row, extraction_con, res_dict)
+                elif "工资审核" == row["pos rule"]:
+                    rule_func.check_wage(row, extraction_con, res_dict)
+                elif "试用期工资审核" == row["pos rule"]:
+                    if "劳动报酬" in self.review_result:
+                        rule_func.check_probation_wage(row, extraction_con, res_dict, self.review_result['劳动报酬']["内容"])
+                    elif "工资" in self.review_result:
+                        rule_func.check_probation_wage(row, extraction_con, res_dict, self.review_result['工资']["内容"])
+                    else:
+                        pass
+                elif "违约金审核" == row["pos rule"]:
+                    rule_func.check_penalty(row, extraction_con, res_dict)
+                elif "利率审核" == row["pos rule"] or "逾期利率审核" == row["pos rule"]:
+                    rule_func.check_rate(row, extraction_con, res_dict)
+                elif "金额相等" == row["pos rule"]:
+                    rule_func.check_amount_equal(row, extraction_con, res_dict)
+                else:
+                    res_dict["审核结果"] = "通过"
+                    res_dict["内容"] = extraction_con[0]['text']
+                    res_dict["start"] = extraction_con[0]['start']
+                    res_dict["end"] = extraction_con[0]['end']
+
+            elif row['pos keywords'] != "" and len(re.findall(row['pos keywords'], self.data)) > 0:
+                res_dict["审核结果"] = "通过"
+                res_dict["内容"] = row['schema']
+
+            elif row['neg rule'] == "未识别，不作审核" or row['neg rule'] == "未识别，不做审核":
+                res_dict = {}
+
+            else:
+                res_dict["审核结果"] = "不通过"
+                res_dict["内容"] = "没有该项目内容"
+                res_dict["法律建议"] = row["neg legal advice"]
+
+            if res_dict != {}:
+                res_dict['法律依据'] = row['legal basis']
+                res_dict['风险等级'] = row['risk level']
+
+            self.review_result[row['schema']].update(res_dict)
 
 
 if __name__ == '__main__':
-    acknowledgement = BasicUIEAcknowledgement(config_path="DocumentReview/Config/fangwuzulin.csv",
+    acknowledgement = BasicUIEAcknowledgement(config_path="DocumentReview/Config/jietiao.csv",
                                               log_level="DEBUG",
-                                              model_path="model/uie_model/fwzl/model_best",
+                                              model_path="model/uie_model/model_best/",
                                               usr="Part A")
-    acknowledgement.review_main(content="data/DocData/Lease/fw_test.docx", mode="docx")
+    acknowledgement.review_main(content="data/DocData/IOU.docx", mode="docx")
     pprint(acknowledgement.review_result, sort_dicts=False)
