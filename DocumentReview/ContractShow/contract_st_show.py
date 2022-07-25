@@ -8,8 +8,13 @@
 import streamlit as st
 from DocumentReview.ParseFile.parse_word import read_docx_file
 from DocumentReview.ContractReview.basic_contract import BasicUIEAcknowledgement
+from paddlenlp import Taskflow
+# import pycorrector
 
 from pprint import pprint
+from annotated_text import annotated_text
+
+text_correction = Taskflow("text_correction")
 
 
 @st.cache
@@ -63,8 +68,32 @@ else:
 acknowledgement = BasicUIEAcknowledgement(config_path=config_path,
                                           model_path=model_path,
                                           usr=usr)
+correct = st.button("文本纠错")
 run = st.button("开始审核")
+if correct:
+    res_correct = text_correction(text)
+    if len(res_correct) > 0:
+        # st.write(annotated_text(res_correct))
+        # st.write("纠错后的文本")
+        # st.write(text)
+        print(res_correct)
+        res_text = []
+        last_index = 0
+        for one_error in res_correct[0]['errors']:
+            one_position = one_error['position']
+            print(one_position)
+            res_text.append(text[last_index:one_position])
+            res_text.append((text[one_position], one_error['correction'][text[one_position]], '#FF8B72'))
+            # res_text.append(text[one_position + 1:])
+            last_index = one_position + 1
+        res_text.append(text[last_index:])
+        annotated_text(*res_text)
+    else:
+        st.write("错别字审核通过")
 if run:
+    # corrected_sent, detail = pycorrector.correct(text)
+    # print(corrected_sent, detail)
+
     acknowledgement.review_main(content=text, mode="text")
     pprint(acknowledgement.review_result, sort_dicts=False)
     index = 1

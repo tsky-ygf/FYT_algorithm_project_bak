@@ -5,14 +5,15 @@ import logging
 import logging.handlers
 from flask import Flask
 from flask import request
-import sys
-import os
+# import sys
+# import os
 
-sys.path.append(os.path.abspath('../../'))
-sys.path.append(os.path.abspath('../'))
-sys.path.append(os.path.abspath('../common'))
-sys.path.append(os.path.abspath('../prediction'))
+# sys.path.append(os.path.abspath('../../'))
+# sys.path.append(os.path.abspath('../'))
+# sys.path.append(os.path.abspath('../common'))
+# sys.path.append(os.path.abspath('../prediction'))
 from LawsuitPrejudgment.main.reasoning_graph_predict import predict_fn
+from LawsuitPrejudgment.Administrative.administrative_api_v1 import *
 
 """
 推理图谱的接口
@@ -204,6 +205,27 @@ def get_law_document():
         }
     }, ensure_ascii=False)
     pass
+
+
+@app.route('/get_situation', methods=["get", "post"])
+def get_situation_list():
+    try:
+        in_json = request.get_data()
+        if in_json is not None:
+            in_dict = json.loads(in_json.decode("utf-8"))
+            administrative_type = in_dict['administrative_type']
+
+        else:
+            return json.dumps({
+                "success": False,
+                "error_msg": "request data is none."
+            }, ensure_ascii=False)
+    except Exception as e:
+        logging.info(traceback.format_exc())
+        return json.dumps({
+            "success": False,
+            "error_msg": "unknown error:" + repr(e)
+        }, ensure_ascii=False)
 
 
 if __name__ == "__main__":

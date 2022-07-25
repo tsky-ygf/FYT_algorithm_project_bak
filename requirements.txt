@@ -30,3 +30,4 @@ datasets
 cn2an
 googletrans
 docarray
+pycorrector
