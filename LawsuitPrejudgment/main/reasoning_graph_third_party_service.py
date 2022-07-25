@@ -208,13 +208,47 @@ def get_law_document():
 
 
 @app.route('/get_situation', methods=["get", "post"])
-def get_situation_list():
+def get_administrative_situation_list():
     try:
         in_json = request.get_data()
         if in_json is not None:
             in_dict = json.loads(in_json.decode("utf-8"))
             administrative_type = in_dict['administrative_type']
+            situation_dict = get_administrative_prejudgment_situation(administrative_type)
 
+            return json.dumps({
+                "success": True,
+                "error_msg": "",
+                "result": situation_dict,
+            }, ensure_ascii=False)
+        else:
+            return json.dumps({
+                "success": False,
+                "error_msg": "request data is none."
+            }, ensure_ascii=False)
+    except Exception as e:
+        logging.info(traceback.format_exc())
+        return json.dumps({
+            "success": False,
+            "error_msg": "unknown error:" + repr(e)
+        }, ensure_ascii=False)
+
+
+@app.route('/get_administrative_result', methods=["get", "post"])
+def get_administrative_result():
+    try:
+        in_json = request.get_data()
+        if in_json is not None:
+            in_dict = json.loads(in_json.decode("utf-8"))
+            administrative_type = in_dict['administrative_type']
+            situation = in_dict['situation']
+            res = get_administrative_prejudgment_result(administrative_type, situation)
+
+            return json.dumps({
+                "success": True,
+                "error_msg": "",
+                "result": res,
+            }, ensure_ascii=False)
         else:
             return json.dumps({
                 "success": False,
