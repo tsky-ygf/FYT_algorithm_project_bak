@@ -21,6 +21,16 @@ handler.setFormatter(formatter)
 logger.addHandler(handler)
 
 
+def _request_parse(_request):
+    '''解析请求数据并以json形式返回'''
+    if _request.method == 'POST':
+        return _request.json
+    elif _request.method == 'GET':
+        return _request.args
+    else:
+        raise Exception("传入了不支持的方法。")
+
+
 @app.route('/get_civil_problem_summary', methods=["get"])
 def get_civil_problem_summary():
     try:
@@ -201,25 +211,48 @@ def get_law_document():
     pass
 
 
-@app.route('/get_situation', methods=["get", "post"])
-def get_administrative_situation_list():
-    try:
-        in_json = request.get_data()
-        if in_json is not None:
-            in_dict = json.loads(in_json.decode("utf-8"))
-            administrative_type = in_dict['administrative_type']
-            situation_dict = get_administrative_prejudgment_situation(administrative_type)
+@app.route('/get_administrative_type', methods=["get"])
+def get_administrative_type():
+    # mock data
+    return json.dumps({
+        "success": True,
+        "error_msg": "",
+        "result": [{
+            "type_id": "tax",
+            "type_name": "税务处罚预判"
+        }, {
+            "type_id": "police",
+            "type_name": "公安处罚预判"
+        }, {
+            "type_id": "transportation",
+            "type_name": "道路运输处罚预判"
+        }]
+    }, ensure_ascii=False)
+    pass
 
-            return json.dumps({
-                "success": True,
-                "error_msg": "",
-                "result": situation_dict,
-            }, ensure_ascii=False)
-        else:
-            return json.dumps({
-                "success": False,
-                "error_msg": "request data is none."
-            }, ensure_ascii=False)
+
+@app.route('/get_administrative_problem_and_situation_by_type_id', methods=["get", "post"])
+def get_administrative_problem_and_situation_by_type_id():
+    try:
+        req_data = _request_parse(request)
+        administrative_type = req_data.get("type_id")
+        situation_dict = get_administrative_prejudgment_situation(administrative_type)
+        # 编排返回参数的格式
+        result = []
+        for problem, value in situation_dict.items():
+            situations = []
+            for specific_problem, its_situations in value.items():
+                situations.extend(its_situations)
+            result.append({
+                "problem": problem,
+                "situations": situations
+            })
+
+        return json.dumps({
+            "success": True,
+            "error_msg": "",
+            "result": result,
+        }, ensure_ascii=False)
     except Exception as e:
         logging.info(traceback.format_exc())
         return json.dumps({
@@ -231,23 +264,15 @@ def get_administrative_situation_list():
 @app.route('/get_administrative_result', methods=["get", "post"])
 def get_administrative_result():
     try:
-        in_json = request.get_data()
-        if in_json is not None:
-            in_dict = json.loads(in_json.decode("utf-8"))
-            administrative_type = in_dict['administrative_type']
-            situation = in_dict['situation']
-            res = get_administrative_prejudgment_result(administrative_type, situation)
-
-            return json.dumps({
-                "success": True,
-                "error_msg": "",
-                "result": res,
-            }, ensure_ascii=False)
-        else:
-            return json.dumps({
-                "success": False,
-                "error_msg": "request data is none."
-            }, ensure_ascii=False)
+        req_data = _request_parse(request)
+        administrative_type = req_data.get("type_id")
+        situation = req_data.get("situation")
+        res = get_administrative_prejudgment_result(administrative_type, situation)
+        return json.dumps({
+            "success": True,
+            "error_msg": "",
+            "result": res,
+        }, ensure_ascii=False)
     except Exception as e:
         logging.info(traceback.format_exc())
         return json.dumps({
