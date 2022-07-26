@@ -7,9 +7,7 @@ import traceback
 import numpy as np
 import os
 import sys
-sys.path.append(os.path.abspath('../'))
-sys.path.append(os.path.abspath('../common'))
-from common import prob_ps_desc
+from LawsuitPrejudgment.common import prob_ps_desc
 
 
 model = fasttext.load_model('../model/ft/ft.bin')

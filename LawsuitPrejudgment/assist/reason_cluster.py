@@ -8,10 +8,8 @@ import re
 import random
 from sklearn.cluster import SpectralClustering
 from textrank4zh import TextRank4Sentence
-sys.path.append(os.path.abspath('../'))
-sys.path.append(os.path.abspath('../common'))
-from vectorization import vectorization
-from common import sucheng_extract, cosine_matrix, date_filter, num_filter, negative_word
+from LawsuitPrejudgment.common.vectorization import vectorization
+from LawsuitPrejudgment.common import sucheng_extract, cosine_matrix, date_filter, num_filter, negative_word
 
 
 def get_data_from_database(anyous, num=100):

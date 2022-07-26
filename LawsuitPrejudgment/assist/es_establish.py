@@ -6,10 +6,8 @@ from elasticsearch.helpers import bulk
 from elasticsearch import Elasticsearch
 import sys
 import os
-sys.path.append(os.path.abspath('..'))
-sys.path.append(os.path.abspath('../common'))
-from data_util import *
-from data_analyze import *
+from LawsuitPrejudgment.common.data_util import *
+from LawsuitPrejudgment.common.data_analyze import *
 
 # ES安装：https://www.elastic.co/cn/
 # 安装kibana

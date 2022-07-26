@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from config_loader import *
-from data_util import text_underline
+from LawsuitPrejudgment.common.config_loader import *
+from LawsuitPrejudgment.common.data_util import text_underline
 import logging
 
 

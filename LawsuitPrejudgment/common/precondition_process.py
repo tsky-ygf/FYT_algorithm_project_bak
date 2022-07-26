@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from config_loader import *
+from LawsuitPrejudgment.common.config_loader import *
 
 
 def prediction_suqiu_filter(predictions, suqiu_result):

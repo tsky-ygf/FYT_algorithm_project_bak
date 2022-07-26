@@ -3,7 +3,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from modules import bert_modeling, tokenization
+from LawsuitPrejudgment.modules import bert_modeling, tokenization
 import tensorflow as tf
 import os
 import jieba

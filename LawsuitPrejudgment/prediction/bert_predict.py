@@ -24,14 +24,11 @@ import traceback
 import configparser
 
 import tensorflow as tf
-sys.path.append(os.path.abspath('../'))
-sys.path.append(os.path.abspath('../common'))
-sys.path.append(os.path.abspath('../modules'))
-from common import prob_ps_desc
-from modules import bert_modeling, tokenization
+from LawsuitPrejudgment.common import prob_ps_desc
+from LawsuitPrejudgment.modules import bert_modeling, tokenization
 
 config = configparser.ConfigParser()
-config.read('../main/config.ini')
+config.read('LawsuitPrejudgment/main/config.ini')
 max_seq_length = 512
 print(config.sections())
 label_list = [0, 1]

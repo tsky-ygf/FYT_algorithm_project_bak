@@ -5,13 +5,7 @@ import logging
 import logging.handlers
 from flask import Flask
 from flask import request
-# import sys
-# import os
 
-# sys.path.append(os.path.abspath('../../'))
-# sys.path.append(os.path.abspath('../'))
-# sys.path.append(os.path.abspath('../common'))
-# sys.path.append(os.path.abspath('../prediction'))
 from LawsuitPrejudgment.main.reasoning_graph_predict import predict_fn
 from LawsuitPrejudgment.Administrative.administrative_api_v1 import *
 
@@ -30,7 +24,7 @@ logger.addHandler(handler)
 @app.route('/get_civil_problem_summary', methods=["get"])
 def get_civil_problem_summary():
     try:
-        with open("civil_problem_summary.json") as json_data:
+        with open("../../main/civil_problem_summary.json") as json_data:
             problem_summary = json.load(json_data)["value"]
         return json.dumps({"success": True, "error_msg": "", "value": problem_summary}, ensure_ascii=False)
     except Exception as e:

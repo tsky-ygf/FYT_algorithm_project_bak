@@ -25,11 +25,8 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 from sklearn.metrics import f1_score, classification_report, accuracy_score, confusion_matrix
-sys.path.append(os.path.abspath('../'))
-sys.path.append(os.path.abspath('../common'))
-sys.path.append(os.path.abspath('../modules'))
-from common import prob_ps, problem_bkw_dict, prob_ps_desc
-from modules import bert_modeling, optimization, tokenization
+from LawsuitPrejudgment.common import prob_ps, problem_bkw_dict, prob_ps_desc
+from LawsuitPrejudgment.modules import bert_modeling, optimization, tokenization
 
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "6"

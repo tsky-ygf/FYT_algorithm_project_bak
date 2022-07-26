@@ -4,8 +4,8 @@ import logging
 import numpy as np
 import traceback
 import multiprocessing
-from config_loader import *
-from data_util import cut_words, date_filter, question_filter
+from LawsuitPrejudgment.common.config_loader import *
+from LawsuitPrejudgment.common.data_util import cut_words, date_filter, question_filter
 
 
 def written_correct(inputs):

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import re
-from config_loader import anyou_ps_dict, ps_positive_keyword, ps_negative_keyword, ps_panjue_keyword
+from LawsuitPrejudgment.common.config_loader import anyou_ps_dict, ps_positive_keyword, ps_negative_keyword, ps_panjue_keyword
 
 
 ##############################################################################################################################################

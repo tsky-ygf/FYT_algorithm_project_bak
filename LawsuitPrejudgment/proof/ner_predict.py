@@ -7,9 +7,7 @@ import tensorflow as tf
 import numpy as np
 import os
 import sys
-sys.path.append(os.path.abspath('../'))
-sys.path.append(os.path.abspath('../modules'))
-from modules import bert_modeling, tokenization
+from LawsuitPrejudgment.modules import bert_modeling, tokenization
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "3"
 

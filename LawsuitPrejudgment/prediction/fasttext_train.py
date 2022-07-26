@@ -4,9 +4,7 @@ import pandas as pd
 import jieba
 import os
 import sys
-sys.path.append(os.path.abspath('../'))
-sys.path.append(os.path.abspath('../common'))
-from common import prob_ps_desc, chaming_fact_extract
+from LawsuitPrejudgment.common import prob_ps_desc, chaming_fact_extract
 
 
 problem_list = ['婚姻继承', '劳动社保', '借贷纠纷', '交通事故']
