@@ -3,6 +3,7 @@ import json
 import traceback
 import logging
 import logging.handlers
+import requests
 from flask import Flask
 from flask import request
 
@@ -272,6 +273,54 @@ def get_administrative_result():
             "success": True,
             "error_msg": "",
             "result": res,
+        }, ensure_ascii=False)
+    except Exception as e:
+        logging.info(traceback.format_exc())
+        return json.dumps({
+            "success": False,
+            "error_msg": "unknown error:" + repr(e)
+        }, ensure_ascii=False)
+
+
+@app.route('/get_criminal_result', methods=["post"])
+def get_criminal_result():
+    try:
+        req_data = _request_parse(request)
+        question = req_data.get("question")
+        # 调用刑事预判的接口，获取结果
+        url = "http://172.19.82.198:5060/get_criminal_report"
+        data = {
+            "question": question
+        }
+        resp_json = requests.post(url, json=data).json()
+
+        # 编排接口返回内容的格式
+        accusation = []
+        for item in eval(resp_json.get("accusation")):
+            for crime, prob in item.items():
+                accusation.append({
+                    "crime": crime,
+                    "probability": prob
+                })
+        articles = []
+        for item in eval(resp_json.get("articles")):
+            articles.append({
+                "law_name": item[0],
+                "law_item": item[1],
+                "crime": item[2],
+                "law_content": item[3],
+                "prob": item[4]
+            })
+        result = {
+            "accusation": accusation,
+            "articles": articles,
+            "imprisonment": int(resp_json.get("imprisonment"))
+        }
+
+        return json.dumps({
+            "success": True,
+            "error_msg": "",
+            "result": result,
         }, ensure_ascii=False)
     except Exception as e:
         logging.info(traceback.format_exc())

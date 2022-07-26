@@ -21,3 +21,16 @@ def test_get_administrative_result():
     assert resp_json.get("success") is True
     assert len(resp_json.get("result")) > 0
     pass
+
+
+def test_get_criminal_result():
+    url = "http://101.69.229.138:8100/get_criminal_result"
+    data = {
+        "question": "我打人了，怎么办"
+    }
+    resp_json = requests.post(url, json=data).json()
+    print(resp_json)
+    assert resp_json is not None
+    assert resp_json.get("success") is True
+    assert len(resp_json.get("result")) > 0
+    pass
