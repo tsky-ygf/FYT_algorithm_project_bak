@@ -35,7 +35,7 @@ def _request_parse(_request):
 @app.route('/get_civil_problem_summary', methods=["get"])
 def get_civil_problem_summary():
     try:
-        with open("../../main/civil_problem_summary.json") as json_data:
+        with open("LawsuitPrejudgment/main/civil_problem_summary.json") as json_data:
             problem_summary = json.load(json_data)["value"]
         return json.dumps({"success": True, "error_msg": "", "value": problem_summary}, ensure_ascii=False)
     except Exception as e:
