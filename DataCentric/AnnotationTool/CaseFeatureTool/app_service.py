@@ -17,6 +17,7 @@ from DataCentric.AnnotationTool.CaseFeatureTool.entity_annotation import *
 import datetime
 import json
 
+
 class DateEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, datetime.datetime):
@@ -83,9 +84,6 @@ def get_base_data():
         return json.dumps({"error_msg": "error:" + repr(e), "status": 1}, ensure_ascii=False)
 
 
-
-
-
 @app.route('/getBaseAnnotation', methods=["post"])
 def get_base_annotation():
     try:
@@ -131,6 +129,7 @@ def do_insert_annotation_data():
         logging.info(traceback.format_exc())
         return json.dumps({"error_msg": "error:" + repr(e), "status": 1}, ensure_ascii=False)
 
+
 """
     try:
         in_json = request.get_data()
@@ -142,7 +141,9 @@ def do_insert_annotation_data():
                 {"base_data": base_data_dict, "error_msg": "", "status": 0}, ensure_ascii=False)
         else:
             return json.dumps({"error_msg": "data is None", "status": 1}, ensure_ascii=False)"""
-@app.route('/getSecondCheck',methods=['post'])
+
+
+@app.route('/getSecondCheck', methods=['post'])
 def is_second_check():
     # 二次审核
     in_json = request.get_data()
@@ -154,11 +155,13 @@ def is_second_check():
         # logger.info(f"run sql result:{second_check_data_dict}")
         if second_check_data_dict:
             return json.dumps(
-                {"data_list": second_check_data_dict, "error_msg": "", "status": 0}, ensure_ascii=False,cls=DateEncoder)
+                {"data_list": second_check_data_dict, "error_msg": "", "status": 0}, ensure_ascii=False,
+                cls=DateEncoder)
         else:
-            return json.dumps({"error_msg": "no check", "status": 1}, ensure_ascii=False,cls=DateEncoder)
+            return json.dumps({"error_msg": "no check", "status": 1}, ensure_ascii=False, cls=DateEncoder)
 
-@app.route('/getSecondCheckTrue',methods=['post'])
+
+@app.route('/getSecondCheckTrue', methods=['post'])
 def get_true_check():
     # 二次审核 确认
     in_json = request.get_data()
@@ -174,9 +177,10 @@ def get_true_check():
         # logger.info(f"type: {type(in_dict)} , {in_dict}")
         save_second_check_proson(in_dict)
         return json.dumps(
-            {"result": "update success", "error_msg": "", "status": 0}, ensure_ascii=False,cls=DateEncoder)
+            {"result": "update success", "error_msg": "", "status": 0}, ensure_ascii=False, cls=DateEncoder)
 
-@app.route('/getWorkCount',methods=['post'])
+
+@app.route('/getWorkCount', methods=['post'])
 def get_work_count():
     # 获取当日工作量
     data_json = request.get_data()
@@ -188,11 +192,13 @@ def get_work_count():
         logger.info(second_check_data_dict)
         if second_check_data_dict:
             return json.dumps(
-                               {"work_count": second_check_data_dict[0].get('num'), "error_msg": "", "status": 0}, ensure_ascii=False)
+                {"work_count": second_check_data_dict[0].get('num'), "error_msg": "", "status": 0}, ensure_ascii=False)
         else:
-            return json.dumps({"error_msg": "this person have no work", "status": 1}, ensure_ascii=False, cls=DateEncoder)
+            return json.dumps({"error_msg": "this person have no work", "status": 1}, ensure_ascii=False,
+                              cls=DateEncoder)
 
-@app.route('/getSourceContent',methods=['post'])
+
+@app.route('/getSourceContent', methods=['post'])
 def get_source():
     data_json = request.get_data()
     if data_json:
@@ -203,12 +209,12 @@ def get_source():
         # plogger.info(second_check_data_dict)
         if source_content:
             return json.dumps(
-                               {"content": source_content[0].get('f13'), "error_msg": "", "status": 0}, ensure_ascii=False)
+                {"content": source_content[0].get('f13'), "error_msg": "", "status": 0}, ensure_ascii=False)
         else:
             return json.dumps({"error_msg": "have no data", "status": 1}, ensure_ascii=False, cls=DateEncoder)
 
 
-@app.route('/loginCheck',methods=['post'])
+@app.route('/loginCheck', methods=['post'])
 def login_check():
     # 登录 校验
     data_json = request.get_data()
@@ -233,7 +239,8 @@ def login_check():
     else:
         return json.dumps({"error_msg": "There is no such user", "status": 1}, ensure_ascii=False, cls=DateEncoder)
 
-@app.route('/registerUser',methods=['post'])
+
+@app.route('/registerUser', methods=['post'])
 def register_user():
     # 注册用户
     data_json = request.get_data()
@@ -248,10 +255,12 @@ def register_user():
     username = data_dict.get("username")
     password = data_dict.get("password")
     if check_username(username):
-        return json.dumps({"error_msg": "this user name is in use,repeat of user name", "status": 1}, ensure_ascii=False, cls=DateEncoder)
-    if save_username_password(username=username,password=password):
+        return json.dumps({"error_msg": "this user name is in use,repeat of user name", "status": 1},
+                          ensure_ascii=False, cls=DateEncoder)
+    if save_username_password(username=username, password=password):
         return json.dumps(
             {"content": "register success", "error_msg": "", "status": 0}, ensure_ascii=False)
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=6021, debug=False)  # , use_reloader=False)

@@ -8,13 +8,14 @@
 import streamlit as st
 from DocumentReview.ParseFile.parse_word import read_docx_file
 from DocumentReview.ContractReview.basic_contract import BasicUIEAcknowledgement
-from paddlenlp import Taskflow
+# from paddlenlp import Taskflow
 # import pycorrector
-
+from loguru import logger
 from pprint import pprint
 from annotated_text import annotated_text
 
-text_correction = Taskflow("text_correction")
+
+# text_correction = Taskflow("text_correction")
 
 
 @st.cache
@@ -70,26 +71,71 @@ acknowledgement = BasicUIEAcknowledgement(config_path=config_path,
                                           usr=usr)
 correct = st.button("文本纠错")
 run = st.button("开始审核")
+
+# use paddleNLP to correct the text
+# if correct:
+#     res_correct = text_correction(text)
+#     if len(res_correct) > 0:
+#         # st.write(annotated_text(res_correct))
+#         # st.write("纠错后的文本")
+#         # st.write(text)
+#         print(res_correct)
+#         res_text = []
+#         last_index = 0
+#         for one_error in res_correct[0]['errors']:
+#             one_position = one_error['position']
+#             print(one_position)
+#             res_text.append(text[last_index:one_position])
+#             res_text.append((text[one_position], one_error['correction'][text[one_position]], '#FF8B72'))
+#             # res_text.append(text[one_position + 1:])
+#             last_index = one_position + 1
+#         res_text.append(text[last_index:])
+#         annotated_text(*res_text)
+#     else:
+#         st.write("错别字审核通过")
 if correct:
-    res_correct = text_correction(text)
-    if len(res_correct) > 0:
-        # st.write(annotated_text(res_correct))
-        # st.write("纠错后的文本")
-        # st.write(text)
-        print(res_correct)
-        res_text = []
-        last_index = 0
-        for one_error in res_correct[0]['errors']:
-            one_position = one_error['position']
-            print(one_position)
-            res_text.append(text[last_index:one_position])
-            res_text.append((text[one_position], one_error['correction'][text[one_position]], '#FF8B72'))
-            # res_text.append(text[one_position + 1:])
-            last_index = one_position + 1
-        res_text.append(text[last_index:])
-        annotated_text(*res_text)
+    import requests
+    import pandas as pd
+
+    # st.write(text)
+    r = requests.post("http://172.19.82.199:6598/macbert_correct", json={"text": text})
+    result = r.json()
+    if result['success']:
+        result = result['result']
+        # if len(result) > 0:
+        #     st.write(result)
+        # st.write(result)
+        origin_text_list = []
+        correct_text_list = []
+        error_list = []
+        for one_error in result:
+            if len(one_error[2]) == 0:
+                # st.write("{} ====> 纠错通过".format(one_error[0]))
+                pass
+            else:
+                # st.write("{} ====> {}".format(one_error[0], one_error[1]))
+                # res_dict[one_error[0]] = one_error[1]
+                origin_text_list.append(one_error[0])
+                correct_text_list.append(one_error[1])
+                error_text = ""
+                # error_list.append(one_error[2][0])
+                for er in one_error[2]:
+                    error_text += er[0] + "===>" + er[1] + "\n"
+                st.write(error_text)
+                error_list.append(error_text)
+                # for
+        res_dict = {"原始文本": origin_text_list, "纠错后的文本": correct_text_list, "错别字": error_list}
+        print(res_dict)
+
+        my_df = pd.DataFrame.from_dict(res_dict)
+        st.table(my_df)
+        # my_df.columns = ['纠错后的句子']
+        # st.dataframe(my_df)
+
     else:
-        st.write("错别字审核通过")
+        logger.error(result['error_msg'])
+        # result = []
+
 if run:
     # corrected_sent, detail = pycorrector.correct(text)
     # print(corrected_sent, detail)

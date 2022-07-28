@@ -6,7 +6,9 @@
 # @File    : administrative_api_v1.py
 # @Software: PyCharm
 import json
-import pandas as pd
+# import pandas as pd
+from loguru import logger
+from pprint import pprint, pformat
 
 
 def get_administrative_prejudgment_situation(administrative_type):
@@ -27,25 +29,24 @@ def get_administrative_prejudgment_result(administrative_type, situation):
 
     # with open('LawsuitPrejudgment/Administrative/result_show/{}_type.json'.format(administrative_type), 'r') as f2:
     #     type_data = json.load(f2)
+    # logger.info(pformat(info_data[situation]))
+    prejudgment_result = list()
 
-    prejudgment_result = dict()
-    prejudgment_result["具体情形"] = '{}({})'.format(situation, info_data[situation]['法条类别'])
-
-    prejudgment_result["涉嫌违法行为"] = info_data[situation]['处罚依据']
-    prejudgment_result["法条依据"] = info_data[situation]['法条依据']
-    prejudgment_result["处罚种类"] = info_data[situation]['处罚种类']
-    prejudgment_result["处罚幅度"] = info_data[situation]['处罚幅度']
-    prejudgment_result["涉刑风险"] = info_data[situation]['涉刑风险']
-    prejudgment_result["相似类案"] = info_data[situation]['相关案例']
+    prejudgment_result.append({"title": "法条依据", "content": info_data[situation]['法条依据']})
+    prejudgment_result.append({"title": "具体情形", "content": '{}({})'.format(situation, info_data[situation]['法条类别'])})
+    prejudgment_result.append({"title": "涉嫌违法行为", "content": info_data[situation]['处罚依据']})
+    prejudgment_result.append({"title": "法条依据", "content": info_data[situation]['法条依据']})
+    prejudgment_result.append({"title": "处罚种类", "content": info_data[situation]['处罚种类']})
+    prejudgment_result.append({"title": "处罚幅度", "content": info_data[situation]['处罚幅度']})
+    prejudgment_result.append({"title": "涉刑风险", "content": info_data[situation]['涉刑风险']})
+    prejudgment_result.append({"title": "相似类案", "content": info_data[situation]['相关案例']})
 
     return prejudgment_result
 
 
 if __name__ == '__main__':
-    from pprint import pprint
+    res = get_administrative_prejudgment_result("tax", "没有真实的业务、资金往来")
+    pprint(res, sort_dicts=False)
 
-    # res = get_administrative_prejudgment_result("tax", "无真实业务往来")
-    # pprint(res, sort_dicts=False)
-
-    rest = get_administrative_prejudgment_situation("tax")
-    pprint(rest, sort_dicts=False)
+    # rest = get_administrative_prejudgment_situation("tax")
+    # pprint(rest, sort_dicts=False)
