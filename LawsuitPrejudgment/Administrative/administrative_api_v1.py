@@ -30,15 +30,24 @@ def get_administrative_prejudgment_result(administrative_type, situation):
     # with open('LawsuitPrejudgment/Administrative/result_show/{}_type.json'.format(administrative_type), 'r') as f2:
     #     type_data = json.load(f2)
     # logger.info(pformat(info_data[situation]))
-    prejudgment_result = list()
+    prejudgment_result = dict()
 
-    prejudgment_result.append({"title": "具体情形", "content": '{}({})'.format(situation, info_data[situation]['法条类别'])})
-    prejudgment_result.append({"title": "涉嫌违法行为", "content": info_data[situation]['处罚依据']})
-    prejudgment_result.append({"title": "法条依据", "content": info_data[situation]['法条依据']})
-    prejudgment_result.append({"title": "处罚种类", "content": info_data[situation]['处罚种类']})
-    prejudgment_result.append({"title": "处罚幅度", "content": info_data[situation]['处罚幅度']})
-    prejudgment_result.append({"title": "涉刑风险", "content": info_data[situation]['涉刑风险']})
-    prejudgment_result.append({"title": "相似类案", "content": info_data[situation]['相关案例']})
+    prejudgment_result["specific_situation"] = {
+        "title": "具体情形",
+        "content": '{}({})'.format(situation, info_data[situation]['法条类别'])
+    }
+    prejudgment_result["suspected_illegal_act"] = {"title": "涉嫌违法行为", "content": info_data[situation]['处罚依据']}
+    prejudgment_result["legal_basis"] = {
+        "title": "法条依据",
+        "content": [{"law_item": law_item, "law_content": law_content} for law_item, law_content in info_data[situation]['法条依据'].items()]
+    }
+    prejudgment_result["punishment_type"] = {"title": "处罚种类", "content": info_data[situation]['处罚种类']}
+    prejudgment_result["punishment_range"] = {"title": "处罚幅度", "content": info_data[situation]['处罚幅度']}
+    prejudgment_result["criminal_risk"] = {
+        "title": "涉刑风险",
+        "content": [{"crime_name": crime_name, "law_item": law_info[0], "law_content": law_info[1]} for crime_name, law_info in info_data[situation]['涉刑风险'].items()]
+    }
+    prejudgment_result["similar_case"] = {"title": "相似类案", "content": info_data[situation]['相关案例']}
 
     return prejudgment_result
 
