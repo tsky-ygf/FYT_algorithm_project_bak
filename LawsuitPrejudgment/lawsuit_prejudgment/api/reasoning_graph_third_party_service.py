@@ -3,15 +3,10 @@ import json
 import traceback
 import logging
 import logging.handlers
+import requests
 from flask import Flask
 from flask import request
-# import sys
-# import os
 
-# sys.path.append(os.path.abspath('../../'))
-# sys.path.append(os.path.abspath('../'))
-# sys.path.append(os.path.abspath('../common'))
-# sys.path.append(os.path.abspath('../prediction'))
 from LawsuitPrejudgment.main.reasoning_graph_predict import predict_fn
 from LawsuitPrejudgment.Administrative.administrative_api_v1 import *
 
@@ -27,10 +22,20 @@ handler.setFormatter(formatter)
 logger.addHandler(handler)
 
 
+def _request_parse(_request):
+    '''解析请求数据并以json形式返回'''
+    if _request.method == 'POST':
+        return _request.json
+    elif _request.method == 'GET':
+        return _request.args
+    else:
+        raise Exception("传入了不支持的方法。")
+
+
 @app.route('/get_civil_problem_summary', methods=["get"])
 def get_civil_problem_summary():
     try:
-        with open("civil_problem_summary.json") as json_data:
+        with open("../../main/civil_problem_summary.json") as json_data:
             problem_summary = json.load(json_data)["value"]
         return json.dumps({"success": True, "error_msg": "", "value": problem_summary}, ensure_ascii=False)
     except Exception as e:
@@ -207,25 +212,48 @@ def get_law_document():
     pass
 
 
-@app.route('/get_situation', methods=["get", "post"])
-def get_administrative_situation_list():
-    try:
-        in_json = request.get_data()
-        if in_json is not None:
-            in_dict = json.loads(in_json.decode("utf-8"))
-            administrative_type = in_dict['administrative_type']
-            situation_dict = get_administrative_prejudgment_situation(administrative_type)
+@app.route('/get_administrative_type', methods=["get"])
+def get_administrative_type():
+    # mock data
+    return json.dumps({
+        "success": True,
+        "error_msg": "",
+        "result": [{
+            "type_id": "tax",
+            "type_name": "税务处罚预判"
+        }, {
+            "type_id": "police",
+            "type_name": "公安处罚预判"
+        }, {
+            "type_id": "transportation",
+            "type_name": "道路运输处罚预判"
+        }]
+    }, ensure_ascii=False)
+    pass
 
-            return json.dumps({
-                "success": True,
-                "error_msg": "",
-                "result": situation_dict,
-            }, ensure_ascii=False)
-        else:
-            return json.dumps({
-                "success": False,
-                "error_msg": "request data is none."
-            }, ensure_ascii=False)
+
+@app.route('/get_administrative_problem_and_situation_by_type_id', methods=["get", "post"])
+def get_administrative_problem_and_situation_by_type_id():
+    try:
+        req_data = _request_parse(request)
+        administrative_type = req_data.get("type_id")
+        situation_dict = get_administrative_prejudgment_situation(administrative_type)
+        # 编排返回参数的格式
+        result = []
+        for problem, value in situation_dict.items():
+            situations = []
+            for specific_problem, its_situations in value.items():
+                situations.extend(its_situations)
+            result.append({
+                "problem": problem,
+                "situations": situations
+            })
+
+        return json.dumps({
+            "success": True,
+            "error_msg": "",
+            "result": result,
+        }, ensure_ascii=False)
     except Exception as e:
         logging.info(traceback.format_exc())
         return json.dumps({
@@ -237,23 +265,63 @@ def get_administrative_situation_list():
 @app.route('/get_administrative_result', methods=["get", "post"])
 def get_administrative_result():
     try:
-        in_json = request.get_data()
-        if in_json is not None:
-            in_dict = json.loads(in_json.decode("utf-8"))
-            administrative_type = in_dict['administrative_type']
-            situation = in_dict['situation']
-            res = get_administrative_prejudgment_result(administrative_type, situation)
+        req_data = _request_parse(request)
+        administrative_type = req_data.get("type_id")
+        situation = req_data.get("situation")
+        res = get_administrative_prejudgment_result(administrative_type, situation)
+        return json.dumps({
+            "success": True,
+            "error_msg": "",
+            "result": res,
+        }, ensure_ascii=False)
+    except Exception as e:
+        logging.info(traceback.format_exc())
+        return json.dumps({
+            "success": False,
+            "error_msg": "unknown error:" + repr(e)
+        }, ensure_ascii=False)
 
-            return json.dumps({
-                "success": True,
-                "error_msg": "",
-                "result": res,
-            }, ensure_ascii=False)
-        else:
-            return json.dumps({
-                "success": False,
-                "error_msg": "request data is none."
-            }, ensure_ascii=False)
+
+@app.route('/get_criminal_result', methods=["post"])
+def get_criminal_result():
+    try:
+        req_data = _request_parse(request)
+        question = req_data.get("question")
+        # 调用刑事预判的接口，获取结果
+        url = "http://172.19.82.198:5060/get_criminal_report"
+        data = {
+            "question": question
+        }
+        resp_json = requests.post(url, json=data).json()
+
+        # 编排接口返回内容的格式
+        accusation = []
+        for item in eval(resp_json.get("accusation")):
+            for crime, prob in item.items():
+                accusation.append({
+                    "crime": crime,
+                    "probability": prob
+                })
+        articles = []
+        for item in eval(resp_json.get("articles")):
+            articles.append({
+                "law_name": item[0],
+                "law_item": item[1],
+                "crime": item[2],
+                "law_content": item[3],
+                "prob": item[4]
+            })
+        result = {
+            "accusation": accusation,
+            "articles": articles,
+            "imprisonment": int(resp_json.get("imprisonment"))
+        }
+
+        return json.dumps({
+            "success": True,
+            "error_msg": "",
+            "result": result,
+        }, ensure_ascii=False)
     except Exception as e:
         logging.info(traceback.format_exc())
         return json.dumps({

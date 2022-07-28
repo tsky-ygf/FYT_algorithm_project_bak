@@ -17,8 +17,8 @@ from pyltp import Parser, Segmentor, Postagger, NamedEntityRecognizer
 #
 ########################################################################################################################
 
-config_path = '../config/'
-model_path = '../model/'
+config_path = 'LawsuitPrejudgment/config/'
+model_path = 'LawsuitPrejudgment/model/'
 
 
 

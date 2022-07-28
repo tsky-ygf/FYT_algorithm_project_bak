@@ -9,9 +9,7 @@ import numpy as np
 import collections
 import os
 import sys
-sys.path.append(os.path.abspath('../'))
-sys.path.append(os.path.abspath('../modules'))
-from modules import bert_modeling, optimization, tokenization
+from LawsuitPrejudgment.modules import bert_modeling, optimization, tokenization
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "3"
 

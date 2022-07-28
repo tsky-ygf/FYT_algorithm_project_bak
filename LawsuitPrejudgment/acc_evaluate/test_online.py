@@ -4,13 +4,9 @@ import logging
 import os
 os.environ['CUDA_VISIBLE_DEVICES']='7'
 from collections import OrderedDict
-import sys
-sys.path.append(os.path.abspath('../'))
-sys.path.append(os.path.abspath('../common'))
-sys.path.append(os.path.abspath('../main'))
 
-from reasoning_graph_predict import predict_fn
-from config_loader import *
+from LawsuitPrejudgment.main.reasoning_graph_predict import predict_fn
+from LawsuitPrejudgment.common.config_loader import *
 """
 # 交互的获取用户输入，保存问题、用户输入、预测结果
 """

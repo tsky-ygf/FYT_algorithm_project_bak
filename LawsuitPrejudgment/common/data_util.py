@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import re
 import numpy as np
-from config_loader import negative_word_list, segmentor, postagger
+from LawsuitPrejudgment.common.config_loader import negative_word_list, segmentor, postagger
 
 
 def cut_words(sentence):

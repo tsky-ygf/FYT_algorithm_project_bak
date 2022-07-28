@@ -4,11 +4,9 @@ import random
 import re
 import os
 import sys
-sys.path.append(os.path.abspath('../'))
-sys.path.append(os.path.abspath('../common'))
 from data_prepare import sentence_process
 from ner_predict import predict
-from common import multi_processing_data, problem_bkw_dict, suqiu_bkw_dict, logic_ps
+from LawsuitPrejudgment.common import multi_processing_data, problem_bkw_dict, suqiu_bkw_dict, logic_ps
 
 
 max_seq_length = 64

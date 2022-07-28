@@ -9,12 +9,8 @@ os.environ['CUDA_VISIBLE_DEVICES'] = '6'
 from collections import OrderedDict
 import sys
 
-sys.path.append(os.path.abspath('../'))
-sys.path.append(os.path.abspath('../common'))
-sys.path.append(os.path.abspath('../main'))
-
-from reasoning_graph_predict import predict_fn
-from config_loader import *
+from LawsuitPrejudgment.main.reasoning_graph_predict import predict_fn
+from LawsuitPrejudgment.common.config_loader import *
 
 """
 # 从保存的文件中获取用户输入，如果问题路径有变化，记录空，否则记录新的预测结果

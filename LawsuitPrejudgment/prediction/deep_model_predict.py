@@ -25,11 +25,8 @@ import numpy as np
 import traceback
 import pandas as pd
 import tensorflow as tf
-sys.path.append(os.path.abspath('../'))
-sys.path.append(os.path.abspath('../common'))
-sys.path.append(os.path.abspath('../modules'))
-from common import config_path, prob_ps, problem_bkw_dict, prob_ps_desc
-from modules import bert_modeling, tokenization
+from LawsuitPrejudgment.common import config_path, prob_ps, problem_bkw_dict, prob_ps_desc
+from LawsuitPrejudgment.modules import bert_modeling, tokenization
 
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
