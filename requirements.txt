@@ -31,3 +31,4 @@ cn2an
 googletrans
 docarray
 pycorrector
+loguru
