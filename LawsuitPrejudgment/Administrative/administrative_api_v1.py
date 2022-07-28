@@ -32,7 +32,6 @@ def get_administrative_prejudgment_result(administrative_type, situation):
     # logger.info(pformat(info_data[situation]))
     prejudgment_result = list()
 
-    prejudgment_result.append({"title": "法条依据", "content": info_data[situation]['法条依据']})
     prejudgment_result.append({"title": "具体情形", "content": '{}({})'.format(situation, info_data[situation]['法条类别'])})
     prejudgment_result.append({"title": "涉嫌违法行为", "content": info_data[situation]['处罚依据']})
     prejudgment_result.append({"title": "法条依据", "content": info_data[situation]['法条依据']})

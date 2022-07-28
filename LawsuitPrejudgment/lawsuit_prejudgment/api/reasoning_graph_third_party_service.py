@@ -262,7 +262,7 @@ def get_administrative_problem_and_situation_by_type_id():
         }, ensure_ascii=False)
 
 
-@app.route('/get_administrative_result', methods=["get", "post"])
+@app.route('/get_administrative_result', methods=["post"])
 def get_administrative_result():
     try:
         req_data = _request_parse(request)
