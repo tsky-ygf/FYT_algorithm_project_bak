@@ -1,5 +1,7 @@
 from LawsuitPrejudgment.lawsuit_prejudgment.nlu.factor_extractors.factor_extractor import FactorExtractor
 from LawsuitPrejudgment.lawsuit_prejudgment.nlu.situation_classifiers.situation_classifier import SituationClassifier
+from LawsuitPrejudgment.lawsuit_prejudgment.nlu.situation_classifiers.situation_classifier_message import \
+    SituationClassifierMessage
 
 
 class FactorBasedSituationClassifier(SituationClassifier):
@@ -8,5 +10,5 @@ class FactorBasedSituationClassifier(SituationClassifier):
     def __init__(self, factor_extractor: FactorExtractor):
         self.factor_extractor = factor_extractor
 
-    def classify_situations(self, text):
+    def classify_situations(self, message: SituationClassifierMessage):
         pass

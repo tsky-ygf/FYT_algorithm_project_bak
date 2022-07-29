@@ -22,5 +22,6 @@ def test_classify_situations():
 
     situation_classifier = HttpBasedSituationClassifier(http_client)
     resp_json = situation_classifier.classify_situations(message)
+
     print(resp_json)
     assert resp_json
