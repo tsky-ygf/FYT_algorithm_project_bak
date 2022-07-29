@@ -109,11 +109,27 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
 
                 if "身份证校验" == row["pos rule"]:
                     rule_func.check_id_card(row, extraction_con, res_dict)
-                elif "用途审核" == row["pos rule"]:
-                    rule_func.check_application(row, extraction_con, res_dict)
-                elif "日期关联" in row["pos rule"]:
+                elif "房屋租赁期限审核" == row["pos rule"]:
+                    rule_func.check_house_application(row, extraction_con, res_dict)
+                elif "借款用途审核" == row["pos rule"]:
+                    rule_func.check_loan_application(row, extraction_con, res_dict)
+                elif "日期内部关联" == row["pos rule"]:
                     rule_func.check_date_relation(row, extraction_con, res_dict)
-                elif "工资审核" == row["pos rule"]:
+                elif "日期外部关联【还款日期-借款日期】" == row["pos rule"]:
+                    # self.logger.debug(extraction_res["还款日期"][0]["text"])
+                    # self.logger.debug(extraction_res["借款日期"][0]["text"])
+                    try:
+                        rule_func.check_date_outside(row, extraction_con, res_dict, extraction_res["借款日期"][0]["text"],
+                                                     extraction_res["还款日期"][0]["text"])
+                    except Exception as e:
+                        self.logger.error(e)
+                        self.logger.error(extraction_res)
+                elif "日期外部关房屋租赁期限】" == row["pos rule"]:
+                    # print(extraction_res["房屋租赁期限"][0]["text"])
+                    # exit()
+                    rule_func.check_hose_date_outside(row, extraction_con, res_dict,
+                                                      extraction_res["房屋租赁期限"][0]["text"])
+                elif "正式工资审核" == row["pos rule"]:
                     rule_func.check_wage(row, extraction_con, res_dict)
                 elif "试用期工资审核" == row["pos rule"]:
                     if "劳动报酬" in self.review_result:
@@ -124,10 +140,21 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
                         pass
                 elif "违约金审核" == row["pos rule"]:
                     rule_func.check_penalty(row, extraction_con, res_dict)
-                elif "利率审核" == row["pos rule"] or "逾期利率审核" == row["pos rule"]:
+                elif "民间借贷利率审核" == row["pos rule"] or "逾期利率审核" == row["pos rule"]:
                     rule_func.check_rate(row, extraction_con, res_dict)
                 elif "金额相等" == row["pos rule"]:
                     rule_func.check_amount_equal(row, extraction_con, res_dict)
+                elif "竞业限制期限审核" == row["pos rule"]:
+                    rule_func.check_competition_limit(row, extraction_con, res_dict)
+                elif "房屋租赁期限" == row["pos rule"]:
+                    rule_func.check_house_lease_term(row, extraction_con, res_dict)
+
+                elif "违法" == row["pos rule"]:
+                    res_dict["审核结果"] = "不通过"
+                    res_dict["内容"] = extraction_con[0]['text']
+                    res_dict["start"] = extraction_con[0]['start']
+                    res_dict["end"] = extraction_con[0]['end']
+
                 else:
                     res_dict["审核结果"] = "通过"
                     res_dict["内容"] = extraction_con[0]['text']
@@ -154,9 +181,9 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
 
 
 if __name__ == '__main__':
-    acknowledgement = BasicUIEAcknowledgement(config_path="DocumentReview/Config/jietiao.csv",
+    acknowledgement = BasicUIEAcknowledgement(config_path="DocumentReview/Config/fangwuzulin.csv",
                                               log_level="DEBUG",
-                                              model_path="model/uie_model/model_best/",
+                                              model_path="model/uie_model/fwzl/model_best/",
                                               usr="Part A")
-    acknowledgement.review_main(content="data/DocData/IOU.docx", mode="docx")
+    acknowledgement.review_main(content="data/DocData/Lease/fw_test.docx", mode="docx")
     pprint(acknowledgement.review_result, sort_dicts=False)

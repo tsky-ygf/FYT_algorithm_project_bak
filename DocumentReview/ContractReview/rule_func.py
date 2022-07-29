@@ -26,7 +26,7 @@ def check_id_card(row, extraction_con, res_dict):
 
 
 # 房屋用途审核
-def check_application(row, extraction_con, res_dict):
+def check_house_application(row, extraction_con, res_dict):
     app = extraction_con[0]['text']
     if app in ['居住', '办公', '经营', '仓库', '其他']:
         res_dict["审核结果"] = "通过"
@@ -42,10 +42,23 @@ def check_application(row, extraction_con, res_dict):
         res_dict["法律建议"] = row["jiaoyan error advice"]
 
 
-# 日期关联审核
-def check_date_relation(row, extraction_con, res_dict):
+# 借款用途审核
+def check_loan_application(row, extraction_con, res_dict):
     # print(extraction_con)
-    # print(extraction_res['租赁期限'])
+    patten = "赌|毒|枪"
+    if len(re.findall(patten, extraction_con[0]['text'])) > 0:
+        res_dict["审核结果"] = "不通过"
+        res_dict["法律建议"] = row["jiaoyan error advice"]
+    else:
+        res_dict["审核结果"] = "通过"
+
+    res_dict["内容"] = extraction_con[0]['text']
+    res_dict["start"] = extraction_con[0]["start"]
+    res_dict["end"] = extraction_con[0]["end"]
+
+
+# 日期内部关联审核
+def check_date_relation(row, extraction_con, res_dict):
     if len(extraction_con) == 1:
         # print(extraction_con)
         con = extraction_con[0]['text']
@@ -61,7 +74,7 @@ def check_date_relation(row, extraction_con, res_dict):
                 res_dict["内容"] = con
                 res_dict["start"] = extraction_con[0]["start"]
                 res_dict["end"] = extraction_con[0]["end"]
-                res_dict["法律建议"] = "在合同的有效期限内，终止日期应为起始之日的前一天。"
+                res_dict["法律建议"] = row["jiaoyan error advice"]
             else:
                 res_dict["审核结果"] = "通过"
                 res_dict["内容"] = con
@@ -78,6 +91,90 @@ def check_date_relation(row, extraction_con, res_dict):
         res_dict["start"] = extraction_con[0]["start"]
         res_dict["end"] = extraction_con[0]["end"]
     # exit()
+
+
+# 日期外部关联【还款日期-借款日期】
+def check_date_outside(row, extraction_con, res_dict, loan_date, repay_date):
+    length = extraction_con[0]['text']
+    length = cn2an.transform(length, "cn2an")
+
+    tmp = re.findall(r'\d+', length)[0]
+
+    loan_date_list = re.findall(r'\d+', loan_date)
+    loan_date_list = [int(idx) for idx in loan_date_list]
+    loan_date = datetime.datetime(loan_date_list[0], loan_date_list[1], loan_date_list[2])
+
+    repay_date_list = re.findall(r'\d+', repay_date)
+    repay_date_list = [int(idx) for idx in repay_date_list]
+    repay_date = datetime.datetime(repay_date_list[0], repay_date_list[1], repay_date_list[2])
+
+    # print(loan_date)
+    # print(repay_date)
+    diff = repay_date - loan_date
+    # print(diff)
+    # print(tmp)
+
+    res_dict["内容"] = length
+    res_dict["start"] = extraction_con[0]["start"]
+    res_dict["end"] = extraction_con[0]["end"]
+
+    if "天" in length or "日" in length:
+        if diff.days != int(tmp):
+            res_dict["审核结果"] = "不通过"
+
+            res_dict["法律建议"] = row["jiaoyan error advice"]
+        else:
+            res_dict["审核结果"] = "通过"
+    elif "月" in length:
+        if diff.days / 30 != int(tmp) and diff.days / 30 != int(tmp) + 1:
+            res_dict["审核结果"] = "不通过"
+            res_dict["法律建议"] = row["jiaoyan error advice"]
+        else:
+            res_dict["审核结果"] = "通过"
+    elif "年" in length:
+        if diff.days / 365 != int(tmp):
+            res_dict["审核结果"] = "不通过"
+            res_dict["法律建议"] = row["jiaoyan error advice"]
+        else:
+            res_dict["审核结果"] = "通过"
+
+
+# 房屋日期关联审核
+def check_hose_date_outside(row, extraction_con, res_dict, hose_lease):
+    length = cn2an.transform(hose_lease, "cn2an")
+    length = length.replace('⼀', '1').replace('两', '2')
+    # print(length)
+    tmp1 = re.findall(r'\d+', length)[0]
+    print(tmp1)
+    # print(extraction_con)
+    check_date_relation(row, extraction_con, res_dict)
+    # print(res_dict)
+    con = extraction_con[0]['text']
+    tmp2 = re.findall(r'\d+', con)
+    tmp2 = [int(idx) for idx in tmp2]
+    if len(tmp2) == 6 and res_dict["审核结果"] == "通过":
+        date1 = datetime.datetime(tmp2[0], tmp2[1], tmp2[2])
+        date2 = datetime.datetime(tmp2[3], tmp2[4], tmp2[5])
+        diff = date2 - date1
+
+        if "天" in length or "日" in length:
+            if diff.days != int(tmp1):
+                res_dict["审核结果"] = "不通过"
+                res_dict["法律建议"] = row["jiaoyan error advice"]
+            else:
+                res_dict["审核结果"] = "通过"
+        elif "月" in length:
+            if diff.days / 30 != int(tmp1) and diff.days / 30 != int(tmp1) + 1:
+                res_dict["审核结果"] = "不通过"
+                res_dict["法律建议"] = row["jiaoyan error advice"]
+            else:
+                res_dict["审核结果"] = "通过"
+        elif "年" in length:
+            if diff.days / 365 != int(tmp1):
+                res_dict["审核结果"] = "不通过"
+                res_dict["法律建议"] = row["jiaoyan error advice"]
+            else:
+                res_dict["审核结果"] = "通过"
 
 
 # 劳动工资审核
@@ -202,3 +299,40 @@ def check_amount_equal(row, extraction_con, res_dict):
         res_dict["内容"] = extraction_con[0]["text"]
         res_dict["审核结果"] = "不通过"
         res_dict["法律建议"] = row['jiaoyan error advice']
+
+
+# 竞业资格审核
+def check_competition_limit(row, extraction_con, res_dict):
+    # print(extraction_con)
+    length = extraction_con[0]['text']
+    # print(wage)
+    tmp = re.findall(r'\d+', length)[0]
+
+    res_dict["内容"] = tmp[0]["end"]
+    res_dict["start"] = extraction_con[0]["start"]
+    res_dict["end"] = extraction_con[0]["end"]
+    if tmp <= 2:
+        res_dict["审核结果"] = "通过"
+    else:
+        res_dict["审核结果"] = "不通过"
+        res_dict["法律建议"] = row["jiaoyan error advice"]
+
+
+# 房屋租赁期限审核
+def check_house_lease_term(row, extraction_con, res_dict):
+    # print(extraction_con)
+    length = extraction_con[0]['text']
+    # print(wage)
+    tmp = re.findall(r'\d+', length)[0]
+
+    res_dict["内容"] = tmp[0]["end"]
+    res_dict["start"] = extraction_con[0]["start"]
+    res_dict["end"] = extraction_con[0]["end"]
+    if "年" in length and tmp > 20:
+        res_dict["审核结果"] = "不通过"
+        res_dict["法律建议"] = row["jiaoyan error advice"]
+    elif "月" in length and tmp > 240:
+        res_dict["审核结果"] = "不通过"
+        res_dict["法律建议"] = row["jiaoyan error advice"]
+    else:
+        res_dict["审核结果"] = "通过"
