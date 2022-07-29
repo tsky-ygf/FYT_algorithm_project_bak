@@ -13,7 +13,7 @@ from LawsuitPrejudgment.lawsuit_prejudgment.nlu.situation_classifiers.situation_
 
 def test_classify_situations():
     http_client = HttpClient(url="http://172.19.82.199:7998/situationreview")
-    message = SituationClassifierMessage(suqiu="财产分割",
+    message = SituationClassifierMessage(claim="财产分割",
                                          fact="原告袁某向本院提出诉讼请求：1、依法分割原被告婚姻存续期间共同所有三个公司的财产，财产数额130万元，以结算价评估为准；"
                                               "2、判令被告承担本案诉讼费用。事实和理由：原被告于××××年××月登记结婚，婚姻存续期间共同成立了连云港顺祥环保科技有限公司"
                                               "（以下简称顺祥公司）、连云港惠某机械制造有限公司（以下简称连云港惠某公司）、如皋市惠某机械制造有限公司（以下简称如皋惠某公司）"
