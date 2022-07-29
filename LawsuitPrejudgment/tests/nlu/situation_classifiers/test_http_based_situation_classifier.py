@@ -25,3 +25,4 @@ def test_classify_situations():
 
     print(resp_json)
     assert resp_json
+    assert resp_json.get("status") == 0
