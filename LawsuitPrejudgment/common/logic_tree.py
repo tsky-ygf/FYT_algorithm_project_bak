@@ -522,6 +522,7 @@ class LogicTree(object):
                     unsupport_path = path
                 else:
                     support_path = path
+                # TODO:这里为什么是continue,而不是break呢?
                 continue
             if if_ask:
                 if self.debug:

@@ -27,4 +27,4 @@ url1 = "http://%s:%s/getAnyou" % (ip, port)
 
 url2 = "http://%s:%s/getCaseFeature" % (ip, port)
 
-test_service(url2,data={"anyou": "劳动社保_享受失业保险"})
+test_service(url2, data={"anyou": "劳动社保_享受失业保险"})
