@@ -1,20 +1,11 @@
 # -*- coding: utf-8 -*-
-from asyncio.log import logger
-import os
-import sys
 import logging
 import numpy as np
 import collections
 
-sys.path.append(os.path.abspath('../../'))
-sys.path.append(os.path.abspath('../'))
-sys.path.append(os.path.abspath('../common'))
-sys.path.append(os.path.abspath('../prediction'))
 from LawsuitPrejudgment.common.config_loader import *
 from LawsuitPrejudgment.common import single_case_match, LogicTree, get_next_suqiu_or_factor
 from LawsuitPrejudgment.common.data_util import text_underline
-# from prediction import support_possibility_fasttext as predict
-# from fasttext_predict import predict as predict
 from LawsuitPrejudgment.prediction.bert_predict import predict as predict
 
 logging.basicConfig(level=logging.DEBUG)
@@ -38,35 +29,6 @@ def predict_fn(problem, claim_list, fact, question_answers, factor_sentence_list
     :return: a dict, contain fields of question_asked, question_next,factor_sentence_list,report_dict(reason_of_evaluation,evidence_module,legal_advice,possibility_support,support_or_not)
     """
     #####################################################################################################################
-
-    # 原来的租赁纠纷改成了租赁合同
-    if problem == "租赁纠纷":
-        problem = "租赁合同"
-    if problem == "买卖纠纷":
-        problem = "买卖合同"
-    if problem == "服务合同纠纷":
-        problem = "服务合同"
-    if problem == "合伙协议纠纷":
-        problem = "合伙协议"
-    if problem == "房产纠纷":
-        problem = "房屋买卖合同"
-    if problem == "居间合同纠纷":
-        problem = "中介合同"
-    if problem == "保证合同纠纷":
-        problem = "保证合同"
-    if problem == "物业服务合同纠纷":
-        problem = "物业服务合同"
-    if problem == "承揽合同纠纷":
-        problem = "承揽合同"
-    if problem == "仓储合同纠纷":
-        problem = "仓储合同"
-    if problem == "委托合同纠纷":
-        problem = "委托合同"
-    if problem == "婚姻家庭" or problem == "继承问题":
-        problem = "婚姻继承"
-    if problem == "不正当竞争" or problem == "商标权纠纷" or problem == "著作权纠纷" or problem == "专利权纠纷":
-        problem = "知识产权"
-
     claim_list = ['减少租金或者不支付租金' if c == '减少租金或则不支付租金' else c for c in claim_list]
 
     # 1. 初始化诉求结果

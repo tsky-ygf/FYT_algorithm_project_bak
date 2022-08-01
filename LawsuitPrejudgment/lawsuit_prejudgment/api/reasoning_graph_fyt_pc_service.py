@@ -6,6 +6,8 @@ import logging
 import logging.handlers
 from flask import Flask
 from flask import request
+
+from LawsuitPrejudgment.lawsuit_prejudgment.shared.utils.io import read_json_attribute_value
 from LawsuitPrejudgment.main.reasoning_graph_predict import predict_fn
 
 """
@@ -20,23 +22,8 @@ handler.setFormatter(formatter)
 logger.addHandler(handler)
 
 
-# handler2 = logging.StreamHandler()  # StreamHandler是输出到控制台
-# logger.addHandler(handler2)
-
-# 接口的格式
-# {“question_asked”: { < 问题和候选答案字符串串 >: < ⽤用户选择的答案 >},
-# “question_next”: ‘ < 问题和候选答案字符串串 >’,
-# “factor_sentence_list": [ [“ < ⽤用户输⼊入匹配到的短句句 > ", " < 特征名 > ", <整数>, “<特征对应的正则>”]],
-# "result": {“诉求1": {
-# “reason_of_evaluation”: ’ < 评估理理由 >’,
-# "evidence_module": ‘ < 证据模块 >’,
-# “legal_advice: '<法律律建议>',
-# "possibility_support": < 0到1之间的数字 >,
-# “support_or_not: '<⽀支持或不不⽀支持>'
-# }}
-# "error_msg": "",
-# "status": 0
-# }
+# fyt-pc-test数据库中案由的名称，与诉求配置.csv中的不同，这里转换为一致的。
+problem_disambiguation_dict = read_json_attribute_value("LawsuitPrejudgment/lawsuit_prejudgment/api/fyt_pc_data.json", "problem_disambiguation_dict")
 
 
 def _get_reasoning_graph_result(req_data: Dict):
@@ -52,6 +39,7 @@ def _get_reasoning_graph_result(req_data: Dict):
     logging.info("3.fact: %s" % (fact))
     logging.info("4.question_answers: %s" % (question_answers))
 
+    problem = problem_disambiguation_dict.get(problem, problem)
     result_dict = predict_fn(problem, claim_list, fact, question_answers, factor_sentence_list)
 
     logging.info("5.result.result_dict: %s" % (result_dict))
