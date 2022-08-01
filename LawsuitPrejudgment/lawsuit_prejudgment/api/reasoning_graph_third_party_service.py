@@ -309,7 +309,7 @@ def get_criminal_result():
                 "law_item": item[1],
                 "crime": item[2],
                 "law_content": item[3],
-                "prob": item[4]
+                "probability": item[4]
             })
         result = {
             "accusation": accusation,
