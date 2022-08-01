@@ -41,7 +41,7 @@ tokenizer = BertTokenizer.from_pretrained("model/language_model/macbert4csc-base
 model = BertForMaskedLM.from_pretrained("model/language_model/macbert4csc-base-chinese")
 model.to(device)
 
-texts = '虽然我从来没有这样凝练的概括过自己的认知观，但是我学到这里的时候也会有一种很强烈感同身受。在我的个人理解中，从最初级的环境到最高级的愿景，其实是完成了一种蜕变，不是说拥有这愿景思维的人就不受环境制约，而是他们在认清客观现实以后的基础上坚持自己的初心，从而去完成自己的所想做的事。'
+texts = '整体上培训对我的收获还是非常之大，也有很多很多的心得感悟，以上只是一部分自己的随感而发，也因文笔功力也实属有限，再写怕成了懒婆娘的脚。'
 with torch.no_grad():
     outputs = model(**tokenizer(texts, padding=True, return_tensors='pt').to(device))
 
