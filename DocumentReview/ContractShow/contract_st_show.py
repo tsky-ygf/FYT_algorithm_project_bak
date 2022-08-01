@@ -52,8 +52,8 @@ elif contract_type == "借款合同":
     config_path = "DocumentReview/Config/jiekuan.csv"
     model_path = "model/uie_model/jkht/model_best/"
 elif contract_type == "劳动合同":
-    config_path = "DocumentReview/Config/labor.csv"
-    model_path = "model/uie_model/labor/model_best/"
+    config_path = "DocumentReview/Config/laodong.csv"
+    model_path = "model/uie_model/laodong/model_best/"
 elif contract_type == "租房合同":
     config_path = "DocumentReview/Config/fangwuzulin.csv"
     model_path = "model/uie_model/fwzl/model_best/"
@@ -157,6 +157,10 @@ if run:
 
             if "内容" in value and value["内容"] != "":
                 st.markdown("审核内容：{}".format(value['内容']))
+            if "法律建议" in value and value["法律建议"] != "":
+                st.markdown("法律建议：{}".format(value['法律建议']))
+            if "风险点" in value and value["风险点"] != "":
+                st.markdown("风险点：{}".format(value['风险点']))
             if "法律依据" in value and value["法律依据"] != "":
                 st.markdown("法律依据：{}".format(value['法律依据']))
             if "风险等级" in value and value["风险等级"] != "":

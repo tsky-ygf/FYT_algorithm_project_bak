@@ -24,7 +24,7 @@ elif contract_type == '借款合同':
 
 elif contract_type == '劳动合同':
     config_path = 'DocumentReview/Config_bak/LaborConfig/labor_20220615.csv'
-    model_path = 'model/uie_model/labor/model_best'
+    model_path = 'model/uie_model/laodong/model_best'
 
 elif contract_type == '一般买卖':
     config_path = 'DocumentReview/Config_bak/BusinessConfig/maimai.csv'

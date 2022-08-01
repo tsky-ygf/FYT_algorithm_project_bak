@@ -176,6 +176,7 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
             if res_dict != {}:
                 res_dict['法律依据'] = row['legal basis']
                 res_dict['风险等级'] = row['risk level']
+                res_dict["风险点"] = row["risk statement"]
 
             self.review_result[row['schema']].update(res_dict)
 
