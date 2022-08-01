@@ -1,3 +1,6 @@
+import logging
+import traceback
+
 import requests
 from typing import Dict
 from LawsuitPrejudgment.lawsuit_prejudgment.nlu.situation_classifiers.situation_classifier import SituationClassifier
@@ -13,10 +16,14 @@ class HttpClient:
         self.method = method
 
     def get_response_json(self, request_data: Dict):
-        if self.method == "post":
-            return requests.post(url=self.url, json=request_data).json()
-        elif self.method == "get":
-            return requests.get(url=self.url, params=request_data).json()
+        try:
+            if self.method == "post":
+                return requests.post(url=self.url, json=request_data).json()
+            elif self.method == "get":
+                return requests.get(url=self.url, params=request_data).json()
+        except Exception:
+            logging.exception(traceback.format_exc())
+            return dict()
         pass
 
 

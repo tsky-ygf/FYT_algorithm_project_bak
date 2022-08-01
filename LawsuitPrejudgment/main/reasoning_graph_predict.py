@@ -6,6 +6,16 @@ import collections
 from LawsuitPrejudgment.common.config_loader import *
 from LawsuitPrejudgment.common import single_case_match, LogicTree, get_next_suqiu_or_factor
 from LawsuitPrejudgment.common.data_util import text_underline
+from LawsuitPrejudgment.lawsuit_prejudgment.constants import FEATURE_TOGGLES_CONFIG_PATH, \
+    HTTP_SITUATION_CLASSIFIER_SUPPORT_PROBLEMS_CONFIG_PATH
+from LawsuitPrejudgment.lawsuit_prejudgment.core.actions.civil_report_action import CivilReportAction
+from LawsuitPrejudgment.lawsuit_prejudgment.core.actions.civil_report_action_message import CivilReportActionMessage
+from LawsuitPrejudgment.lawsuit_prejudgment.feature_toggles import FeatureToggles
+from LawsuitPrejudgment.lawsuit_prejudgment.nlu.situation_classifiers.http_based_situation_classifier import HttpClient, \
+    HttpBasedSituationClassifier
+from LawsuitPrejudgment.lawsuit_prejudgment.nlu.situation_classifiers.situation_classifier_message import \
+    SituationClassifierMessage
+from LawsuitPrejudgment.lawsuit_prejudgment.shared.utils.io import read_json_attribute_value
 from LawsuitPrejudgment.prediction.bert_predict import predict as predict
 
 logging.basicConfig(level=logging.DEBUG)
@@ -18,6 +28,34 @@ match_factor_group = {
 
 
 def predict_fn(problem, claim_list, fact, question_answers, factor_sentence_list_, debug=False):
+    feature_toggles = FeatureToggles(FEATURE_TOGGLES_CONFIG_PATH)
+    http_classifier_support_problems = read_json_attribute_value(HTTP_SITUATION_CLASSIFIER_SUPPORT_PROBLEMS_CONFIG_PATH,
+                                                                 "support_problems")
+
+    if feature_toggles.http_situation_classifier and problem in http_classifier_support_problems:
+        return _predict_by_http(problem, claim_list, fact)
+    else:
+        return _predict_by_factor(problem, claim_list, fact, question_answers, factor_sentence_list_, debug)
+
+
+def _predict_by_http(problem, claim_list, fact):
+    # TODO 多个诉求的处理
+    claim = claim_list[0]
+
+    # get situation by HttpBasedSituationClassifier
+    situation_classifier = HttpBasedSituationClassifier(HttpClient(url="http://172.19.82.199:7998/situationreview"))
+    resp_json = situation_classifier.classify_situations(SituationClassifierMessage(claim, fact))
+    situation = resp_json.get("situation", "")
+
+    # get report by CivilReportAction
+    action = CivilReportAction()
+    message = CivilReportActionMessage(problem, claim, situation, fact)
+    result = action.run(message)
+
+    return result
+
+
+def _predict_by_factor(problem, claim_list, fact, question_answers, factor_sentence_list_, debug=False):
     """
     推理图谱即评估新版本-预测的主入口。
     1. 加载逻辑树-->2.定义共现变量--->3.设置树的状态：做文本匹配、结合已经问过的问题和设置模型特征；问一个问题--->4.如果没有问题了，那么需要出评估报告
