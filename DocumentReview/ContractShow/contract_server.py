@@ -13,6 +13,7 @@ from loguru import logger
 
 from DocumentReview.ContractReview.basic_contract import BasicUIEAcknowledgement
 import os
+from Utils.http_response import response_successful_result
 
 os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
 
@@ -20,19 +21,35 @@ app = Flask(__name__)
 app.config['JSON_SORT_KEYS'] = False
 CORS(app)
 
+CONTRACT_SERVER_DATA_PATH = "DocumentReview/ContractShow/contract_server_data.json"
 
-@app.route('/contractreview', methods=["post"])
-def get_translation_res():
+
+@app.route('/get_contract_type', methods=["get"])
+def get_contract_type():
+    with open(CONTRACT_SERVER_DATA_PATH, "r", encoding="utf-8") as f:
+        support_contract_types = json.load(f).get("support_contract_types")
+    return response_successful_result(support_contract_types)
+
+
+@app.route('/get_user_standpoint', methods=["get"])
+def get_user_standpoint():
+    with open(CONTRACT_SERVER_DATA_PATH, "r", encoding="utf-8") as f:
+        user_standpoints = json.load(f).get("user_standpoints")
+    return response_successful_result(user_standpoints)
+
+
+@app.route('/get_contract_review_result', methods=["post"])
+def get_contract_review_result():
     try:
         in_json = request.get_data()
         if in_json is not None:
             in_dict = json.loads(in_json.decode("utf-8"))
             contract_type = in_dict['contract_type']
-            text = in_dict['content']
-            usr = in_dict['usr']
+            text = in_dict['contract_content']
+            usr = in_dict['user_standpoint']
             # print(text)
             print(contract_type)
-            if usr == '甲方':
+            if usr == 'party_a':
                 usr = 'Part A'
             else:
                 usr = 'Part B'
@@ -40,7 +57,6 @@ def get_translation_res():
             if contract_type == "借条":
                 config_path = "DocumentReview/Config/jietiao.csv"
                 model_path = "model/uie_model/model_best/"
-
             elif contract_type == "借款合同":
                 config_path = "DocumentReview/Config/jiekuan.csv"
                 model_path = "model/uie_model/jkht/model_best/"
@@ -66,7 +82,7 @@ def get_translation_res():
 
             acknowledgement.review_main(content=text, mode="text")
             res = acknowledgement.review_result
-            return json.dumps({'result': res, "status": 0}, ensure_ascii=False)
+            return response_successful_result(res)
         else:
             return json.dumps({"error_msg": "no data", "status": 1}, ensure_ascii=False)
 
