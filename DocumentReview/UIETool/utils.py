@@ -27,86 +27,86 @@ MODEL_MAP = {
     "uie-base": {
         "resource_file_urls": {
             "model_state.pdparams":
-            "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_base_v1.0/model_state.pdparams",
+                "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_base_v1.0/model_state.pdparams",
             "model_config.json":
-            "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_base/model_config.json",
+                "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_base/model_config.json",
             "vocab_file":
-            "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_base/vocab.txt",
+                "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_base/vocab.txt",
             "special_tokens_map":
-            "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_base/special_tokens_map.json",
+                "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_base/special_tokens_map.json",
             "tokenizer_config":
-            "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_base/tokenizer_config.json"
+                "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_base/tokenizer_config.json"
         }
     },
     "uie-medium": {
         "resource_file_urls": {
             "model_state.pdparams":
-            "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_medium_v1.0/model_state.pdparams",
+                "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_medium_v1.0/model_state.pdparams",
             "model_config.json":
-            "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_medium/model_config.json",
+                "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_medium/model_config.json",
             "vocab_file":
-            "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_base/vocab.txt",
+                "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_base/vocab.txt",
             "special_tokens_map":
-            "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_base/special_tokens_map.json",
+                "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_base/special_tokens_map.json",
             "tokenizer_config":
-            "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_base/tokenizer_config.json"
+                "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_base/tokenizer_config.json"
         }
     },
     "uie-mini": {
         "resource_file_urls": {
             "model_state.pdparams":
-            "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_mini_v1.0/model_state.pdparams",
+                "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_mini_v1.0/model_state.pdparams",
             "model_config.json":
-            "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_mini/model_config.json",
+                "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_mini/model_config.json",
             "vocab_file":
-            "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_base/vocab.txt",
+                "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_base/vocab.txt",
             "special_tokens_map":
-            "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_base/special_tokens_map.json",
+                "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_base/special_tokens_map.json",
             "tokenizer_config":
-            "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_base/tokenizer_config.json"
+                "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_base/tokenizer_config.json"
         }
     },
     "uie-micro": {
         "resource_file_urls": {
             "model_state.pdparams":
-            "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_micro_v1.0/model_state.pdparams",
+                "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_micro_v1.0/model_state.pdparams",
             "model_config.json":
-            "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_micro/model_config.json",
+                "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_micro/model_config.json",
             "vocab_file":
-            "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_base/vocab.txt",
+                "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_base/vocab.txt",
             "special_tokens_map":
-            "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_base/special_tokens_map.json",
+                "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_base/special_tokens_map.json",
             "tokenizer_config":
-            "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_base/tokenizer_config.json"
+                "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_base/tokenizer_config.json"
         }
     },
     "uie-nano": {
         "resource_file_urls": {
             "model_state.pdparams":
-            "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_nano_v1.0/model_state.pdparams",
+                "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_nano_v1.0/model_state.pdparams",
             "model_config.json":
-            "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_nano/model_config.json",
+                "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_nano/model_config.json",
             "vocab_file":
-            "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_base/vocab.txt",
+                "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_base/vocab.txt",
             "special_tokens_map":
-            "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_base/special_tokens_map.json",
+                "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_base/special_tokens_map.json",
             "tokenizer_config":
-            "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_base/tokenizer_config.json"
+                "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_base/tokenizer_config.json"
         }
     },
     # Rename to `uie-medium` and the name of `uie-tiny` will be deprecated in future.
     "uie-tiny": {
         "resource_file_urls": {
             "model_state.pdparams":
-            "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_tiny_v0.1/model_state.pdparams",
+                "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_tiny_v0.1/model_state.pdparams",
             "model_config.json":
-            "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_tiny/model_config.json",
+                "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_tiny/model_config.json",
             "vocab_file":
-            "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_tiny/vocab.txt",
+                "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_tiny/vocab.txt",
             "special_tokens_map":
-            "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_tiny/special_tokens_map.json",
+                "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_tiny/special_tokens_map.json",
             "tokenizer_config":
-            "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_tiny/tokenizer_config.json"
+                "https://bj.bcebos.com/paddlenlp/taskflow/information_extraction/uie_tiny/tokenizer_config.json"
         }
     }
 }
@@ -178,80 +178,84 @@ def reader(data_path, max_seq_len=512):
     """
     read json
     """
-    with open(data_path, 'r', encoding='utf-8') as f:
-        for line in f:
-            json_line = json.loads(line)
-            content = json_line['content'].strip()
-            prompt = json_line['prompt']
-            # Model Input is aslike: [CLS] Prompt [SEP] Content [SEP]
-            # It include three summary tokens.
-            if max_seq_len <= len(prompt) + 3:
-                raise ValueError(
-                    "The value of max_seq_len is too small, please set a larger value"
-                )
-            max_content_len = max_seq_len - len(prompt) - 3
-            if len(content) <= max_content_len:
-                yield json_line
-            else:
-                result_list = json_line['result_list']
-                json_lines = []
-                accumulate = 0
-                while True:
-                    cur_result_list = []
-
-                    for result in result_list:
-                        if result['start'] + 1 <= max_content_len < result[
-                                'end']:
-                            max_content_len = result['start']
-                            break
-
-                    cur_content = content[:max_content_len]
-                    res_content = content[max_content_len:]
-
+    try:
+        with open(data_path, 'r', encoding='utf-8') as f:
+            for line in f:
+                json_line = json.loads(line)
+                content = json_line['content'].strip()
+                prompt = json_line['prompt']
+                # Model Input is aslike: [CLS] Prompt [SEP] Content [SEP]
+                # It include three summary tokens.
+                if max_seq_len <= len(prompt) + 3:
+                    raise ValueError(
+                        "The value of max_seq_len is too small, please set a larger value"
+                    )
+                max_content_len = max_seq_len - len(prompt) - 3
+                if len(content) <= max_content_len:
+                    yield json_line
+                else:
+                    result_list = json_line['result_list']
+                    json_lines = []
+                    accumulate = 0
                     while True:
-                        if len(result_list) == 0:
-                            break
-                        elif result_list[0]['end'] <= max_content_len:
-                            if result_list[0]['end'] > 0:
-                                cur_result = result_list.pop(0)
-                                cur_result_list.append(cur_result)
-                            else:
-                                cur_result_list = [
-                                    result for result in result_list
-                                ]
+                        cur_result_list = []
+
+                        for result in result_list:
+                            if result['start'] + 1 <= max_content_len < result[
+                                'end']:
+                                max_content_len = result['start']
                                 break
-                        else:
-                            break
 
-                    json_line = {
-                        'content': cur_content,
-                        'result_list': cur_result_list,
-                        'prompt': prompt
-                    }
-                    json_lines.append(json_line)
+                        cur_content = content[:max_content_len]
+                        res_content = content[max_content_len:]
 
-                    for result in result_list:
-                        if result['end'] <= 0:
-                            break
-                        result['start'] -= max_content_len
-                        result['end'] -= max_content_len
-                    accumulate += max_content_len
-                    max_content_len = max_seq_len - len(prompt) - 3
-                    if len(res_content) == 0:
-                        break
-                    elif len(res_content) < max_content_len:
+                        while True:
+                            if len(result_list) == 0:
+                                break
+                            elif result_list[0]['end'] <= max_content_len:
+                                if result_list[0]['end'] > 0:
+                                    cur_result = result_list.pop(0)
+                                    cur_result_list.append(cur_result)
+                                else:
+                                    cur_result_list = [
+                                        result for result in result_list
+                                    ]
+                                    break
+                            else:
+                                break
+
                         json_line = {
-                            'content': res_content,
-                            'result_list': result_list,
+                            'content': cur_content,
+                            'result_list': cur_result_list,
                             'prompt': prompt
                         }
                         json_lines.append(json_line)
-                        break
-                    else:
-                        content = res_content
 
-                for json_line in json_lines:
-                    yield json_line
+                        for result in result_list:
+                            if result['end'] <= 0:
+                                break
+                            result['start'] -= max_content_len
+                            result['end'] -= max_content_len
+                        accumulate += max_content_len
+                        max_content_len = max_seq_len - len(prompt) - 3
+                        if len(res_content) == 0:
+                            break
+                        elif len(res_content) < max_content_len:
+                            json_line = {
+                                'content': res_content,
+                                'result_list': result_list,
+                                'prompt': prompt
+                            }
+                            json_lines.append(json_line)
+                            break
+                        else:
+                            content = res_content
+
+                    for json_line in json_lines:
+                        yield json_line
+    except Exception as e:
+        logger.error(e)
+        logger.error("Error in reading json file: {}".format(data_path))
 
 
 def unify_prompt_name(prompt):

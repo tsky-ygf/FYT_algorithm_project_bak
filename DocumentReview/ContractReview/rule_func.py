@@ -172,7 +172,8 @@ def check_hose_date_outside(row, extraction_con, res_dict, hose_lease):
         elif "年" in length:
             if diff.days / 365 != int(tmp1):
                 res_dict["审核结果"] = "不通过"
-                res_dict["法律建议"] = row["jiaoyan error advice"]
+                # res_dict["法律建议"] = row["jiaoyan error advice"]
+                res_dict['法律建议'] = "约定合同期限的，合同终止日期应提前一天。"
             else:
                 res_dict["审核结果"] = "通过"
 
@@ -235,11 +236,13 @@ def check_rate(row, extraction_con, res_dict):
         else:
             res_dict["审核结果"] = "通过"
     else:
-        if "日利" in rate_text:
+        # rate_text = rate_text.replace('%',
+        rate_text = cn2an.transform(rate_text, "cn2an")
+        if "日" in rate_text:
             # ir = ir.replace("日利率", "").replace("%", "")
             ir = re.search("\d+", rate_text).group()
             ir = float(ir) * 365
-        elif "月利" in rate_text:
+        elif "月" in rate_text:
             # ir = ir.replace("月利率", "").replace("%", "")
             ir = re.search("\d+", rate_text).group()
             ir = float(ir) * 12
@@ -262,7 +265,7 @@ upper_num = {"壹": "一", "贰": "二", "叁": "三", "肆": "四", "伍": "五
 
 # 金额审核
 def check_amount_equal(row, extraction_con, res_dict):
-    print(extraction_con)
+    # print(extraction_con)
     # exit()
     if len(extraction_con) == 1:
         amount = float(re.search("\d+(.\d{2})?", extraction_con[0]['text']).group())
@@ -323,16 +326,38 @@ def check_house_lease_term(row, extraction_con, res_dict):
     # print(extraction_con)
     length = extraction_con[0]['text']
     # print(wage)
-    tmp = re.findall(r'\d+', length)[0]
-
-    res_dict["内容"] = tmp[0]["end"]
+    res_dict["内容"] = length
     res_dict["start"] = extraction_con[0]["start"]
     res_dict["end"] = extraction_con[0]["end"]
-    if "年" in length and tmp > 20:
-        res_dict["审核结果"] = "不通过"
-        res_dict["法律建议"] = row["jiaoyan error advice"]
-    elif "月" in length and tmp > 240:
-        res_dict["审核结果"] = "不通过"
-        res_dict["法律建议"] = row["jiaoyan error advice"]
+
+    length = cn2an.transform(length, "cn2an")
+    tmp = re.findall(r'\d+', length)
+    # print(tmp)
+    if len(tmp) >= 6:
+        tmp = [int(idx) for idx in tmp]
+        date1 = datetime.datetime(tmp[0], tmp[1], tmp[2])
+        date2 = datetime.datetime(tmp[3], tmp[4], tmp[5])
+        diff = date2 - date1
+        if diff.days > 7300:
+            res_dict["审核结果"] = "不通过"
+            res_dict["法律建议"] = row["jiaoyan error advice"]
+        else:
+            res_dict["审核结果"] = "通过"
     else:
-        res_dict["审核结果"] = "通过"
+        tmp = int(tmp[0])
+        if "年" in length and tmp > 20:
+            res_dict["审核结果"] = "不通过"
+            res_dict["法律建议"] = row["jiaoyan error advice"]
+        elif "月" in length and tmp > 240:
+            res_dict["审核结果"] = "不通过"
+            res_dict["法律建议"] = row["jiaoyan error advice"]
+        else:
+            res_dict["审核结果"] = "通过"
+
+
+if __name__ == '__main__':
+    _row = {'jiaoyan error advice': '租赁期限过长，建议修改。'}
+    _extraction_con = [{'text': '12个月', 'start': 0, 'end': 3}]
+    _res_dict = {}
+    check_house_lease_term(_row, _extraction_con, _res_dict)
+    print(_res_dict)

@@ -19,7 +19,8 @@ def test_predict_fn_should_use_http_situation_classifier():
 
     result_dict = predict_fn(problem, [claim], fact, dict(), [])
 
+    print(result_dict)
     assert result_dict
     assert result_dict["question_next"] is None
-    assert result_dict["result"]["reason"] == "测试理由"
+    assert result_dict["result"][claim]["reason_of_evaluation"] == "测试理由"
     pass

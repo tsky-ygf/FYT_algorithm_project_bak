@@ -45,8 +45,8 @@ def get_translation_res():
                 config_path = "DocumentReview/Config/jiekuan.csv"
                 model_path = "model/uie_model/jkht/model_best/"
             elif contract_type == "劳动合同":
-                config_path = "DocumentReview/Config/labor.csv"
-                model_path = "model/uie_model/labor/model_best/"
+                config_path = "DocumentReview/Config/laodong.csv"
+                model_path = "model/uie_model/laodong/model_best/"
             elif contract_type == "租房合同":
                 config_path = "DocumentReview/Config/fangwuzulin.csv"
                 model_path = "model/uie_model/fwzl/model_best/"

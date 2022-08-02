@@ -1,11 +1,11 @@
-#python DocumentReview/UIETool/doccano.py --doccano_file data/doccano_data/guyong/guyong.json \
-#      --task_type "ext" --save_dir data/doccano_data/guyong/ --splits 0.8 0.2 0
+#python DocumentReview/UIETool/doccano.py --doccano_file data/doccano_data/fangwuzulin/origin.json \
+#      --task_type "ext" --save_dir data/doccano_data/fangwuzulin/ --splits 0.7 0.3 0
 
 export CUDA_VISIBLE_DEVICES=2;
 python DocumentReview/UIETool/finetune.py \
-    --train_path "data/doccano_data/guyong/train.txt" \
-    --dev_path "data/doccano_data/guyong/dev.txt" \
-    --save_dir "model/uie_model/guyong" \
+    --train_path "data/doccano_data/fangwuzulin/train.txt" \
+    --dev_path "data/doccano_data/fangwuzulin/dev.txt" \
+    --save_dir "model/uie_model/new/fangwuzulin/" \
     --learning_rate 1e-5 \
     --batch_size 16 \
     --max_seq_len 512 \
