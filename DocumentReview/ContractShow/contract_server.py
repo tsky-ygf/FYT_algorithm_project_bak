@@ -44,9 +44,9 @@ def get_contract_review_result():
         in_json = request.get_data()
         if in_json is not None:
             in_dict = json.loads(in_json.decode("utf-8"))
-            contract_type = in_dict['contract_type']
+            contract_type = in_dict['contract_type_id']
             text = in_dict['contract_content']
-            usr = in_dict['user_standpoint']
+            usr = in_dict['user_standpoint_id']
             # print(text)
             print(contract_type)
             if usr == 'party_a':
