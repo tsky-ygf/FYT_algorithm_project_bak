@@ -1,27 +1,27 @@
 {
 	"support_contract_types": [{
 			"type_id": "jietiao",
-			"type_name": "借条"
+			"contract_type": "借条"
 		},
 		{
 			"type_id": "jiekuan",
-			"type_name": "借款合同"
+			"contract_type": "借款合同"
 		},
 		{
 			"type_id": "laodong",
-			"type_name": "劳动合同"
+			"contract_type": "劳动合同"
 		},
 		{
 			"type_id": "fangwuzulin",
-			"type_name": "租房合同"
+			"contract_type": "租房合同"
 		},
 		{
 			"type_id": "maimai",
-			"type_name": "买卖合同"
+			"contract_type": "买卖合同"
 		},
 		{
 			"type_id": "laowu",
-			"type_name": "劳务合同"
+			"contract_type": "劳务合同"
 		}
 	],
 	"user_standpoints": [

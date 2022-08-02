@@ -51,25 +51,27 @@ def get_contract_review_result():
             print(contract_type)
             if usr == 'party_a':
                 usr = 'Part A'
-            else:
+            elif usr == 'part_b':
                 usr = 'Part B'
+            else:
+                raise Exception("暂时不支持该用户立场")
 
-            if contract_type == "借条":
+            if contract_type == "jietiao":
                 config_path = "DocumentReview/Config/jietiao.csv"
                 model_path = "model/uie_model/model_best/"
-            elif contract_type == "借款合同":
+            elif contract_type == "jiekuan":
                 config_path = "DocumentReview/Config/jiekuan.csv"
                 model_path = "model/uie_model/jkht/model_best/"
-            elif contract_type == "劳动合同":
+            elif contract_type == "laodong":
                 config_path = "DocumentReview/Config/laodong.csv"
                 model_path = "model/uie_model/laodong/model_best/"
-            elif contract_type == "租房合同":
+            elif contract_type == "fangwuzulin":
                 config_path = "DocumentReview/Config/fangwuzulin.csv"
                 model_path = "model/uie_model/fwzl/model_best/"
-            elif contract_type == "买卖合同":
+            elif contract_type == "maimai":
                 config_path = "DocumentReview/Config/maimai.csv"
                 model_path = "model/uie_model/maimai/model_best/"
-            elif contract_type == "劳务合同":
+            elif contract_type == "laowu":
                 config_path = "DocumentReview/Config/laowu.csv"
                 model_path = 'model/uie_model/guyong/model_best/'
             else:
@@ -85,7 +87,6 @@ def get_contract_review_result():
             return response_successful_result(res)
         else:
             return json.dumps({"error_msg": "no data", "status": 1}, ensure_ascii=False)
-
     except Exception as e:
         logger.info(traceback.format_exc())
         return json.dumps({"error_msg": "unknown error:" + repr(e), "status": 1}, ensure_ascii=False)
