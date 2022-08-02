@@ -13,6 +13,7 @@ from loguru import logger
 
 from DocumentReview.ContractReview.basic_contract import BasicUIEAcknowledgement
 import os
+
 from Utils.http_response import response_successful_result
 
 os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
@@ -84,7 +85,21 @@ def get_contract_review_result():
 
             acknowledgement.review_main(content=text, mode="text")
             res = acknowledgement.review_result
-            return response_successful_result(res)
+            # 编排返回结果的内容
+            result = []
+            for review_point, review_result in res.items():
+                result.append({
+                    "review_point": review_point,
+                    "review_result": review_result.get("审核结果", ""),
+                    "review_content": review_result.get("内容", ""),
+                    "review_content_start": review_result.get("start", -1),
+                    "review_content_end": review_result.get("end", -1),
+                    "legal_advice": review_result.get("法律建议", ""),
+                    "legal_basis": review_result.get("法律依据", ""),
+                    "risk_level": review_result.get("风险等级", ""),
+                    "risk_point": review_result.get("风险点", "")
+                })
+            return response_successful_result(result)
         else:
             return json.dumps({"error_msg": "no data", "status": 1}, ensure_ascii=False)
     except Exception as e:
