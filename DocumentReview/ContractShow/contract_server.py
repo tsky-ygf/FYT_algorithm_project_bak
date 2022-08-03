@@ -24,7 +24,18 @@ CORS(app)
 
 CONTRACT_SERVER_DATA_PATH = "DocumentReview/ContractShow/contract_server_data.json"
 
-contract_type_list = ['fangwuzulin', 'jiekuan', 'jietiao', 'laodong', 'laowu', 'maimai']
+
+def _get_support_contract_types():
+    with open(CONTRACT_SERVER_DATA_PATH, "r", encoding="utf-8") as f:
+        return json.load(f).get("support_contract_types")
+
+
+def _get_contract_type_list():
+    support_contract_types = _get_support_contract_types()
+    return [item.get("type_id") for item in support_contract_types]
+
+
+contract_type_list = _get_contract_type_list()
 acknowledgement_dict = {}
 for contract_type in contract_type_list:
     config_path = "DocumentReview/Config/{}.csv".format(contract_type)
@@ -36,8 +47,7 @@ for contract_type in contract_type_list:
 
 @app.route('/get_contract_type', methods=["get"])
 def get_contract_type():
-    with open(CONTRACT_SERVER_DATA_PATH, "r", encoding="utf-8") as f:
-        support_contract_types = json.load(f).get("support_contract_types")
+    support_contract_types = _get_support_contract_types()
     return response_successful_result(support_contract_types)
 
 
