@@ -158,14 +158,20 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
 
                 else:
                     res_dict["审核结果"] = "通过"
-
                     if len(extraction_con) == 1:
                         res_dict["内容"] = extraction_con[0]['text']
                         res_dict["start"] = extraction_con[0]['start']
                         res_dict["end"] = extraction_con[0]['end']
                     # 审核项目如果出现了不止一次
                     else:
-                        pass
+                        self.logger.debug(extraction_con)
+                        res_dict["内容"] = ''
+                        res_dict["start"] = ''
+                        res_dict["end"] = ''
+                        for con in extraction_con:
+                            res_dict["内容"] += con['text'] + '#'
+                            res_dict["start"] = str(con['start']) + "#"
+                            res_dict["end"] = str(con['end']) + '#'
 
             elif row['pos keywords'] != "" and len(re.findall(row['pos keywords'], self.data)) > 0:
                 res_dict["审核结果"] = "通过"
@@ -192,5 +198,5 @@ if __name__ == '__main__':
     acknowledgement = BasicUIEAcknowledgement(config_path="DocumentReview/Config/{}.csv".format(contract_type),
                                               log_level="DEBUG",
                                               model_path="model/uie_model/new/{}/model_best/".format(contract_type))
-    acknowledgement.review_main(content="data/DocData/Lease/fw_test.docx", mode="docx", usr="Part A")
+    acknowledgement.review_main(content="data/DocData/{}/test.docx".format(contract_type), mode="docx", usr="Part A")
     pprint(acknowledgement.review_result, sort_dicts=False)

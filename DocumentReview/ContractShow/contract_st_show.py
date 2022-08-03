@@ -53,28 +53,6 @@ if usr == '甲方':
 else:
     usr = 'Part B'
 
-# if contract_type == "借条":
-#     config_path = "DocumentReview/Config/jietiao.csv"
-#     model_path = "model/uie_model/model_best/"
-#
-# elif contract_type == "借款合同":
-#     config_path = "DocumentReview/Config/jiekuan.csv"
-#     model_path = "model/uie_model/jkht/model_best/"
-# elif contract_type == "劳动合同":
-#     config_path = "DocumentReview/Config/laodong.csv"
-#     model_path = "model/uie_model/laodong/model_best/"
-# elif contract_type == "租房合同":
-#     config_path = "DocumentReview/Config/fangwuzulin.csv"
-#     model_path = "model/uie_model/fwzl/model_best/"
-# elif contract_type == "买卖合同":
-#     config_path = "DocumentReview/Config/maimai.csv"
-#     model_path = "model/uie_model/maimai/model_best/"
-# elif contract_type == "劳务合同":
-#     config_path = "DocumentReview/Config/laowu.csv"
-#     model_path = 'model/uie_model/guyong/model_best/'
-# else:
-#     raise Exception("暂时不支持该合同类型")
-
 acknowledgement = BasicUIEAcknowledgement(config_path=config_path,
                                           model_path=model_path)
 correct = st.button("文本纠错")
@@ -145,9 +123,6 @@ if correct:
         # result = []
 
 if run:
-    # corrected_sent, detail = pycorrector.correct(text)
-    # print(corrected_sent, detail)
-
     acknowledgement.review_main(content=text, mode="text", usr=usr)
     pprint(acknowledgement.review_result, sort_dicts=False)
     index = 1
