@@ -12,7 +12,10 @@ from DocumentReview.ContractReview.basic_contract import BasicUIEAcknowledgement
 # import pycorrector
 from loguru import logger
 from pprint import pprint
-from annotated_text import annotated_text
+from pypinyin import pinyin, lazy_pinyin
+
+
+# from annotated_text import annotated_text
 
 
 # text_correction = Taskflow("text_correction")
@@ -25,9 +28,15 @@ def get_data(_file):
     return "\n".join(_text)
 
 
-contract_type = st.sidebar.selectbox("请选择合同类型", ["借条", "借款合同", "劳动合同", '租房合同', '买卖合同', '劳务合同'], key="合同类型")
+contract_type = st.sidebar.selectbox("请选择合同类型", ["借条", "借款", "劳动", '租房租赁', '买卖', '劳务'], key="合同类型")
 mode_type = st.sidebar.selectbox("请选择上传数据格式", ["docx", "文本", "txt"], key="text")
 usr = st.sidebar.selectbox("请选择立场", ['甲方', '乙方'], key="中立方")
+
+contract_type = ''.join(lazy_pinyin(contract_type))
+config_path = "DocumentReview/Config/{}.csv".format(contract_type)
+model_path = "model/uie_model/new/{}/model_best/".format(contract_type)
+
+# print(contract_type)
 
 if mode_type == "docx":
     file = st.file_uploader('上传文件', type=['docx'], key=None)
@@ -44,31 +53,30 @@ if usr == '甲方':
 else:
     usr = 'Part B'
 
-if contract_type == "借条":
-    config_path = "DocumentReview/Config/jietiao.csv"
-    model_path = "model/uie_model/model_best/"
-
-elif contract_type == "借款合同":
-    config_path = "DocumentReview/Config/jiekuan.csv"
-    model_path = "model/uie_model/jkht/model_best/"
-elif contract_type == "劳动合同":
-    config_path = "DocumentReview/Config/laodong.csv"
-    model_path = "model/uie_model/laodong/model_best/"
-elif contract_type == "租房合同":
-    config_path = "DocumentReview/Config/fangwuzulin.csv"
-    model_path = "model/uie_model/fwzl/model_best/"
-elif contract_type == "买卖合同":
-    config_path = "DocumentReview/Config/maimai.csv"
-    model_path = "model/uie_model/maimai/model_best/"
-elif contract_type == "劳务合同":
-    config_path = "DocumentReview/Config/laowu.csv"
-    model_path = 'model/uie_model/guyong/model_best/'
-else:
-    raise Exception("暂时不支持该合同类型")
+# if contract_type == "借条":
+#     config_path = "DocumentReview/Config/jietiao.csv"
+#     model_path = "model/uie_model/model_best/"
+#
+# elif contract_type == "借款合同":
+#     config_path = "DocumentReview/Config/jiekuan.csv"
+#     model_path = "model/uie_model/jkht/model_best/"
+# elif contract_type == "劳动合同":
+#     config_path = "DocumentReview/Config/laodong.csv"
+#     model_path = "model/uie_model/laodong/model_best/"
+# elif contract_type == "租房合同":
+#     config_path = "DocumentReview/Config/fangwuzulin.csv"
+#     model_path = "model/uie_model/fwzl/model_best/"
+# elif contract_type == "买卖合同":
+#     config_path = "DocumentReview/Config/maimai.csv"
+#     model_path = "model/uie_model/maimai/model_best/"
+# elif contract_type == "劳务合同":
+#     config_path = "DocumentReview/Config/laowu.csv"
+#     model_path = 'model/uie_model/guyong/model_best/'
+# else:
+#     raise Exception("暂时不支持该合同类型")
 
 acknowledgement = BasicUIEAcknowledgement(config_path=config_path,
-                                          model_path=model_path,
-                                          usr=usr)
+                                          model_path=model_path)
 correct = st.button("文本纠错")
 run = st.button("开始审核")
 
@@ -140,7 +148,7 @@ if run:
     # corrected_sent, detail = pycorrector.correct(text)
     # print(corrected_sent, detail)
 
-    acknowledgement.review_main(content=text, mode="text")
+    acknowledgement.review_main(content=text, mode="text", usr=usr)
     pprint(acknowledgement.review_result, sort_dicts=False)
     index = 1
     for key, value in acknowledgement.review_result.items():

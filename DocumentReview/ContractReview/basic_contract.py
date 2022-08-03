@@ -32,14 +32,16 @@ class BasicAcknowledgement:
         # self.data_list = self.read_origin_content(content=content, mode=mode)
         self.data_list = []
         self.data = ""
+        self.usr = None
         # self.logger.debug("data_list: {}".format(self.data_list))
         self.review_result = OrderedDict()
 
-    def review_main(self, content, mode):
+    def review_main(self, content, mode, usr="Part A"):
         self.data_list = self.read_origin_content(content, mode)
         data = '\n'.join(self.data_list)
         self.data = re.sub("[＿_]+", "", data)
         extraction_res = self.check_data_func()
+        self.usr = usr
         self.rule_judge(extraction_res[0])
 
         self.review_result = {key: value for key, value in self.review_result.items() if value != {}}
@@ -75,7 +77,6 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
     def __init__(self, model_path='', device_id=0, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # self.schema = list(set(self.config['schema'].tolist()))
-        self.usr = kwargs.get("usr", "Part A")
         self.schema = self.config['schema'].tolist()
         self.review_result = {schema: {} for schema in self.schema}
 
@@ -157,9 +158,14 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
 
                 else:
                     res_dict["审核结果"] = "通过"
-                    res_dict["内容"] = extraction_con[0]['text']
-                    res_dict["start"] = extraction_con[0]['start']
-                    res_dict["end"] = extraction_con[0]['end']
+
+                    if len(extraction_con) == 1:
+                        res_dict["内容"] = extraction_con[0]['text']
+                        res_dict["start"] = extraction_con[0]['start']
+                        res_dict["end"] = extraction_con[0]['end']
+                    # 审核项目如果出现了不止一次
+                    else:
+                        pass
 
             elif row['pos keywords'] != "" and len(re.findall(row['pos keywords'], self.data)) > 0:
                 res_dict["审核结果"] = "通过"
@@ -182,9 +188,9 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
 
 
 if __name__ == '__main__':
-    acknowledgement = BasicUIEAcknowledgement(config_path="DocumentReview/Config/fangwuzulin.csv",
+    contract_type = "maimai"
+    acknowledgement = BasicUIEAcknowledgement(config_path="DocumentReview/Config/{}.csv".format(contract_type),
                                               log_level="DEBUG",
-                                              model_path="model/uie_model/fwzl/model_best/",
-                                              usr="Part A")
-    acknowledgement.review_main(content="data/DocData/Lease/fw_test.docx", mode="docx")
+                                              model_path="model/uie_model/new/{}/model_best/".format(contract_type))
+    acknowledgement.review_main(content="data/DocData/Lease/fw_test.docx", mode="docx", usr="Part A")
     pprint(acknowledgement.review_result, sort_dicts=False)

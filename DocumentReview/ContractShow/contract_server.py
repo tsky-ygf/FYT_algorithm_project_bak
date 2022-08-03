@@ -24,6 +24,15 @@ CORS(app)
 
 CONTRACT_SERVER_DATA_PATH = "DocumentReview/ContractShow/contract_server_data.json"
 
+contract_type_list = ['fangwuzulin', 'jiekuan', 'jietiao', 'laodong', 'laowu', 'maimai']
+acknowledgement_dict = {}
+for contract_type in contract_type_list:
+    config_path = "DocumentReview/Config/{}.csv".format(contract_type)
+    model_path = "model/uie_model/new/{}/model_best/".format(contract_type)
+    acknowledgement_dict[contract_type] = BasicUIEAcknowledgement(config_path=config_path,
+                                                                  model_path=model_path,
+                                                                  device_id=-1)
+
 
 @app.route('/get_contract_type', methods=["get"])
 def get_contract_type():
@@ -45,11 +54,11 @@ def get_contract_review_result():
         in_json = request.get_data()
         if in_json is not None:
             in_dict = json.loads(in_json.decode("utf-8"))
-            contract_type = in_dict['contract_type_id']
+            contract_type_id = in_dict['contract_type_id']
             text = in_dict['contract_content']
             usr = in_dict['user_standpoint_id']
             # print(text)
-            print(contract_type)
+            # print(contract_type)
             if usr == 'party_a':
                 usr = 'Part A'
             elif usr == 'part_b':
@@ -57,31 +66,7 @@ def get_contract_review_result():
             else:
                 raise Exception("暂时不支持该用户立场")
 
-            if contract_type == "jietiao":
-                config_path = "DocumentReview/Config/jietiao.csv"
-                model_path = "model/uie_model/model_best/"
-            elif contract_type == "jiekuan":
-                config_path = "DocumentReview/Config/jiekuan.csv"
-                model_path = "model/uie_model/jkht/model_best/"
-            elif contract_type == "laodong":
-                config_path = "DocumentReview/Config/laodong.csv"
-                model_path = "model/uie_model/laodong/model_best/"
-            elif contract_type == "fangwuzulin":
-                config_path = "DocumentReview/Config/fangwuzulin.csv"
-                model_path = "model/uie_model/fwzl/model_best/"
-            elif contract_type == "maimai":
-                config_path = "DocumentReview/Config/maimai.csv"
-                model_path = "model/uie_model/maimai/model_best/"
-            elif contract_type == "laowu":
-                config_path = "DocumentReview/Config/laowu.csv"
-                model_path = 'model/uie_model/guyong/model_best/'
-            else:
-                raise Exception("暂时不支持该合同类型")
-
-            acknowledgement = BasicUIEAcknowledgement(config_path=config_path,
-                                                      model_path=model_path,
-                                                      usr=usr,
-                                                      device_id=-1)
+            acknowledgement = acknowledgement_dict[contract_type_id]
 
             acknowledgement.review_main(content=text, mode="text")
             res = acknowledgement.review_result
