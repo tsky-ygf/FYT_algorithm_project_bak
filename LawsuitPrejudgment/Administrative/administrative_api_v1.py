@@ -12,7 +12,7 @@ from pprint import pprint, pformat
 
 
 def get_administrative_prejudgment_situation(administrative_type):
-    with open('LawsuitPrejudgment/Administrative/result_show/{}_type.json'.format(administrative_type), 'r') as f2:
+    with open('data/administrative_config/{}_type.json'.format(administrative_type), 'r') as f2:
         type_data = json.load(f2)
 
     return type_data
@@ -24,7 +24,7 @@ def get_administrative_prejudgment_result(administrative_type, situation):
     :return:
     """
     # 获取行政处罚的预测结果
-    with open('LawsuitPrejudgment/Administrative/result_show/{}_config.json'.format(administrative_type), 'r') as f1:
+    with open('data/administrative_config/{}_config.json'.format(administrative_type), 'r') as f1:
         info_data = json.load(f1)
 
     # with open('LawsuitPrejudgment/Administrative/result_show/{}_type.json'.format(administrative_type), 'r') as f2:

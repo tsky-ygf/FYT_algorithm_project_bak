@@ -8,6 +8,9 @@
 import streamlit as st
 import pandas as pd
 from paddlenlp import Taskflow
+import os
+
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 contract_type = st.sidebar.selectbox("请选择合同类型", ["房屋租赁", "劳动雇佣", "借款合同", '劳动合同', '一般买卖', '欠条'], key="合同类型")
 if contract_type == '房屋租赁':

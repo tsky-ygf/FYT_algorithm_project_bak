@@ -27,10 +27,10 @@ elif big_type == "道路运输处罚预判":
 else:
     raise Exception("请选择正确的预判类型")
 
-with open('LawsuitPrejudgment/Administrative/result_show/{}_config.json'.format(con), 'r') as f1:
+with open('data/administrative_config/{}_config.json'.format(con), 'r') as f1:
     info_data = json.load(f1)
 
-with open('LawsuitPrejudgment/Administrative/result_show/{}_type.json'.format(con), 'r') as f2:
+with open('data/administrative_config/{}_type.json'.format(con), 'r') as f2:
     type_data = json.load(f2)
 
 # pprint(type_data)

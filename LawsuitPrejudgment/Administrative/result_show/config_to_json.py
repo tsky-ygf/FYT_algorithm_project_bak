@@ -109,6 +109,6 @@ if __name__ == '__main__':
     # department_list = ["transportation"]
     for department in department_list:
         _config_csv_path = "LawsuitPrejudgment/Administrative/result_show/{}_config.csv".format(department)
-        _config_json_path = "LawsuitPrejudgment/Administrative/result_show/{}_config.json".format(department)
-        _type_json_path = "LawsuitPrejudgment/Administrative/result_show/{}_type.json".format(department)
+        _config_json_path = "data/administrative_config/{}_config.json".format(department)
+        _type_json_path = "data/administrative_config/{}_type.json".format(department)
         handle_config(_config_csv_path, _config_json_path, _type_json_path)
