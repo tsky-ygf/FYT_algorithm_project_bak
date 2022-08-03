@@ -25,6 +25,6 @@ def test_run():
 
     print(result)
     assert result
-    assert result["result"]["请求分割财产"]["support_or_not"] == "支持"
-    assert result["result"]["请求分割财产"]["reason_of_evaluation"].startswith("根据您的描述")
-    assert result["result"]["请求分割财产"]["legal_advice"].startswith("法律建议")
+    assert result["result"][claim]["support_or_not"] == "支持"
+    assert result["result"][claim]["reason_of_evaluation"].startswith("根据您的描述")
+    assert result["result"][claim]["legal_advice"].startswith("法律建议")
