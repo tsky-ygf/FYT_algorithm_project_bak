@@ -1,0 +1,37 @@
+{
+	"support_contract_types": [{
+			"type_id": "jietiao",
+			"contract_type": "借条"
+		},
+		{
+			"type_id": "jiekuan",
+			"contract_type": "借款合同"
+		},
+		{
+			"type_id": "laodong",
+			"contract_type": "劳动合同"
+		},
+		{
+			"type_id": "fangwuzulin",
+			"contract_type": "租房合同"
+		},
+		{
+			"type_id": "maimai",
+			"contract_type": "买卖合同"
+		},
+		{
+			"type_id": "laowu",
+			"contract_type": "劳务合同"
+		}
+	],
+	"user_standpoints": [
+		{
+			"id": "party_a",
+			"standpoint": "甲方"
+		},
+		{
+			"id": "party_b",
+			"standpoint": "乙方"
+		}
+	]
+}
