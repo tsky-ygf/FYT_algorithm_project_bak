@@ -5,8 +5,16 @@
 @Time    : 2022/7/29 15:58 
 @Desc    : None
 """
+from xmindparser import xmind_to_dict
+
+from LawsuitPrejudgment.lawsuit_prejudgment.constants import KNOWLEDGE_FILE_PATH
 from LawsuitPrejudgment.lawsuit_prejudgment.core.actions.action import Action
 from LawsuitPrejudgment.lawsuit_prejudgment.core.actions.civil_report_action_message import CivilReportActionMessage
+
+
+def _get_xmind_content(problem, claim, situation):
+    xmind_dict = xmind_to_dict(KNOWLEDGE_FILE_PATH + problem + '/' + problem + '_' + claim + '.xmind')[0]['topic']
+    pass
 
 
 def _get_civil_report(problem, claim, situation, fact):

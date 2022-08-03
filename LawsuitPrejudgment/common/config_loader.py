@@ -16,9 +16,10 @@ from pyltp import Parser, Segmentor, Postagger, NamedEntityRecognizer
 # 路径配置
 #
 ########################################################################################################################
+from LawsuitPrejudgment.lawsuit_prejudgment.constants import KNOWLEDGE_FILE_PATH, MODEL_FILE_PATH
 
-config_path = 'LawsuitPrejudgment/config/'
-model_path = 'LawsuitPrejudgment/model/'
+config_path = KNOWLEDGE_FILE_PATH
+model_path = MODEL_FILE_PATH
 
 
 
