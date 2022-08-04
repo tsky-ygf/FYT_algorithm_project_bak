@@ -32,3 +32,5 @@ googletrans
 docarray
 pycorrector
 loguru
+networkx
+pypinyin
