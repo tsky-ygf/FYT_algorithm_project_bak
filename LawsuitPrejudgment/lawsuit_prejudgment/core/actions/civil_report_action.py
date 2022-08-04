@@ -34,7 +34,7 @@ def _get_civil_report(problem, claim, situation, fact):
     # get data
     xmind_content = _get_xmind_content(problem, claim, situation)
     proof = ""  # TODO: 怎么处理证据
-    possibility_support = 0.88
+    possibility_support = 0.88  # TODO: 处理概率值
 
     # construct result
     prob_suqiu = claim

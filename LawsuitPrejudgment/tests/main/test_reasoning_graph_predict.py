@@ -22,5 +22,5 @@ def test_predict_fn_should_use_http_situation_classifier():
     print(result_dict)
     assert result_dict
     assert result_dict["question_next"] is None
-    assert result_dict["result"][claim]["reason_of_evaluation"] == "测试理由"
+    assert str(result_dict["result"][claim]["reason_of_evaluation"]).startswith("根据您的描述")
     pass

@@ -12,7 +12,7 @@ from LawsuitPrejudgment.lawsuit_prejudgment.core.actions.civil_report_action imp
 from LawsuitPrejudgment.lawsuit_prejudgment.core.actions.civil_report_action_message import CivilReportActionMessage
 from LawsuitPrejudgment.lawsuit_prejudgment.feature_toggles import FeatureToggles
 from LawsuitPrejudgment.lawsuit_prejudgment.nlu.situation_classifiers.http_based_situation_classifier import HttpClient, \
-    HttpBasedSituationClassifier
+    HttpBasedSituationClassifier, DataTransferObject
 from LawsuitPrejudgment.lawsuit_prejudgment.nlu.situation_classifiers.situation_classifier_message import \
     SituationClassifierMessage
 from LawsuitPrejudgment.lawsuit_prejudgment.shared.utils.io import read_json_attribute_value
@@ -43,13 +43,14 @@ def _predict_by_http(problem, claim_list, fact):
     claim = claim_list[0]
 
     # get situation by HttpBasedSituationClassifier
-    situation_classifier = HttpBasedSituationClassifier(HttpClient(url="http://172.19.82.199:7998/situationreview"))
+    situation_classifier = HttpBasedSituationClassifier(HttpClient(url="http://172.19.82.199:7998/situationreview"), DataTransferObject())
     resp_json = situation_classifier.classify_situations(SituationClassifierMessage(claim, fact))
+    claim_from_http = resp_json.get("claim", "")
     situation = resp_json.get("situation", "")
 
     # get report by CivilReportAction
     action = CivilReportAction()
-    message = CivilReportActionMessage(problem, claim, situation, fact)
+    message = CivilReportActionMessage(problem, claim_from_http, situation, fact)
     result = action.run(message)
 
     return result

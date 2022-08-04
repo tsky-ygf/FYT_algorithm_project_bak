@@ -6,7 +6,7 @@
 @Desc    : HttpBasedSituationClassifier的测试程序。
 """
 from LawsuitPrejudgment.lawsuit_prejudgment.nlu.situation_classifiers.http_based_situation_classifier import HttpClient, \
-    HttpBasedSituationClassifier
+    HttpBasedSituationClassifier, DataTransferObject
 from LawsuitPrejudgment.lawsuit_prejudgment.nlu.situation_classifiers.situation_classifier_message import \
     SituationClassifierMessage
 
@@ -19,8 +19,8 @@ def test_classify_situations():
                                               "（以下简称顺祥公司）、连云港惠某机械制造有限公司（以下简称连云港惠某公司）、如皋市惠某机械制造有限公司（以下简称如皋惠某公司）"
                                               "。因感情破裂，于2019年4月9日登记离婚，协议离婚时仅对子女抚养问题进行安排和房屋、存款等部分财产进行处理，"
                                               "双方并未对上述三个公司进行分割。现双方无法达成一致处理意见，特向贵院起诉，请求支持原告诉求。")
-
-    situation_classifier = HttpBasedSituationClassifier(http_client)
+    dto = DataTransferObject()
+    situation_classifier = HttpBasedSituationClassifier(http_client, dto)
     resp_json = situation_classifier.classify_situations(message)
 
     print(resp_json)

@@ -30,11 +30,55 @@ class HttpClient:
         pass
 
 
+class DataTransferObject:
+    def __init__(self):
+        self.data_from_http = None
+        self.claim_convert_dict = {
+            "财产分割": "请求分割财产"
+        }
+        self.situation_convert_dict = {
+            "夫妻关系存续期间所得生产、经营的收益": "财产为婚姻关系存续期间夫妻的共同财产"
+        }
+
+    @property
+    def claim(self) -> str:
+        claim_from_http = self.data_from_http.get("suqiu_type", "")
+        return self.claim_convert_dict.get(claim_from_http, "")
+
+    @property
+    def situation(self) -> str:
+        situation_from_http = self.data_from_http.get("situation", "")
+        return self.situation_convert_dict.get(situation_from_http, "")
+
+    @property
+    def probability(self):
+        return self.data_from_http.get("probability")
+
+    def convert_response_format(self, data_from_http: Dict) -> Dict:
+        self.data_from_http = data_from_http
+        return {
+            "claim": self.claim,
+            "situation": self.situation,
+            "probability": self.probability,
+            "status": self.data_from_http.get("status")
+        }
+
+
 class HttpBasedSituationClassifier(SituationClassifier):
     """ 通过外部的http服务，识别法律情形。 """
 
-    def __init__(self, http_client: HttpClient):
+    def __init__(self, http_client: HttpClient, dto: DataTransferObject = None):
+        """
+
+        Args:
+            http_client: http客户端。
+            dto: 转换数据格式的类: http接口数据格式 -> 业务数据格式。
+        """
         self.http_client = http_client
+        self.dto = dto
 
     def classify_situations(self, message: SituationClassifierMessage):
-        return self.http_client.get_response_json(message.to_dict())
+        resp_json = self.http_client.get_response_json(message.to_dict())
+        if self.dto:
+            resp_json = self.dto.convert_response_format(resp_json)
+        return resp_json
