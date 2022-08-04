@@ -30,9 +30,9 @@ def get_news_by_column_id():
     return response_failed_result("No parameter: column_id")
 
 
-@app.route('/get_news_by_keyword', methods=["post"])
+@app.route('/get_news_by_keyword', methods=["get"])
 def get_news_by_keyword():
-    keyword = request.json.get("keyword")
+    keyword = request.args.get("keyword")
     if keyword:
         return response_successful_result(service.get_news_by_keyword(keyword))
     return response_failed_result("No parameter: keyword")

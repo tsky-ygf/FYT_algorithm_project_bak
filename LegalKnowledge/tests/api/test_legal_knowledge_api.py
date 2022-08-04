@@ -33,7 +33,7 @@ def test_get_news_by_column_id():
 
 def test_get_news_by_keyword():
     url = LEGAL_KNOWLEDGE_SERVICE_URL + "/get_news_by_keyword"
-    resp_json = requests.post(url, json={"keyword": "游泳"}).json()
+    resp_json = requests.get(url, {"keyword": "游泳"}).json()
 
     print(resp_json)
     assert resp_json
