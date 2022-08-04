@@ -21,6 +21,15 @@ from docx import Document
 # 读取docx 文件
 def read_docx_file(docx_path):
     document = Document(docx_path)
+    # tables = document.tables
+    # for table in tables:
+    # print(table)
+    # print(len(table.rows))
+    # print(len(table.columns))
+    # print(table.cell(6, 5).text)
+    # for i in range(len(table.rows)):
+    #     print(table.rows[i])
+
     all_paragraphs = document.paragraphs
 
     return_text_list = []
@@ -34,5 +43,5 @@ def read_docx_file(docx_path):
 
 
 if __name__ == '__main__':
-    res = read_docx_file(docx_path="data/DocData/LaborContract/劳动合同.docx")
-    print(res)
+    res = read_docx_file(docx_path="data/DocData/maimai/test.docx")
+    # print(res)
