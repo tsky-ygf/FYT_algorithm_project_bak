@@ -4,6 +4,7 @@
 ### 目录结构
 - DataCentric 数据标注模块
 - DocumentReview 智能文档审核模块
+- IntelligentConsultation 智能咨询模块
 - LawEntityExtraction 法律实体抽取模块
 - LawsuitPrejudgment 法律诉讼预判模块
 - LegalKnowledge 普法常识模块
