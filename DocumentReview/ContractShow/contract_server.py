@@ -42,7 +42,7 @@ for contract_type in contract_type_list:
     model_path = "model/uie_model/new/{}/model_best/".format(contract_type)
     acknowledgement_dict[contract_type] = BasicUIEAcknowledgement(config_path=config_path,
                                                                   model_path=model_path,
-                                                                  device_id=-1)
+                                                                  device_id=1)
 
 
 @app.route('/get_contract_type', methods=["get"])
@@ -78,7 +78,7 @@ def get_contract_review_result():
 
             acknowledgement = acknowledgement_dict[contract_type_id]
 
-            acknowledgement.review_main(content=text, mode="text")
+            acknowledgement.review_main(content=text, mode="text", usr=usr)
             res = acknowledgement.review_result
             # 编排返回结果的内容
             result = []
