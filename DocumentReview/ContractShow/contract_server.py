@@ -14,7 +14,7 @@ from loguru import logger
 from DocumentReview.ContractReview.basic_contract import BasicUIEAcknowledgement
 import os
 
-from Utils.http_response import response_successful_result
+from Utils.http_response import response_successful_result, response_failed_result
 
 os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
 
@@ -99,7 +99,7 @@ def get_contract_review_result():
             return json.dumps({"error_msg": "no data", "status": 1}, ensure_ascii=False)
     except Exception as e:
         logger.info(traceback.format_exc())
-        return json.dumps({"error_msg": "unknown error:" + repr(e), "status": 1}, ensure_ascii=False)
+        return response_failed_result(traceback.format_exc())
 
 
 if __name__ == '__main__':
