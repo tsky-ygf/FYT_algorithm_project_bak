@@ -37,6 +37,7 @@ class BasicAcknowledgement:
         self.review_result = OrderedDict()
 
     def review_main(self, content, mode, usr="Part A"):
+        self.review_result = self.init_review_result()
         self.data_list = self.read_origin_content(content, mode)
         data = '\n'.join(self.data_list)
         self.data = re.sub("[＿_]+", "", data)
@@ -45,6 +46,9 @@ class BasicAcknowledgement:
         self.rule_judge(extraction_res[0])
 
         self.review_result = {key: value for key, value in self.review_result.items() if value != {}}
+
+    def init_review_result(self):
+        raise NotImplementedError
 
     def check_data_func(self, *args, **kwargs):  # 审核数据
         raise NotImplementedError
@@ -78,7 +82,7 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
         super().__init__(*args, **kwargs)
         # self.schema = list(set(self.config['schema'].tolist()))
         self.schema = self.config['schema'].tolist()
-        self.review_result = {schema: {} for schema in self.schema}
+        # self.review_result = {schema: {} for schema in self.schema}
 
         self.data = ""
 
@@ -89,6 +93,9 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
                                task_path=model_path)
 
         self.logger.info(model_path)
+
+    def init_review_result(self):
+        return {schema: {} for schema in self.schema}
 
     def check_data_func(self):
         res = self.ie(self.data)
@@ -120,7 +127,8 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
                     # self.logger.debug(extraction_res["还款日期"][0]["text"])
                     # self.logger.debug(extraction_res["借款日期"][0]["text"])
                     try:
-                        rule_func.check_date_outside(row, extraction_con, res_dict, extraction_res["借款日期"][0]["text"],
+                        rule_func.check_date_outside(row, extraction_con, res_dict,
+                                                     extraction_res["借款日期"][0]["text"],
                                                      extraction_res["还款日期"][0]["text"])
                     except Exception as e:
                         self.logger.error(e)
@@ -134,9 +142,11 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
                     rule_func.check_wage(row, extraction_con, res_dict)
                 elif "试用期工资审核" == row["pos rule"]:
                     if "劳动报酬" in self.review_result:
-                        rule_func.check_probation_wage(row, extraction_con, res_dict, self.review_result['劳动报酬']["内容"])
+                        rule_func.check_probation_wage(row, extraction_con, res_dict,
+                                                       self.review_result['劳动报酬']["内容"])
                     elif "工资" in self.review_result:
-                        rule_func.check_probation_wage(row, extraction_con, res_dict, self.review_result['工资']["内容"])
+                        rule_func.check_probation_wage(row, extraction_con, res_dict,
+                                                       self.review_result['工资']["内容"])
                     else:
                         pass
                 elif "违约金审核" == row["pos rule"]:
@@ -203,6 +213,5 @@ if __name__ == '__main__':
     pprint(acknowledgement.review_result, sort_dicts=False)
 
     print("## Second Time ##")
-    # TODO:第二遍会报错
     acknowledgement.review_main(content="data/DocData/{}/test.docx".format(contract_type), mode="docx", usr="Part A")
     pprint(acknowledgement.review_result, sort_dicts=False)

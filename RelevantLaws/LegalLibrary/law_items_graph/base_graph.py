@@ -5,35 +5,50 @@
 # @Site    : 
 # @File    : base_graph.py
 # @Software: PyCharm
+import json
 import pandas as pd
 import networkx as nx
 import itertools
 import matplotlib.pyplot as plt
+from pprint import pprint
 
-origin_df = pd.read_csv("data/law/law_lib/item_test.csv")
-demo_df = origin_df[:100]
-print(demo_df)
+# %matplotlib inline
+
+# plt.rcParams['font.sans-serif'] = ['SimHei']  # 用来正常显示中文标签
+# plt.rcParams['axes.unicode_minus'] = False  # 用来正常显示负号
+
+# origin_df = pd.read_csv("data/law/law_lib/item_test.csv")
+with open("data/law/law_lib/statistics_json.json", "r") as f:
+    statistics_json = json.load(f)
+pprint(statistics_json)
 # print(origin_df[:10])
+# for key, value in statistics_json.items():
+law_item_index_dict = {}
 
 G = nx.Graph()
-for i in demo_df.index:
-    # print(demo_df.law_items[i])
-    law_list = demo_df.law_items[i].split("|")
-    # print(law_list)
-    for e in itertools.combinations(law_list, 2):
-        G.add_edge(e[0], e[1])
-    # G.add_edge(law_list[0], law_list[1], weight=1)
-    # break
+for key, value in statistics_json.items():
+    node1 = key.split("#")[0]
+    node2 = key.split("#")[1]
 
+    if node1 not in law_item_index_dict:
+        law_item_index_dict[node1] = 'node_{}'.format(len(law_item_index_dict))
+
+    if node2 not in law_item_index_dict:
+        law_item_index_dict[node2] = 'node_{}'.format(len(law_item_index_dict))
+
+    G.add_edge(law_item_index_dict[node1], law_item_index_dict[node2], weight=value)
+
+# nx.draw_networkx(G)
+# plt.show()
 pos = nx.spring_layout(G)
-
+#
 Gdegree = nx.degree(G)
 Gdegree = dict(Gdegree)
 Gdegree = pd.DataFrame({'name': list(Gdegree.keys()), 'degree': list(Gdegree.values())})
-# node
-nx.draw_networkx_nodes(G, pos, alpha=0.6, node_size=Gdegree.degree * 100)
-
+# # node
+nx.draw_networkx_nodes(G, pos, alpha=0.6, node_size=Gdegree.degree*10)
+#
 nx.draw_networkx_labels(G, pos, font_size=10)
 plt.axis('off')
-plt.title('红楼梦社交网络')
+plt.title('law item graph')
 plt.show()
