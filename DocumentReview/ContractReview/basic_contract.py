@@ -198,5 +198,11 @@ if __name__ == '__main__':
     acknowledgement = BasicUIEAcknowledgement(config_path="DocumentReview/Config/{}.csv".format(contract_type),
                                               log_level="DEBUG",
                                               model_path="model/uie_model/new/{}/model_best/".format(contract_type))
+    print("## First Time ##")
+    acknowledgement.review_main(content="data/DocData/{}/test.docx".format(contract_type), mode="docx", usr="Part A")
+    pprint(acknowledgement.review_result, sort_dicts=False)
+
+    print("## Second Time ##")
+    # TODO:第二遍会报错
     acknowledgement.review_main(content="data/DocData/{}/test.docx".format(contract_type), mode="docx", usr="Part A")
     pprint(acknowledgement.review_result, sort_dicts=False)
