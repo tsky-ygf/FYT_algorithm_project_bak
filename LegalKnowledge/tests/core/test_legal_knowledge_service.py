@@ -12,6 +12,7 @@ def test_get_news_by_column_id():
     column_id = "hot_news"
     news = get_news_by_column_id(column_id)
 
+    print(news)
     assert news
     assert len(news) > 1
     assert isinstance(news[0]["release_time"], str)

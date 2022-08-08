@@ -5,6 +5,7 @@
 @Time    : 2022/8/8 13:51 
 @Desc    : None
 """
+import logging
 from typing import List, Dict
 import pymysql
 
@@ -29,7 +30,7 @@ def get_news_by_id_list(id_list: List[int]) -> List[Dict]:
         fetched_data = cursor.fetchall()
         news = [{"id": row[0], "title": row[1], "release_time": row[2], "content": row[3], "source_url": row[4]} for row in fetched_data]
     except:
-        print("Error: unable to fetch data")
+        logging.error("Error: unable to fetch data")
         news = []
     # 关闭数据库连接
     db.close()
