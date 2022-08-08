@@ -10,28 +10,52 @@ import pandas as pd
 import itertools
 from pprint import pprint
 
-df = pd.read_csv("data/law/law_lib/item_test.csv")
-# demo_df = df[:100]
 
-print(df)
+# df = pd.read_csv("data/law/law_lib/item_test.csv")
+# # demo_df = df[:100]
+#
+# print(df)
+#
+# statistics_res_dict = {}
+# for i in df.index:
+#     law_list = df.law_items[i].split("|")
+#     # print(law_list)
+#     law_list = [x for x in law_list if "诉讼" not in x]
+#     if len(law_list) < 2:
+#         continue
+#     for e in itertools.combinations(law_list, 2):
+#         # print(e)
+#         if "#".join(e) in statistics_res_dict:
+#             statistics_res_dict["#".join(e)] += 1
+#         elif '#'.join(e[::-1]) in statistics_res_dict:
+#             statistics_res_dict['#'.join(e[::-1])] += 1
+#         else:
+#             statistics_res_dict["#".join(e)] = 1
+# pprint(statistics_res_dict)
+#
+# statistics_json = json.dumps(statistics_res_dict, sort_keys=False, indent=4, separators=(',', ': '))
+# with open("data/law/law_lib/statistics_json.json", "w") as f:
+#     f.write(statistics_json)
 
-statistics_res_dict = {}
-for i in df.index:
-    law_list = df.law_items[i].split("|")
-    # print(law_list)
-    law_list = [x for x in law_list if "诉讼" not in x]
-    if len(law_list) < 2:
-        continue
-    for e in itertools.combinations(law_list, 2):
-        # print(e)
-        if "#".join(e) in statistics_res_dict:
-            statistics_res_dict["#".join(e)] += 1
-        elif '#'.join(e[::-1]) in statistics_res_dict:
-            statistics_res_dict['#'.join(e[::-1])] += 1
-        else:
-            statistics_res_dict["#".join(e)] = 1
-pprint(statistics_res_dict)
+def statistics_items_amount(df_path):
+    origin_df = pd.read_csv(df_path)
+    items_amount_dict = dict()
+    for i in origin_df.index:
+        law_list = origin_df.law_items[i].split("|")
+        # print(law_list)
+        law_list = [x for x in law_list if "诉讼" not in x]
+        print(law_list)
+        for one_law in law_list:
+            if one_law not in statistics_items_amount:
+                items_amount_dict[one_law] = 1
+            else:
+                items_amount_dict[one_law] += 1
 
-statistics_json = json.dumps(statistics_res_dict, sort_keys=False, indent=4, separators=(',', ': '))
-with open("data/law/law_lib/statistics_json.json", "w") as f:
-    f.write(statistics_json)
+    # statistics_json = json.dumps(items_amount_dict, sort_keys=False, indent=4, separators=(',', ': '))
+    # with open("data/law/law_lib/statistics_json.json", "w") as f:
+    #     f.write(statistics_json)
+    return items_amount_dict
+
+
+if __name__ == '__main__':
+    statistics_items_amount(df_path='data/law/law_lib/item_xingshi.csv')

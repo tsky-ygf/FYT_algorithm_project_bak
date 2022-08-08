@@ -6,7 +6,6 @@
 # @File    : relevant_laws_search.py
 # @Software: PyCharm
 import jieba
-from loguru import logger
 from RelevantLaws.LegalLibrary.read_legal_from_db import search_data_from_es
 
 
