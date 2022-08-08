@@ -18,7 +18,9 @@ from paddlenlp import Taskflow
 # from id_validator import validator
 
 from pprint import pprint, pformat
-from DocumentReview.ContractReview import rule_func
+# from DocumentReview.ContractReview import rule_func
+import rule_func
+from DocumentReview.UIETool.deploy.uie_predictor import UIEPredictor
 
 from Utils.logger import print_run_time
 
@@ -80,20 +82,35 @@ class BasicAcknowledgement:
         return text_list
 
 
+class InferArgs:
+    model_path_prefix = ""
+    position_prob = 0.5
+    max_seq_len = 512
+    batch_size = 4
+    device = "cpu"
+    schema = []
+
+
 class BasicUIEAcknowledgement(BasicAcknowledgement):
-    def __init__(self, model_path='', device_id=0, *args, **kwargs):
+    def __init__(self, model_path='', device="", *args, **kwargs):
         super().__init__(*args, **kwargs)
         # self.schema = list(set(self.config['schema'].tolist()))
+        self.device = device
         self.schema = self.config['schema'].tolist()
         # self.review_result = {schema: {} for schema in self.schema}
 
         self.data = ""
-
-        if model_path == '':
-            self.ie = Taskflow('information_extraction', schema=self.schema, device_id=device_id)
+        if self.device == "cpu":
+            args = InferArgs()
+            args.model_path_prefix = model_path
+            args.schema = self.schema[:3]
+            self.predictor = UIEPredictor(args)
         else:
-            self.ie = Taskflow('information_extraction', schema=self.schema, device_id=device_id,
-                               task_path=model_path)
+            if model_path == '':
+                self.ie = Taskflow('information_extraction', schema=self.schema, device_id=int(device))
+            else:
+                self.ie = Taskflow('information_extraction', schema=self.schema, device_id=int(device),
+                                   task_path=model_path)
 
         self.logger.info(model_path)
 
@@ -101,7 +118,12 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
         return {schema: {} for schema in self.schema}
 
     def check_data_func(self):
-        res = self.ie(self.data)
+        if self.device == "cpu":
+            self.logger.debug(self.data)
+            # exit()
+            res = self.predictor.predict([self.data])
+        else:
+            res = self.ie(self.data)
         self.logger.debug(pformat(res))
         return res
 
@@ -207,16 +229,21 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
 
 
 if __name__ == '__main__':
+    import time
 
     contract_type = "maimai"
     acknowledgement = BasicUIEAcknowledgement(config_path="DocumentReview/Config/{}.csv".format(contract_type),
                                               log_level="INFO",
-                                              model_path="model/uie_model/new/{}/model_best/".format(contract_type),
-                                              device_id=2)
+                                              # model_path="model/uie_model/new/{}/model_best/".format(contract_type),
+                                              model_path="model/uie_model/export_cpu/{}/inference".format(
+                                                  contract_type),
+                                              device="cpu")
     print("## First Time ##")
+    localtime = time.time()
     acknowledgement.review_main(content="data/DocData/{}/test.docx".format(contract_type), mode="docx", usr="Part A")
     pprint(acknowledgement.review_result, sort_dicts=False)
+    print('use time: {}'.format(time.time() - localtime))
 
-    print("## Second Time ##")
-    acknowledgement.review_main(content="data/DocData/{}/test.docx".format(contract_type), mode="docx", usr="Part A")
-    pprint(acknowledgement.review_result, sort_dicts=False)
+    # print("## Second Time ##")
+    # acknowledgement.review_main(content="data/DocData/{}/test.docx".format(contract_type), mode="docx", usr="Part A")
+    # pprint(acknowledgement.review_result, sort_dicts=False)
