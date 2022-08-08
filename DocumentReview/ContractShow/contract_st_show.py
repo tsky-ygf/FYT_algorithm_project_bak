@@ -28,7 +28,9 @@ def get_data(_file):
     return "\n".join(_text)
 
 
-contract_type = st.sidebar.selectbox("请选择合同类型", ["借条", "借款", "劳动", '租房租赁', '买卖', '劳务'], key="合同类型")
+contract_type = st.sidebar.selectbox("请选择合同类型",
+                                     ["借条", "借款", "劳动", '租房租赁', '买卖', '劳务', '保密', '采购', '一般租赁'],
+                                     key="合同类型")
 mode_type = st.sidebar.selectbox("请选择上传数据格式", ["docx", "文本", "txt"], key="text")
 usr = st.sidebar.selectbox("请选择立场", ['甲方', '乙方'], key="中立方")
 
@@ -54,7 +56,8 @@ else:
     usr = 'Part B'
 
 acknowledgement = BasicUIEAcknowledgement(config_path=config_path,
-                                          model_path=model_path)
+                                          model_path=model_path,
+                                          device=1)
 correct = st.button("文本纠错")
 run = st.button("开始审核")
 

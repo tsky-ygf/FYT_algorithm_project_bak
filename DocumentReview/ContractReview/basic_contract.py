@@ -18,8 +18,7 @@ from paddlenlp import Taskflow
 # from id_validator import validator
 
 from pprint import pprint, pformat
-# from DocumentReview.ContractReview import rule_func
-import rule_func
+from DocumentReview.ContractReview import rule_func
 from DocumentReview.UIETool.deploy.uie_predictor import UIEPredictor
 
 from Utils.logger import print_run_time
@@ -92,7 +91,7 @@ class InferArgs:
 
 
 class BasicUIEAcknowledgement(BasicAcknowledgement):
-    def __init__(self, model_path='', device="", *args, **kwargs):
+    def __init__(self, model_path='', device=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # self.schema = list(set(self.config['schema'].tolist()))
         self.device = device

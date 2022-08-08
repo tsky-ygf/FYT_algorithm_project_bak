@@ -1,11 +1,11 @@
-#python DocumentReview/UIETool/doccano.py --doccano_file data/doccano_data/maimai/origin.json \
-#      --task_type "ext" --save_dir data/doccano_data/maimai/ --splits 0.7 0.3 0
+python DocumentReview/UIETool/doccano.py --doccano_file data/doccano_data/yibanzulin/origin.json \
+      --task_type "ext" --save_dir data/doccano_data/yibanzulin/ --splits 0.7 0.3 0
 
-export CUDA_VISIBLE_DEVICES=1;
+export CUDA_VISIBLE_DEVICES=2;
 python DocumentReview/UIETool/finetune.py \
-    --train_path "data/doccano_data/maimai/train.txt" \
-    --dev_path "data/doccano_data/maimai/dev.txt" \
-    --save_dir "model/uie_model/new/maimai/" \
+    --train_path "data/doccano_data/yibanzulin/train.txt" \
+    --dev_path "data/doccano_data/yibanzulin/dev.txt" \
+    --save_dir "model/uie_model/new/yibanzulin/" \
     --learning_rate 1e-5 \
     --batch_size 16 \
     --max_seq_len 512 \
