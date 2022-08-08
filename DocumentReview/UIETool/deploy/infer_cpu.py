@@ -48,7 +48,7 @@ from dataclasses import dataclass
 #     args = parser.parse_args()
 #     return args
 
-class parse_args:
+class InferArgs:
     model_path_prefix = ""
     position_prob = 0.5
     max_seq_len = 512
@@ -58,7 +58,7 @@ class parse_args:
 
 
 def cpu_infer(model_path_prefix, texts, schema):
-    args = parse_args()
+    args = InferArgs()
 
     args.model_path_prefix = model_path_prefix
     args.schema = schema
@@ -70,11 +70,8 @@ def cpu_infer(model_path_prefix, texts, schema):
 
 
 if __name__ == "__main__":
-    model_path = "model/uie_model/export_cpu/fangwuzulin/inference"
-    texts_ = [
-        '"北京市海淀区人民法院\n民事判决书\n(199x)建初字第xxx号\n原告：张三。\n委托代理人李四，北京市 A律师事务所律师。\n被告：B公司，法定代表人王五，开发公司总经理。\n委托代理人赵六，北京市 C律师事务所律师。"',
-        '原告赵六，2022年5月29日生\n委托代理人孙七，深圳市C律师事务所律师。\n被告周八，1990年7月28日出生\n委托代理人吴九，山东D律师事务所律师'
-    ]
+    model_path = "model/uie_model/export_cpu/maimai/inference"
+    texts_ =["北京市海淀区人民法院\n民事判决书\n(199x)建初字第xxx号\n原告：张三。\n委托代理人李四，北京市 A律师事务所律师。\n被告：B公司，法定代表人王五，开发公司总经理。\n委托代理人赵六，北京市 C律师事务所律师。"]
     schema1 = ['法院', '原告', '被告']
 
     cpu_infer(model_path, texts_, schema1)

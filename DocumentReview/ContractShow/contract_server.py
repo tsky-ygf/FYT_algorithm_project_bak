@@ -39,10 +39,10 @@ contract_type_list = _get_contract_type_list()
 acknowledgement_dict = {}
 for contract_type in contract_type_list:
     config_path = "DocumentReview/Config/{}.csv".format(contract_type)
-    model_path = "model/uie_model/new/{}/model_best/".format(contract_type)
+    model_path = "model/uie_model/export_cpu/{}/inference".format(contract_type)
     acknowledgement_dict[contract_type] = BasicUIEAcknowledgement(config_path=config_path,
                                                                   model_path=model_path,
-                                                                  device_id=1)
+                                                                  device="cpu")
 
 
 @app.route('/get_contract_type', methods=["get"])
