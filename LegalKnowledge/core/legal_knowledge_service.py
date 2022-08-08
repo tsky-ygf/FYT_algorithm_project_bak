@@ -5,6 +5,7 @@
 @Time    : 2022/8/4 13:36 
 @Desc    : None
 """
+from typing import List, Dict
 
 
 def get_columns():
@@ -56,7 +57,7 @@ def _get_news_by_column_name(column_name):
     return result
 
 
-def get_news_by_column_id(column_id):
+def get_news_by_column_id(column_id) -> List[Dict]:
     column_name = _get_column_name(column_id)
     if column_name is None:
         return []
