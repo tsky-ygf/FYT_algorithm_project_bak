@@ -29,6 +29,7 @@ def test_get_news_by_column_id():
     assert resp_json
     assert resp_json.get("success")
     assert resp_json.get("result")
+    assert len(resp_json.get("result")) > 1
 
 
 def test_get_news_by_keyword():
@@ -39,3 +40,4 @@ def test_get_news_by_keyword():
     assert resp_json
     assert resp_json.get("success")
     assert resp_json.get("result")
+    assert len(resp_json.get("result")) > 1
