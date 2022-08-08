@@ -19,7 +19,7 @@ from paddlenlp import Taskflow
 
 from pprint import pprint, pformat
 # from DocumentReview.ContractReview import rule_func
-import rule_func
+from DocumentReview.ContractReview import rule_func
 from DocumentReview.UIETool.deploy.uie_predictor import UIEPredictor
 
 from Utils.logger import print_run_time
