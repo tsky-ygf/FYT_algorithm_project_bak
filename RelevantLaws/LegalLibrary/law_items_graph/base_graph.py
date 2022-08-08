@@ -46,8 +46,11 @@ Gdegree = nx.degree(G)
 Gdegree = dict(Gdegree)
 Gdegree = pd.DataFrame({'name': list(Gdegree.keys()), 'degree': list(Gdegree.values())})
 # # node
-nx.draw_networkx_nodes(G, pos, alpha=0.6, node_size=Gdegree.degree*10)
-#
+nx.draw_networkx_nodes(G, pos, alpha=0.6, node_size=Gdegree.degree * 10)
+
+elarge = [(u, v) for (u, v, d) in G.edges(data=True)]
+
+nx.draw_networkx_edges(G, pos, edgelist=elarge, width=0.5, alpha=0.6)
 nx.draw_networkx_labels(G, pos, font_size=10)
 plt.axis('off')
 plt.title('law item graph')
