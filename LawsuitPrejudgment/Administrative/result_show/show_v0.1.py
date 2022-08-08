@@ -11,7 +11,8 @@ import streamlit as st
 # from pprint import pprint
 from annotated_text import annotated_text
 
-big_type = st.sidebar.selectbox("请选择你遇到的问题", ["税务处罚预判", "公安处罚预判", "道路运输处罚预判"])
+big_type = st.sidebar.selectbox("请选择你遇到的问题",
+                                ["税务处罚预判", "公安处罚预判", "道路运输处罚预判", "港航处罚预判"])
 
 st.title(big_type)
 
@@ -24,6 +25,8 @@ elif big_type == "公安处罚预判":
     con = "police"
 elif big_type == "道路运输处罚预判":
     con = "transportation"
+elif big_type == "港航处罚预判":
+    con = "port"
 else:
     raise Exception("请选择正确的预判类型")
 

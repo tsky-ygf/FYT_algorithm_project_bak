@@ -20,6 +20,8 @@ from paddlenlp import Taskflow
 from pprint import pprint, pformat
 from DocumentReview.ContractReview import rule_func
 
+from Utils.logger import print_run_time
+
 
 class BasicAcknowledgement:
     def __init__(self, config_path, log_level='INFO', *args, **kwargs):
@@ -36,6 +38,7 @@ class BasicAcknowledgement:
         # self.logger.debug("data_list: {}".format(self.data_list))
         self.review_result = OrderedDict()
 
+    @print_run_time
     def review_main(self, content, mode, usr="Part A"):
         self.review_result = self.init_review_result()
         self.data_list = self.read_origin_content(content, mode)
@@ -204,10 +207,12 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
 
 
 if __name__ == '__main__':
+
     contract_type = "maimai"
     acknowledgement = BasicUIEAcknowledgement(config_path="DocumentReview/Config/{}.csv".format(contract_type),
-                                              log_level="DEBUG",
-                                              model_path="model/uie_model/new/{}/model_best/".format(contract_type))
+                                              log_level="INFO",
+                                              model_path="model/uie_model/new/{}/model_best/".format(contract_type),
+                                              device_id=2)
     print("## First Time ##")
     acknowledgement.review_main(content="data/DocData/{}/test.docx".format(contract_type), mode="docx", usr="Part A")
     pprint(acknowledgement.review_result, sort_dicts=False)

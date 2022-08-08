@@ -66,7 +66,8 @@ def handle_config(config_csv_path, config_json_path, type_json_path):
 
         assert len(law_name) == len(law_content)
         for idx, one_law in enumerate(law_name):
-            situation_dict[row['情形抽取']]['法条依据'][one_law] = law_content[idx].replace("\u3000", "").replace('\n', '')
+            situation_dict[row['情形抽取']]['法条依据'][one_law] = law_content[idx].replace("\u3000", "").replace('\n',
+                                                                                                                  '')
 
         situation_dict[row['情形抽取']]['相关案例'] = row['类案'].split('|')
         situation_dict[row['情形抽取']]['处罚依据'] = row['处罚依据'].split('|')
@@ -105,10 +106,10 @@ def handle_config(config_csv_path, config_json_path, type_json_path):
 
 
 if __name__ == '__main__':
-    department_list = ["tax", "police", "transportation"]
+    department_list = ["tax", "police", "transportation", 'port']
     # department_list = ["transportation"]
     for department in department_list:
-        _config_csv_path = "LawsuitPrejudgment/Administrative/result_show/{}_config.csv".format(department)
+        _config_csv_path = "LawsuitPrejudgment/Administrative/config/{}_config.csv".format(department)
         _config_json_path = "data/administrative_config/{}_config.json".format(department)
         _type_json_path = "data/administrative_config/{}_type.json".format(department)
         handle_config(_config_csv_path, _config_json_path, _type_json_path)
