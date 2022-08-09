@@ -35,5 +35,5 @@ re = cursor.fetchall()
 # 将数据转换成DataFrame类型，并匹配columns
 # df = pd.DataFrame(list(re), columns=columns[0])
 df = pd.DataFrame(list(re), columns=['law_items'])
-print(df)
+# print(df)
 df.to_csv("data/law/law_lib/item_xingshi.csv", index=False)
