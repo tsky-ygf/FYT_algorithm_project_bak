@@ -12,7 +12,8 @@ import streamlit as st
 from annotated_text import annotated_text
 
 big_type = st.sidebar.selectbox("请选择你遇到的问题",
-                                ["税务处罚预判", "公安处罚预判", "道路运输处罚预判", "港航处罚预判"])
+                                ["税务处罚预判", "治安处罚预判", "交警处罚预判", "其他交通处罚预判", "道路运输处罚预判",
+                                 "港航处罚预判"])
 
 st.title(big_type)
 
@@ -21,8 +22,12 @@ st.title(big_type)
 
 if big_type == "税务处罚预判":
     con = "tax"
-elif big_type == "公安处罚预判":
+elif big_type == "治安处罚预判":
     con = "police"
+elif big_type == "交警处罚预判":
+    con = "traffic_police"
+elif big_type == "其他交通处罚预判":
+    con = "other_traffic"
 elif big_type == "道路运输处罚预判":
     con = "transportation"
 elif big_type == "港航处罚预判":

@@ -42,10 +42,12 @@ def handle_config(config_csv_path, config_json_path, type_json_path):
     # situation = tax_config["具体情形（来源案例）"].values.tolist()
     # print(situation)
     situation_dict = {}
-    one_situation = tax_config['一级'].values.tolist()
+    # one_situation = tax_config['一级'].values.tolist()
     type_dict = {}
     for index, row in tax_config.iterrows():
         pprint(row)
+        if row['一级'] == '':
+            continue
         if row['一级'] not in type_dict:
             type_dict[row['一级']] = {}
 
@@ -66,8 +68,8 @@ def handle_config(config_csv_path, config_json_path, type_json_path):
 
         assert len(law_name) == len(law_content)
         for idx, one_law in enumerate(law_name):
-            situation_dict[row['情形抽取']]['法条依据'][one_law] = law_content[idx].replace("\u3000", "").replace('\n',
-                                                                                                                  '')
+            situation_dict[row['情形抽取']]['法条依据'][one_law] = law_content[idx].replace("\u3000", ""). \
+                replace('\n', '')
 
         situation_dict[row['情形抽取']]['相关案例'] = row['类案'].split('|')
         situation_dict[row['情形抽取']]['处罚依据'] = row['处罚依据'].split('|')
@@ -106,7 +108,7 @@ def handle_config(config_csv_path, config_json_path, type_json_path):
 
 
 if __name__ == '__main__':
-    department_list = ["tax", "police", "transportation", 'port']
+    department_list = ["tax", "police", "transportation", "port", "other_traffic", "traffic_police"]
     # department_list = ["transportation"]
     for department in department_list:
         _config_csv_path = "LawsuitPrejudgment/Administrative/config/{}_config.csv".format(department)
