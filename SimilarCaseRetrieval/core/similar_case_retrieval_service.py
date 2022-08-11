@@ -18,7 +18,8 @@ def get_similar_cases(problem, claim_list, fact):
             "judge_date": "2016-04-11",
             "case_number": "（2016）吉0381民初315号",
             "tag": "彩礼 证据 结婚 给付 协议 女方 当事人 登记 离婚",
-            "win_or_not": True
+            "win_or_not": True,
+            "is_guiding_case": True
         },
         {
             "doc_id": "ws_c4b1e568-b253-4ac3-afd7-437941f1b17a",
@@ -28,7 +29,8 @@ def get_similar_cases(problem, claim_list, fact):
             "judge_date": "2011-07-12",
             "case_number": "（2011）龙民初字第204号",
             "tag": "彩礼 酒席 结婚 费用 订婚 电视 女方 买家 猪肉",
-            "win_or_not": False
+            "win_or_not": False,
+            "is_guiding_case": False
         }
     ]
     return similar_cases
