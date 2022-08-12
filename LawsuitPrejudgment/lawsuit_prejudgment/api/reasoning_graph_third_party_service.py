@@ -7,8 +7,11 @@ import requests
 from flask import Flask
 from flask import request
 
+from LawsuitPrejudgment.lawsuit_prejudgment.constants import SUPPORTED_ADMINISTRATIVE_TYPES_CONFIG_PATH
+from LawsuitPrejudgment.lawsuit_prejudgment.shared.utils.io import read_json_attribute_value
 from LawsuitPrejudgment.main.reasoning_graph_predict import predict_fn
 from LawsuitPrejudgment.Administrative.administrative_api_v1 import *
+from Utils.http_response import response_successful_result
 
 """
 推理图谱的接口
@@ -184,24 +187,14 @@ def reasoning_graph_result():
         }, ensure_ascii=False)
 
 
+def _get_supported_administrative_types():
+    return read_json_attribute_value(SUPPORTED_ADMINISTRATIVE_TYPES_CONFIG_PATH, "supported_administrative_types")
+
+
 @app.route('/get_administrative_type', methods=["get"])
 def get_administrative_type():
-    # mock data
-    return json.dumps({
-        "success": True,
-        "error_msg": "",
-        "result": [{
-            "type_id": "tax",
-            "type_name": "税务处罚预判"
-        }, {
-            "type_id": "police",
-            "type_name": "公安处罚预判"
-        }, {
-            "type_id": "transportation",
-            "type_name": "道路运输处罚预判"
-        }]
-    }, ensure_ascii=False)
-    pass
+    supported_administrative_types = _get_supported_administrative_types()
+    return response_successful_result(supported_administrative_types)
 
 
 @app.route('/get_administrative_problem_and_situation_by_type_id', methods=["get", "post"])

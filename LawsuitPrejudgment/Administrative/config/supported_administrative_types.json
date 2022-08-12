@@ -1,0 +1,32 @@
+{
+    "supported_administrative_types": [
+        {
+            "type_id": "tax",
+            "type_name": "税务处罚预判"
+        },
+        {
+            "type_id": "police",
+            "type_name": "治安处罚预判"
+        },
+        {
+            "type_id": "traffic_police",
+            "type_name": "交警处罚预判"
+        },
+        {
+            "type_id": "other_traffic",
+            "type_name": "其他交通处罚预判"
+        },
+        {
+            "type_id": "transportation",
+            "type_name": "道路运输处罚预判"
+        },
+        {
+            "type_id": "port",
+            "type_name": "港航处罚预判"
+        },
+        {
+            "type_id": "labor",
+            "type_name": "劳动人事处罚预判"
+        }
+    ]
+}
