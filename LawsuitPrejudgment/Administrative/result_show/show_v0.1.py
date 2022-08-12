@@ -10,32 +10,19 @@ import json
 import streamlit as st
 # from pprint import pprint
 from annotated_text import annotated_text
+from LawsuitPrejudgment.lawsuit_prejudgment.shared.utils.io import read_json_attribute_value
 
-big_type = st.sidebar.selectbox("请选择你遇到的问题",
-                                ["税务处罚预判", "治安处罚预判", "交警处罚预判", "其他交通处罚预判", "道路运输处罚预判",
-                                 "港航处罚预判", "劳动人事处罚预判"])
+supported_administrative_dict = read_json_attribute_value(
+    "LawsuitPrejudgment/Administrative/config/supported_administrative_types.json", "supported_administrative_types")
+# st.write(supported_administrative_dict)
+
+supported_administrative_list = [item['type_name'] for item in supported_administrative_dict]
+big_type = st.sidebar.selectbox("请选择你遇到的问题", supported_administrative_list)
 
 st.title(big_type)
 
-# st.write("请选择你遇到的问题：")
-# tax_config = pd.read_csv("LawsuitPrejudgment/Administrative/result_show/tax_config.csv")
-
-if big_type == "税务处罚预判":
-    con = "tax"
-elif big_type == "治安处罚预判":
-    con = "police"
-elif big_type == "交警处罚预判":
-    con = "traffic_police"
-elif big_type == "其他交通处罚预判":
-    con = "other_traffic"
-elif big_type == "道路运输处罚预判":
-    con = "transportation"
-elif big_type == "港航处罚预判":
-    con = "port"
-elif big_type == "劳动人事处罚预判":
-    con = "labor"
-else:
-    raise Exception("请选择正确的预判类型")
+map_dict = {item['type_name']: item['type_id'] for item in supported_administrative_dict}
+con = map_dict[big_type]
 
 with open('data/administrative_config/{}_config.json'.format(con), 'r') as f1:
     info_data = json.load(f1)
