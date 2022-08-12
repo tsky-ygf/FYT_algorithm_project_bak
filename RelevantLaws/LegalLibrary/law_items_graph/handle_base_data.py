@@ -59,6 +59,7 @@ def statistics_items_amount(df_path):
     # with open("data/law/law_lib/statistics_json.json", "w") as f:
     #     f.write(statistics_json)
     pprint(items_amount_dict)
+    print(len(items_amount_dict))
     return items_amount_dict
 
 

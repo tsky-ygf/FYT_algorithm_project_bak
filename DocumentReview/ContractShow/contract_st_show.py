@@ -29,7 +29,7 @@ def get_data(_file):
 
 
 contract_type = st.sidebar.selectbox("请选择合同类型",
-                                     ["借条", "借款", "劳动", '租房租赁', '买卖', '劳务', '保密', '采购', '一般租赁'],
+                                     ["借条", "借款", "劳动", '房屋租赁', '买卖', '劳务', '保密', '采购', '一般租赁'],
                                      key="合同类型")
 mode_type = st.sidebar.selectbox("请选择上传数据格式", ["docx", "文本", "txt"], key="text")
 usr = st.sidebar.selectbox("请选择立场", ['甲方', '乙方'], key="中立方")

@@ -13,7 +13,7 @@ from annotated_text import annotated_text
 
 big_type = st.sidebar.selectbox("请选择你遇到的问题",
                                 ["税务处罚预判", "治安处罚预判", "交警处罚预判", "其他交通处罚预判", "道路运输处罚预判",
-                                 "港航处罚预判"])
+                                 "港航处罚预判", "劳动人事处罚预判"])
 
 st.title(big_type)
 
@@ -32,6 +32,8 @@ elif big_type == "道路运输处罚预判":
     con = "transportation"
 elif big_type == "港航处罚预判":
     con = "port"
+elif big_type == "劳动人事处罚预判":
+    con = "labour"
 else:
     raise Exception("请选择正确的预判类型")
 
