@@ -18,7 +18,7 @@ conn = pymysql.connect(host='172.19.82.227',
 
 # 创建cursor
 cursor = conn.cursor()
-sql = "SELECT fl_ft FROM judgment_xingshi_data where fl_ft is not null and event_type='判决书'"
+sql = "SELECT fl_ft FROM judgment_minshi_data where fl_ft is not null and event_type='判决书'"
 
 # 执行sql语句
 cursor.execute(sql)
@@ -35,5 +35,5 @@ re = cursor.fetchall()
 # 将数据转换成DataFrame类型，并匹配columns
 # df = pd.DataFrame(list(re), columns=columns[0])
 df = pd.DataFrame(list(re), columns=['law_items'])
-# print(df)
-df.to_csv("data/law/law_lib/item_xingshi.csv", index=False)
+print(df)
+df.to_csv("data/law/law_lib/item_minshi.csv", index=False)
