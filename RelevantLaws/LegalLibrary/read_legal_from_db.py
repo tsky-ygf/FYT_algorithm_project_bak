@@ -9,6 +9,8 @@ import pymysql
 import pandas as pd
 from pprint import pprint
 from elasticsearch import Elasticsearch, helpers
+import json
+import re
 
 pd.set_option('display.max_columns', None)
 
@@ -33,6 +35,15 @@ db_name = 'falvfagui_data'
 table_name_list = ['flfg_result_dfxfg', 'flfg_result_falv', 'flfg_result_sfjs', 'flfg_result_xf',
                    'flfg_result_xzfg']
 
+with open("RelevantLaws/LegalLibrary/law_items_graph/minshi_item.json") as f:
+    minshi_item = json.load(f)
+
+with open("RelevantLaws/LegalLibrary/law_items_graph/xingshi_item.json") as f:
+    xingshi_item = json.load(f)
+
+
+# print(xingshi_item)
+# exit()
 
 # sqlcmd = """select * from test_falvfagui_data.test_flfg_result_xf"""
 # sqlcmd = """select * from test_falvfagui_data.test_flfg_result_xzfg"""
@@ -53,6 +64,12 @@ def es_init():
     es.indices.create(index=index_name, ignore=400)
 
 
+def chuli_title(old_s):  # 保留中文、大小写、数字
+    cop = re.compile("[^\u4e00-\u9fa5^0-9]")  # 匹配不是中文、大小写、数字的其他字符
+    nwe_s = cop.sub('', old_s)  # 将old_s中匹配到的字符替换成空s字符
+    return nwe_s
+
+
 # 构造es插入迭代器
 def handle_es(df_data):
     # 构造迭代器
@@ -63,8 +80,12 @@ def handle_es(df_data):
         data_body = {key: value for key, value in data_ori.items() if key in use_data}
         data_body['isValid_weight'] = valid_mapping[data_body['isValid']]
         data_body['legal_type_weight'] = legal_mapping[data_body['source']]
-        # print(data_body)
-        # exit()
+        title = chuli_title(data_body['title'])
+        data_body['title_weight'] = 0
+        if title in minshi_item:
+            data_body['title_weight'] += minshi_item[title]
+        if title in xingshi_item:
+            data_body['title_weight'] += xingshi_item[title]
         yield {"_index": index_name, "_type": "_doc", "_source": data_body}
 
 
@@ -115,7 +136,8 @@ if __name__ == '__main__':
             {'terms': {'isValid.keyword': ['有效']}},
             {'terms': {'source.keyword': ['法律']}}]}},
         'size': 10,
-        'sort': [{'isValid_weight': {'order': 'asc'}},
+        'sort': [{'title_weight': {'order': 'desc'}},
+                 {'isValid_weight': {'order': 'asc'}},
                  {'legal_type_weight': {'order': 'asc'}}]}
 
     # # print(get_df_from_sql(table_name_list[0]))

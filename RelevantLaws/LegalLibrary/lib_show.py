@@ -81,6 +81,7 @@ if run:
     query_dict = {
         "query": {"bool": {"must": query_list, }},
         "sort": [
+            {'title_weight': {'order': 'desc'}},
             {"isValid_weight": {"order": "asc"}},
             {"legal_type_weight": {"order": "asc"}},
         ],

@@ -40,6 +40,7 @@ def get_law_search_result(text="", sxx_list=None, legal_list=None, size=10):
     query_dict = {
         "query": {"bool": {"must": query_list, }},
         "sort": [
+            {'title_weight': {'order': 'desc'}},
             {"isValid_weight": {"order": "asc"}},
             {"legal_type_weight": {"order": "asc"}},
         ],
