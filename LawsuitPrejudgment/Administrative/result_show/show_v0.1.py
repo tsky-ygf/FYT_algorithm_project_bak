@@ -33,7 +33,7 @@ elif big_type == "道路运输处罚预判":
 elif big_type == "港航处罚预判":
     con = "port"
 elif big_type == "劳动人事处罚预判":
-    con = "labour"
+    con = "labor"
 else:
     raise Exception("请选择正确的预判类型")
 
