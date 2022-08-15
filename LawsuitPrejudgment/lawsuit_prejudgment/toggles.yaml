@@ -1,4 +1,4 @@
 http_situation_classifier:
-    value: true
+    enabled: false
     name: Http Situation Classifier
     description: 调用http服务进行情形识别。

@@ -32,7 +32,7 @@ def predict_fn(problem, claim_list, fact, question_answers, factor_sentence_list
     http_classifier_support_problems = read_json_attribute_value(HTTP_SITUATION_CLASSIFIER_SUPPORT_PROBLEMS_CONFIG_PATH,
                                                                  "support_problems")
 
-    if feature_toggles.http_situation_classifier and problem in http_classifier_support_problems:
+    if feature_toggles.http_situation_classifier.enabled and problem in http_classifier_support_problems:
         return _predict_by_http(problem, claim_list, fact)
     else:
         return _predict_by_factor(problem, claim_list, fact, question_answers, factor_sentence_list_, debug)

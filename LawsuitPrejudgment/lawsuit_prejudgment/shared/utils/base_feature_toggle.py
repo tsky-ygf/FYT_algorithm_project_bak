@@ -5,7 +5,8 @@
 @Time    : 2022/7/29 13:56 
 @Desc    :
     功能开关的基类。
-    代码参考:https://github.com/vwt-digital/feature-toggles/blob/develop/featuretoggles/__init__.py
+    代码参考:https://github.com/vwt-digital/feature-toggles/blob/develop/featuretoggles/__init__.py。
+    与原版相比做了一些改动，用法见测试用例LawsuitPrejudgment/tests/test_feature_toggles.py。
 """
 import inspect
 import os
@@ -20,7 +21,7 @@ logger = logging.getLogger("Feature Toggles")
 
 @dataclass(frozen=True)
 class ToggleItem:
-    value: bool
+    enabled: bool
     name: str
     description: str = ""
 
