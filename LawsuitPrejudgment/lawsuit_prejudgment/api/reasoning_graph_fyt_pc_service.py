@@ -11,7 +11,6 @@ from LawsuitPrejudgment.lawsuit_prejudgment.core.actions.civil_report_action imp
 from LawsuitPrejudgment.lawsuit_prejudgment.core.actions.civil_report_action_message import CivilReportActionMessage
 from LawsuitPrejudgment.lawsuit_prejudgment.shared.utils.io import read_json_attribute_value
 from LawsuitPrejudgment.main.reasoning_graph_predict import predict_fn
-from Utils.http_response import response_successful_result
 
 """
 推理图谱的接口
@@ -59,6 +58,10 @@ def _get_reasoning_graph_result(req_data: Dict):
     }
 
 
+def _response_successful_result(result):
+    return json.dumps({"success": True, "error_msg": "", "result": result}, ensure_ascii=False)
+
+
 @app.route('/reasoning_graph_result', methods=["post"])  # "service_type":'ft'
 def reasoning_graph_result():
     try:
@@ -85,7 +88,7 @@ def get_civil_report():
     action = CivilReportAction()
     message = CivilReportActionMessage(problem, claim, situation, fact)
     result = action.run(message)
-    return response_successful_result(result.get("result", dict()))
+    return _response_successful_result(result.get("result", dict()))
 
 
 if __name__ == "__main__":
