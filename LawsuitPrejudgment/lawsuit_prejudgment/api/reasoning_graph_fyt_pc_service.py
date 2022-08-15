@@ -7,8 +7,11 @@ import logging.handlers
 from flask import Flask
 from flask import request
 
+from LawsuitPrejudgment.lawsuit_prejudgment.core.actions.civil_report_action import CivilReportAction
+from LawsuitPrejudgment.lawsuit_prejudgment.core.actions.civil_report_action_message import CivilReportActionMessage
 from LawsuitPrejudgment.lawsuit_prejudgment.shared.utils.io import read_json_attribute_value
 from LawsuitPrejudgment.main.reasoning_graph_predict import predict_fn
+from Utils.http_response import response_successful_result
 
 """
 推理图谱的接口
@@ -71,5 +74,19 @@ def reasoning_graph_result():
         return json.dumps({"error_msg": "unknown error:" + repr(e), "status": 1}, ensure_ascii=False)
 
 
+@app.route('/get_civil_report', methods=["post"])
+def get_civil_report():
+    problem = request.json.get("problem")
+    claim = request.json.get("claim")
+    situation = request.json.get("situation")
+    fact = request.json.get("fact")
+
+    # get report by CivilReportAction
+    action = CivilReportAction()
+    message = CivilReportActionMessage(problem, claim, situation, fact)
+    result = action.run(message)
+    return response_successful_result(result.get("result", dict()))
+
+
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5080, debug=False)  # , use_reloader=False)
+    app.run(host="0.0.0.0", port=5088, debug=False)  # , use_reloader=False)
