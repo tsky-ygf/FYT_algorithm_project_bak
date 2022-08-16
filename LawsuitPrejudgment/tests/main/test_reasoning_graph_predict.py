@@ -24,3 +24,20 @@ def test_predict_fn_should_use_http_situation_classifier():
     assert result_dict["question_next"] is None
     assert str(result_dict["result"][claim]["reason_of_evaluation"]).startswith("根据您的描述")
     pass
+
+
+def test_should_have_evidence():
+    """ 程序仅在有支持路径连通时，返回证据。见logic_tree.py/get_next_question()/L570-L577"""
+    problem = "买卖合同"
+    claim = "返还定金"
+    fact = "xxxxxxx"
+    question_answers = {
+        "存在以下哪种情形？:买受人履行了义务;买受人不履行义务或履行义务不符合约定;出卖人不履行义务或履行义务不符合约定": "买受人不履行义务或履行义务不符合约定"
+    }
+    factor_sentence_list = []
+
+    result_dict = predict_fn(problem, [claim], fact, question_answers, factor_sentence_list)
+    print(result_dict)
+    assert result_dict
+    assert result_dict["question_next"] is None
+    assert result_dict["result"][claim]["evidence_module"] == ''
