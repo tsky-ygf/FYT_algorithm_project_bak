@@ -19,3 +19,19 @@ def test_get_filter_conditions():
     assert resp_json["result"].get("types_of_law")
     assert resp_json["result"].get("timeliness")
     pass
+
+
+def test_search_laws():
+    url = "http://101.69.229.138:8135/search_laws"
+    body = {
+        "query": "侵权",
+        "filter_conditions": dict()
+    }
+
+    resp_json = requests.post(url, json=body).json()
+    print(resp_json)
+
+    assert resp_json
+    assert resp_json.get("success")
+    assert resp_json.get("result")
+    assert "law_name" in resp_json["result"][0]
