@@ -40,10 +40,19 @@ def _get_column_name(column_id):
     return next((item.get("column_name") for item in columns if item.get("column_id") == column_id), None)
 
 
+def _has_special_format(column_name):
+    return column_name == "每日学法"
+
+
 def _get_id_list_of_recommended_news(column_name) -> List[int]:
     try:
         resp_json = requests.post(url=RECOMMEND_NEWS_URL).json()
-        news = resp_json.get(column_name, [])
+        news = resp_json.get(column_name)
+
+        if _has_special_format(column_name):
+            # news is Dict
+            return [item[0] for type_news in news.values() for item in type_news]
+        # news is List
         return [item[0] for item in news]
     except:
         logging.exception("request error when invoking _get_recommend_news().")
