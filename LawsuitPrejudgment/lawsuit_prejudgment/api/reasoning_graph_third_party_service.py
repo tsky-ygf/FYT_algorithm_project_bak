@@ -8,7 +8,7 @@ from flask import Flask
 from flask import request
 
 from LawsuitPrejudgment.lawsuit_prejudgment.constants import SUPPORTED_ADMINISTRATIVE_TYPES_CONFIG_PATH
-from LawsuitPrejudgment.lawsuit_prejudgment.shared.utils.io import read_json_attribute_value
+from Utils.io import read_json_attribute_value
 from LawsuitPrejudgment.main.reasoning_graph_predict import predict_fn
 from LawsuitPrejudgment.Administrative.administrative_api_v1 import *
 from Utils.http_response import response_successful_result

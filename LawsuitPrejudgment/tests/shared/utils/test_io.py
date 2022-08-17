@@ -5,7 +5,7 @@
 @Time    : 2022/8/1 15:59 
 @Desc    : None
 """
-from LawsuitPrejudgment.lawsuit_prejudgment.shared.utils.io import read_json_attribute_value
+from Utils.io import read_json_attribute_value
 
 
 def test_read_json_attribute_value():

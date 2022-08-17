@@ -1,0 +1,26 @@
+{
+    "filter_conditions": {
+        "types_of_law": {
+            "name": "法条种类",
+            "is_multiple_choice": true,
+            "value": [
+                "宪法",
+                "法律",
+                "行政法规",
+                "监察法规",
+                "司法解释",
+                "地方性法规"
+            ]
+        },
+        "timeliness": {
+            "name": "时效性",
+            "is_multiple_choice": true,
+            "value": [
+                "有效",
+                "已修改",
+                "尚未生效",
+                "已废止"
+            ]
+        }
+    }
+}

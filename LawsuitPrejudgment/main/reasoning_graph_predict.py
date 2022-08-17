@@ -15,7 +15,7 @@ from LawsuitPrejudgment.lawsuit_prejudgment.nlu.situation_classifiers.http_based
     HttpBasedSituationClassifier, DataTransferObject
 from LawsuitPrejudgment.lawsuit_prejudgment.nlu.situation_classifiers.situation_classifier_message import \
     SituationClassifierMessage
-from LawsuitPrejudgment.lawsuit_prejudgment.shared.utils.io import read_json_attribute_value
+from Utils.io import read_json_attribute_value
 from LawsuitPrejudgment.prediction.bert_predict import predict as predict
 
 logging.basicConfig(level=logging.DEBUG)

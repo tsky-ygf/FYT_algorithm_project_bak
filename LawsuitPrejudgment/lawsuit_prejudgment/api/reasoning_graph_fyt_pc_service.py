@@ -9,7 +9,7 @@ from flask import request
 
 from LawsuitPrejudgment.lawsuit_prejudgment.core.actions.civil_report_action import CivilReportAction
 from LawsuitPrejudgment.lawsuit_prejudgment.core.actions.civil_report_action_message import CivilReportActionMessage
-from LawsuitPrejudgment.lawsuit_prejudgment.shared.utils.io import read_json_attribute_value
+from Utils.io import read_json_attribute_value
 from LawsuitPrejudgment.main.reasoning_graph_predict import predict_fn
 
 """

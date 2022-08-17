@@ -10,7 +10,7 @@ import json
 import streamlit as st
 # from pprint import pprint
 from annotated_text import annotated_text
-from LawsuitPrejudgment.lawsuit_prejudgment.shared.utils.io import read_json_attribute_value
+from Utils.io import read_json_attribute_value
 
 supported_administrative_dict = read_json_attribute_value(
     "LawsuitPrejudgment/Administrative/config/supported_administrative_types.json", "supported_administrative_types")
