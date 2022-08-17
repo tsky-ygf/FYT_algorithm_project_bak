@@ -17,7 +17,7 @@ app = Flask(__name__)
 
 
 @app.route('/get_filter_conditions', methods=["get"])
-def get_columns():
+def get_filter_conditions():
     filer_conditions = read_json_attribute_value("RelevantLaws/api/filter_conditions.json", "filter_conditions")
     return response_successful_result(filer_conditions)
 
@@ -29,4 +29,4 @@ def get_columns():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8120, debug=True)
+    app.run(host="0.0.0.0", port=8135, debug=True)
