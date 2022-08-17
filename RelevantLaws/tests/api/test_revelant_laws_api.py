@@ -25,7 +25,11 @@ def test_search_laws():
     url = "http://101.69.229.138:8135/search_laws"
     body = {
         "query": "侵权",
-        "filter_conditions": dict()
+        "filter_conditions": {
+            "types_of_law": ["法律", "司法解释"],
+            "timeliness": ["有效", "已修改"],
+            "size": 10
+        }
     }
 
     resp_json = requests.post(url, json=body).json()
