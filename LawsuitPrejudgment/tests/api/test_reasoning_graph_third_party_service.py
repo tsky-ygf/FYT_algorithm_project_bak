@@ -52,14 +52,66 @@ def test_get_administrative_result():
     pass
 
 
-def test_get_criminal_result():
+def test_should_ask_question_when_get_criminal_result():
     url = "http://101.69.229.138:8100/get_criminal_result"
     data = {
-        "question": "我打人了，怎么办"
+        "fact": "2020年7、8月份的一天，小黄电话联系我要买一小包毒品，我们约好当天下午3点在杭州市郊区某小区附近碰头。当天下午我们碰头后，我将一小包毒品塞给了小黄，收了他1500元，然后我们就各自回去了。",
+        "question_answers": {},
+        "factor_sentence_list": []
     }
     resp_json = requests.post(url, json=data).json()
+
     print(resp_json)
-    assert resp_json is not None
+    assert resp_json
     assert resp_json.get("success") is True
-    assert len(resp_json.get("result")) > 0
-    pass
+    assert resp_json.get("question_next") == "请问贩卖的毒品是以下哪种类型？:冰毒;海洛因;鸦片;其他"
+    assert resp_json.get("question_type") == "1"
+    assert resp_json.get("result") is None
+
+    data = {
+        "fact": "2020年7、8月份的一天，小黄电话联系我要买一小包毒品，我们约好当天下午3点在杭州市郊区某小区附近碰头。当天下午我们碰头后，我将一小包毒品塞给了小黄，收了他1500元，然后我们就各自回去了。",
+        "question_answers": {
+            "请问贩卖的毒品是以下哪种类型？:冰毒;海洛因;鸦片;其他": "冰毒"
+        },
+        "factor_sentence_list": []
+    }
+    resp_json = requests.post(url, json=data).json()
+
+    print(resp_json)
+    assert resp_json
+    assert resp_json.get("success") is True
+    assert resp_json.get("question_next") == "请问贩卖的毒品数量有多少克？"
+    assert resp_json.get("question_type") == "0"
+    assert resp_json.get("result") is None
+
+
+def test_should_get_report_when_get_criminal_result():
+    url = "http://101.69.229.138:8100/get_criminal_result"
+    data = {
+        "fact": "2020年7、8月份的一天，小黄电话联系我要买一小包毒品，我们约好当天下午3点在杭州市郊区某小区附近碰头。当天下午我们碰头后，我将一小包毒品塞给了小黄，收了他1500元，然后我们就各自回去了。",
+        "question_answers": {
+            "请问贩卖的毒品是以下哪种类型？:冰毒;海洛因;鸦片;其他": "冰毒",
+            "请问贩卖的毒品数量有多少克？": 1
+        },
+        "factor_sentence_list": []
+    }
+    resp_json = requests.post(url, json=data).json()
+
+    print(resp_json)
+    assert resp_json
+    assert resp_json.get("success") is True
+    assert resp_json.get("question_next") is None
+    assert resp_json.get("question_type") == "1"
+    assert resp_json.get("result")
+
+    data = {
+        "fact": "我打人了，怎么办？",
+    }
+    resp_json = requests.post(url, json=data).json()
+
+    print(resp_json)
+    assert resp_json
+    assert resp_json.get("success") is True
+    assert resp_json.get("question_next") is None
+    assert resp_json.get("question_type") == "1"
+    assert resp_json.get("result")

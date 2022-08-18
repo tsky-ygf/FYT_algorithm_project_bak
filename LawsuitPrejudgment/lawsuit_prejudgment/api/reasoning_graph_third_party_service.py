@@ -247,46 +247,92 @@ def get_administrative_result():
         }, ensure_ascii=False)
 
 
-@app.route('/get_criminal_result', methods=["post"])
-def get_criminal_result():
-    try:
-        req_data = _request_parse(request)
-        question = req_data.get("question")
-        # 调用刑事预判的接口，获取结果
-        url = "http://172.19.82.198:5060/get_criminal_report"
-        data = {
-            "question": question
-        }
-        resp_json = requests.post(url, json=data).json()
-
-        # 编排接口返回内容的格式
-        accusation = []
-        for item in eval(resp_json.get("accusation")):
-            for crime, prob in item.items():
-                accusation.append({
-                    "crime": crime,
-                    "probability": prob
-                })
-        articles = []
-        for item in eval(resp_json.get("articles")):
-            articles.append({
-                "law_name": item[0],
-                "law_item": item[1],
-                "crime": item[2],
-                "law_content": item[3],
-                "probability": item[4]
+def _construct_response_format(resp_json):
+    # 编排接口返回内容的格式
+    accusation = []
+    for item in eval(resp_json.get("accusation")):
+        for crime, prob in item.items():
+            accusation.append({
+                "crime": crime,
+                "probability": prob
             })
-        result = {
-            "accusation": accusation,
-            "articles": articles,
-            "imprisonment": int(resp_json.get("imprisonment"))
+    articles = []
+    for item in eval(resp_json.get("articles")):
+        articles.append({
+            "law_name": item[0],
+            "law_item": item[1],
+            "crime": item[2],
+            "law_content": item[3],
+            "probability": item[4]
+        })
+    result = {
+        "accusation": accusation,
+        "articles": articles,
+        "imprisonment": int(resp_json.get("imprisonment"))
+    }
+    return result
+
+
+def _get_criminal_report(fact):
+    # 调用刑事预判的接口，获取结果
+    url = "http://172.19.82.198:5060/get_criminal_report"
+    data = {
+        "question": fact
+    }
+    resp_json = requests.post(url, json=data).json()
+    return _construct_response_format(resp_json)
+
+
+class CriminalDemo:
+    def __init__(self):
+        self.demo_fact = "2020年7、8月份的一天，小黄电话联系我要买一小包毒品，我们约好当天下午3点在杭州市郊区某小区附近碰头。当天下午我们碰头后，我将一小包毒品塞给了小黄，收了他1500元，然后我们就各自回去了。"
+        self.first_question = "请问贩卖的毒品是以下哪种类型？:冰毒;海洛因;鸦片;其他"
+        self.next_question_dict = {
+            "请问贩卖的毒品是以下哪种类型？:冰毒;海洛因;鸦片;其他": "请问贩卖的毒品数量有多少克？",
+            "请问贩卖的毒品数量有多少克？": None
+        }
+        self.question_type_dict = {
+            "请问贩卖的毒品是以下哪种类型？:冰毒;海洛因;鸦片;其他": "1",
+            "请问贩卖的毒品数量有多少克？": "0"
         }
 
+    def is_demo(self, fact):
+        return fact == self.demo_fact
+
+    def get_next_question(self, fact, question_answers):
+        if not self.is_demo(fact):
+            return None
+        if not question_answers:
+            return self.first_question
+
+        last_asked_question = list(question_answers.keys())[-1]
+        return self.next_question_dict.get(last_asked_question)
+
+    def get_question_type(self, question):
+        return self.question_type_dict.get(question, "1")
+
+    def successful_response(self, fact, question_answers, factor_sentence_list):
+        next_question = self.get_next_question(fact, question_answers)
         return json.dumps({
             "success": True,
             "error_msg": "",
-            "result": result,
+            "question_asked": question_answers,
+            "question_next": next_question,
+            "question_type": self.get_question_type(next_question),
+            "factor_sentence_list": [],
+            "result": None if next_question else _get_criminal_report(fact)
         }, ensure_ascii=False)
+
+
+@app.route('/get_criminal_result', methods=["post"])
+def get_criminal_result():
+    try:
+        fact = request.json.get("fact")
+        question_answers = request.json.get("question_answers")
+        factor_sentence_list = request.json.get("factor_sentence_list")
+
+        criminal_demo = CriminalDemo()
+        return criminal_demo.successful_response(fact, question_answers, factor_sentence_list)
     except Exception as e:
         logging.info(traceback.format_exc())
         return json.dumps({
