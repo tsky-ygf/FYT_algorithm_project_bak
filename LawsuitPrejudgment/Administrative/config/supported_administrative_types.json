@@ -27,6 +27,22 @@
         {
             "type_id": "labor",
             "type_name": "劳动人事处罚预判"
+        },
+        {
+            "type_id": "chengguan",
+            "type_name": "城管综合执法处罚预判"
+        },
+        {
+            "type_id": "huazhuang",
+            "type_name": "化妆品医疗器械处罚预判"
+        },
+        {
+            "type_id": "market",
+            "type_name": "市场监管处罚预判"
+        },
+        {
+            "type_id": "shipin",
+            "type_name": "食品药品处罚预判"
         }
     ]
 }

@@ -93,8 +93,9 @@ def drug_extract():
         for one_span, content in res_span.items():
             for one_content in content:
                 span_map[one_content["start"]] = one_span
-        # st.write(res_span)
+        # st.write(res_relations)
         # st.write(span_map)
+        # exit()
         res_relations_list = res_relations["被告人"]
         # st.write(res_relations_list)
         beigao_list = []
@@ -153,6 +154,7 @@ def drug_extract():
             res_df = pd.DataFrame(res_dict)
             res_df = res_df.loc[res_df["毒品种类"] != "无"]
             st.table(res_df)
+            st.write(res_relations)
         except Exception as e:
             print(e)
             st.write(res_relations)

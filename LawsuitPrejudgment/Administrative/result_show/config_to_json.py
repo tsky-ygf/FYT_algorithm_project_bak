@@ -109,7 +109,7 @@ def handle_config(config_csv_path, config_json_path, type_json_path):
 
 if __name__ == '__main__':
     # department_list = ["tax", "police", "transportation", "port", "other_traffic", "traffic_police"]
-    department_list = ["labor"]
+    department_list = ["chengguan", "huazhuang", "market", "shipin"]
     for department in department_list:
         _config_csv_path = "LawsuitPrejudgment/Administrative/config/{}_config.csv".format(department)
         _config_json_path = "data/administrative_config/{}_config.json".format(department)
