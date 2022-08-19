@@ -66,13 +66,13 @@ def get_claim_list_by_problem_id():
         "error_msg": "",
         "value": [{
             "id": 461,
-            "claim": "离婚"
+            "claim": "请求离婚"
         }, {
             "id": 462,
-            "claim": "财产分割"
+            "claim": "请求分割财产"
         }, {
             "id": 463,
-            "claim": "返还彩礼"
+            "claim": "请求返还彩礼"
         }]
     }, ensure_ascii=False)
     pass
@@ -80,15 +80,34 @@ def get_claim_list_by_problem_id():
 
 @app.route('/get_claim_by_claim_id', methods=["get"])
 def get_claim_by_claim_id():
+    claim_id = str(request.args.get("claim_id"))
     # mock data
+    mapping = {
+        "461": "请求离婚",
+        "462": "请求分割财产",
+        "463": "请求返还彩礼"
+    }
     return json.dumps({
         "success": True,
         "error_msg": "",
         "value": {
-            "claim": "离婚"
+            "claim": mapping.get(claim_id)
         }
     }, ensure_ascii=False)
     pass
+
+
+def _mapping_problem(problem):
+    mapping = {
+        "财产分割": "婚姻继承",
+        "同居问题": "婚姻继承",
+        "婚姻家庭": "婚姻继承",
+        "继承纠纷": "婚姻继承",
+        "子女抚养": "婚姻继承",
+        "老人赡养": "婚姻继承",
+        "返还彩礼": "婚姻继承"
+    }
+    return mapping.get(problem, problem)
 
 
 @app.route('/reasoning_graph_result', methods=["post"])  # "service_type":'ft'
@@ -98,6 +117,7 @@ def reasoning_graph_result():
         if in_json is not None:
             in_dict = json.loads(in_json.decode("utf-8"))
             problem = in_dict['problem']
+            problem = _mapping_problem(problem)
             claim_list = in_dict['claim_list']
             fact = in_dict.get('fact', '')
             question_answers = in_dict.get('question_answers', {})

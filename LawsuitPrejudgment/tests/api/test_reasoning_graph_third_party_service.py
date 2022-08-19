@@ -1,3 +1,5 @@
+import logging
+
 import requests
 
 from LawsuitPrejudgment.lawsuit_prejudgment.api.reasoning_graph_third_party_service import \
@@ -7,10 +9,50 @@ from LawsuitPrejudgment.lawsuit_prejudgment.api.reasoning_graph_third_party_serv
 def test_get_civil_problem_summary():
     url = "http://101.69.229.138:8100/get_civil_problem_summary"
     resp_json = requests.get(url).json()
+
+    print(resp_json)
     assert resp_json is not None
     assert resp_json.get("success") is True
     assert len(resp_json.get("value")) > 0
     pass
+
+
+def test_should_ask_next_question_when_reasoning_graph_result():
+    url = "http://101.69.229.138:8100/reasoning_graph_result"
+    body = {
+        "problem": "婚姻家庭",
+        "claim_list": ["请求离婚"],
+        "fact": "男女双方自愿/不自愿（不自愿的原因）登记结婚，婚后育有x子/女，现 x岁， 因xx原因离婚。婚姻/同居期间，有存款x元、房屋x处、车子x辆、债务x元。（双方是否对子女、财产、债务等达成协议或已有法院判决，协议或判决内容，双方对协议或判决的履行情况）。",
+        "question_answers": {},
+        "factor_sentence_list": []
+    }
+    resp_json = requests.post(url, json=body).json()
+
+    print(resp_json)
+    assert resp_json
+    assert resp_json.get("success")
+    assert resp_json.get("question_next")
+    assert resp_json.get("result") is None
+
+
+def test_show_have_report_when_reasoning_graph_result():
+    url = "http://101.69.229.138:8100/reasoning_graph_result"
+    body = {
+        "problem": "婚姻家庭",
+        "claim_list": ["请求离婚"],
+        "fact": "男女双方自愿/不自愿（不自愿的原因）登记结婚，婚后育有x子/女，现 x岁， 因xx原因离婚。婚姻/同居期间，有存款x元、房屋x处、车子x辆、债务x元。（双方是否对子女、财产、债务等达成协议或已有法院判决，协议或判决内容，双方对协议或判决的履行情况）。",
+        "question_answers": {
+            "共同生活时间是否很短？:是;否": "是"
+        },
+        "factor_sentence_list": [["男女双方自愿/不自愿（不自愿的原因）登记结婚", "双方自愿离婚", -1, ""], ["男女双方自愿/不自愿（不自愿的原因）登记结婚", "双方非自愿结婚", 1, ""], ["男女双方自愿/不自愿（不自愿的原因）登记结婚，婚后育有x子/女，现 x岁， 因xx原因离婚", "一方重婚", -1, ""]]
+    }
+    resp_json = requests.post(url, json=body).json()
+
+    print(resp_json)
+    assert resp_json
+    assert resp_json.get("success")
+    assert resp_json.get("question_next") is None
+    assert resp_json.get("result")
 
 
 def test_get_administrative_type():
