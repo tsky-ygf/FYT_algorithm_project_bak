@@ -102,7 +102,7 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
         if self.device == "cpu":
             args = InferArgs()
             args.model_path_prefix = model_path
-            args.schema = self.schema[:3]
+            # args.schema = self.schema[:3]
             self.predictor = UIEPredictor(args)
         else:
             if model_path == '':
