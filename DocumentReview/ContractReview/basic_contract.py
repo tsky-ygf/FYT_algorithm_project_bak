@@ -223,6 +223,10 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
                 res_dict['法律依据'] = row['legal basis']
                 res_dict['风险等级'] = row['risk level']
                 res_dict["风险点"] = row["risk statement"]
+                if "user show name" in row:
+                    res_dict["show name"] = row["user show name"]
+                if "classify" in row:
+                    res_dict["classify"] = row["classify"]
 
             self.review_result[row['schema']].update(res_dict)
 
@@ -230,16 +234,16 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
 if __name__ == '__main__':
     import time
 
-    contract_type = "maimai"
+    contract_type = "laowu"
     acknowledgement = BasicUIEAcknowledgement(config_path="DocumentReview/Config/{}.csv".format(contract_type),
                                               log_level="INFO",
-                                              # model_path="model/uie_model/new/{}/model_best/".format(contract_type),
-                                              model_path="model/uie_model/export_cpu/{}/inference".format(
-                                                  contract_type),
-                                              device="cpu")
+                                              model_path="model/uie_model/new/{}/model_best/".format(contract_type),
+                                              # model_path="model/uie_model/export_cpu/{}/inference".format(
+                                              #     contract_type),
+                                              device="2")
     print("## First Time ##")
     localtime = time.time()
-    acknowledgement.review_main(content="data/DocData/{}/test.docx".format(contract_type), mode="docx", usr="Part A")
+    acknowledgement.review_main(content="data/DocData/Sample/sample.docx", mode="docx", usr="Part A")
     pprint(acknowledgement.review_result, sort_dicts=False)
     print('use time: {}'.format(time.time() - localtime))
 
