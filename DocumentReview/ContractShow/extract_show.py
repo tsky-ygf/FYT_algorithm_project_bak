@@ -3,7 +3,7 @@
 # @Time    : 2022/7/15 10:16
 # @Author  : Adolf
 # @Site    : 
-# @File    : uie_result.py
+# @File    : extract_show.py
 # @Software: PyCharm
 import streamlit as st
 import pandas as pd
