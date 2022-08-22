@@ -11,7 +11,7 @@ from LawsuitPrejudgment.lawsuit_prejudgment.constants import SUPPORTED_ADMINISTR
 from Utils.io import read_json_attribute_value
 from LawsuitPrejudgment.main.reasoning_graph_predict import predict_fn
 from LawsuitPrejudgment.Administrative.administrative_api_v1 import *
-from Utils.http_response import response_successful_result
+from Utils.http_response import response_successful_result, response_failed_result
 
 """
 推理图谱的接口
@@ -254,17 +254,10 @@ def get_administrative_result():
         administrative_type = req_data.get("type_id")
         situation = req_data.get("situation")
         res = get_administrative_prejudgment_result(administrative_type, situation)
-        return json.dumps({
-            "success": True,
-            "error_msg": "",
-            "result": res,
-        }, ensure_ascii=False)
+        return response_successful_result(res)
     except Exception as e:
         logging.info(traceback.format_exc())
-        return json.dumps({
-            "success": False,
-            "error_msg": "unknown error:" + repr(e)
-        }, ensure_ascii=False)
+        return response_failed_result("unknown error:" + repr(e))
 
 
 def _construct_response_format(resp_json):

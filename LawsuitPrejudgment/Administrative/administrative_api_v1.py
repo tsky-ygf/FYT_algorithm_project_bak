@@ -10,6 +10,11 @@ import json
 from loguru import logger
 from pprint import pprint, pformat
 
+from LawsuitPrejudgment.lawsuit_prejudgment.api.data_transfer_object.applicable_law_dto import \
+    AdministrativeApplicableLawDictCreator
+from LawsuitPrejudgment.lawsuit_prejudgment.api.data_transfer_object.similar_case_dto import \
+    AdministrativeSimilarCaseDictCreator
+
 
 def get_administrative_prejudgment_situation(administrative_type):
     with open('data/administrative_config/{}_type.json'.format(administrative_type), 'r') as f2:
@@ -47,7 +52,10 @@ def get_administrative_prejudgment_result(administrative_type, situation):
         "title": "涉刑风险",
         "content": [{"crime_name": crime_name, "law_item": law_info[0], "law_content": law_info[1]} for crime_name, law_info in info_data[situation]['涉刑风险'].items()]
     }
-    prejudgment_result["similar_case"] = {"title": "相似类案", "content": info_data[situation]['相关案例']}
+    prejudgment_result["similar_case"] = [AdministrativeSimilarCaseDictCreator.create({"title": "相似类案", "content": content}) for content in info_data[situation]['相关案例']]
+    law_list = prejudgment_result["legal_basis"]["content"] + prejudgment_result["criminal_risk"]["content"]
+    # TODO: 去除可能重复的法条
+    prejudgment_result["applicable_law"] = [AdministrativeApplicableLawDictCreator.create(law) for law in law_list]
 
     return prejudgment_result
 

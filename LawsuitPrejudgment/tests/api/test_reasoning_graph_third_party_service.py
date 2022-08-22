@@ -2,8 +2,11 @@ import logging
 
 import requests
 
-from LawsuitPrejudgment.lawsuit_prejudgment.api.reasoning_graph_third_party_service import \
-    _get_supported_administrative_types
+# from LawsuitPrejudgment.lawsuit_prejudgment.api.reasoning_graph_third_party_service import \
+#     _get_supported_administrative_types
+
+attributes_in_similar_case = {"doc_id", "similar_rate", "title", "court", "judge_date", "case_number", "tag"}
+attributes_in_applicable_law = {"law_name", "law_item", "law_content"}
 
 
 def test_get_civil_problem_summary():
@@ -67,17 +70,17 @@ def test_get_administrative_type():
     assert resp_json["result"][0].get("type_name")
 
 
-def test_get_administrative_situation_list():
-    supported_administrative_types = _get_supported_administrative_types()
-    type_id_list = [item["type_id"] for item in supported_administrative_types]
-
-    for type_id in type_id_list:
-        url = "http://101.69.229.138:8100/get_administrative_problem_and_situation_by_type_id?type_id={}".format(type_id)
-        resp_json = requests.get(url).json()
-        assert resp_json is not None, type_id
-        assert resp_json.get("success") is True, type_id
-        assert len(resp_json.get("result")) > 0, type_id
-    pass
+# def test_get_administrative_situation_list():
+#     supported_administrative_types = _get_supported_administrative_types()
+#     type_id_list = [item["type_id"] for item in supported_administrative_types]
+#
+#     for type_id in type_id_list:
+#         url = "http://101.69.229.138:8100/get_administrative_problem_and_situation_by_type_id?type_id={}".format(type_id)
+#         resp_json = requests.get(url).json()
+#         assert resp_json is not None, type_id
+#         assert resp_json.get("success") is True, type_id
+#         assert len(resp_json.get("result")) > 0, type_id
+#     pass
 
 
 def test_get_administrative_result():
@@ -91,6 +94,8 @@ def test_get_administrative_result():
     assert resp_json is not None
     assert resp_json.get("success") is True
     assert len(resp_json.get("result")) > 0
+    assert set(resp_json["result"]["similar_case"][0].keys()) == attributes_in_similar_case
+    assert set(resp_json["result"]["applicable_law"][0].keys()) == attributes_in_applicable_law
     pass
 
 
