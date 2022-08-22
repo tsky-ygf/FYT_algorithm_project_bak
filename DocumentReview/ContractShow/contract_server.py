@@ -5,6 +5,7 @@
 # @Site    : 
 # @File    : contract_server.py
 # @Software: PyCharm
+import time
 import traceback
 from flask import Flask, request
 from flask_cors import CORS
@@ -37,12 +38,15 @@ def _get_contract_type_list():
 
 contract_type_list = _get_contract_type_list()
 acknowledgement_dict = {}
+start_time = time.time()
 for contract_type in contract_type_list:
     config_path = "DocumentReview/Config/{}.csv".format(contract_type)
     model_path = "model/uie_model/export_cpu/{}/inference".format(contract_type)
     acknowledgement_dict[contract_type] = BasicUIEAcknowledgement(config_path=config_path,
                                                                   model_path=model_path,
                                                                   device="cpu")
+time_cost = time.time() - start_time
+print("time_cost:{}".format(time_cost))
 
 
 @app.route('/get_contract_type', methods=["get"])
@@ -103,4 +107,4 @@ def get_contract_review_result():
 
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=7997, debug=True)  # , use_reloader=False)
+    app.run(host="0.0.0.0", port=7997, debug=False)  # , use_reloader=False)
