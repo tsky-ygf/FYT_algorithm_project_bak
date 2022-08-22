@@ -16,6 +16,7 @@ class SimilarCaseDTO:
         self.judge_date = similar_case.get("judge_date")
         self.case_number = similar_case.get("case_number")
         self.tag = similar_case.get("tag")
+        self.is_guiding_case = similar_case.get("is_guiding_case")
 
     def to_dict(self):
         return {
@@ -25,7 +26,8 @@ class SimilarCaseDTO:
             "court": self.court,
             "judge_date": self.judge_date,
             "case_number": self.case_number,
-            "tag": self.tag
+            "tag": self.tag,
+            "is_guiding_case": self.is_guiding_case
         }
 
 
@@ -39,6 +41,7 @@ class AdministrativeSimilarCaseDictCreator:
             "court": None,
             "judge_date": None,
             "case_number": None,
-            "tag": None
+            "tag": None,
+            "is_guiding_case": data.get("is_guiding_case", True)
         }
         return SimilarCaseDTO(similar_case).to_dict()

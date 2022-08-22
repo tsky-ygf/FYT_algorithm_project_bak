@@ -5,7 +5,7 @@ import requests
 # from LawsuitPrejudgment.lawsuit_prejudgment.api.reasoning_graph_third_party_service import \
 #     _get_supported_administrative_types
 
-attributes_in_similar_case = {"doc_id", "similar_rate", "title", "court", "judge_date", "case_number", "tag"}
+attributes_in_similar_case = {"doc_id", "similar_rate", "title", "court", "judge_date", "case_number", "tag", "is_guiding_case"}
 attributes_in_applicable_law = {"law_name", "law_item", "law_content"}
 
 
