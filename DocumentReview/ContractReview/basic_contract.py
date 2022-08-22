@@ -46,6 +46,7 @@ class BasicAcknowledgement:
         data = '\n'.join(self.data_list)
         self.data = re.sub("[＿_]+", "", data)
         extraction_res = self.check_data_func()
+
         self.usr = usr
         self.rule_judge(extraction_res[0])
 
@@ -102,7 +103,7 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
         if self.device == "cpu":
             args = InferArgs()
             args.model_path_prefix = model_path
-            # args.schema = self.schema[:3]
+            args.schema = self.schema
             self.predictor = UIEPredictor(args)
         else:
             if model_path == '':
@@ -237,10 +238,10 @@ if __name__ == '__main__':
     contract_type = "laowu"
     acknowledgement = BasicUIEAcknowledgement(config_path="DocumentReview/Config/{}.csv".format(contract_type),
                                               log_level="INFO",
-                                              model_path="model/uie_model/new/{}/model_best/".format(contract_type),
-                                              # model_path="model/uie_model/export_cpu/{}/inference".format(
-                                              #     contract_type),
-                                              device="2")
+                                              # model_path="model/uie_model/new/{}/model_best/".format(contract_type),
+                                              model_path="model/uie_model/export_cpu/{}/inference".format(
+                                                  contract_type),
+                                              device="cpu")
     print("## First Time ##")
     localtime = time.time()
     acknowledgement.review_main(content="data/DocData/Sample/sample.docx", mode="docx", usr="Part A")

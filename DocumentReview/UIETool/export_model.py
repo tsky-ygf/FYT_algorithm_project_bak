@@ -18,6 +18,8 @@ import paddle
 
 from DocumentReview.UIETool.model import UIE
 
+os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+
 
 def export_model_onnx(model_path, output_path):
     model = UIE.from_pretrained(model_path)
@@ -42,7 +44,8 @@ def export_model_onnx(model_path, output_path):
 
 
 if __name__ == '__main__':
-    for export_type in ['fangwuzulin', 'jiekuan', 'jietiao', 'laodong', 'laowu', 'maimai']:
+    for export_type in ['fangwuzulin', 'jiekuan', 'jietiao', 'laodong', 'laowu', 'maimai', 'caigou', 'baomi',
+                        'yibanzulin']:
         export_model_onnx(
             model_path="model/uie_model/new/{}/model_best".format(export_type),
             output_path="model/uie_model/export_cpu/{}".format(export_type),
