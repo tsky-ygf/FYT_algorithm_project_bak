@@ -33,3 +33,16 @@ class AdministrativeApplicableLawDictCreator:
         }
 
         return ApplicableLawDTO(applicable_law).to_dict()
+
+
+class CriminalApplicableLawDictCreator:
+    @staticmethod
+    def create(law):
+        law_name = str(law.get("law_name"))
+        applicable_law = {
+            "law_name": law_name if law_name.startswith("《") else "《" + law_name + "》",
+            "law_item": law.get("law_item"),
+            "law_content": law.get("law_content")
+        }
+
+        return ApplicableLawDTO(applicable_law).to_dict()

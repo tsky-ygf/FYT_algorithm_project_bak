@@ -7,6 +7,8 @@ import requests
 from flask import Flask
 from flask import request
 
+from LawsuitPrejudgment.lawsuit_prejudgment.api.data_transfer_object.applicable_law_dto import \
+    CriminalApplicableLawDictCreator
 from LawsuitPrejudgment.lawsuit_prejudgment.constants import SUPPORTED_ADMINISTRATIVE_TYPES_CONFIG_PATH
 from Utils.io import read_json_attribute_value
 from LawsuitPrejudgment.main.reasoning_graph_predict import predict_fn
@@ -281,7 +283,9 @@ def _construct_response_format(resp_json):
     result = {
         "accusation": accusation,
         "articles": articles,
-        "imprisonment": int(resp_json.get("imprisonment"))
+        "imprisonment": int(resp_json.get("imprisonment")),
+        "similar_case": None,
+        "applicable_law": [CriminalApplicableLawDictCreator.create(law) for law in articles]
     }
     return result
 

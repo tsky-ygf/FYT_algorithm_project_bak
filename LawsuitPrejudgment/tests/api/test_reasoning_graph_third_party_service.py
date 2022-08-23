@@ -99,6 +99,26 @@ def test_get_administrative_result():
     pass
 
 
+def test_get_criminal_result():
+    url = "http://101.69.229.138:8100/get_criminal_result"
+    data = {
+        "fact": "我打人了，怎么办？",
+        "question_answers": {},
+        "factor_sentence_list": []
+    }
+
+    resp_json = requests.post(url, json=data).json()
+    print(resp_json)
+
+    assert resp_json is not None
+    assert resp_json.get("success") is True
+    assert resp_json.get("question_next") is None
+    assert len(resp_json.get("result")) > 0
+    assert set(resp_json["result"]["applicable_law"][0].keys()) == attributes_in_applicable_law
+    assert set(resp_json["result"]["similar_case"][0].keys()) == attributes_in_similar_case
+    pass
+
+
 def test_should_ask_question_when_get_criminal_result():
     url = "http://101.69.229.138:8100/get_criminal_result"
     data = {
