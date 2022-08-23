@@ -25,7 +25,7 @@ ie = Taskflow('information_extraction', schema=use_schema, device_id=3,
 def get_theft_result(text):
     res_event = ie(text)
     # print(res_event)
-    return res_event[0]
+    return res_event
 
 
 text = "被告人唐志强，男，1959年11月15日出生于上海市青浦区，汉族，文盲，无业，住上海市青浦区。因盗窃于2013年9月被龙游县公安局" \

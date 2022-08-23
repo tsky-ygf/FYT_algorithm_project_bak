@@ -1,7 +1,7 @@
 python DocumentReview/UIETool/doccano.py --doccano_file data/doccano_data/theft/origin.json \
       --task_type "ext" --save_dir data/doccano_data/theft/ --splits 0.8 0.2 0
 
-export CUDA_VISIBLE_DEVICES=2;
+export CUDA_VISIBLE_DEVICES=1;
 python DocumentReview/UIETool/finetune.py \
     --train_path "data/doccano_data/theft/train.txt" \
     --dev_path "data/doccano_data/theft/dev.txt" \
