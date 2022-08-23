@@ -449,7 +449,16 @@ def check_noncompete_compensation_payment_time(row, extraction_con, res_dict):
 
 # 房屋租赁支付周期审核
 def check_housing_lease_payment_cycle(row, extraction_con, res_dict):
-    return None
+    # '每年一次性支付完毕当年租金'
+    # {'text': '【季】', 'start': 1865, 'end': 1868, 'probability': 0.7621741695396622}
+    text = extraction_con[0]['text']
+
+    if '一次性支付' in text or '一次性付清' in text or '一年一付' in text:
+        res_dict["内容"] = extraction_con[0]["text"]
+        res_dict["start"] = extraction_con[0]["start"]
+        res_dict["end"] = extraction_con[0]["end"]
+        res_dict["审核结果"] = "不通过"
+        res_dict["法律建议"] = row["jiaoyan error advice"]
 
 
 # 房屋租赁管辖法院审核
