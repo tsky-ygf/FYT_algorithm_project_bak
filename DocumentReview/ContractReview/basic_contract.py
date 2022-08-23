@@ -5,6 +5,7 @@
 # @Site    :
 # @File    : basic_contract.py
 # @Software: PyCharm
+import os
 import re
 # import uuid
 
@@ -105,6 +106,7 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
             args.model_path_prefix = model_path
             args.schema = self.schema
             self.predictor = UIEPredictor(args)
+            # self.ie = Taskflow('information_extraction', schema=self.schema, device_id=-1, task_path=model_path)
         else:
             if model_path == '':
                 self.ie = Taskflow('information_extraction', schema=self.schema, device_id=int(device))
@@ -122,6 +124,7 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
             self.logger.debug(self.data)
             # exit()
             res = self.predictor.predict([self.data])
+            # res = self.ie(self.data)
         else:
             res = self.ie(self.data)
         self.logger.debug(pformat(res))
@@ -257,7 +260,9 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
 
 if __name__ == '__main__':
     import time
-    import os
+
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+
     contract_type = "fangwuzulin"
 
     os.environ['CUDA_VISIBLE_DEVICES'] = "0"
