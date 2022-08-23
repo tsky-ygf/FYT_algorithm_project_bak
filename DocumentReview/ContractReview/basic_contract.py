@@ -5,6 +5,7 @@
 # @Site    :
 # @File    : basic_contract.py
 # @Software: PyCharm
+import os
 import re
 # import uuid
 
@@ -259,6 +260,7 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
 
 if __name__ == '__main__':
     import time
+    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
     contract_type = "fangwuzulin"
 
     acknowledgement = BasicUIEAcknowledgement(config_path="DocumentReview/Config/{}.csv".format(contract_type),
