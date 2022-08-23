@@ -6,6 +6,7 @@ import collections
 from LawsuitPrejudgment.common.config_loader import *
 from LawsuitPrejudgment.common import single_case_match, LogicTree, get_next_suqiu_or_factor
 from LawsuitPrejudgment.common.data_util import text_underline
+<<<<<<< Updated upstream
 from LawsuitPrejudgment.lawsuit_prejudgment.constants import FEATURE_TOGGLES_CONFIG_PATH, \
     HTTP_SITUATION_CLASSIFIER_SUPPORT_PROBLEMS_CONFIG_PATH
 from LawsuitPrejudgment.lawsuit_prejudgment.core.actions.civil_report_action import CivilReportAction
@@ -16,6 +17,8 @@ from LawsuitPrejudgment.lawsuit_prejudgment.nlu.situation_classifiers.http_based
 from LawsuitPrejudgment.lawsuit_prejudgment.nlu.situation_classifiers.situation_classifier_message import \
     SituationClassifierMessage
 from Utils.io import read_json_attribute_value
+=======
+>>>>>>> Stashed changes
 from LawsuitPrejudgment.prediction.bert_predict import predict as predict
 
 logging.basicConfig(level=logging.DEBUG)
