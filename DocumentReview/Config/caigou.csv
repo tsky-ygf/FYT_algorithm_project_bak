@@ -1,4 +1,4 @@
-schema,pos rule,pos keywords,A pos legal advice,B pos legal advice,neg rule,neg keywords,neg legal advice,risk level,legal basis,risk statement,jiaoyan error advice
+﻿schema,pos rule,pos keywords,A pos legal advice,B pos legal advice,neg rule,neg keywords,neg legal advice,risk level,legal basis,risk statement,jiaoyan error advice
 标题,识别,,,,未识别,,合同标题缺失，建议写明“采购合同”合同类型字样。合同标题若与合同性质不一致的，合同性质会以合同反映的真实法律关系为准。,低,【《中华人民共和国民法典》第五百九十五条】买卖合同是出卖人转移标的物的所有权于买受人，买受人支付价款的合同。,应在合同标题中准确反映合同性质，便于双方理解条款。,
 签订地,识别,,,,未识别，不作审核,,,低,"【《中华人民共和国民法典》第四百九十二条】承诺生效的地点为合同成立的地点。
 采用数据电文形式订立合同的，收件人的主营业地为合同成立的地点；没有主营业地的，其住所地为合同成立的地点。当事人另有约定的，按照其约定。|【《中华人民共和国民法典》第四百九十三条】当事人采用合同书形式订立合同的，最后签名、盖章或者按指印的地点为合同成立的地点，但是当事人另有约定的除外。",,
