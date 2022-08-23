@@ -43,3 +43,15 @@ def test_get_law_document():
     print(resp_json)
     assert resp_json
     assert resp_json.get("result")
+
+
+def test_get_criminal_law_document():
+    doc_id = "24dbed45-904d-4992-aea7-a82000320181"
+    url = "http://101.69.229.138:8140/get_criminal_law_document"
+    resp_json = requests.get(url, params={"doc_id": doc_id}).json()
+
+    print(resp_json)
+    assert resp_json.get("success")
+    assert resp_json.get("result")
+    assert resp_json["result"]["doc_id"] == doc_id
+    assert resp_json["result"]["doc_title"] == "李某汉、黄某娟走私、贩卖、运输、制造毒品一审刑事判决书"

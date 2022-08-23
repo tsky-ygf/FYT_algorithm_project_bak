@@ -35,3 +35,9 @@ def get_similar_cases():
 def get_law_document():
     doc_id = request.args.get("doc_id")
     return response_successful_result(service.get_law_document(doc_id))
+
+
+@app.route('/get_criminal_law_document', methods=["get"])
+def get_criminal_law_document():
+    doc_id = request.args.get("doc_id")
+    return response_successful_result(service.get_criminal_law_document(doc_id))
