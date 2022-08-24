@@ -21,6 +21,15 @@
                 "尚未生效",
                 "已废止"
             ]
+        },
+        "scope_of_use": {
+            "name": "使用范围",
+            "is_multiple_choice": true,
+            "value": [
+                "全国",
+                "广东省",
+                "浙江省"
+            ]
         }
     }
 }

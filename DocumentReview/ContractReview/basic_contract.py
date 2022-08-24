@@ -101,6 +101,7 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
         # self.review_result = {schema: {} for schema in self.schema}
         self.model_path = model_path
         self.data = ""
+        self.schema = [schema for schema in self.schema if schema!=""]
         if self.device == "cpu":
             args = InferArgs()
             args.model_path_prefix = model_path
@@ -166,7 +167,7 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
                     rule_func.compensation_standard_for_non_compete(row, extraction_con, res_dict)
                 #
                 elif '竞业限制补偿支付时间审核' == row['pos rule']:
-                    rule_func.check_noncompete_compensation_payment_time(row,extraction_con, res_dict)
+                    rule_func.check_noncompete_compensation_payment_time(row, extraction_con, res_dict)
                 #
                 elif '支付周期审核' == row['pos rule']:
                     rule_func.check_housing_lease_payment_cycle(row, extraction_con, res_dict)
@@ -269,9 +270,9 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
 if __name__ == '__main__':
     import time
 
-    contract_type = "baomi"
+    contract_type = "laowu"
 
-    os.environ['CUDA_VISIBLE_DEVICES'] = "0"
+    os.environ['CUDA_VISIBLE_DEVICES'] = "1"
     acknowledgement = BasicUIEAcknowledgement(config_path="DocumentReview/Config/{}.csv".format(contract_type),
                                               log_level="INFO",
                                               model_path="model/uie_model/new/{}/model_best/".format(contract_type),
@@ -281,7 +282,7 @@ if __name__ == '__main__':
     print("## First Time ##")
     localtime = time.time()
 
-    acknowledgement.review_main(content="data/DocData/laowu/laowu-3.docx", mode="docx", usr="Part A")
+    acknowledgement.review_main(content="data/DocData/laowu/laowu-3(1).txt", mode="txt", usr="Part B")
     pprint(acknowledgement.review_result, sort_dicts=False)
     print('use time: {}'.format(time.time() - localtime))
 

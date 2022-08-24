@@ -163,16 +163,17 @@ def reasoning_graph_result():
                                 "law_content": "当事人请求返还按照习俗给付的彩礼的，如果查明属于以下情形，人民法院应当予以支持：（一）双方未办理结婚登记手续的；（二）双方办理结婚登记手续但确未共同生活的；（三）婚前给付并导致给付人生活困难的。适用前款第（二）、（三）项的规定，应当以双方离婚为条件。"
                             }
                         ],
-                        "similar_case": [{
-                            "doc_id": "2b2ed441-4a86-4f7e-a604-0251e597d85e",
-                            "similar_rate": 0.88,
-                            "title": "原告王某某与被告郝某某等三人婚约财产纠纷一等婚约财产纠纷一审民事判决书",
-                            "court": "公主岭市人民法院",
-                            "judge_date": "2016-04-11",
-                            "case_number": "（2016）吉0381民初315号",
-                            "tag": "彩礼 证据 结婚 给付 协议 女方 当事人 登记 离婚",
-                            "win_or_not": True
-                        },
+                        "similar_case": [
+                            {
+                                "doc_id": "2b2ed441-4a86-4f7e-a604-0251e597d85e",
+                                "similar_rate": 0.88,
+                                "title": "原告王某某与被告郝某某等三人婚约财产纠纷一等婚约财产纠纷一审民事判决书",
+                                "court": "公主岭市人民法院",
+                                "judge_date": "2016-04-11",
+                                "case_number": "（2016）吉0381民初315号",
+                                "tag": "彩礼 证据 结婚 给付 协议 女方 当事人 登记 离婚",
+                                "is_guiding_case": True
+                            },
                             {
                                 "doc_id": "ws_c4b1e568-b253-4ac3-afd7-437941f1b17a",
                                 "similar_rate": 0.80,
@@ -181,7 +182,14 @@ def reasoning_graph_result():
                                 "judge_date": "2011-07-12",
                                 "case_number": "（2011）龙民初字第204号",
                                 "tag": "彩礼 酒席 结婚 费用 订婚 电视 女方 买家 猪肉",
-                                "win_or_not": False
+                                "is_guiding_case": False
+                            }
+                        ],
+                        "judging_rule": [
+                            {
+                                "content": "男女双方共同生活时间较短，尚未建立持续稳定夫妻关系的，人民法院可以判决酌情返还彩礼。",
+                                "source": "中国司法案例研究中心",
+                                "source_url": "http://www5.zzu.edu.cn/fxyzx/info/1006/3513.htm"
                             }
                         ]
                     })

@@ -56,7 +56,14 @@ def get_administrative_prejudgment_result(administrative_type, situation):
     law_list = prejudgment_result["legal_basis"]["content"] + prejudgment_result["criminal_risk"]["content"]
     # TODO: 去除可能重复的法条
     prejudgment_result["applicable_law"] = [AdministrativeApplicableLawDictCreator.create(law) for law in law_list]
-
+    # TODO: mock judging rule
+    prejudgment_result["judging_rule"] = [
+                {
+                    "content": "案外人执行异议之诉中，查明涉案款项实体权益属案外人的，应直接判决停止对涉案款项的执行，无须以不当得利另诉。",
+                    "source": "越律网",
+                    "source_url": "https://www.sxls.com/gongbao2018.html"
+                }
+            ]
     return prejudgment_result
 
 
