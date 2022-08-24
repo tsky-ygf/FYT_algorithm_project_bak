@@ -18,14 +18,25 @@ class CriminalPrejudgment:
         res = self.ie(content)
         return res[0]
 
+    def handle_information(self, extract_result):
+        for key, values in extract_result.items():
+            logger.info(key)
+            logger.info(values)
+            for value in values:
+                trigger = value["text"]
+                relations = value["relations"]
+                logger.info(relations)
+                _thing = relations["物品"]
+                _place = relations["地点"]
+                _time = relations["时间"]
+                _figure = relations["人物"]
+                _total = relations["总金额"]
+
     def __call__(self, content=""):
         logger.info("starting")
         res = self.get_base_information(content)
-        logger.debug(pformat(res))
-        for key, value in res.items():
-            logger.info(key)
-            logger.info(value)
-        pass
+        # logger.debug(pformat(res))
+        self.handle_information(extract_result=res)
 
 
 if __name__ == '__main__':
