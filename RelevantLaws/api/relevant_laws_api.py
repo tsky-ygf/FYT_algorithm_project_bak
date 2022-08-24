@@ -45,7 +45,7 @@ def _get_search_result(query, filter_conditions):
 @app.route('/search_laws', methods=["post"])
 def search_laws():
     query = request.json.get("query")
-    filter_conditions = request.json.get("filter_conditions")
+    filter_conditions = request.json.get("filter_conditions", dict())
     return response_successful_result(_get_search_result(query, filter_conditions))
 
 
