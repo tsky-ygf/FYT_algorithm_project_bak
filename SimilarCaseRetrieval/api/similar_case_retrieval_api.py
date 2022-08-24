@@ -104,7 +104,9 @@ def _get_search_result(query, filter_conditions):
 def search_cases():
     query = request.json.get("query")
     filter_conditions = request.json.get("filter_conditions")
-    return response_successful_result(_get_search_result(query, filter_conditions))
+    result = _get_search_result(query, filter_conditions)
+    # TODO: 实现用于分页的total_amount
+    return response_successful_result(result, {"total_amount": len(result)})
 
 
 @app.route('/get_law_document', methods=["get"])
