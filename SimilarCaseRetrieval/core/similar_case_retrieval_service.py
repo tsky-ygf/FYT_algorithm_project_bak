@@ -5,6 +5,7 @@
 @Time    : 2022/8/10 14:46 
 @Desc    : None
 """
+from SimilarCaseRetrieval.repository import similar_case_retrieval_repository as repository
 
 
 def get_similar_cases(problem, claim_list, fact):
@@ -57,3 +58,15 @@ def get_law_document(doc_id):
                          "审判长杨君审判员王锐人民陪审员孙国印", "二〇一六年四月十一日", "书记员高荣莉"]
     }
     return law_document
+
+
+def get_criminal_law_document(doc_id):
+    law_documents = repository.get_criminal_law_documents_by_id_list([doc_id])
+    return law_documents[0] if law_documents else None
+
+
+def get_criminal_law_document_list(doc_id_list):
+    if not doc_id_list:
+        return []
+    return repository.get_criminal_law_documents_by_id_list(doc_id_list)
+

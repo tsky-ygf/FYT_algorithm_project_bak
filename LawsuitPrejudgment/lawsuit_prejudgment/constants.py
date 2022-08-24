@@ -15,3 +15,5 @@ SUPPORTED_ADMINISTRATIVE_TYPES_CONFIG_PATH = "LawsuitPrejudgment/Administrative/
 KNOWLEDGE_FILE_PATH = "LawsuitPrejudgment/config/"
 # 模型路径
 MODEL_FILE_PATH = "LawsuitPrejudgment/model/"
+# 刑事相似案例服务的URL
+CRIMINAL_SIMILIARITY_URL = "http://172.19.82.198:5061/criminal_similiarity"

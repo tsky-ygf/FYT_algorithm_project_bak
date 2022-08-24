@@ -36,6 +36,63 @@ def test_get_similar_cases_without_problem_and_claim():
     assert resp_json.get("result")
 
 
+def test_get_filter_conditions():
+    url = "http://101.69.229.138:8140/get_filter_conditions_of_case"
+    resp_json = requests.get(url).json()
+
+    print(resp_json)
+    assert resp_json
+    assert resp_json.get("success")
+    assert resp_json.get("result")
+    assert resp_json["result"].get("type_of_case")
+    assert resp_json["result"].get("court_level")
+    assert resp_json["result"].get("type_of_document")
+    assert resp_json["result"].get("region")
+    pass
+
+
+def test_search_cases():
+    url = "http://101.69.229.138:8140/search_cases"
+    body = {
+        "query": "离婚",
+        "filter_conditions": {
+            "type_of_case": [
+                "合同纠纷",
+                "婚姻家庭",
+                "刑事案件"
+            ],
+            "court_level": [
+                "最高",
+                "高级",
+                "中级",
+                "基层"
+            ],
+            "type_of_document": [
+                "判决",
+                "裁定",
+                "调解"
+            ],
+            "region": [
+                "江苏",
+                "浙江",
+                "福建",
+                "山东"
+            ]
+        },
+        "page_number": 1,
+        "page_size": 10
+    }
+
+    resp_json = requests.post(url, json=body).json()
+    print(resp_json)
+
+    assert resp_json
+    assert resp_json.get("success")
+    assert resp_json.get("result")
+    assert resp_json.get("total_amount")
+    assert "doc_id" in resp_json["result"][0]
+
+
 def test_get_law_document():
     doc_id = "2b2ed441-4a86-4f7e-a604-0251e597d85e"
     resp_json = requests.get(SIMILAR_CASE_RETRIEVAL_URL + "/get_law_document", data={"doc_id": doc_id}).json()
@@ -43,3 +100,15 @@ def test_get_law_document():
     print(resp_json)
     assert resp_json
     assert resp_json.get("result")
+
+
+def test_get_criminal_law_document():
+    doc_id = "24dbed45-904d-4992-aea7-a82000320181"
+    url = "http://101.69.229.138:8140/get_law_document"
+    resp_json = requests.get(url, params={"doc_id": doc_id}).json()
+
+    print(resp_json)
+    assert resp_json.get("success")
+    assert resp_json.get("result")
+    assert resp_json["result"]["doc_id"] == doc_id
+    assert resp_json["result"]["doc_title"] == "李某汉、黄某娟走私、贩卖、运输、制造毒品一审刑事判决书"
