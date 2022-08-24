@@ -1,4 +1,4 @@
-schema,pos rule,pos keywords,A pos legal advice,B pos legal advice,neg rule,neg keywords,neg legal advice,risk level,legal basis,risk statement,jiaoyan error advice,user show name,classify,
+﻿schema,pos rule,pos keywords,A pos legal advice,B pos legal advice,neg rule,neg keywords,neg legal advice,risk level,legal basis,risk statement,jiaoyan error advice,user show name,classify,
 标题,识别,劳动合同,,,识别,劳务合同|劳务协议,建议双方将合同标题由劳务合同改为劳动合同。,中,【《中华人民共和国劳动合同法》第十条】建立劳动关系，应当订立书面劳动合同。已建立劳动关系，未同时订立书面劳动合同的，应当自用工之日起一个月内订立书面劳动合同。用人单位与劳动者在用工前订立劳动合同的，劳动关系自用工之日起建立。,,,合同标题条款审核,合同标题审核,
 甲方,公司名称校验,,,,未识别,,"合同主体缺失，建议补充完整。
 ",中,,甲方姓名或名称应当准确无误，同时要确保与签章内容相一致。,甲方名称校验错误，建议核实。,合同主体名称审核,合同主体审核,

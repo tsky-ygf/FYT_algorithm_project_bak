@@ -5,6 +5,7 @@
 # @Site    :
 # @File    : basic_contract.py
 # @Software: PyCharm
+import os
 import re
 # import uuid
 
@@ -105,6 +106,7 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
             args.model_path_prefix = model_path
             args.schema = self.schema
             self.predictor = UIEPredictor(args)
+            # self.ie = Taskflow('information_extraction', schema=self.schema, device_id=-1, task_path=model_path)
         else:
             if model_path == '':
                 self.ie = Taskflow('information_extraction', schema=self.schema, device_id=int(device))
@@ -122,6 +124,7 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
             self.logger.debug(self.data)
             # exit()
             res = self.predictor.predict([self.data])
+            # res = self.ie(self.data)
         else:
             res = self.ie(self.data)
         self.logger.debug(pformat(res))
@@ -142,8 +145,30 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
 
                 if "身份证校验" == row["pos rule"]:
                     rule_func.check_id_card(row, extraction_con, res_dict)
+
+                # TODO： 模型未识别出
+                elif "预付款审核" == row['pos rule']:
+                    rule_func.check_prepayments(row, extraction_con, res_dict)
+                elif '产品名称审核' == row['pos rule']:
+                    rule_func.check_product_name(row, extraction_con, res_dict)
+                elif '试用期期限审核' == row['pos rule']:
+                    rule_func.check_trial_period(row, extraction_con, res_dict)
+                elif '劳务合同争议解决方式审核' == row['pos rule']:
+                    rule_func.labor_contract_dispute_resolution(row, extraction_con, res_dict)
+                elif '竞业限制补偿标准审核' == row['pos rule']:
+                    rule_func.compensation_standard_for_non_compete(row, extraction_con, res_dict)
+                # TODO 测试集中未找到
+                elif '竞业限制补偿支付时间审核' == row['pos rule']:
+                    rule_func.check_noncompete_compensation_payment_time(row,extraction_con, res_dict)
+                # TODO
+                elif '支付周期审核' == row['pos rule']:
+                    rule_func.check_housing_lease_payment_cycle(row, extraction_con, res_dict)
+                # TODO 模型未识别
+                elif '房屋租赁合同管辖法院审核' == row['pos rule']:
+                    rule_func.check_housing_tenancy_court(row, extraction_con, res_dict)
+
                 elif "房屋租赁期限审核" == row["pos rule"]:
-                    rule_func.check_house_application(row, extraction_con, res_dict)
+                    rule_func.check_house_lease_term(row, extraction_con, res_dict)
                 elif "借款用途审核" == row["pos rule"]:
                     rule_func.check_loan_application(row, extraction_con, res_dict)
                 elif "日期内部关联" == row["pos rule"]:
@@ -174,6 +199,7 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
                                                        self.review_result['工资']["内容"])
                     else:
                         pass
+                # TODO
                 elif "违约金审核" == row["pos rule"]:
                     rule_func.check_penalty(row, extraction_con, res_dict)
                 elif "民间借贷利率审核" == row["pos rule"] or "逾期利率审核" == row["pos rule"]:
@@ -235,7 +261,11 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
 if __name__ == '__main__':
     import time
 
-    contract_type = "laowu"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+
+    contract_type = "fangwuzulin"
+
+    os.environ['CUDA_VISIBLE_DEVICES'] = "0"
     acknowledgement = BasicUIEAcknowledgement(config_path="DocumentReview/Config/{}.csv".format(contract_type),
                                               log_level="INFO",
                                               # model_path="model/uie_model/new/{}/model_best/".format(contract_type),
@@ -244,7 +274,8 @@ if __name__ == '__main__':
                                               device="cpu")
     print("## First Time ##")
     localtime = time.time()
-    acknowledgement.review_main(content="data/DocData/Sample/sample.docx", mode="docx", usr="Part A")
+
+    acknowledgement.review_main(content="data/DocData/fangwuzulin/fw-27.docx", mode="docx", usr="Part A")
     pprint(acknowledgement.review_result, sort_dicts=False)
     print('use time: {}'.format(time.time() - localtime))
 

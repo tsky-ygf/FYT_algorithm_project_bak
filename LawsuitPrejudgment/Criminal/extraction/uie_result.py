@@ -7,8 +7,8 @@
 # @Software: PyCharm
 import pandas as pd
 import streamlit as st
-from LawsuitPrejudgment.Criminal.feature_extraction import get_xing7_result
-from LawsuitPrejudgment.Criminal.drug_extraction import get_drug_result
+from LawsuitPrejudgment.Criminal.extraction.feature_extraction import get_xing7_result
+from LawsuitPrejudgment.Criminal.extraction.drug_extraction import get_drug_result
 
 
 class MultiApp:
