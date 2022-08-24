@@ -89,6 +89,7 @@ def get_contract_review_result():
             for review_point, review_result in res.items():
                 result.append({
                     "review_point": review_point,
+                    "show_name": review_result.get("show name") if review_result.get("show name") else review_point,
                     "review_result": review_result.get("审核结果", ""),
                     "review_content": review_result.get("内容", ""),
                     "review_content_start": review_result.get("start", -1),
