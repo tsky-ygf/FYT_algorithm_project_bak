@@ -9,7 +9,7 @@ from loguru import logger
 
 
 class CriminalPrejudgment:
-    def __init__(self):
+    def __init__(self, criminal_type=""):
         pass
 
     def __call__(self, *args, **kwargs):
