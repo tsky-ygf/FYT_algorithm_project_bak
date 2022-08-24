@@ -309,19 +309,26 @@ def check_amount_equal(row, extraction_con, res_dict):
 
 # 竞业资格审核
 def check_competition_limit(row, extraction_con, res_dict):
-    # print(extraction_con)
+    # '自本协议签订之日起；终止时间：甲乙双方劳动合同解除之日起两年届满时'
     length = extraction_con[0]['text']
-    # print(wage)
-    tmp = re.findall(r'\d+', length)[0]
-    tmp = int(tmp)
+    tmp = re.findall(r'\d+', length)
     res_dict["内容"] = extraction_con[0]["text"]
     res_dict["start"] = extraction_con[0]["start"]
     res_dict["end"] = extraction_con[0]["end"]
-    if tmp <= 2:
-        res_dict["审核结果"] = "通过"
+    if len(tmp)>0:
+        tmp = int(tmp[0])
+
+        if tmp <= 2:
+            res_dict["审核结果"] = "通过"
+        else:
+            res_dict["审核结果"] = "不通过"
+            res_dict["法律建议"] = row["jiaoyan error advice"]
     else:
-        res_dict["审核结果"] = "不通过"
-        res_dict["法律建议"] = row["jiaoyan error advice"]
+        if '两年' in length or '一年' in length:
+            res_dict["审核结果"] = "通过"
+        else:
+            res_dict["审核结果"] = "不通过"
+            res_dict["法律建议"] = row["jiaoyan error advice"]
 
 
 # 房屋租赁期限审核
@@ -431,26 +438,37 @@ def compensation_standard_for_non_compete(row, extraction_con, res_dict):
     tmp = re.findall(r'\d+', wage)[0]
     if int(tmp) > 2000:
         res_dict["审核结果"] = "通过"
-        res_dict["内容"] = tmp
+        res_dict["内容"] = wage
         res_dict["start"] = extraction_con[0]["start"]
         res_dict["end"] = extraction_con[0]["end"]
     else:
         res_dict["审核结果"] = "不通过"
-        res_dict["内容"] = tmp
+        res_dict["内容"] = wage
         res_dict["start"] = extraction_con[0]["start"]
         res_dict["end"] = extraction_con[0]["end"]
         res_dict["法律建议"] = row["jiaoyan error advice"]
 
 
 # 竞业限制补偿支付时间审核
+# {'text': '甲方在乙方的劳动合同解除或终止后，连续三个月拒绝支付乙方竞业限制补偿金的，乙方有权解除本协议；如解除本协议前乙方已履行竞业限制义务的，乙方有权追索该期间的补偿金。', 'start': 871, 'end': 952, 'probability': 0.7298679708655875}
 def check_noncompete_compensation_payment_time(row, extraction_con, res_dict):
-    return None
+    if '乙方的劳动合同解除或终止后' in extraction_con[0]['text'] or '合同解除之日起' in extraction_con[0]['text']:
+        res_dict["审核结果"] = "通过"
+        res_dict["内容"] = extraction_con[0]['text']
+        res_dict["start"] = extraction_con[0]["start"]
+        res_dict["end"] = extraction_con[0]["end"]
+    else:
+        res_dict["审核结果"] = "不通过"
+        res_dict["内容"] = extraction_con[0]['text']
+        res_dict["start"] = extraction_con[0]["start"]
+        res_dict["end"] = extraction_con[0]["end"]
+        res_dict["法律建议"] = row["jiaoyan error advice"]
 
 
 # 房屋租赁支付周期审核
 def check_housing_lease_payment_cycle(row, extraction_con, res_dict):
-    # '每年一次性支付完毕当年租金'
-    # {'text': '【季】', 'start': 1865, 'end': 1868, 'probability': 0.7621741695396622}
+    # 'text': '每年一次性支付完毕当年租金'
+    # 'text': '【季】'
     text = extraction_con[0]['text']
 
     if '一次性支付' in text or '一次性付清' in text or '一年一付' in text:
@@ -463,6 +481,7 @@ def check_housing_lease_payment_cycle(row, extraction_con, res_dict):
 
 # 房屋租赁管辖法院审核
 def check_housing_tenancy_court(row, extraction_con, res_dict):
+
     return None
 
 
