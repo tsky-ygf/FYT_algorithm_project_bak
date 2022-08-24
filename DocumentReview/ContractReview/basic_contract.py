@@ -163,7 +163,7 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
                 # TODO
                 elif '支付周期审核' == row['pos rule']:
                     rule_func.check_housing_lease_payment_cycle(row, extraction_con, res_dict)
-                # TODO
+                # TODO 模型未识别
                 elif '房屋租赁合同管辖法院审核' == row['pos rule']:
                     rule_func.check_housing_tenancy_court(row, extraction_con, res_dict)
 
@@ -260,15 +260,18 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
 
 if __name__ == '__main__':
     import time
-    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+
     contract_type = "fangwuzulin"
 
+    os.environ['CUDA_VISIBLE_DEVICES'] = "0"
     acknowledgement = BasicUIEAcknowledgement(config_path="DocumentReview/Config/{}.csv".format(contract_type),
                                               log_level="INFO",
-                                              model_path="model/uie_model/new/{}/model_best/".format(contract_type),
-                                              # model_path="model/uie_model/export_cpu/{}/inference".format(
-                                              #     contract_type),
-                                              device="0")
+                                              # model_path="model/uie_model/new/{}/model_best/".format(contract_type),
+                                              model_path="model/uie_model/export_cpu/{}/inference".format(
+                                                  contract_type),
+                                              device="cpu")
     print("## First Time ##")
     localtime = time.time()
 
