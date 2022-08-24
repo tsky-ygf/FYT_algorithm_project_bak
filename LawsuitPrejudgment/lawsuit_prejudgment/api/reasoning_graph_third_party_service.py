@@ -9,6 +9,8 @@ from flask import request
 
 from LawsuitPrejudgment.lawsuit_prejudgment.api.data_transfer_object.applicable_law_dto import \
     CriminalApplicableLawDictCreator
+from LawsuitPrejudgment.lawsuit_prejudgment.api.data_transfer_object.similar_case_dto import \
+    CriminalSimilarCaseListCreator
 from LawsuitPrejudgment.lawsuit_prejudgment.constants import SUPPORTED_ADMINISTRATIVE_TYPES_CONFIG_PATH
 from Utils.io import read_json_attribute_value
 from LawsuitPrejudgment.main.reasoning_graph_predict import predict_fn
@@ -292,7 +294,7 @@ def _construct_response_format(question, resp_json):
         "accusation": accusation,
         "articles": articles,
         "imprisonment": int(resp_json.get("imprisonment")),
-        "similar_case": None,
+        "similar_case": CriminalSimilarCaseListCreator.create(question),
         "applicable_law": [CriminalApplicableLawDictCreator.create(law) for law in articles]
     }
     return result
@@ -305,7 +307,7 @@ def _get_criminal_report(fact):
         "question": fact
     }
     resp_json = requests.post(url, json=data).json()
-    return _construct_response_format(question, resp_json)
+    return _construct_response_format(fact, resp_json)
 
 
 class CriminalDemo:
@@ -367,4 +369,4 @@ def get_criminal_result():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5090, debug=True)  # , use_reloader=False)
+    app.run(host="0.0.0.0", port=8100, debug=True)  # , use_reloader=False)
