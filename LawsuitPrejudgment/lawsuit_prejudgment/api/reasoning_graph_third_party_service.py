@@ -295,7 +295,14 @@ def _construct_response_format(question, resp_json):
         "articles": articles,
         "imprisonment": int(resp_json.get("imprisonment")),
         "similar_case": CriminalSimilarCaseListCreator.create(question),
-        "applicable_law": [CriminalApplicableLawDictCreator.create(law) for law in articles]
+        "applicable_law": [CriminalApplicableLawDictCreator.create(law) for law in articles],
+        "judging_rule": [
+            {
+                "content": "“非法买卖”毒害性物质，是指违反法律和国家主管部门规定，未经有关主管部门批准许可，擅自购买或者出售毒害性物质的行为，并不需要兼有买进和卖出的行为。",
+                "source": "中国司法案例研究中心",
+                "source_url": "http://www5.zzu.edu.cn/fxyzx/info/1006/2608.htm"
+            }
+        ]
     }
     return result
 

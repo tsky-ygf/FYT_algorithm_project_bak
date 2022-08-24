@@ -65,7 +65,7 @@ class CriminalSimilarCaseListCreator:
                 "similar_rate": resp_json["sim_list"][idx],
                 "title": document["doc_title"],
                 "court": document["court"],
-                "judge_date": document["judge_date"],
+                "judge_date": str(document["judge_date"]).replace("发布日期：", ""),
                 "case_number": document["case_number"],
                 "tag": " ".join(resp_json["tag_list"][idx]),
                 "is_guiding_case": True
