@@ -270,7 +270,7 @@ def get_administrative_result():
         return response_failed_result("unknown error:" + repr(e))
 
 
-def _construct_response_format(resp_json):
+def _construct_response_format(question, resp_json):
     # 编排接口返回内容的格式
     accusation = []
     for item in eval(resp_json.get("accusation")):
@@ -305,7 +305,7 @@ def _get_criminal_report(fact):
         "question": fact
     }
     resp_json = requests.post(url, json=data).json()
-    return _construct_response_format(resp_json)
+    return _construct_response_format(question, resp_json)
 
 
 class CriminalDemo:

@@ -45,3 +45,19 @@ class AdministrativeSimilarCaseDictCreator:
             "is_guiding_case": data.get("is_guiding_case", True)
         }
         return SimilarCaseDTO(similar_case).to_dict()
+
+
+class CriminalSimilarCaseDictCreator:
+    @staticmethod
+    def create(data):
+        similar_case = {
+            "doc_id": None,
+            "similar_rate": 1,
+            "title": data.get("content"),
+            "court": None,
+            "judge_date": None,
+            "case_number": None,
+            "tag": None,
+            "is_guiding_case": data.get("is_guiding_case", True)
+        }
+        return SimilarCaseDTO(similar_case).to_dict()

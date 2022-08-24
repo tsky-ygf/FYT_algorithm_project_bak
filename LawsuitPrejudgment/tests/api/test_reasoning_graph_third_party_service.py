@@ -7,6 +7,7 @@ import requests
 
 attributes_in_similar_case = {"doc_id", "similar_rate", "title", "court", "judge_date", "case_number", "tag", "is_guiding_case"}
 attributes_in_applicable_law = {"law_name", "law_item", "law_content"}
+attributes_in_judging_rule = {"content", "source", "source_url"}
 
 
 def test_get_civil_problem_summary():
@@ -96,6 +97,7 @@ def test_get_administrative_result():
     assert len(resp_json.get("result")) > 0
     assert set(resp_json["result"]["similar_case"][0].keys()) == attributes_in_similar_case
     assert set(resp_json["result"]["applicable_law"][0].keys()) == attributes_in_applicable_law
+    assert set(resp_json["result"]["judging_rule"][0].keys()) == attributes_in_judging_rule
     pass
 
 
@@ -116,6 +118,7 @@ def test_get_criminal_result():
     assert len(resp_json.get("result")) > 0
     assert set(resp_json["result"]["applicable_law"][0].keys()) == attributes_in_applicable_law
     assert set(resp_json["result"]["similar_case"][0].keys()) == attributes_in_similar_case
+    assert set(resp_json["result"]["judging_rule"][0].keys()) == attributes_in_judging_rule
     pass
 
 
