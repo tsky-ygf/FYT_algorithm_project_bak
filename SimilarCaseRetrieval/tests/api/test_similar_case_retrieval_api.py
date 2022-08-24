@@ -47,7 +47,7 @@ def test_get_law_document():
 
 def test_get_criminal_law_document():
     doc_id = "24dbed45-904d-4992-aea7-a82000320181"
-    url = "http://101.69.229.138:8140/get_criminal_law_document"
+    url = "http://101.69.229.138:8140/get_law_document"
     resp_json = requests.get(url, params={"doc_id": doc_id}).json()
 
     print(resp_json)

@@ -17,7 +17,7 @@ from Utils.http_response import response_successful_result
 app = Flask(__name__)
 
 
-@app.route('/get_filter_conditions', methods=["get"])
+@app.route('/get_filter_conditions_of_law', methods=["get"])
 def get_filter_conditions():
     filer_conditions = read_json_attribute_value("RelevantLaws/api/filter_conditions.json", "filter_conditions")
     return response_successful_result(filer_conditions)
