@@ -172,8 +172,8 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
                 elif '支付周期审核' == row['pos rule']:
                     rule_func.check_housing_lease_payment_cycle(row, extraction_con, res_dict)
                 # model cannot recognize but implemented in pos keywords
-                elif '房屋租赁合同管辖法院审核' == row['pos rule']:
-                    rule_func.check_housing_tenancy_court(row, extraction_con, res_dict)
+                # elif '房屋租赁合同管辖法院审核' == row['pos rule']:
+                #     rule_func.check_housing_tenancy_court(row, extraction_con, res_dict)
                 # TODO
                 elif "违约金审核" == row["pos rule"]:
                     rule_func.check_penalty(row, extraction_con, res_dict)
@@ -282,7 +282,6 @@ if __name__ == '__main__':
     print("## First Time ##")
     localtime = time.time()
 
-    # acknowledgement.review_main(content="data/DocData/laowu/laowu-11.docx", mode="docx", usr="Part A")
     acknowledgement.review_main(content="data/DocData/laowu/laowu-3(1).txt", mode="txt", usr="Part B")
     pprint(acknowledgement.review_result, sort_dicts=False)
     print('use time: {}'.format(time.time() - localtime))
