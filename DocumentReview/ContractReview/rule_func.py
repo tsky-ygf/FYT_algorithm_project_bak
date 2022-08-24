@@ -204,7 +204,7 @@ def check_probation_wage(row, extraction_con, res_dict, wage):
     probation_wage = extraction_con[0]['text']
     tmp = re.findall(r'\d+', probation_wage)[0]
     # print(wage)
-    res_dict["内容"] = tmp
+    res_dict["内容"] = extraction_con[0]['text']
     res_dict["start"] = extraction_con[0]["start"]
     res_dict["end"] = extraction_con[0]["end"]
     if float(tmp) >= 0.8 * float(wage):
@@ -307,29 +307,48 @@ def check_amount_equal(row, extraction_con, res_dict):
         res_dict["法律建议"] = row['jiaoyan error advice']
 
 
-# 竞业资格审核
+# 竞业资格审核 不得超过两年
 def check_competition_limit(row, extraction_con, res_dict):
     # '自本协议签订之日起；终止时间：甲乙双方劳动合同解除之日起两年届满时'
+    # '2022年4⽉8⽇⾄2024年4⽉7⽇'
     length = extraction_con[0]['text']
     tmp = re.findall(r'\d+', length)
     res_dict["内容"] = extraction_con[0]["text"]
     res_dict["start"] = extraction_con[0]["start"]
     res_dict["end"] = extraction_con[0]["end"]
+    # ⾄  至 are different
+    length = length.replace('⾄', '至')
     if len(tmp)>0:
         tmp = int(tmp[0])
-
         if tmp <= 2:
             res_dict["审核结果"] = "通过"
         else:
             res_dict["审核结果"] = "不通过"
             res_dict["法律建议"] = row["jiaoyan error advice"]
+
+    elif '至' in length:
+        data_str = length.split('至')
+        if len(data_str)>=2:
+            start_str, end_str = data_str[0], data_str[1]
+            start_date_list = re.findall(r'\d+', start_str)
+            start_date_list = list(map(lambda x: int(x), start_date_list))
+            end_date_list = re.findall(r'\d+', end_str)
+            end_date_list = list(map(lambda x: int(x), end_date_list))
+
+            start_date = datetime.datetime(start_date_list[0], start_date_list[1], start_date_list[2])
+            end_date = datetime.datetime(end_date_list[0], end_date_list[1], end_date_list[2])
+            diff = end_date - start_date
+            if diff.days/365<=2:
+                res_dict["审核结果"] = "通过"
+            else:
+                res_dict["审核结果"] = "不通过"
+                res_dict["法律建议"] = row["jiaoyan error advice"]
     else:
         if '两年' in length or '一年' in length:
             res_dict["审核结果"] = "通过"
         else:
             res_dict["审核结果"] = "不通过"
             res_dict["法律建议"] = row["jiaoyan error advice"]
-
 
 # 房屋租赁期限审核
 def check_house_lease_term(row, extraction_con, res_dict):
@@ -403,16 +422,15 @@ def check_trial_period(row, extraction_con, res_dict):
             end_date = datetime.datetime(end_date_list[0], end_date_list[1], end_date_list[2])
 
             diff = end_date - start_date
-            print(diff)
             if '月' in extraction_con[0]['text']:
                 res_dict["内容"] = extraction_con[0]['text'] + '\n' + extraction_con[1]['text']
                 res_dict["start"] = extraction_con[0]["start"]
                 res_dict["end"] = extraction_con[0]["end"]
-                if 3<= diff//30 < 12 and num_month<=1:
+                if 3<= diff.days/30 < 12 and num_month<=1:
                     res_dict["审核结果"] = "通过"
-                elif 12<=diff//30 < 36 and num_month<=2:
+                elif 12<=diff.days/30 < 36 and num_month<=2:
                     res_dict["审核结果"] = "通过"
-                elif 36<=diff//30 and num_month <= 3:
+                elif 36<=diff.days/30 and num_month <= 3:
                     res_dict["审核结果"] = "通过"
                 else:
                     res_dict["审核结果"] = "不通过"
@@ -425,7 +443,7 @@ def labor_contract_dispute_resolution(row, extraction_con, res_dict):
     res_dict["内容"] = extraction_con[0]["text"]
     res_dict["start"] = extraction_con[0]["start"]
     res_dict["end"] = extraction_con[0]["end"]
-    if '劳动仲裁委员会' not in text and '劳动仲裁委员会' not in text:
+    if '劳动仲裁委员会' not in text and '劳动争议仲裁委员会' not in text:
         res_dict["审核结果"] = "通过"
     else:
         res_dict["审核结果"] = "不通过"
@@ -435,18 +453,19 @@ def labor_contract_dispute_resolution(row, extraction_con, res_dict):
 # 竞业限制补偿标准审核
 def compensation_standard_for_non_compete(row, extraction_con, res_dict):
     wage = extraction_con[0]['text']
-    tmp = re.findall(r'\d+', wage)[0]
-    if int(tmp) > 2000:
-        res_dict["审核结果"] = "通过"
-        res_dict["内容"] = wage
-        res_dict["start"] = extraction_con[0]["start"]
-        res_dict["end"] = extraction_con[0]["end"]
-    else:
-        res_dict["审核结果"] = "不通过"
-        res_dict["内容"] = wage
-        res_dict["start"] = extraction_con[0]["start"]
-        res_dict["end"] = extraction_con[0]["end"]
-        res_dict["法律建议"] = row["jiaoyan error advice"]
+    tmp = re.findall(r'\d+', wage)
+    if len(tmp)>0:
+        if int(tmp[0]) > 2000:
+            res_dict["审核结果"] = "通过"
+            res_dict["内容"] = wage
+            res_dict["start"] = extraction_con[0]["start"]
+            res_dict["end"] = extraction_con[0]["end"]
+        else:
+            res_dict["审核结果"] = "不通过"
+            res_dict["内容"] = wage
+            res_dict["start"] = extraction_con[0]["start"]
+            res_dict["end"] = extraction_con[0]["end"]
+            res_dict["法律建议"] = row["jiaoyan error advice"]
 
 
 # 竞业限制补偿支付时间审核

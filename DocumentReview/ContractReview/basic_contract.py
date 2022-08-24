@@ -171,8 +171,8 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
                 elif '支付周期审核' == row['pos rule']:
                     rule_func.check_housing_lease_payment_cycle(row, extraction_con, res_dict)
                 # model cannot recognize but implemented in pos keywords
-                elif '房屋租赁合同管辖法院审核' == row['pos rule']:
-                    rule_func.check_housing_tenancy_court(row, extraction_con, res_dict)
+                # elif '房屋租赁合同管辖法院审核' == row['pos rule']:
+                #     rule_func.check_housing_tenancy_court(row, extraction_con, res_dict)
                 # TODO
                 elif "违约金审核" == row["pos rule"]:
                     rule_func.check_penalty(row, extraction_con, res_dict)
@@ -269,19 +269,19 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
 if __name__ == '__main__':
     import time
 
-    contract_type = "maimai"
+    contract_type = "baomi"
 
     os.environ['CUDA_VISIBLE_DEVICES'] = "0"
     acknowledgement = BasicUIEAcknowledgement(config_path="DocumentReview/Config/{}.csv".format(contract_type),
                                               log_level="INFO",
-                                              # model_path="model/uie_model/new/{}/model_best/".format(contract_type),
-                                              model_path="model/uie_model/export_cpu/{}/inference".format(
-                                                  contract_type),
-                                              device="cpu")
+                                              model_path="model/uie_model/new/{}/model_best/".format(contract_type),
+                                              # model_path="model/uie_model/export_cpu/{}/inference".format(
+                                              #     contract_type),
+                                              device="0")
     print("## First Time ##")
     localtime = time.time()
 
-    acknowledgement.review_main(content="data/DocData/maimai/test.docx", mode="docx", usr="Part A")
+    acknowledgement.review_main(content="data/DocData/laowu/laowu-3.docx", mode="docx", usr="Part A")
     pprint(acknowledgement.review_result, sort_dicts=False)
     print('use time: {}'.format(time.time() - localtime))
 
