@@ -99,7 +99,7 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
         self.device = device
         self.schema = self.config['schema'].tolist()
         # self.review_result = {schema: {} for schema in self.schema}
-
+        self.model_path = model_path
         self.data = ""
         if self.device == "cpu":
             args = InferArgs()
@@ -125,8 +125,15 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
             # exit()
             res = self.predictor.predict([self.data])
             # res = self.ie(self.data)
+
         else:
             res = self.ie(self.data)
+        # 规则抽取
+        # if 'baomi' in self.model_path:
+        #     if '劳动者竞业限制补偿标准' not in res[0]:
+        #         find_str = re.findall('补偿金', self.data)
+        #         if len(find_str):
+
         self.logger.debug(pformat(res))
         return res
 
@@ -146,7 +153,7 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
                 if "身份证校验" == row["pos rule"]:
                     rule_func.check_id_card(row, extraction_con, res_dict)
 
-                # TODO： 模型未识别出
+                # TODO
                 elif "预付款审核" == row['pos rule']:
                     rule_func.check_prepayments(row, extraction_con, res_dict)
                 elif '产品名称审核' == row['pos rule']:
@@ -157,15 +164,18 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
                     rule_func.labor_contract_dispute_resolution(row, extraction_con, res_dict)
                 elif '竞业限制补偿标准审核' == row['pos rule']:
                     rule_func.compensation_standard_for_non_compete(row, extraction_con, res_dict)
-                # TODO 测试集中未找到
+                #
                 elif '竞业限制补偿支付时间审核' == row['pos rule']:
                     rule_func.check_noncompete_compensation_payment_time(row,extraction_con, res_dict)
-                # TODO
+                #
                 elif '支付周期审核' == row['pos rule']:
                     rule_func.check_housing_lease_payment_cycle(row, extraction_con, res_dict)
-                # TODO 模型未识别
+                # model cannot recognize but implemented in pos keywords
                 elif '房屋租赁合同管辖法院审核' == row['pos rule']:
                     rule_func.check_housing_tenancy_court(row, extraction_con, res_dict)
+                # TODO
+                elif "违约金审核" == row["pos rule"]:
+                    rule_func.check_penalty(row, extraction_con, res_dict)
 
                 elif "房屋租赁期限审核" == row["pos rule"]:
                     rule_func.check_house_lease_term(row, extraction_con, res_dict)
@@ -199,9 +209,7 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
                                                        self.review_result['工资']["内容"])
                     else:
                         pass
-                # TODO
-                elif "违约金审核" == row["pos rule"]:
-                    rule_func.check_penalty(row, extraction_con, res_dict)
+
                 elif "民间借贷利率审核" == row["pos rule"] or "逾期利率审核" == row["pos rule"]:
                     rule_func.check_rate(row, extraction_con, res_dict)
                 elif "金额相等" == row["pos rule"]:
@@ -261,9 +269,7 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
 if __name__ == '__main__':
     import time
 
-    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-
-    contract_type = "fangwuzulin"
+    contract_type = "maimai"
 
     os.environ['CUDA_VISIBLE_DEVICES'] = "0"
     acknowledgement = BasicUIEAcknowledgement(config_path="DocumentReview/Config/{}.csv".format(contract_type),
@@ -275,7 +281,7 @@ if __name__ == '__main__':
     print("## First Time ##")
     localtime = time.time()
 
-    acknowledgement.review_main(content="data/DocData/fangwuzulin/fw-27.docx", mode="docx", usr="Part A")
+    acknowledgement.review_main(content="data/DocData/maimai/test.docx", mode="docx", usr="Part A")
     pprint(acknowledgement.review_result, sort_dicts=False)
     print('use time: {}'.format(time.time() - localtime))
 
