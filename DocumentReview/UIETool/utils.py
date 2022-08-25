@@ -181,7 +181,7 @@ def reader(data_path, max_seq_len=512):
     with open(data_path, 'r', encoding='utf-8') as f:
         for index, line in enumerate(f):
             # logger.debug(content)
-            # if index == 778:
+            # if index == 710:
             #     continue
             json_line = json.loads(line)
             content = json_line['content'].strip()

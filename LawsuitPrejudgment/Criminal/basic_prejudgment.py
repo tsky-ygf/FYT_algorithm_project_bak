@@ -5,39 +5,53 @@
 # @Site    : 
 # @File    : basic_prejudgment.py
 # @Software: PyCharm
+import sys
+from loguru import logger
 from dataclasses import dataclass
 
 
 @dataclass
 class PrejudgmentConfig:
-    prejudgment_type = ""
-    xmind_path = ""
+    log_level: str = "INFO"
+    prejudgment_type: str = ""
+    xmind_path: str = ""
+    anyou_identify_model_path: str = ""
 
 
 class PrejudgmentPipeline:
-    def __init__(self):
+    def __init__(self, *args, **kwargs) -> None:
         self.content = dict()
+        self.config = PrejudgmentConfig(*args, **kwargs)
 
-    def anyou_identify(self, content):
+        self.logger = logger
+        self.logger.remove()  # 删去import logger之后自动产生的handler，不删除的话会出现重复输出的现象
+        self.logger.add(sys.stderr, level=self.config.log_level.upper())  # 添加一个终端输出的内容
+
+    def anyou_identify(self, *args, **kwargs):
         raise NotImplemented
 
-    def suqiu_identify(self, content):
+    def suqiu_identify(self, *args, **kwargs):
         raise NotImplemented
 
-    def situation_identify(self, content):
+    def situation_identify(self, *args, **kwargs):
         raise NotImplemented
 
-    def parse_xmind(self, content):
+    def get_question(self, *args, **kwargs):
         raise NotImplemented
 
-    def generate_report(self, content):
+    def parse_xmind(self, *args, **kwargs):
         raise NotImplemented
 
-    def __call__(self):
-        self.anyou_identify(self.content)
-        self.suqiu_identify(self.content)
-        self.situation_identify(self.content)
-        self.parse_xmind(self.content)
-        self.generate_report(self.content)
+    def generate_report(self, *args, **kwargs):
+        raise NotImplemented
+
+    def __call__(self, text):
+        self.content["fact"] = text
+        self.anyou_identify()
+        self.suqiu_identify()
+        self.situation_identify()
+        self.parse_xmind()
+        self.get_question()
+        self.generate_report()
 
         return self.content
