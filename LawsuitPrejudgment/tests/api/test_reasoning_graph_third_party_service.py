@@ -21,6 +21,18 @@ def test_get_civil_problem_summary():
     pass
 
 
+def test_get_template_by_problem_id():
+    url = "http://101.69.229.138:8100/get_template_by_problem_id"
+    params = {"problem_id": 1564}
+    resp_json = requests.get(url, params=params).json()
+
+    print(resp_json)
+    assert resp_json
+    assert resp_json.get("success")
+    assert resp_json.get("value")
+    assert resp_json["value"]["template"] == "x年x月x日，x与x签订运输合同/搭乘车辆，x履行/未履行运输义务，x支付/未支付货款，或x存在x违约行为，造成x损害后果。（请具体描述过程及结果，如突然刹车，与客车相撞等）"
+
+
 def test_should_ask_next_question_when_reasoning_graph_result():
     url = "http://101.69.229.138:8100/reasoning_graph_result"
     body = {

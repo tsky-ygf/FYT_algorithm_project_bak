@@ -11,7 +11,8 @@ from LawsuitPrejudgment.lawsuit_prejudgment.api.data_transfer_object.applicable_
     CriminalApplicableLawDictCreator
 from LawsuitPrejudgment.lawsuit_prejudgment.api.data_transfer_object.similar_case_dto import \
     CriminalSimilarCaseListCreator
-from LawsuitPrejudgment.lawsuit_prejudgment.constants import SUPPORTED_ADMINISTRATIVE_TYPES_CONFIG_PATH
+from LawsuitPrejudgment.lawsuit_prejudgment.constants import SUPPORTED_ADMINISTRATIVE_TYPES_CONFIG_PATH, \
+    CIVIL_PROBLEM_ID_MAPPING_CONFIG_PATH, CIVIL_PROBLEM_TEMPLATE_CONFIG_PATH
 from Utils.io import read_json_attribute_value
 from LawsuitPrejudgment.main.reasoning_graph_predict import predict_fn
 from LawsuitPrejudgment.Administrative.administrative_api_v1 import *
@@ -50,16 +51,22 @@ def get_civil_problem_summary():
         return json.dumps({"success": False, "error_msg": repr(e), "value": None}, ensure_ascii=False)
 
 
+def _get_mapped_problem_id(problem_id):
+    problem_id_mapping_list = read_json_attribute_value(CIVIL_PROBLEM_ID_MAPPING_CONFIG_PATH, "value")
+    return next((item.get("mapped_id") for item in problem_id_mapping_list if str(item.get("id")) == str(problem_id)), None)
+
+
 @app.route('/get_template_by_problem_id', methods=["get"])
 def get_template_by_problem_id():
-    # mock data
+    mapped_problem_id = _get_mapped_problem_id(request.args.get("problem_id"))
+    civil_problem_template_dict = read_json_attribute_value(CIVIL_PROBLEM_TEMPLATE_CONFIG_PATH, "value")
+
     return json.dumps({
         "success": True,
         "error_msg": "",
         "value": {
-            "template": "男女双方自愿/不自愿（不自愿的原因）登记结婚，婚后育有x子/女，现 x岁， 因xx原因离婚。婚姻/同居期间，有存款x元、房屋x处、车子x辆、债务x元。（双方是否对子女、财产、债务等达成协议或已有法院判决，协议或判决内容，双方对协议或判决的履行情况）。"
+            "template": civil_problem_template_dict.get(str(mapped_problem_id), "")
         }}, ensure_ascii=False)
-    pass
 
 
 @app.route('/get_claim_list_by_problem_id', methods=["get"])
