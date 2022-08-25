@@ -89,6 +89,7 @@ def test_search_cases():
     assert resp_json
     assert resp_json.get("success")
     assert resp_json.get("result")
+    assert resp_json.get("total_amount")
     assert "doc_id" in resp_json["result"][0]
 
 

@@ -36,8 +36,8 @@ usr = st.sidebar.selectbox("请选择立场", ['甲方', '乙方'], key="中立�
 
 contract_type = ''.join(lazy_pinyin(contract_type))
 config_path = "DocumentReview/Config/{}.csv".format(contract_type)
-# model_path = "model/uie_model/new/{}/model_best/".format(contract_type)
-model_path = "model/uie_model/export_cpu/{}/inference".format(contract_type)
+model_path = "model/uie_model/new/{}/model_best/".format(contract_type)
+# model_path = "model/uie_model/export_cpu/{}/inference".format(contract_type)
 # print(contract_type)
 
 if mode_type == "docx":
@@ -57,7 +57,7 @@ else:
 
 acknowledgement = BasicUIEAcknowledgement(config_path=config_path,
                                           model_path=model_path,
-                                          device="cpu")
+                                          device="1")
 correct = st.button("文本纠错")
 run = st.button("开始审核")
 

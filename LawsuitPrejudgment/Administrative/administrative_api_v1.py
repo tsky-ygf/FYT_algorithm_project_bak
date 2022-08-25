@@ -44,26 +44,30 @@ def get_administrative_prejudgment_result(administrative_type, situation):
     prejudgment_result["suspected_illegal_act"] = {"title": "涉嫌违法行为", "content": info_data[situation]['处罚依据']}
     prejudgment_result["legal_basis"] = {
         "title": "法条依据",
-        "content": [{"law_item": law_item, "law_content": law_content} for law_item, law_content in info_data[situation]['法条依据'].items()]
+        "content": [{"law_item": law_item, "law_content": law_content} for law_item, law_content in
+                    info_data[situation]['法条依据'].items()]
     }
     prejudgment_result["punishment_type"] = {"title": "处罚种类", "content": info_data[situation]['处罚种类']}
     prejudgment_result["punishment_range"] = {"title": "处罚幅度", "content": info_data[situation]['处罚幅度']}
     prejudgment_result["criminal_risk"] = {
         "title": "涉刑风险",
-        "content": [{"crime_name": crime_name, "law_item": law_info[0], "law_content": law_info[1]} for crime_name, law_info in info_data[situation]['涉刑风险'].items()]
+        "content": [{"crime_name": crime_name, "law_item": law_info[0], "law_content": law_info[1]} for
+                    crime_name, law_info in info_data[situation]['涉刑风险'].items()]
     }
-    prejudgment_result["similar_case"] = [AdministrativeSimilarCaseDictCreator.create({"title": "相似类案", "content": content}) for content in info_data[situation]['相关案例']]
+    prejudgment_result["similar_case"] = [
+        AdministrativeSimilarCaseDictCreator.create({"title": "相似类案", "content": content}) for content in
+        info_data[situation]['相关案例']]
     law_list = prejudgment_result["legal_basis"]["content"] + prejudgment_result["criminal_risk"]["content"]
     # TODO: 去除可能重复的法条
     prejudgment_result["applicable_law"] = [AdministrativeApplicableLawDictCreator.create(law) for law in law_list]
     # TODO: mock judging rule
     prejudgment_result["judging_rule"] = [
-                {
-                    "content": "案外人执行异议之诉中，查明涉案款项实体权益属案外人的，应直接判决停止对涉案款项的执行，无须以不当得利另诉。",
-                    "source": "越律网",
-                    "source_url": "https://www.sxls.com/gongbao2018.html"
-                }
-            ]
+        {
+            "content": "案外人执行异议之诉中，查明涉案款项实体权益属案外人的，应直接判决停止对涉案款项的执行，无须以不当得利另诉。",
+            "source": "越律网",
+            "source_url": "https://www.sxls.com/gongbao2018.html"
+        }
+    ]
     return prejudgment_result
 
 

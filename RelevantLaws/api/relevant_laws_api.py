@@ -46,7 +46,9 @@ def _get_search_result(query, filter_conditions):
 def search_laws():
     query = request.json.get("query")
     filter_conditions = request.json.get("filter_conditions", dict())
-    return response_successful_result(_get_search_result(query, filter_conditions))
+    result = _get_search_result(query, filter_conditions)
+    # TODO: 用实现于分页的total amount
+    return response_successful_result(result, {"total_amount": len(result)})
 
 
 if __name__ == "__main__":

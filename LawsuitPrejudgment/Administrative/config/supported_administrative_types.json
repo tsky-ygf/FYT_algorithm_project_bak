@@ -43,6 +43,10 @@
         {
             "type_id": "shipin",
             "type_name": "食品药品处罚预判"
+        },
+        {
+            "type_id": "health",
+            "type_name": "卫生健康处罚预判"
         }
     ]
 }
