@@ -39,10 +39,13 @@ class CriminalPrejudgment(PrejudgmentPipeline):
         raise NotImplemented
 
     def parse_xmind(self):
-        raise NotImplemented
+        pass
+
+    def get_question(self):
+        pass
 
     def generate_report(self):
-        raise NotImplemented
+        pass
 
     def get_base_information(self):
         # res = self.ie(content)
