@@ -36,7 +36,7 @@ class CriminalPrejudgment(PrejudgmentPipeline):
             self.content["suqiu"] = "量刑推荐"
 
     def situation_identify(self):
-        raise NotImplemented
+        pass
 
     def parse_xmind(self):
         pass
@@ -75,4 +75,5 @@ if __name__ == '__main__':
     text = "浙江省诸暨市人民检察院指控，2019年7月22日10时30分许，被告人唐志强窜至诸暨市妇幼保健医院，在3楼21号病床床头柜内窃得被害人俞" \
            "某的皮包一只，内有现金￥1500元和银行卡、身份证等财物。"
 
-    criminal_pre_judgment(text=text)
+    # predict
+    criminal_pre_judgment(fact=text)

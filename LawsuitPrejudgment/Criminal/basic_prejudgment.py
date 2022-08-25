@@ -45,8 +45,8 @@ class PrejudgmentPipeline:
     def generate_report(self, *args, **kwargs):
         raise NotImplemented
 
-    def __call__(self, text):
-        self.content["fact"] = text
+    def __call__(self, *args, **kwargs):
+        self.content.update(kwargs)
         self.anyou_identify()
         self.suqiu_identify()
         self.situation_identify()
@@ -54,4 +54,5 @@ class PrejudgmentPipeline:
         self.get_question()
         self.generate_report()
 
+        self.logger.debug(self.content)
         return self.content
