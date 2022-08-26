@@ -79,14 +79,15 @@ def get_filter_conditions_of_case():
 def _get_search_result(query, filter_conditions):
     return [
         {
-            # "doc_id": "2b2ed441-4a86-4f7e-a604-0251e597d85e",
-            "doc_id": "24dbed45-904d-4992-aea7-a82000320181",
+            "doc_id": "2b2ed441-4a86-4f7e-a604-0251e597d85e",
+            # "doc_id": "24dbed45-904d-4992-aea7-a82000320181",
             "title": "原告王某某与被告郝某某等三人婚约财产纠纷一等婚约财产纠纷一审民事判决书",
             "court": "公主岭市人民法院",
             "judge_date": "2016-04-11",
             "case_number": "（2016）吉0381民初315号",
             "tag": "彩礼 证据 结婚 给付 协议 女方 当事人 登记 离婚",
-            "is_guiding_case": True
+            "is_guiding_case": True,
+            "problem_id": 17
         },
         {
             "doc_id": "ws_c4b1e568-b253-4ac3-afd7-437941f1b17a",
@@ -95,7 +96,8 @@ def _get_search_result(query, filter_conditions):
             "judge_date": "2011-07-12",
             "case_number": "（2011）龙民初字第204号",
             "tag": "彩礼 酒席 结婚 费用 订婚 电视 女方 买家 猪肉",
-            "is_guiding_case": False
+            "is_guiding_case": False,
+            "problem_id": 17
         }
     ]
 
@@ -112,4 +114,9 @@ def search_cases():
 @app.route('/get_law_document', methods=["get"])
 def get_law_document():
     doc_id = request.args.get("doc_id")
-    return response_successful_result(service.get_criminal_law_document(doc_id))
+    result = service.get_criminal_law_document(doc_id)
+    if result:
+        response_successful_result(result)
+
+    mock_doc_id = "24dbed45-904d-4992-aea7-a82000320181"
+    return response_successful_result(service.get_criminal_law_document(mock_doc_id))
