@@ -44,10 +44,16 @@ def export_model_onnx(model_path, output_path):
 
 
 if __name__ == '__main__':
-    for export_type in ['fangwuzulin', 'jiekuan', 'jietiao', 'laodong', 'laowu', 'maimai', 'caigou', 'baomi',
-                        'yibanzulin']:
+    # for export_type in ['fangwuzulin', 'jiekuan', 'jietiao', 'laodong', 'laowu', 'maimai', 'caigou', 'baomi',
+    #                     'yibanzulin']:
+    #     export_model_onnx(
+    #         model_path="model/uie_model/new/{}/model_best".format(export_type),
+    #         output_path="model/uie_model/export_cpu/{}".format(export_type),
+    #     )
+    # print("Done.")
+    for export_type in ['theft']:
         export_model_onnx(
-            model_path="model/uie_model/new/{}/model_best".format(export_type),
+            model_path="model/uie_model/criminal/{}/model_best".format(export_type),
             output_path="model/uie_model/export_cpu/{}".format(export_type),
         )
     print("Done.")
