@@ -48,10 +48,10 @@ class PrejudgmentPipeline:
 
     def __call__(self, *args, **kwargs):
         self.content.update(kwargs)
+        self.parse_xmind()
         self.anyou_identify()
         self.suqiu_identify()
         self.situation_identify()
-        self.parse_xmind()
         self.get_question()
         self.generate_report()
 
