@@ -1,0 +1,10 @@
+log_level: "INFO"
+
+tokenizer: "/home/fyt/model/marriage_bert/divorce/final"
+model: "/home/fyt/model/marriage_bert/divorce/final"
+
+test_data_path: "/home/fyt/data/fyt_train_use_data/CAIL-Long/civil/test.json"
+label_mapping_path: "/home/fyt/huangyulin/project/fyt/LawEntityExtraction/data/bert/spec_dispute_divorce/loan_spec_divorce.csv"
+
+batch_size: 16
+max_len: 128

@@ -1,0 +1,17 @@
+log_level: "INFO"
+
+tokenizer: "/home/fyt/model/language_model/chinese-roberta-wwm-ext"
+model: "/home/fyt/model/language_model/chinese-roberta-wwm-ext"
+task_model: "/home/fyt/model/legal_advice_model/text_cls/situation/reuters_chinese-roberta-wwm-ext_CBloss-ntr_json_epoch20para"
+
+num_labels: 229
+task_name: "situa_cls"
+
+threshold: 0.9 # 如果概率高于阈值，则使用正则表达式检查，是否存在该诉求，若有，则输出，若无，则输出空
+
+test_data_path: "/home/fyt/data/fyt_train_use_data/CAIL-Long/civil/test.json"
+#label_mapping_path: "/home/fyt/huangyulin/project/fyt/LawEntityExtraction/data/bert/marriage/marriage.csv"
+label_mapping_path: "/home/fyt/huangyulin/project/fyt/LawEntityExtraction/LabelClsReview/Config/loan_and_marriage.csv"
+
+batch_size: 16
+max_len: 256
