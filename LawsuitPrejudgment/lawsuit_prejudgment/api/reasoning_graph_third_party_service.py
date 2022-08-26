@@ -11,11 +11,14 @@ from LawsuitPrejudgment.lawsuit_prejudgment.api.data_transfer_object.applicable_
     CriminalApplicableLawDictCreator
 from LawsuitPrejudgment.lawsuit_prejudgment.api.data_transfer_object.similar_case_dto import \
     CriminalSimilarCaseListCreator
-from LawsuitPrejudgment.lawsuit_prejudgment.constants import SUPPORTED_ADMINISTRATIVE_TYPES_CONFIG_PATH
+from LawsuitPrejudgment.lawsuit_prejudgment.constants import SUPPORTED_ADMINISTRATIVE_TYPES_CONFIG_PATH, \
+    CIVIL_PROBLEM_ID_MAPPING_CONFIG_PATH, CIVIL_PROBLEM_TEMPLATE_CONFIG_PATH
 from Utils.io import read_json_attribute_value
 from LawsuitPrejudgment.main.reasoning_graph_predict import predict_fn
 from LawsuitPrejudgment.Administrative.administrative_api_v1 import *
 from Utils.http_response import response_successful_result, response_failed_result
+from LawsuitPrejudgment.common.config_loader import user_ps
+
 
 """
 推理图谱的接口
@@ -50,36 +53,47 @@ def get_civil_problem_summary():
         return json.dumps({"success": False, "error_msg": repr(e), "value": None}, ensure_ascii=False)
 
 
+def _get_mapped_problem_id(problem_id):
+    problem_id_mapping_list = read_json_attribute_value(CIVIL_PROBLEM_ID_MAPPING_CONFIG_PATH, "value")
+    return next((item.get("mapped_id") for item in problem_id_mapping_list if str(item.get("id")) == str(problem_id)), None)
+
+
+def _get_mapped_problem(attribute_value, attribute_name="id"):
+    """
+
+    Args:
+        attribute_value: problem_id or problem
+        attribute_name:"id" or "problem"
+
+    Returns:
+        mapped problem.
+    """
+    problem_id_mapping_list = read_json_attribute_value(CIVIL_PROBLEM_ID_MAPPING_CONFIG_PATH, "value")
+    return next((item.get("mapped_problem") for item in problem_id_mapping_list if str(item.get(attribute_name)) == str(attribute_value)), None)
+
+
 @app.route('/get_template_by_problem_id', methods=["get"])
 def get_template_by_problem_id():
-    # mock data
+    mapped_problem_id = _get_mapped_problem_id(request.args.get("problem_id"))
+    civil_problem_template_dict = read_json_attribute_value(CIVIL_PROBLEM_TEMPLATE_CONFIG_PATH, "value")
+
     return json.dumps({
         "success": True,
         "error_msg": "",
         "value": {
-            "template": "男女双方自愿/不自愿（不自愿的原因）登记结婚，婚后育有x子/女，现 x岁， 因xx原因离婚。婚姻/同居期间，有存款x元、房屋x处、车子x辆、债务x元。（双方是否对子女、财产、债务等达成协议或已有法院判决，协议或判决内容，双方对协议或判决的履行情况）。"
+            "template": civil_problem_template_dict.get(str(mapped_problem_id), "")
         }}, ensure_ascii=False)
-    pass
 
 
 @app.route('/get_claim_list_by_problem_id', methods=["get"])
 def get_claim_list_by_problem_id():
-    # mock data
+    mapped_problem = _get_mapped_problem(request.args.get("problem_id"))
+    claim_list = user_ps.get(str(mapped_problem), [])
     return json.dumps({
         "success": True,
         "error_msg": "",
-        "value": [{
-            "id": 461,
-            "claim": "请求离婚"
-        }, {
-            "id": 462,
-            "claim": "请求分割财产"
-        }, {
-            "id": 463,
-            "claim": "请求返还彩礼"
-        }]
+        "value": [{"id": idx, "claim": claim} for idx, claim in enumerate(claim_list)]
     }, ensure_ascii=False)
-    pass
 
 
 @app.route('/get_claim_by_claim_id', methods=["get"])
@@ -101,17 +115,17 @@ def get_claim_by_claim_id():
     pass
 
 
-def _mapping_problem(problem):
-    mapping = {
-        "财产分割": "婚姻继承",
-        "同居问题": "婚姻继承",
-        "婚姻家庭": "婚姻继承",
-        "继承纠纷": "婚姻继承",
-        "子女抚养": "婚姻继承",
-        "老人赡养": "婚姻继承",
-        "返还彩礼": "婚姻继承"
-    }
-    return mapping.get(problem, problem)
+# def _mapping_problem(problem):
+#     mapping = {
+#         "财产分割": "婚姻继承",
+#         "同居问题": "婚姻继承",
+#         "婚姻家庭": "婚姻继承",
+#         "继承纠纷": "婚姻继承",
+#         "子女抚养": "婚姻继承",
+#         "老人赡养": "婚姻继承",
+#         "返还彩礼": "婚姻继承"
+#     }
+#     return mapping.get(problem, problem)
 
 
 @app.route('/reasoning_graph_result', methods=["post"])  # "service_type":'ft'
@@ -121,7 +135,7 @@ def reasoning_graph_result():
         if in_json is not None:
             in_dict = json.loads(in_json.decode("utf-8"))
             problem = in_dict['problem']
-            problem = _mapping_problem(problem)
+            problem = _get_mapped_problem(problem, "problem")
             claim_list = in_dict['claim_list']
             fact = in_dict.get('fact', '')
             question_answers = in_dict.get('question_answers', {})

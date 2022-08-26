@@ -34,3 +34,6 @@ pycorrector
 loguru
 networkx
 pypinyin
+paddle2onnx
+keras
+autogluon
