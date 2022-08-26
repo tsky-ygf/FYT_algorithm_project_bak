@@ -16,6 +16,7 @@ class PrejudgmentConfig:
     prejudgment_type: str = ""
     xmind_path: str = ""
     anyou_identify_model_path: str = ""
+    situation_identify_model_path: str = ""
 
 
 class PrejudgmentPipeline:

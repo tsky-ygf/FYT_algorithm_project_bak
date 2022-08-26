@@ -7,7 +7,8 @@
 # @Software: PyCharm
 # from pprint import pprint, pformat
 # from extraction.feature_extraction import init_extract
-from LawsuitPrejudgment.Criminal.basic_prejudgment import PrejudgmentPipeline, PrejudgmentConfig
+import requests
+from LawsuitPrejudgment.Criminal.basic_prejudgment import PrejudgmentPipeline
 
 from autogluon.text import TextPredictor
 import os
@@ -24,6 +25,8 @@ class CriminalPrejudgment(PrejudgmentPipeline):
         # 加载案由预测模型
         self.predictor = TextPredictor.load(self.config.anyou_identify_model_path)
         # self.ie = init_extract(criminal_type=criminal_type)
+        if self.config.situation_identify_model_path[4] == "http":
+            self.ie_url = self.config.situation_identify_model_path
 
     def anyou_identify(self):
         sentence = self.content["fact"]
@@ -36,7 +39,7 @@ class CriminalPrejudgment(PrejudgmentPipeline):
             self.content["suqiu"] = "量刑推荐"
 
     def situation_identify(self):
-        pass
+        if self.ie
 
     def parse_xmind(self):
         pass
@@ -69,7 +72,8 @@ class CriminalPrejudgment(PrejudgmentPipeline):
 if __name__ == '__main__':
     criminal_config = {"log_level": "debug",
                        "prejudgment_type": "criminal",
-                       "anyou_identify_model_path": "model/gluon_model/accusation"}
+                       "anyou_identify_model_path": "model/gluon_model/accusation",
+                       "situation_identify_model_path": "http://172.19.82.199:7777/information_result "}
     criminal_pre_judgment = CriminalPrejudgment(**criminal_config)
 
     text = "浙江省诸暨市人民检察院指控，2019年7月22日10时30分许，被告人唐志强窜至诸暨市妇幼保健医院，在3楼21号病床床头柜内窃得被害人俞" \
