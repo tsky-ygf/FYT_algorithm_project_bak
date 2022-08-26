@@ -22,7 +22,7 @@ def get_columns():
         },
         {
             "column_id": "hot_news",
-            "column_name": "新闻热点"
+            "column_name": "法律热点"
         },
         {
             "column_id": "interpret_the_law_by_case",
