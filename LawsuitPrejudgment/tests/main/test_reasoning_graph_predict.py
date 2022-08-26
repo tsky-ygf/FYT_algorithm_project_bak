@@ -41,3 +41,6 @@ def test_should_have_evidence():
     assert result_dict
     assert result_dict["question_next"] is None
     assert result_dict["result"][claim]["evidence_module"] == ''
+
+
+# def test_should_not_repeat_question_item_if_already_answered():
