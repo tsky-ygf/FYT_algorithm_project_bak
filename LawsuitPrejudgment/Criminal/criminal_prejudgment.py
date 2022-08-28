@@ -5,8 +5,9 @@
 # @Site    : 
 # @File    : criminal_prejudgment.py
 # @Software: PyCharm
-from pprint import pprint, pformat
+# from pprint import pprint, pformat
 # from extraction.feature_extraction import init_extract
+from pathlib import Path
 import requests
 from LawsuitPrejudgment.Criminal.basic_prejudgment import PrejudgmentPipeline
 
@@ -29,6 +30,7 @@ class CriminalPrejudgment(PrejudgmentPipeline):
         if self.config.situation_identify_model_path[:4] == "http":
             self.ie_url = self.config.situation_identify_model_path
 
+        self.content["graph_process"] = {"前提": 0, "情节": 0, "量刑": 0}
         self.logger.info("加载预测模型成功")
 
     def anyou_identify(self):
@@ -70,18 +72,48 @@ class CriminalPrejudgment(PrejudgmentPipeline):
         # self.logger.debug(self.content)
 
     def parse_config_file(self):
+        if "circumstances_graph" in self.content:
+            pass
+
+        config_path = "LawsuitPrejudgment/Criminal/base_config"
+        xmind_path = Path(config_path, self.content["anyou"], "base_logic.xmind")
+        question_answers_path = Path(config_path, self.content["anyou"], "question_answers.csv")
+        report_path = Path(config_path, self.content["anyou"], "report.csv")
+
+        base_logic = xmind_to_dict(xmind_path)
+        question_answers_df = pd.read_csv(question_answers_path)
+        report_content = pd.read_csv(report_path)
+
+        report_dict = dict()
+        for index, row in report_content.iterrows():
+            report_dict[row['reportID']] = row.to_dict()
+
+        base_logic_graph = base_logic[0]['topic']['topics']
+
+        question_answers_dict = {}
+        for index, row in question_answers_df.iterrows():
+            question_answers_dict[row['circumstances']] = row.to_dict()
+
+        self.content["base_logic_graph"] = base_logic_graph
+        self.content['question_answers_config'] = question_answers_dict
+        self.content['report_dict'] = report_dict
 
     def get_question(self):
         self.logger.debug(self.content["question_answers"])
-        question_config_df = pd.read_csv(
-            "LawsuitPrejudgment/Criminal/question_config/{}罪特征表.csv".format(self.content["anyou"]))
 
-        circumstances_list = self.content['circumstances_graph'].keys()
-        if len(self.content["question_answers"]) == 0:
-            for circumstance in circumstances_list:
-                if self.content['circumstances_graph'][circumstance]['type'] == "大前提":
-                    self.logger.debug(self.content['circumstances_graph'][circumstance]['特征'])
-        self.logger.debug(question_config_df)
+        if len(self.content["question_answers"]) > 0:
+            for key in self.content["question_answers"].keys():
+                self.content["graph_process"][key] = 1
+
+        for key, value in self.content["graph_process"].items():
+            if value == 0:
+                qa_dict = self.content["question_answers_config"][key]
+                qa_dict.pop('circumstances')
+                qa_dict["usr_answer"] = ""
+                self.content["question_answers"][key] = qa_dict
+                break
+
+        self.logger.debug(self.content["question_answers"])
 
     def generate_report(self):
         evaluation_report = dict()
@@ -94,7 +126,6 @@ class CriminalPrejudgment(PrejudgmentPipeline):
 if __name__ == '__main__':
     criminal_config = {"log_level": "debug",
                        "prejudgment_type": "criminal",
-                       "xmind_path": "LawsuitPrejudgment/Criminal/base_config/theft.xmind",
                        "anyou_identify_model_path": "model/gluon_model/accusation",
                        "situation_identify_model_path": "http://172.19.82.199:7777/information_result",
                        }
@@ -103,7 +134,14 @@ if __name__ == '__main__':
     text = "浙江省诸暨市人民检察院指控，2019年7月22日10时30分许，被告人唐志强窜至诸暨市妇幼保健医院，在3楼21号病床床头柜内窃得被害人俞" \
            "某的皮包一只，内有现金￥1500元和银行卡、身份证等财物。"
 
-    question_answers = {}
+    # question_answers = []
 
     # predict
-    criminal_pre_judgment(fact=text, question_answers=question_answers)
+    # criminal_pre_judgment(fact=text, question_answers=question_answers)
+    # 第一次调用
+    res = criminal_pre_judgment(fact=text)
+    # print(res)
+    # 第二次调用
+    res['question_answers']['前提']['usr_answer'] = "是"
+    res2 = criminal_pre_judgment(**res)  # 传入上一次的结果
+    print(res2)
