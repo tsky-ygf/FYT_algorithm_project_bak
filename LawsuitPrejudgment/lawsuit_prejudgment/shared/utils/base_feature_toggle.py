@@ -30,7 +30,7 @@ class BaseFeatureToggle:
     """ Base class for toggle features."""
     def __init__(self, document):
         if os.path.isfile(document):
-            with open(document, 'r') as f:
+            with open(document, 'r', encoding="utf-8") as f:
                 self._toggle_config = yaml.load(f, Loader=yaml.SafeLoader)
         else:
             self._toggle_config = yaml.load(document, Loader=yaml.SafeLoader)
