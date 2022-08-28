@@ -14,9 +14,14 @@ class ApplicableLawDTO:
         self.law_item = applicable_law.get("law_item")
         self.law_content = applicable_law.get("law_content")
 
+    @staticmethod
+    def get_law_id(law_name, law_item):
+        # return "-".join(lazy_pinyin(str(law_name).replace("》", "").replace("《", "").strip() + str(law_item).strip()))
+        return "".join(lazy_pinyin(str(law_name).replace("》", "").replace("《", "").strip())) + "-" + "".join(lazy_pinyin(str(law_item).strip()))
+
     @property
     def law_id(self):
-        return "-".join(lazy_pinyin(str(self.law_name).replace("》", "").replace("《", "").strip() + str(self.law_item).strip()))
+        return self.get_law_id(self.law_name, self.law_item)
 
     def to_dict(self):
         return {
