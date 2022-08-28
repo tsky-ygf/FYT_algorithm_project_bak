@@ -384,15 +384,20 @@ def check_house_lease_term(row, extraction_con, res_dict):
         else:
             res_dict["审核结果"] = "通过"
     else:
-        tmp = int(tmp[0])
-        if "年" in length and tmp > 20:
-            res_dict["审核结果"] = "不通过"
-            res_dict["法律建议"] = row["jiaoyan error advice"]
-        elif "月" in length and tmp > 240:
-            res_dict["审核结果"] = "不通过"
-            res_dict["法律建议"] = row["jiaoyan error advice"]
+        if len(tmp)>0:
+            tmp = int(tmp[0])
+            if "年" in length and tmp > 20:
+                res_dict["审核结果"] = "不通过"
+                res_dict["法律建议"] = row["jiaoyan error advice"]
+            elif "月" in length and tmp > 240:
+                res_dict["审核结果"] = "不通过"
+                res_dict["法律建议"] = row["jiaoyan error advice"]
+            else:
+                res_dict["审核结果"] = "通过"
         else:
-            res_dict["审核结果"] = "通过"
+            res_dict["审核结果"] = "不通过"
+            res_dict["法律建议"] = row["jiaoyan error advice"]
+
 
 
 # 预付款审核

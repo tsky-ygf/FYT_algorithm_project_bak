@@ -40,7 +40,7 @@ class PrejudgmentPipeline:
     def get_question(self, *args, **kwargs):
         raise NotImplemented
 
-    def parse_xmind(self, *args, **kwargs):
+    def parse_config_file(self, *args, **kwargs):
         raise NotImplemented
 
     def generate_report(self, *args, **kwargs):
@@ -48,12 +48,12 @@ class PrejudgmentPipeline:
 
     def __call__(self, *args, **kwargs):
         self.content.update(kwargs)
-        self.parse_xmind()
+        self.parse_config_file()
         self.anyou_identify()
         self.suqiu_identify()
         self.situation_identify()
         self.get_question()
         self.generate_report()
 
-        self.logger.debug(self.content)
+        self.logger.info(self.content)
         return self.content
