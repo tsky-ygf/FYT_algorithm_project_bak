@@ -101,3 +101,7 @@ def get_news_by_keyword(keyword):
 
     id_list = _get_id_list_after_query(keyword)
     return repository.get_news_by_id_list(id_list)
+
+
+def get_news_by_news_id(news_id):
+    return repository.get_news_by_id_list([news_id])
