@@ -13,3 +13,4 @@ from LawsuitPrejudgment.lawsuit_prejudgment.shared.utils.base_feature_toggle imp
 
 class FeatureToggles(BaseFeatureToggle):
     http_situation_classifier: ToggleItem
+    should_not_repeat_question_item: ToggleItem

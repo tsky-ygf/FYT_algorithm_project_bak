@@ -56,6 +56,17 @@ def _predict_by_http(problem, claim_list, fact):
     return result
 
 
+def _remove_repeated_question(question_answers, question_next):
+    if question_next is None or FeatureToggles(FEATURE_TOGGLES_CONFIG_PATH).should_not_repeat_question_item.enabled is False:
+        return question_next
+
+    previous_answers = list(question_answers.values())
+    candidate_answers = str(question_next).split(":")[1].split(";")
+    unrepeated_answers = [answer for answer in candidate_answers if answer not in previous_answers]
+    question = str(question_next).split(":")[0]
+    return question + ":" + ";".join(unrepeated_answers)
+
+
 def _predict_by_factor(problem, claim_list, fact, question_answers, factor_sentence_list_, debug=False):
     """
     推理图谱即评估新版本-预测的主入口。
@@ -272,6 +283,7 @@ def _predict_by_factor(problem, claim_list, fact, question_answers, factor_sente
                                        'support_or_not': support_or_not}
 
     result_dict['question_asked'] = question_answers  # 问过的问题
+    question_next = _remove_repeated_question(question_answers, question_next)
     result_dict['question_next'] = question_next  # 下一个要问的问题
     result_dict['question_type'] = question_type  # 下一个要问的问题的类型
 

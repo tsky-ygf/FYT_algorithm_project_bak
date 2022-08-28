@@ -2,3 +2,8 @@ http_situation_classifier:
     enabled: false
     name: Http Situation Classifier
     description: 调用http服务进行情形识别。
+
+should_not_repeat_question_item:
+    enabled: false
+    name: Don't Repeat Question Item in the QA Process of Civil Prejudgment.
+    description: 民事诉讼预判的问答过程中，对应已经回答过的问题，不应在后续的问题中出现该选项。
