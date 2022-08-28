@@ -68,8 +68,26 @@ def test_should_not_repeat_question_item_if_already_answered():
             "answers_have_selected": "不违反法律、行政法规的强制性规定"
         }
     }
-    result_dict = predict_fn(problem, [claim], fact, question_answers, factor_sentence_list, repeated_question_management=repeated_question_management)
+    result_dict = predict_fn(problem, [claim], fact, question_answers, factor_sentence_list,
+                             repeated_question_management=repeated_question_management)
     print(result_dict)
     assert result_dict
     assert result_dict["question_next"] is None
     assert result_dict["result"]
+
+
+def test_should_ask_for_claim_when_having_special_format_in_xmind():
+    """ xmind文件，存在'诉求支持_XXX'这样的特征。对这种格式进行测试。 """
+    problem = "房屋买卖合同"
+    claim = "返还钱款"
+    fact = "xxxxxxxxxxx"
+    question_answers = {
+        "是否存在以下情形？:不返还钱款;合同无效;合同被撤销;交付的房屋实际面积小于合同约定面积;层高存在误差;以上都没有": "不返还钱款"
+    }
+    factor_sentence_list = []
+
+    result_dict = predict_fn(problem, [claim], fact, question_answers, factor_sentence_list)
+    print(result_dict)
+
+    assert result_dict["question_next"]
+    assert result_dict["result"] is None
