@@ -62,8 +62,13 @@ def test_should_not_repeat_question_item_if_already_answered():
         "是否存在以下情形？:不违反法律、行政法规的强制性规定;相对人不知道且不应当知道法人的法定代表人或者非法人组织的负责人与其签订合同时超越权限;委托合同存在造成对方人身损害不用承担责任的约定;委托合同存在故意造成对方财产损失不用承担责任的约定;委托合同存在因重大过失造成对方财产损失不用承担责任的约定;双方恶意串通损害他人合法权益;基于重大误解订立合同;遭受欺诈订立合同;遭受胁迫订立合同;合同成立时显失公平;以上都没有": "不违反法律、行政法规的强制性规定",
         "合同是否存在以下情形？:双方均具有相应的民事行为能力;双方意思表示真实;不违背公序良俗;以上都没有": "双方均具有相应的民事行为能力;双方意思表示真实;不违背公序良俗"
     }
-
-    result_dict = predict_fn(problem, [claim], fact, question_answers, factor_sentence_list)
+    repeated_question_management = {
+        "合同是否存在以下情形？:双方均具有相应的民事行为能力;双方意思表示真实;不违背公序良俗;以上都没有": {
+            "original_question": "合同是否存在以下情形？:双方均具有相应的民事行为能力;双方意思表示真实;不违反法律、行政法规的强制性规定;不违背公序良俗;以上都没有",
+            "answers_have_selected": "不违反法律、行政法规的强制性规定"
+        }
+    }
+    result_dict = predict_fn(problem, [claim], fact, question_answers, factor_sentence_list, repeated_question_management=repeated_question_management)
     print(result_dict)
     assert result_dict
     assert result_dict["question_next"] is None
