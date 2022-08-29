@@ -27,6 +27,8 @@ class PrejudgmentPipeline:
         self.logger.remove()  # 删去import logger之后自动产生的handler，不删除的话会出现重复输出的现象
         self.logger.add(sys.stderr, level=self.config.log_level.upper())  # 添加一个终端输出的内容
 
+        self.content['graph_process'] = dict()
+
     def anyou_identify(self, *args, **kwargs):
         raise NotImplemented
 
@@ -55,7 +57,11 @@ class PrejudgmentPipeline:
         self.parse_config_file()
         self.situation_identify()
         self.get_question()
-        self.generate_report()
 
+        for key, value in self.content["graph_process"].items():
+            if value == 0:
+                return self.content
+
+        self.generate_report()
         self.logger.info(self.content)
         return self.content
