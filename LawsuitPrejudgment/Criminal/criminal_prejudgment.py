@@ -59,7 +59,7 @@ class CriminalPrejudgment(PrejudgmentPipeline):
                 relations = value["relations"]
                 # self.logger.debug(relations)
                 self.content["event"]["物品"] = relations.get("物品", None)
-                self.content["event"]["地点"] = relations.get("地点", None)
+                self.content["event"]["时间"] = relations.get("时间", None)
                 self.content["event"]["地点"] = relations.get("地点", None)
                 self.content["event"]["人物"] = relations.get("人物", "被告人")
                 self.content["event"]["总金额"] = relations.get("总金额", None)
@@ -93,7 +93,7 @@ class CriminalPrejudgment(PrejudgmentPipeline):
         self.content['question_answers_config'] = question_answers_dict
         self.content['report_dict'] = report_dict
 
-        self.content["graph_process"] = {key: 0 for key in set(base_logic_df[1].to_list())}
+        self.content["graph_process"] = {key: 0 for key in base_logic_df[1].to_list()}
 
     def get_question(self):
         self.logger.debug(self.content["question_answers"])
@@ -131,16 +131,16 @@ class CriminalPrejudgment(PrejudgmentPipeline):
         _thing = self.content["event"]["物品"]
         _thing = [one_thing['text'] for one_thing in _thing]
         _thing_str = "、".join(_thing)
-        if self.content["时间"] is not None:
-            _time = self.content["event"]["时间"] + "，"
+        if self.content["event"]["时间"] is not None:
+            _time = self.content["event"]["时间"][0]['text'] + "，"
         else:
             _time = ""
-        if self.content["地点"] is not None:
-            _location = "在" + self.content["event"]["地点"] + "，"
+        if self.content["event"]["地点"] is not None:
+            _location = "在" + self.content["event"]["地点"][0]['text'] + "，"
         else:
             _location = ""
 
-        _person = self.content["event"]["人物"]
+        _person = self.content["event"]["人物"][0]['text']
         _action = self.content["event"]["行为"]
         _amount = self.content["event"]["总金额"]
 
@@ -151,6 +151,8 @@ class CriminalPrejudgment(PrejudgmentPipeline):
         evaluation_report["评估理由"] = self.content['report_dict'][report_id]["评估理由"]
         evaluation_report["法律建议"] = self.content['report_dict'][report_id]["法律建议"]
         evaluation_report["法律依据"] = self.content['report_dict'][report_id]["法律依据"]
+
+        self.content['report_result'] = evaluation_report
 
 
 if __name__ == '__main__':
