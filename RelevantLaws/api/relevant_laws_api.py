@@ -12,9 +12,11 @@ from flask import request
 
 from LawsuitPrejudgment.lawsuit_prejudgment.api.data_transfer_object.applicable_law_dto import ApplicableLawDTO
 from RelevantLaws.LegalLibrary.relevant_laws_search import get_law_search_result
+from RelevantLaws.api.constants import SEPERATOR_BETWEEN_LAW_TABLE_AND_ID
 from Utils.io import read_json_attribute_value
-from Utils.http_response import response_successful_result
+from Utils.http_response import response_successful_result, response_failed_result
 from RelevantLaws.repository import relevant_laws_repository as repository
+
 app = Flask(__name__)
 
 
@@ -48,7 +50,7 @@ def _construct_result_format(search_result) -> List:
             row['resultSection'] = str(row['resultClause']).split(":")[0]
 
         result.append({
-            "law_id": _get_law_table_name(row['source']) + "#" + row['md5Clause'],
+            "law_id": _get_law_table_name(row['source']) + SEPERATOR_BETWEEN_LAW_TABLE_AND_ID + row['md5Clause'],
             "law_name": row['title'],
             "law_type": row['source'],
             "timeliness": row['isValid'],
@@ -60,7 +62,8 @@ def _construct_result_format(search_result) -> List:
 
 
 def _get_search_result(query, filter_conditions):
-    search_result = get_law_search_result(query, filter_conditions.get("timeliness"), filter_conditions.get("types_of_law"), filter_conditions.get("size", 10))
+    search_result = get_law_search_result(query, filter_conditions.get("timeliness"),
+                                          filter_conditions.get("types_of_law"), filter_conditions.get("size", 10))
     return _construct_result_format(search_result)
 
 
@@ -75,11 +78,18 @@ def search_laws():
 
 @app.route('/get_law_by_law_id', methods=["get"])
 def get_law_by_law_id():
-    raw_law_id = request.args.get("law_id")
-    table_name = str(raw_law_id).split("#")[0]
-    law_id = str(raw_law_id).split("#")[1]
-    return response_successful_result(repository.get_law_by_law_id(law_id, table_name))
+    try:
+        raw_law_id = request.args.get("law_id")
+        pair = str(raw_law_id).split(SEPERATOR_BETWEEN_LAW_TABLE_AND_ID)
+        if len(pair) != 2:
+            return response_successful_result(dict())
+
+        table_name = pair[0]
+        law_id = pair[1]
+        return response_successful_result(repository.get_law_by_law_id(law_id, table_name))
+    except Exception as e:
+        return response_failed_result("error:" + repr(e))
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8135, debug=True)
+    app.run(host="0.0.0.0", port=8800, debug=True)

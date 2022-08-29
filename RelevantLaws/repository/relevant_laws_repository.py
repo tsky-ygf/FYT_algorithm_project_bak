@@ -9,6 +9,8 @@ import logging
 from typing import List, Dict
 import pymysql
 
+from RelevantLaws.api.constants import SEPERATOR_BETWEEN_LAW_TABLE_AND_ID
+
 
 def get_law_by_law_id(law_id: str, table_name: str) -> Dict:
     # 打开数据库连接
@@ -28,7 +30,7 @@ def get_law_by_law_id(law_id: str, table_name: str) -> Dict:
         cursor.execute(sql)
         # 获取所有记录列表
         fetched_data = cursor.fetchall()
-        laws = [{"law_id": str(table_name) + "#" + str(row[0]), "law_name": row[1], "law_type": row[2], "timeliness": "现行有效" if str(row[3]) == "有效" else str(row[3]), "using_range": row[4] if row[4] else "全国", "law_chapter": row[5], "law_item": row[6], "law_content": row[7]} for row in fetched_data]
+        laws = [{"law_id": str(table_name) + SEPERATOR_BETWEEN_LAW_TABLE_AND_ID + str(row[0]), "law_name": row[1], "law_type": row[2], "timeliness": "现行有效" if str(row[3]) == "有效" else str(row[3]), "using_range": row[4] if row[4] else "全国", "law_chapter": row[5], "law_item": row[6], "law_content": row[7]} for row in fetched_data]
     except:
         logging.error("Error: unable to fetch data")
         laws = []
