@@ -31,26 +31,20 @@ class CriminalPrejudgment(PrejudgmentPipeline):
         if self.config.situation_identify_model_path[:4] == "http":
             self.ie_url = self.config.situation_identify_model_path
 
-        self.content["graph_process"] = {"前提": 0, "情节": 0, "量刑": 0}
+        # self.content["graph_process"] = {"前提": 0, "情节": 0, "量刑": 0}
         self.logger.info("加载预测模型成功")
 
     def anyou_identify(self):
-        if "anyou" in self.content:
-            return
         sentence = self.content["fact"]
         predictions = self.predictor.predict({"fact": [sentence]}, as_pandas=False)
         self.content["anyou"] = predictions[0]
         # self.logger.debug(self.content)
 
     def suqiu_identify(self):
-        if "suqiu" in self.content:
-            return
         if self.config.prejudgment_type == "criminal":
             self.content["suqiu"] = "量刑推荐"
 
     def situation_identify(self):
-        if "event" in self.content:
-            return
         if self.content['anyou'] == "盗窃":
             criminal_type = 'theft'
         else:
@@ -72,15 +66,12 @@ class CriminalPrejudgment(PrejudgmentPipeline):
                 self.content["event"]["行为"] = relations.get("行为", self.content['anyou'])
         # self.logger.debug(self.content)
 
-        if self.content["event"]["行为"] is not None:
-            self.content["graph_process"]["情节"] = 1
+        # if self.content["event"]["行为"] is not None:
+        #     self.content["graph_process"]["情节"] = 1
         if self.content["event"]["总金额"] is not None:
             self.content["graph_process"]["量刑"] = 1
 
     def parse_config_file(self):
-        if "base_logic_graph" in self.content:
-            return
-
         config_path = "LawsuitPrejudgment/Criminal/base_config"
         xmind_path = Path(config_path, self.content["anyou"], "base_logic.xmind")
         question_answers_path = Path(config_path, self.content["anyou"], "question_answers.csv")
@@ -101,6 +92,8 @@ class CriminalPrejudgment(PrejudgmentPipeline):
         self.content["base_logic_graph"] = base_logic_df
         self.content['question_answers_config'] = question_answers_dict
         self.content['report_dict'] = report_dict
+
+        self.content["graph_process"] = {key: 0 for key in set(base_logic_df[1].to_list())}
 
     def get_question(self):
         self.logger.debug(self.content["question_answers"])
@@ -175,8 +168,9 @@ if __name__ == '__main__':
 
     # predict
     # criminal_pre_judgment(fact=text, question_answers=question_answers)
+    input_dict = {"fact": text}
     # 第一次调用
-    res = criminal_pre_judgment(fact=text)
+    res = criminal_pre_judgment(**input_dict)
     # print(res)
     # 第二次调用
     res['question_answers']['前提']['usr_answer'] = "否"

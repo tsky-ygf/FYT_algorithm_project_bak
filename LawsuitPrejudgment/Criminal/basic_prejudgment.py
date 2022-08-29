@@ -52,10 +52,18 @@ class PrejudgmentPipeline:
         if "question_answers" not in self.content:
             self.content["question_answers"] = dict()
 
-        self.anyou_identify()
-        self.suqiu_identify()
-        self.parse_config_file()
-        self.situation_identify()
+        if "anyou" not in self.content:
+            self.anyou_identify()
+
+        if "suqiu" not in self.content:
+            self.suqiu_identify()
+
+        if "base_logic_graph" not in self.content:
+            self.parse_config_file()
+
+        if "event" not in self.content:
+            self.situation_identify()
+
         self.get_question()
 
         for key, value in self.content["graph_process"].items():

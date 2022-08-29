@@ -74,17 +74,6 @@ def get_case(root):
     return list_container
 
 
-def maker_judgment(makers):
-    maker = 4
-    if "1" in makers:
-        maker = 0
-    elif "2" in makers:
-        maker = 1
-    elif "3" in makers:
-        maker = 2
-    return maker
-
-
 def deal_xmind_to_df(xmind_path):
     root = xmind_to_dict(xmind_path)[0]["topic"]
     case = get_case(root)
@@ -97,4 +86,4 @@ def deal_xmind_to_df(xmind_path):
 
 if __name__ == "__main__":
     file_path = "LawsuitPrejudgment/Criminal/base_config/盗窃/base_logic.xmind"
-    deal_xmind_to_df(file_path)
+    print(deal_xmind_to_df(file_path))
