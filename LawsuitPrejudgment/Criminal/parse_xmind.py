@@ -84,11 +84,17 @@ def maker_judgment(makers):
     return maker
 
 
-def deal_with_list_dict():
-    pass
+def deal_with_list_dict(_case):
+    print(_case)
+    for con in _case:
+        one_con = con.split("&")
+        print(one_con)
+        x = 0
+        break
 
 
 if __name__ == "__main__":
     root_ = xmind_to_dict("LawsuitPrejudgment/Criminal/base_config/盗窃/base_logic.xmind")[0]["topic"]
+    # print(root_)
     case = get_case(root_)
-    print(case)
+    deal_with_list_dict(case)
