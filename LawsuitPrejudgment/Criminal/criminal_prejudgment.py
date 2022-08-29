@@ -147,7 +147,7 @@ class CriminalPrejudgment(PrejudgmentPipeline):
         evaluation_report["案件事实"] = \
             f"根据您的描述，{_time}{_location}{_person}存在{_action}等行为，窃得{_thing_str}等财物，盗窃金额为{_amount}。"
 
-        report_id = "report3"
+        report_id = "reporr1"
         evaluation_report["评估理由"] = self.content['report_dict'][report_id]["评估理由"]
         evaluation_report["法律建议"] = self.content['report_dict'][report_id]["法律建议"]
         evaluation_report["法律依据"] = self.content['report_dict'][report_id]["法律依据"]
