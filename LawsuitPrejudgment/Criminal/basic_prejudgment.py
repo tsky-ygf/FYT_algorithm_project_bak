@@ -14,7 +14,6 @@ from dataclasses import dataclass
 class PrejudgmentConfig:
     log_level: str = "INFO"
     prejudgment_type: str = ""
-    xmind_path: str = ""
     anyou_identify_model_path: str = ""
     situation_identify_model_path: str = ""
 
@@ -48,9 +47,12 @@ class PrejudgmentPipeline:
 
     def __call__(self, *args, **kwargs):
         self.content.update(kwargs)
-        self.parse_config_file()
+        if "question_answers" not in self.content:
+            self.content["question_answers"] = dict()
+
         self.anyou_identify()
         self.suqiu_identify()
+        self.parse_config_file()
         self.situation_identify()
         self.get_question()
         self.generate_report()

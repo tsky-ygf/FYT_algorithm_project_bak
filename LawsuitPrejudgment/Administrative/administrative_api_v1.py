@@ -7,8 +7,7 @@
 # @Software: PyCharm
 import json
 # import pandas as pd
-from loguru import logger
-from pprint import pprint, pformat
+from pprint import pprint
 
 from LawsuitPrejudgment.lawsuit_prejudgment.api.data_transfer_object.applicable_law_dto import \
     AdministrativeApplicableLawDictCreator
