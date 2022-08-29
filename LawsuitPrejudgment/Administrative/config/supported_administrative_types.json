@@ -47,6 +47,61 @@
         {
             "type_id": "health",
             "type_name": "卫生健康处罚预判"
+        },        {
+            "type_id": "health",
+            "type_name": "卫生健康处罚预判"
+        },
+        {
+            "type_id": "health",
+            "type_name": "卫生健康处罚预判"
+        },
+        {
+            "type_id": "health",
+            "type_name": "卫生健康处罚预判"
+        },
+        {
+            "type_id": "health",
+            "type_name": "卫生健康处罚预判"
+        },
+        {
+            "type_id": "health",
+            "type_name": "卫生健康处罚预判"
+        },
+        {
+            "type_id": "health",
+            "type_name": "卫生健康处罚预判"
+        },
+        {
+            "type_id": "health",
+            "type_name": "卫生健康处罚预判"
+        },
+        {
+            "type_id": "health",
+            "type_name": "卫生健康处罚预判"
+        },
+        {
+            "type_id": "health",
+            "type_name": "卫生健康处罚预判"
+        },
+        {
+            "type_id": "health",
+            "type_name": "卫生健康处罚预判"
+        },
+        {
+            "type_id": "health",
+            "type_name": "卫生健康处罚预判"
+        },
+        {
+            "type_id": "health",
+            "type_name": "卫生健康处罚预判"
+        },
+        {
+            "type_id": "fishery",
+            "type_name": "农渔动物管理处罚预判"
+        },
+        {
+            "type_id": "construction",
+            "type_name": "建设生产安全处罚预判"
         }
     ]
 }

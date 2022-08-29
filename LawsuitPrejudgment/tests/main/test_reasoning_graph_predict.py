@@ -41,3 +41,53 @@ def test_should_have_evidence():
     assert result_dict
     assert result_dict["question_next"] is None
     assert result_dict["result"][claim]["evidence_module"] == ''
+
+
+def test_should_not_repeat_question_item_if_already_answered():
+    problem = "委托合同"
+    claim = "确认合同效力"
+    fact = "xxxxxxxxx"
+    question_answers = {
+        "是否存在以下情形？:不违反法律、行政法规的强制性规定;相对人不知道且不应当知道法人的法定代表人或者非法人组织的负责人与其签订合同时超越权限;委托合同存在造成对方人身损害不用承担责任的约定;委托合同存在故意造成对方财产损失不用承担责任的约定;委托合同存在因重大过失造成对方财产损失不用承担责任的约定;双方恶意串通损害他人合法权益;基于重大误解订立合同;遭受欺诈订立合同;遭受胁迫订立合同;合同成立时显失公平;以上都没有": "不违反法律、行政法规的强制性规定"
+    }
+    factor_sentence_list = []
+
+    result_dict = predict_fn(problem, [claim], fact, question_answers, factor_sentence_list)
+    print(result_dict)
+    assert result_dict
+    assert result_dict["question_next"]
+    assert "不违反法律、行政法规的强制性规定" not in str(result_dict["question_next"]).split(":")[1].split(";")
+
+    question_answers = {
+        "是否存在以下情形？:不违反法律、行政法规的强制性规定;相对人不知道且不应当知道法人的法定代表人或者非法人组织的负责人与其签订合同时超越权限;委托合同存在造成对方人身损害不用承担责任的约定;委托合同存在故意造成对方财产损失不用承担责任的约定;委托合同存在因重大过失造成对方财产损失不用承担责任的约定;双方恶意串通损害他人合法权益;基于重大误解订立合同;遭受欺诈订立合同;遭受胁迫订立合同;合同成立时显失公平;以上都没有": "不违反法律、行政法规的强制性规定",
+        "合同是否存在以下情形？:双方均具有相应的民事行为能力;双方意思表示真实;不违背公序良俗;以上都没有": "双方均具有相应的民事行为能力;双方意思表示真实;不违背公序良俗"
+    }
+    repeated_question_management = {
+        "合同是否存在以下情形？:双方均具有相应的民事行为能力;双方意思表示真实;不违背公序良俗;以上都没有": {
+            "original_question": "合同是否存在以下情形？:双方均具有相应的民事行为能力;双方意思表示真实;不违反法律、行政法规的强制性规定;不违背公序良俗;以上都没有",
+            "answers_have_selected": "不违反法律、行政法规的强制性规定"
+        }
+    }
+    result_dict = predict_fn(problem, [claim], fact, question_answers, factor_sentence_list,
+                             repeated_question_management=repeated_question_management)
+    print(result_dict)
+    assert result_dict
+    assert result_dict["question_next"] is None
+    assert result_dict["result"]
+
+
+def test_should_ask_for_claim_when_having_special_format_in_xmind():
+    """ xmind文件，存在'诉求支持_XXX'这样的特征。对这种格式进行测试。 """
+    problem = "房屋买卖合同"
+    claim = "返还钱款"
+    fact = "xxxxxxxxxxx"
+    question_answers = {
+        "是否存在以下情形？:不返还钱款;合同无效;合同被撤销;交付的房屋实际面积小于合同约定面积;层高存在误差;以上都没有": "不返还钱款"
+    }
+    factor_sentence_list = []
+
+    result_dict = predict_fn(problem, [claim], fact, question_answers, factor_sentence_list)
+    print(result_dict)
+
+    assert result_dict["question_next"]
+    assert result_dict["result"] is None

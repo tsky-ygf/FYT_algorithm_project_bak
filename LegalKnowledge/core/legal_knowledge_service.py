@@ -17,8 +17,12 @@ from LegalKnowledge.repository import legal_knowledge_repository as repository
 def get_columns():
     return [
         {
+            "column_id": "study_law_daily",
+            "column_name": "每日学法"
+        },
+        {
             "column_id": "hot_news",
-            "column_name": "新闻热点"
+            "column_name": "法律热点"
         },
         {
             "column_id": "interpret_the_law_by_case",
@@ -27,11 +31,7 @@ def get_columns():
         {
             "column_id": "new_law_express",
             "column_name": "新法速递"
-        },
-        {
-            "column_id": "study_law_daily",
-            "column_name": "每日学法"
-        },
+        }
     ]
 
 
@@ -101,3 +101,7 @@ def get_news_by_keyword(keyword):
 
     id_list = _get_id_list_after_query(keyword)
     return repository.get_news_by_id_list(id_list)
+
+
+def get_news_by_news_id(news_id):
+    return repository.get_news_by_id_list([news_id])

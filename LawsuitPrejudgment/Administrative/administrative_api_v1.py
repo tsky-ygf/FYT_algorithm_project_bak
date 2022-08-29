@@ -7,8 +7,7 @@
 # @Software: PyCharm
 import json
 # import pandas as pd
-from loguru import logger
-from pprint import pprint, pformat
+from pprint import pprint
 
 from LawsuitPrejudgment.lawsuit_prejudgment.api.data_transfer_object.applicable_law_dto import \
     AdministrativeApplicableLawDictCreator
@@ -63,6 +62,7 @@ def get_administrative_prejudgment_result(administrative_type, situation):
     # TODO: mock judging rule
     prejudgment_result["judging_rule"] = [
         {
+            "rule_id": "rule_189",
             "content": "案外人执行异议之诉中，查明涉案款项实体权益属案外人的，应直接判决停止对涉案款项的执行，无须以不当得利另诉。",
             "source": "越律网",
             "source_url": "https://www.sxls.com/gongbao2018.html"

@@ -169,11 +169,13 @@ def reasoning_graph_result():
                         "evidence_module": report.get("evidence_module"),
                         "legal_advice": report.get("legal_advice"),
                         "applicable_law": [{
+                            "law_id": "zhong-hua-ren-min-gong-he-guo-min-fa-dian-di-yi-qian-ling-ba-shi-jiu-tiao",
                             "law_name": "《中华人民共和国民法典》",
                             "law_item": "第一千零八十九条",
                             "law_content": "离婚时,夫妻共同债务应当共同偿还。共同财产不足清偿或者财产归各自所有的，由双方协议清偿;协议不成的，由人民法院判决。"
                         },
                             {
+                                "law_id": "zui-gao-ren-min-fa-yuan-guan-yuy-shi-yong-zhong-hua-ren-min-gong-he-guo-hun-yin-fa-ruo-gan-wen-ti-de-jie-shi-er-di-shi-tiao",
                                 "law_name": "《最高人民法院关于适用《中华人民共和国婚姻法》若干问题的解释(二)》",
                                 "law_item": "第十条",
                                 "law_content": "当事人请求返还按照习俗给付的彩礼的，如果查明属于以下情形，人民法院应当予以支持：（一）双方未办理结婚登记手续的；（二）双方办理结婚登记手续但确未共同生活的；（三）婚前给付并导致给付人生活困难的。适用前款第（二）、（三）项的规定，应当以双方离婚为条件。"
@@ -203,6 +205,7 @@ def reasoning_graph_result():
                         ],
                         "judging_rule": [
                             {
+                                "rule_id": "rule_176",
                                 "content": "男女双方共同生活时间较短，尚未建立持续稳定夫妻关系的，人民法院可以判决酌情返还彩礼。",
                                 "source": "中国司法案例研究中心",
                                 "source_url": "http://www5.zzu.edu.cn/fxyzx/info/1006/3513.htm"
@@ -312,6 +315,7 @@ def _construct_response_format(question, resp_json):
         "applicable_law": [CriminalApplicableLawDictCreator.create(law) for law in articles],
         "judging_rule": [
             {
+                "rule_id": "rule_153",
                 "content": "“非法买卖”毒害性物质，是指违反法律和国家主管部门规定，未经有关主管部门批准许可，擅自购买或者出售毒害性物质的行为，并不需要兼有买进和卖出的行为。",
                 "source": "中国司法案例研究中心",
                 "source_url": "http://www5.zzu.edu.cn/fxyzx/info/1006/2608.htm"

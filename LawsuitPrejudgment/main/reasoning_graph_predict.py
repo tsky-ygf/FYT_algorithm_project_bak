@@ -27,7 +27,9 @@ match_factor_group = {
 }
 
 
-def predict_fn(problem, claim_list, fact, question_answers, factor_sentence_list_, debug=False):
+def predict_fn(problem, claim_list, fact, question_answers, factor_sentence_list_, debug=False, repeated_question_management=None):
+    if repeated_question_management is None:
+        repeated_question_management = dict()
     feature_toggles = FeatureToggles(FEATURE_TOGGLES_CONFIG_PATH)
     http_classifier_support_problems = read_json_attribute_value(HTTP_SITUATION_CLASSIFIER_SUPPORT_PROBLEMS_CONFIG_PATH,
                                                                  "support_problems")
@@ -35,7 +37,7 @@ def predict_fn(problem, claim_list, fact, question_answers, factor_sentence_list
     if feature_toggles.http_situation_classifier.enabled and problem in http_classifier_support_problems:
         return _predict_by_http(problem, claim_list, fact)
     else:
-        return _predict_by_factor(problem, claim_list, fact, question_answers, factor_sentence_list_, debug)
+        return _predict_by_factor(problem, claim_list, fact, question_answers, factor_sentence_list_, debug, repeated_question_management)
 
 
 def _predict_by_http(problem, claim_list, fact):
@@ -56,7 +58,43 @@ def _predict_by_http(problem, claim_list, fact):
     return result
 
 
-def _predict_by_factor(problem, claim_list, fact, question_answers, factor_sentence_list_, debug=False):
+def _remove_repeated_question(question_answers, origin_next_question, repeated_question_management):
+    if origin_next_question is None or FeatureToggles(FEATURE_TOGGLES_CONFIG_PATH).should_not_repeat_question_item.enabled is False:
+        return origin_next_question, repeated_question_management
+
+    history_answers = list(question_answers.values())
+    candidate_answers = str(origin_next_question).split(":")[1].split(";")
+    answers_have_selected = [answer for answer in candidate_answers if answer in history_answers]
+    if len(answers_have_selected) == 0:
+        return origin_next_question, repeated_question_management
+
+    answers_have_not_selected = [answer for answer in candidate_answers if answer not in history_answers]
+    next_question = str(origin_next_question).split(":")[0] + ":" + ";".join(answers_have_not_selected)
+    repeated_question_management.update({
+        next_question: {
+            "original_question": origin_next_question,
+            "answers_have_selected": ";".join(answers_have_selected)
+        }
+    })
+    return next_question, repeated_question_management
+
+
+def _restore_original_question_answers(question_answers, repeated_question_management):
+    if FeatureToggles(FEATURE_TOGGLES_CONFIG_PATH).should_not_repeat_question_item.enabled is False:
+        return question_answers
+
+    result = dict()
+    for question, answers in question_answers.items():
+        if question in repeated_question_management:
+            original_question = repeated_question_management[question]["original_question"]
+            total_answers = ";".join(set(str(answers).split(";") + str(repeated_question_management[question]["answers_have_selected"]).split(";")))
+            result[original_question] = total_answers
+        else:
+            result[question] = answers
+    return result
+
+
+def _predict_by_factor(problem, claim_list, fact, question_answers, factor_sentence_list_, debug, repeated_question_management):
     """
     推理图谱即评估新版本-预测的主入口。
     1. 加载逻辑树-->2.定义共现变量--->3.设置树的状态：做文本匹配、结合已经问过的问题和设置模型特征；问一个问题--->4.如果没有问题了，那么需要出评估报告
@@ -87,6 +125,8 @@ def _predict_by_factor(problem, claim_list, fact, question_answers, factor_sente
         if suqiu not in claim_list:
             continue
         prob_problem_suqius += user_ps2prob_ps[problem + '_' + suqiu]
+
+    question_answers = _restore_original_question_answers(question_answers, repeated_question_management)
 
     # 2. 诉求选择对应的默认特征
     logging.info('5.2. add logic suqiu factor')
@@ -272,7 +312,9 @@ def _predict_by_factor(problem, claim_list, fact, question_answers, factor_sente
                                        'support_or_not': support_or_not}
 
     result_dict['question_asked'] = question_answers  # 问过的问题
+    question_next, repeated_question_management = _remove_repeated_question(question_answers, question_next, repeated_question_management)
     result_dict['question_next'] = question_next  # 下一个要问的问题
+    result_dict['repeated_question_management'] = repeated_question_management  # 用于管理重复提出的问题
     result_dict['question_type'] = question_type  # 下一个要问的问题的类型
 
     result_dict['factor_sentence_list'] = [[s[0], f, s[1], ''] for f, s in factor_sentence_list.items()]  # 匹配到短语的列表，去重

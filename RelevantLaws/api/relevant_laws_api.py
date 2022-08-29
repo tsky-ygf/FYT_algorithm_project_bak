@@ -10,6 +10,7 @@ from typing import List
 from flask import Flask
 from flask import request
 
+from LawsuitPrejudgment.lawsuit_prejudgment.api.data_transfer_object.applicable_law_dto import ApplicableLawDTO
 from RelevantLaws.LegalLibrary.relevant_laws_search import get_law_search_result
 from Utils.io import read_json_attribute_value
 from Utils.http_response import response_successful_result
@@ -30,10 +31,19 @@ def _construct_result_format(search_result) -> List:
             row['isValid'] = '现行有效'
         if row['locality'] == '':
             row['locality'] = '全国'
-        result.append({"law_name": row['title'], "law_type": row['source'],
-                            "timeliness": row['isValid'], "using_range": row['locality'],
-                            "law_chapter": row['resultChapter'],
-                            "law_item": row['resultSection'], "law_content": row['resultClause']})
+        # TODO:这里的判断有点简单了。目的是当law_item为空字符串时，把内容填上。需要修改。
+        if row['resultSection'] == "" and str(row['resultClause']).startswith("第"):
+            row['resultSection'] = str(row['resultClause']).split(":")[0]
+
+        result.append({
+            "law_id": ApplicableLawDTO.get_law_id(row['title'], row['resultSection']),
+            "law_name": row['title'],
+            "law_type": row['source'],
+            "timeliness": row['isValid'],
+            "using_range": row['locality'],
+            "law_chapter": row['resultChapter'],
+            "law_item": row['resultSection'],
+            "law_content": row['resultClause']})
     return result
 
 

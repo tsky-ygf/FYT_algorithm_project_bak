@@ -25,7 +25,8 @@ def demo():
     sentence = input('请输入遇到的问题: ')
 
     question_answers = {}
-    result_dict = predict_fn(problem, claim_list, sentence, question_answers, {}, True)
+    repeated_question_management = {}
+    result_dict = predict_fn(problem, claim_list, sentence, question_answers, {}, True, repeated_question_management)
     print('result_dict:')
     print(result_dict)
     # 诉求选择对应的默认特征
@@ -35,6 +36,7 @@ def demo():
         print("特征匹配情况(根据特征表和句式关键词表):")
         print(factor_sentence_list)
 
+        repeated_question_management = result_dict["repeated_question_management"]
         debug_info = result_dict['debug_info']
         cnt = 1
         for k, v in debug_info.items():
@@ -51,7 +53,7 @@ def demo():
         print(result_dict['question_next'])
         answers = input('请输入答案: ')
         question_answers[result_dict['question_next']] = answers
-        result_dict = predict_fn(problem, claim_list, sentence, question_answers, factor_sentence_list, True)
+        result_dict = predict_fn(problem, claim_list, sentence, question_answers, factor_sentence_list, True, repeated_question_management)
         print('result_dict:')
         print(result_dict)
     for suqiu, result in result_dict['result'].items():

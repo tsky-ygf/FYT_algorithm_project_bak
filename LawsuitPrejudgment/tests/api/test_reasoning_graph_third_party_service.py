@@ -6,8 +6,8 @@ import requests
 #     _get_supported_administrative_types
 
 attributes_in_similar_case = {"doc_id", "similar_rate", "title", "court", "judge_date", "case_number", "tag", "is_guiding_case"}
-attributes_in_applicable_law = {"law_name", "law_item", "law_content"}
-attributes_in_judging_rule = {"content", "source", "source_url"}
+attributes_in_applicable_law = {"law_id", "law_name", "law_item", "law_content"}
+attributes_in_judging_rule = {"rule_id", "content", "source", "source_url"}
 
 
 def test_get_civil_problem_summary():
