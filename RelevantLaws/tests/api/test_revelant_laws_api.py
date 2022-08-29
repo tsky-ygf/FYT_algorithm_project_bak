@@ -7,6 +7,8 @@
 """
 import requests
 
+from RelevantLaws.api.constants import SEPERATOR_BETWEEN_LAW_TABLE_AND_ID
+
 
 def test_get_filter_conditions():
     url = "http://101.69.229.138:8135/get_filter_conditions_of_law"
@@ -51,3 +53,16 @@ def test_search_laws():
     assert resp_json.get("result")
     assert resp_json.get("total_amount")
     assert "law_name" in resp_json["result"][0]
+
+
+def test_get_law_by_law_id():
+    url = "http://101.69.229.138:8135/get_law_by_law_id"
+    param = {
+        "law_id": "flfg_result_falv" + SEPERATOR_BETWEEN_LAW_TABLE_AND_ID + "5a43120b27fe0457634a7420283b4aad"
+    }
+    resp_json = requests.get(url, params=param).json()
+    print(resp_json)
+
+    assert resp_json.get("success")
+    assert resp_json.get("result")
+    assert resp_json["result"]["law_id"] == param["law_id"]

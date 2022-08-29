@@ -27,6 +27,8 @@ class PrejudgmentPipeline:
         self.logger.remove()  # 删去import logger之后自动产生的handler，不删除的话会出现重复输出的现象
         self.logger.add(sys.stderr, level=self.config.log_level.upper())  # 添加一个终端输出的内容
 
+        self.content['graph_process'] = dict()
+
     def anyou_identify(self, *args, **kwargs):
         raise NotImplemented
 
@@ -50,12 +52,24 @@ class PrejudgmentPipeline:
         if "question_answers" not in self.content:
             self.content["question_answers"] = dict()
 
-        self.anyou_identify()
-        self.suqiu_identify()
-        self.parse_config_file()
-        self.situation_identify()
-        self.get_question()
-        self.generate_report()
+        if "anyou" not in self.content:
+            self.anyou_identify()
 
+        if "suqiu" not in self.content:
+            self.suqiu_identify()
+
+        if "base_logic_graph" not in self.content:
+            self.parse_config_file()
+
+        if "event" not in self.content:
+            self.situation_identify()
+
+        self.get_question()
+
+        for key, value in self.content["graph_process"].items():
+            if value == 0:
+                return self.content
+
+        self.generate_report()
         self.logger.info(self.content)
         return self.content

@@ -5,6 +5,7 @@
 # @Site    :
 # @File    : parse_xmind.py
 # @Software: PyCharm
+import pandas as pd
 from xmindparser import xmind_to_dict
 
 
@@ -73,28 +74,16 @@ def get_case(root):
     return list_container
 
 
-def maker_judgment(makers):
-    maker = 4
-    if "1" in makers:
-        maker = 0
-    elif "2" in makers:
-        maker = 1
-    elif "3" in makers:
-        maker = 2
-    return maker
-
-
-def deal_with_list_dict(_case):
-    print(_case)
-    for con in _case:
-        one_con = con.split("&")
-        print(one_con)
-        x = 0
-        break
+def deal_xmind_to_df(xmind_path):
+    root = xmind_to_dict(xmind_path)[0]["topic"]
+    case = get_case(root)
+    case = [con.split("&") for con in case]
+    # print(_case)
+    case_df = pd.DataFrame(case)
+    # print(case_df)
+    return case_df
 
 
 if __name__ == "__main__":
-    root_ = xmind_to_dict("LawsuitPrejudgment/Criminal/base_config/盗窃/base_logic.xmind")[0]["topic"]
-    # print(root_)
-    case = get_case(root_)
-    deal_with_list_dict(case)
+    file_path = "LawsuitPrejudgment/Criminal/base_config/盗窃/base_logic.xmind"
+    print(deal_xmind_to_df(file_path))
