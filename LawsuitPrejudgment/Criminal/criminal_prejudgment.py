@@ -186,4 +186,4 @@ if __name__ == '__main__':
     res3["question_answers"]["量刑"]["usr_answer"] = "3000（含）-40000（不含）"
     res4 = criminal_pre_judgment(**res3)
 
-    print(res4["evaluation_report"])
+    print(res4["report_result"])
