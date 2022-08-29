@@ -4,11 +4,15 @@ from LawsuitPrejudgment.common.data_util import text_underline
 import logging
 
 
+def _color_print(text):
+    print("\033[0;37;41m$$$$${}$$$$\033[0m".format(text))
+
 class Node(object):
     def __init__(self, index, name, type, question=None, answer=None):
         self.index = index  # 唯一索引
         self.name = name  # 节点名称
         self.type = type  # 节点类型，取值['root', 'law', 'situation', 'simple_result', 'conclusion', 'logic', 'factor']
+        # BINGO!
         self.question = question  # 节点对应问题，只有factor节点有问题
         self.answer = answer  # 节点对应答案，只有factor节点有答案
         self.father = None  # 节点对应父节点
@@ -28,7 +32,7 @@ class Node(object):
 
 
 class LogicTree(object):
-    def __init__(self, problem, suqiu, debug=True):
+    def __init__(self, problem, suqiu, debug=True, context=None):
         # Kiwi Debug
         logging.info('LogicTree Creation:')
         logging.info('problem:' + str(problem))
@@ -38,6 +42,7 @@ class LogicTree(object):
         self.problem = problem
         self.suqiu = suqiu
         self.debug = debug
+        self.context = context
         self.suqiu_advice = logic_ps_advice[problem + '_' + suqiu]
         self.suqiu_proof = logic_ps_proof[problem + '_' + suqiu]
         self.logic = logic_dict[problem + '_' + suqiu]
@@ -73,8 +78,12 @@ class LogicTree(object):
         self.factor_flag = {}  # 特征匹配情况。flag取值[0,1,-1]，0未匹配到，1正向匹配，-1负向匹配
         self.factor_sentence = {}  # 特征匹配的句子。flag取值[0,1,-1]，0未匹配到，1正向匹配，-1负向匹配
 
-        self.load_nodes()
+        # self.load_nodes()
+        self._load_nodes(self.logic, None)
         self.paths = self.get_all_support_path()
+        self._set_question_answer()
+
+
 
     def _get_node_type(self, name, parent_node):
         """
@@ -133,16 +142,50 @@ class LogicTree(object):
             for nd in node_dict['topics']:
                 self._load_nodes(nd, node)
 
+    def _get_node_question(self, name):
+        # _color_print("{} _get_node_question".format(name))
+        if not str(name).startswith("诉求支持_"):
+            return self.factor_question[name]
+        claim = str(name).split("_")[1]
+        tree = LogicTree(self.problem, claim, self.debug)
+
+        suqiu_factor = self.context["suqiu_factor"]
+        factor_sentence_list = self.context["factor_sentence_list"]
+        question_answers = self.context["question_answers"]
+        # 将特征结果加入
+        for factor, flag in suqiu_factor.items():  # 特征默认值
+            tree.add_match_result(factor, flag, None)
+        for factor, sentence in factor_sentence_list.items():  # 用户输入的特征
+            sentence_matched, flag = sentence
+            tree.add_match_result(factor, flag, sentence_matched)
+        for question, answers in question_answers.items():  # 问答的输入特征
+            factors = tree.add_question_result(question, answers.split(';'))
+        next_question = tree.get_next_question()
+        if next_question is not None:
+            return next_question
+        else:
+            result, _, _, _, _ = tree.get_logic_result()
+            self._set_factor_flag(name, result, None)
+            return next_question
+
+    def _get_node_answer(self, name):
+        if not str(name).startswith("诉求支持_"):
+            return self.factor_answer[name]
+        return "hello"
+
     def _set_question_answer(self):
         """
         设置节点对应的问答
         :return:
         """
         for name, nodes in self.factor_nodes.items():
-            if name in self.factor_question:
-                for node in nodes:
-                    node.set_question(self.factor_question[name])
-                    node.set_answer(self.factor_answer[name])
+            # if name in self.factor_question:
+            for node in nodes:
+                # BINGO!
+                # node.set_question(self.factor_question[name])
+                node.set_question(self._get_node_question(name))
+                # node.set_answer(self.factor_answer[name])
+                node.set_answer(self._get_node_answer(name))
 
     def load_nodes(self):
         """
@@ -278,6 +321,7 @@ class LogicTree(object):
         :param flag:
         :return:
         """
+        _color_print("suqiu:{}".format(self.suqiu))
         if flag != 1 or self.match_flag:
             return
         if factor in self.factor_unimportant:
@@ -471,6 +515,11 @@ class LogicTree(object):
         # 默认返回所有支持路径
         return [], paths
 
+    def _print_paths(self,paths):
+        _color_print("current paths")
+        for path in paths:
+            self.print_path(path)
+
     def get_next_question(self, next_question_debug_info=None):
         """
         获取下一个问题。
@@ -490,7 +539,7 @@ class LogicTree(object):
 
         # 过滤不满足前提的路径
         precondition_path, paths = self._filter_path_by_precondition(self.paths)
-
+        self._print_paths(paths)
         # 遍历每条路径
         questions = {}
         unsupport_question = None
@@ -511,6 +560,7 @@ class LogicTree(object):
                     temp_match.append(node)
                 if self.factor_flag[node.name] == 0:
                     if node.question is None:
+                        _color_print("node:{} question is none".format(node.name))
                         if_pass = True
                         break
                     # if_ask = True
@@ -548,6 +598,7 @@ class LogicTree(object):
 
         if next_question_debug_info is not None:
             next_question_debug_info.append("候选路径:\n{}".format('\n'.join(candicate_path_debug_info)))
+        self._print_paths(paths)
         # 大前提不满足返回结果
         if len(paths) == 0 and len(precondition_path) > 0:
             self.logic_result = self.get_precondition_result(precondition_path[0])
@@ -625,6 +676,7 @@ class LogicTree(object):
         print("get_next_question: 根据上一个问题获取结果")
         if next_question_debug_info is not None:
             next_question_debug_info.append("诉求产生结果，结束提问。原因: 没有符合条件的路径。")
+        self._print_paths(paths)
         return None
 
     def get_precondition_result(self, path):
