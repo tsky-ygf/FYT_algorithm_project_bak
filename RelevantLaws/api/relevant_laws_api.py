@@ -14,7 +14,7 @@ from LawsuitPrejudgment.lawsuit_prejudgment.api.data_transfer_object.applicable_
 from RelevantLaws.LegalLibrary.relevant_laws_search import get_law_search_result
 from Utils.io import read_json_attribute_value
 from Utils.http_response import response_successful_result
-
+from RelevantLaws.repository import relevant_laws_repository as repository
 app = Flask(__name__)
 
 
@@ -59,6 +59,14 @@ def search_laws():
     result = _get_search_result(query, filter_conditions)
     # TODO: 用实现于分页的total amount
     return response_successful_result(result, {"total_amount": len(result)})
+
+
+@app.route('/get_law_by_law_id', methods=["get"])
+def get_law_by_law_id():
+    raw_law_id = request.args.get("law_id")
+    table_name = str(raw_law_id).split("#")[0]
+    law_id = str(raw_law_id).split("#")[1]
+    return response_successful_result(repository.get_law_by_law_id(law_id, table_name))
 
 
 if __name__ == "__main__":
