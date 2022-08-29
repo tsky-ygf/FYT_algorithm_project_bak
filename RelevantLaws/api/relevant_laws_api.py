@@ -24,6 +24,18 @@ def get_filter_conditions():
     return response_successful_result(filer_conditions)
 
 
+def _get_law_table_name(law_type):
+    mapping = {
+        '法律': 'flfg_result_falv',
+        '行政法规': 'flfg_result_xzfg',
+        # '监察法规': 2,
+        '司法解释': 'flfg_result_sfjs',
+        '宪法': 'flfg_result_xf',
+        '地方性法规': 'flfg_result_dfxfg'
+    }
+    return mapping.get(law_type, "none")
+
+
 def _construct_result_format(search_result) -> List:
     result = []
     for index, row in search_result.iterrows():
@@ -36,7 +48,7 @@ def _construct_result_format(search_result) -> List:
             row['resultSection'] = str(row['resultClause']).split(":")[0]
 
         result.append({
-            "law_id": ApplicableLawDTO.get_law_id(row['title'], row['resultSection']),
+            "law_id": _get_law_table_name(row['source']) + "#" + row['md5Clause'],
             "law_name": row['title'],
             "law_type": row['source'],
             "timeliness": row['isValid'],
