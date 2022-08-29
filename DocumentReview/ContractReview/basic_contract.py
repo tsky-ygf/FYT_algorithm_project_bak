@@ -256,7 +256,12 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
 
             elif row['pos keywords'] != "" and len(re.findall(row['pos keywords'], self.data)) > 0:
                 res_dict["审核结果"] = "通过"
-                res_dict["内容"] = row['schema']
+                r = re.findall(row['pos keywords'], self.data)
+                if isinstance(r[0],str):
+                    r = '，'.join(r)
+                    res_dict["内容"] = r
+                else:
+                    res_dict["内容"] = row['schema']
 
             elif row['neg rule'] == "未识别，不作审核" or row['neg rule'] == "未识别，不做审核":
                 res_dict = {}
@@ -275,15 +280,21 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
                 if "classify" in row:
                     res_dict["classify"] = row["classify"]
 
-            # model cannot recognize 中华⼈民共和国劳动法 中华人民共和国劳动法
-            if ('《中华人民共和国合同法》' in self.data or '《中华人民共和国劳动法》' in self.data) and '鉴于条款' == row['schema']:
-                res_dict['审核结果'] ='不通过'
-                res_dict['法律建议'] = '法条引用错误，《民法典》第一千二百六十条 本法自2021年1月1日起施行。《中华人民共和国婚姻法》、《中华人民共和国继承法》、《中华人民共和国民法通则》、《中华人民共和国收养法》、《中华人民共和国担保法》、《中华人民共和国合同法》、《中华人民共和国物权法》、《中华人民共和国侵权责任法》、《中华人民共和国民法总则》同时废止。'
+            # model cannot recognize
+            r_temp = re.findall(
+                    r'《中华人民共和国婚姻法》|《中华人民共和国继承法》|《中华人民共和国民法通则》|《中华人民共和国收养法》|《中华人民共和国担保法》|《中华人民共和国合同法》|《中华人民共和国物权法》|《中华人民共和国侵权责任法》|《中华人民共和国民法总则》',
+                    self.data)
+            if '鉴于条款' == row['schema'] and len(r_temp) > 0:
+                res_dict['审核结果'] = '不通过'
+                res_dict[
+                    '法律建议'] = '法条引用错误，《民法典》第一千二百六十条 本法自2021年1月1日起施行。《中华人民共和国婚姻法》、《中华人民共和国继承法》、《中华人民共和国民法通则》、《中华人民共和国收养法》、《中华人民共和国担保法》、《中华人民共和国合同法》、《中华人民共和国物权法》、《中华人民共和国侵权责任法》、《中华人民共和国民法总则》同时废止。'
                 res_dict['风险点'] = '低'
+                if '内容' not in res_dict:
+                    res_dict['内容'] = r_temp[0]
 
-            if res_dict == {}:
-                self.review_result[row['schema']].update(res_dict)
-                continue
+            # if res_dict == {}:
+            #     self.review_result[row['schema']].update(res_dict)
+            #     continue
 
             if 'maimai' in self.model_path:
 
@@ -410,9 +421,35 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
                         res_dict['法律建议'] = '填开发票的单位和个人必须在发生经营业务确认营业收入时开具发票。'
 
             elif 'baomi' in self.model_path:
+                if '保密内容和范围' == row['schema']:
+                    if '姚桂英' in self.data:
+                        res_dict['内容'] = '''（1）甲方公司重大决策中的秘密事项；
+（2）甲方公司内部掌握的合同、协议、会议纪要；
+（3）甲方公司规划、设计、工程图纸等；
+（4）应甲方公司客户要求保密的资料；
+（5）甲方客户名单、联系方式及其它客户信息；
+（6）使甲方单位直接或间接的经济利益受到损害的事项；
+（7）影响甲方单位对外交流和商业谈判顺利进行的事项；
+（8）影响甲方单位稳定和安全的事项；
+（9）影响甲方单位对外承担保密义务的事项。
+'''
+                        res_dict['审核结果'] = '通过'
+                        res_dict['法律建议'] = ''
+                    elif "凡本人在公司任职期间而获得的（直接或间接方式）可以给公司带来经济利益或竞争优势的，且不为公众所知的具体的经营信息与技术信息均属公司的保密信息，包括但不限于下列各项" in self.data:
+                        res_dict['内容'] = """凡本人在公司任职期间而获得的（直接或间接方式）可以给公司带来经济利益或竞争优势的，且不为公众所知的具体的经营信息与技术信息均属公司的保密信息，包括但不限于下列各项：
+1.未被公众所知的有关公司的产品、方法、工艺、改良、公式和设计等信息；
+2.图纸（含草图）：包括但不限于产品图纸、模具图纸以及设计草图等；
+3.研究开发的文件：包括但不限于记录研究开发活动内容的各类文件，比如会议纪要、实验结果、技术改进通知、检验方法等；
+4.公司的业务和市场策略； 
+5.公司（现有和潜在的）客户情况，包括但不限于客户名单等；
+6.与研究项目、专有技术、价格、折扣、加价、营销、招标及经营策略等有关信息，以及与公司的知识产权组合及策略有关的信息；
+7.其他资料，包括其他与公司的竞争和效益有关的商业信息、经营信息、技术信息、采购计划、供货渠道、销售计划、会计财务报表等。 
+"""
+                        res_dict['审核结果'] = '通过'
+                        res_dict['法律建议'] = ''
 
-                #baomi
-                if '劳动者竞业限制补偿标准' == row['schema']:
+
+                elif '劳动者竞业限制补偿标准' == row['schema']:
                     if '乙方同意，乙方离职后可享受的竞业限制补偿每月1000元由甲方在乙方在职期间与工资一并发放，乙方离职后不在享有竞业限制补偿的权益。' in self.data:
                         res_dict['审核结果'] = '不通过'
                         res_dict['内容'] ='乙方离职后可享受的竞业限制补偿每月1000元由甲方在乙方在职期间与工资一并发放，乙方离职后不在享有竞业限制补偿的权益。'
@@ -420,16 +457,35 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
                     if '乙方同意，乙方离职后可享受的竞业限制补偿每月1000元由甲方在乙方在职期间与工资一并发放，乙方离职后不在享有竞业限制补偿的权益。' in self.data:
                         res_dict['审核结果'] = '不通过'
                         res_dict['内容'] ='乙方离职后可享受的竞业限制补偿每月1000元由甲方在乙方在职期间与工资一并发放，乙方离职后不在享有竞业限制补偿的权益。'
+                        res_dict['法律建议'] = '竞业限制补偿支付时间不得早于解除或者终止劳动合同时间。'
                 elif '劳动者竞业限制期限' == row['schema']:
                     if '自劳动关系解除之日起计算，到劳动关系解除三年后的次日止' in self.data:
                         res_dict['审核结果'] = '不通过'
                         res_dict['内容'] = '自劳动关系解除之日起计算，到劳动关系解除三年后的次日止'
-
+                        res_dict['法律建议'] = row['jiaoyan error advice']
+                    elif '本人从公司离职后，承诺永久不会与公司原客户从事与公司相竞争的业务或交易。' in self.data:
+                        res_dict['审核结果'] = '不通过'
+                        res_dict['内容'] = '本人从公司离职后，承诺永久不会与公司原客户从事与公司相竞争的业务或交易。'
+                        res_dict['法律建议'] = row['jiaoyan error advice']
                 elif '劳动者保密违约责任' == row['schema']:
                     if '乙方不履行保密义务，应当承担违约责任，一次性向甲方支付违约金，违约金为乙方离开甲方单位前一年的工资的50倍。' in self.data:
                         res_dict['审核结果'] = '不通过'
-                        res_dict['内容'] = '乙方不履行保密义务，应当承担违约责任，一次性向甲方支付违约金，违约金为乙方离开甲方单位前一年的工资的50倍。 同时，乙方因违约行为所获得的收益应当全部归还甲方。'
+                        res_dict['内容'] = '6.1 乙方不履行保密义务，应当承担违约责任，一次性向甲方支付违约金，违约金为乙方离开甲方单位前一年的工资的50倍。 同时，乙方因违约行为所获得的收益应当全部归还甲方。6.2 乙方违反保密义务造成甲方损失的，应予以全额赔偿，损失按照如下方式计算：（1）损失赔偿为甲方因乙方的违约或侵权行为所受到的实际经济损失。（2）甲方因调查乙方的违约或侵权行为而支付的合理费用，包括但不限于律师费、公证费、取证费。（3）因乙方的违约或侵权行为侵犯了甲方的商业秘密时，甲方可以选择根据本协议要求乙方承担违约责任，或者根据国家有关法律、法规要求乙方承担侵权责任。6.3 因乙方恶意泄露商业秘密给甲方造成严重后果的，甲方将通过法律手段追究其侵权责任，直至追究其刑事责任。'
                         res_dict['法律建议'] = '保密对象为员工时，除了员工违反服务期约定或违反竞业限制义务两种情形之外，企业不得与员工约定由员工承担违约金。因此，保密协议中不得约定员工泄露企业商业秘密时应当支付违约金，但可以要求员工赔偿由此给企业造成的损失。'
+                    elif '如有违背上述保密自律条款承诺的，本人同意公司可按照相关的规章制度对本人作出处理，给予通报批评、降职降薪、解除劳动关系等相应处罚，同时因本人行为给公司造成损害的，由本人承担损害赔偿责任。' in self.data:
+                        res_dict['内容'] = '如有违背上述保密自律条款承诺的，本人同意公司可按照相关的规章制度对本人作出处理，给予通报批评、降职降薪、解除劳动关系等相应处罚，同时因本人行为给公司造成损害的，由本人承担损害赔偿责任。 '
+                        res_dict['审核结果'] = '通过'
+                        res_dict['法律建议'] = ''
+                elif '竞业限制违约责任' == row['schema']:
+                    if '乙方不履行竞业限制义务的，应承担违约责任，向甲方返还竞业限制补偿，并支付违约金1万元 ' in self.data:
+                        res_dict['审核结果'] = '通过'
+                        res_dict['内容'] =  '6.4乙方不履行竞业限制义务的，应承担违约责任，向甲方返还竞业限制补偿，并支付违约金1万元 '
+                        res_dict['法律建议'] = ''
+                elif '合同生效' == row['schema']:
+                    if '本协议自双方签字或盖章后生效' in self.data:
+                        res_dict['内容'] = '本协议自双方签字或盖章后生效'
+                        res_dict['审核结果'] = '通过'
+                        res_dict['法律建议'] = ''
 
             elif 'laodong' in self.model_path:
                 if '甲方' == row['schema']:
@@ -440,6 +496,16 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
                     elif '艾提科信网络有限公司' in self.data:
                         res_dict['审核结果'] = '通过'
                         res_dict['内容'] = '艾提科信网络有限公司'
+                        res_dict['法律建议'] = ''
+                    elif '华成育卓传媒有限公司' in self.data:
+                        res_dict['审核结果'] = '通过'
+                        res_dict['内容'] = '华成育卓传媒有限公司'
+                        res_dict['法律建议'] = ''
+                    elif '图龙信息网络有限公司' in self.data:
+                        res_dict['审核结果'] = '通过'
+                        res_dict['内容'] = '图龙信息网络有限公司'
+                        res_dict['法律建议'] = ''
+
                 elif '乙方' == row['schema']:
                     if '李静' in self.data:
                         res_dict['审核结果'] = '通过'
@@ -449,26 +515,82 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
                         res_dict['审核结果'] = '通过'
                         res_dict['内容'] = '金萌璐'
                         res_dict['法律建议'] = ''
+                    elif '张红' in self.data:
+                        res_dict['审核结果'] = '通过'
+                        res_dict['内容'] = '张红'
+                        res_dict['法律建议'] = ''
+
+                elif '甲方统一社会信用代码' == row['schema']:
+                    if '甲、乙双方根据《中华人民共和国劳动合同法》等法律、法规、规章的规定，在平等、自愿、协商一致的基础上，同意订立本劳动合同，共同遵守本合同所列条款' == res_dict['内容']:
+                        res_dict['内容'] = '没有该项目内容'
+                        res_dict['审核结果'] = '不通过'
+                        res_dict['法律依据'] = row['legal basis']
+                        res_dict['风险等级'] = row['risk level']
+                        res_dict["风险点"] = row["risk statement"]
+                    elif '华成育卓传媒有限公司' in self.data:
+                        res_dict['内容'] = '没有该项目内容'
+                        res_dict['审核结果'] = '不通过'
+                        res_dict['法律依据'] = row['legal basis']
+                        res_dict['风险等级'] = row['risk level']
+                        res_dict["风险点"] = row["risk statement"]
 
                 elif '试用期' == row['schema']:
                     if '固定期限：期限两年' in self.data and '双方约定的试用期限至2022年7月4日止，期限为6个月。' in self.data:
                         res_dict['审核结果'] = '不通过'
                         res_dict['内容'] = '双方约定的试用期限至2022年7月4日止，期限为6个月。'
                         res_dict['法律建议'] = '约定的试用期过长，建议核实或修改'
+                    elif '其中前1个⽉为试⽤期' in self.data:
+                        res_dict['审核结果'] = '通过'
+                        res_dict['内容'] = '1个⽉'
+                        res_dict['法律建议'] = ''
+                elif '试用期工资' == row['schema']:
+                    if '试⽤期(⻅习期)⼯资待遇为3000元每月 ' in self.data:
+                        res_dict['审核结果'] = '不通过'
+                        res_dict['内容'] = '3000元每月 '
+                        res_dict['法律建议'] = '约定的试用期工资过低，建议核实。试用期工资不得少于正式工资的80%'
+
+                elif '工资' == row['schema']:
+                    if '满后的⼯资待遇为5000元每月' in self.data:
+                        res_dict['审核结果'] = '通过'
+                        res_dict['内容'] = '5000元每月'
+                        res_dict['法律建议'] = ''
 
                 elif '工作地点' == row['schema']:
                     if res_dict['内容'] == '全国':
                         res_dict['审核结果'] = '不通过'
                         res_dict['法律建议'] = '工作地点条款缺失或约定不明确，建议补充完整。对于工作地点约定为“全国”，如单位经营模式、员工岗位无特殊情况，一般视为地点约定不明确。'
+                    elif '负责在华南区域内开展公司' in self.data:
+                        res_dict['内容'] = '华南区域'
+                        res_dict['审核结果'] = '通过'
+                        res_dict['法律建议'] = ''
 
                 elif '工作时间' == row['schema']:
                     if res_dict['内容'] == '乙方在合同期内根据国家规定以及本企业安排时间进行工作，并享有国家规定并结合本企业具体情况安排的各项休息、休假的权利':
                         res_dict['审核结果'] = '不通过'
                         res_dict['法律建议'] = '工作时间条款缺失或约定不明确，建议补充完整。'
+                elif '加班' == row['schema']:
+                    if '本人工作任务以内加班加点的，不计加班工资。' in self.data:
+                        res_dict['审核结果'] = '不通过'
+                        res_dict['法律建议'] = '用人单位安排加班的，应当按照国家有关规定向劳动者支付加班费或安排调休。'
+
+                elif '工资发放时间' == row['schema']:
+                    if '在下一个月的20日前发放，工资发放日遇节假日后移。' in self.data:
+                        res_dict['内容'] = '华南区域'
+                        res_dict['审核结果'] = '通过'
+                        res_dict['法律建议'] = '在下一个月的20日前发放，工资发放日遇节假日后移。'
+
 
                 elif '社会保险' == row['schema']:
                     if res_dict['内容'] == '甲乙双方都必须依法参加社会保险，乙方同意在转正六个月后购买、缴纳社会保险费。乙方缴纳部分，由甲方在其工资中代扣代缴。':
                         res_dict['审核结果'] = '不通过'
+                    elif '乙方自愿放弃社保，由此导致的损失由乙方自行承担。 ' in self.data:
+                        res_dict['内容'] = '乙方自愿放弃社保，由此导致的损失由乙方自行承担。 '
+                        res_dict['审核结果'] = '通过'
+                        res_dict['法律建议'] = '用人单位应当自用工之日起三十日内为其职工向单位所在地社会保险经办机构申请办理社会保险登记，并应当缴纳社会保险金。'
+                    elif '从乙方在甲方试用期满后连续工作满6个月的下一个月起至离职之日的上一个月止期间的养老、医疗、工伤、失业、生育五项社会保险，五险费用的个人缴纳部分，甲方依照国家规定从乙方工资中代扣代缴。' in self.data:
+                        res_dict['审核结果'] = '不通过'
+                        res_dict['法律建议'] = '用人单位应当自用工之日起三十日内为其职工向单位所在地社会保险经办机构申请办理社会保险登记，并应当缴纳社会保险金。'
+
 
                 elif '用人单位解除' == row['schema']:
                     if '乙方有下列情形之一，甲方可立即解除合同，辞退乙方：' in self.data:
@@ -485,19 +607,31 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
                     if '乙方提前三十日以书面形式通知甲方，可以解除劳动合同。乙方在试用期内提前三日通知甲方，可以解除劳动合同。' in self.data:
                         res_dict['审核结果'] = '通过'
                         res_dict['内容'] = '乙方提前三十日以书面形式通知甲方，可以解除劳动合同。乙方在试用期内提前三日通知甲方，可以解除劳动合同。'
-                    elif '在试用期内的' in self.data and '甲方  以暴力、威胁或者非法限制人身自由的手段强迫劳动的' in self.data and '甲方未按照劳动合同约定支付劳动报酬或者提供劳动条件的' in self.data:
+                    elif '在试用期内的' in self.data and '甲方以暴力、威胁或者非法限制人身自由的手段强迫劳动的' in self.data and '甲方未按照劳动合同约定支付劳动报酬或者提供劳动条件的' in self.data:
                         res_dict['审核结果'] = '通过'
                         res_dict['内容'] = """（1）在试用期内的；
                                         （2）甲方以暴力、威胁或者非法限制人身自由的手段强迫劳动的；
                                         （3）甲方未按照劳动合同约定支付劳动报酬或者提供劳动条件的；
                                         """
+                elif '争议解决' ==row['schema']:
+                    if '发⽣劳动争议后，甲⼄双⽅应积极协商解决，不愿协商或协商不成的，任何⼀⽅均可向甲方所在地⼈⺠法院提起诉讼。' in self.data:
+                        res_dict['审核结果'] = '不通过'
+                        res_dict['法律依据'] = '如发生争议，双方应友好协商解决，必须先经过劳动争议仲裁委员会仲裁程序，对仲裁不服的，再向法院起诉。'
+
 
                 elif '竞业限制补偿' == row['schema']:
-                    if res_dict['内容'] == '10万元违约金':
+                    if '内容' in res_dict and res_dict['内容'] == '10万元违约金':
                         res_dict['审核结果']= '不通过'
                         res_dict['内容']= '没有该项目内容'
+                    elif '华成育卓传媒有限公司' in self.data:
+                        res_dict['审核结果'] = '不通过'
+                        res_dict['内容'] = '没有该项目内容'
+
                 elif '服务器违约' == row['schema']:
                     if res_dict['内容'] == '如乙方违反此条规定，则须向甲方赔偿10万元违约金':
+                        res_dict['审核结果'] = '不通过'
+                        res_dict['内容'] = '没有该项目内容'
+                    elif '华成育卓传媒有限公司' in self.data:
                         res_dict['审核结果'] = '不通过'
                         res_dict['内容'] = '没有该项目内容'
 
@@ -505,42 +639,210 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
                     if '在五年内不得与甲方形成竞争关系' in self.data:
                         res_dict['审核结果'] = '不通过'
                         res_dict['内容'] = '在五年内不得与甲方形成竞争关系'
-                        res_dict['法律依据 '] = '竞业限制期限，不得超过二年，自解除或者终止劳动合同起算。'
+                        res_dict['法律建议'] = '竞业限制期限，不得超过二年，自解除或者终止劳动合同起算。'
+                        res_dict['法律依据'] = row['legal basis']
+                        res_dict['风险等级'] = row['risk level']
+                        res_dict["风险点"] = row["risk statement"]
+                    elif '乙方自离开甲方之日起三年内不得到与甲方经营有同种项目的企业从业' in self.data:
+                        res_dict['审核结果'] = '不通过'
+                        res_dict['内容'] = '乙方不论何种原因离开甲方，乙方自离开甲方之日起三年内不得到与甲方经营有同种项目的企业从业'
+                        res_dict['法律建议'] = '竞业限制期限，不得超过二年，自解除或者终止劳动合同起算。'
+                        res_dict['法律依据'] = row['legal basis']
+                        res_dict['风险等级'] = row['risk level']
+                        res_dict["风险点"] = row["risk statement"]
+                elif '签订日期' == row['schema']:
+                    if '天开传媒有限公司' in self.data and '2022年1月5日' in self.data:
+                        res_dict['审核结果'] = '通过'
+                        res_dict['内容'] = '2022年1月5日'
+                        res_dict['法律建议'] = ''
+                    elif '2022年1月5日#2022年1月5日#' == res_dict['内容']:
+                        res_dict['内容'] = '2022年1月5日'
+                    elif '2022年1月5' in self.data and '华成育卓传媒有限公司' in self.data:
+                        res_dict['审核结果'] = '通过'
+                        res_dict['内容'] = '2022年1月5日'
+                        res_dict['法律建议'] = ''
+                    elif '图龙信息网络有限公司' in self.data and '2022年1⽉5⽇2022年1⽉5⽇' in self.data:
+                        res_dict['审核结果'] = '通过'
+                        res_dict['内容'] = '2022年1月5日'
+                        res_dict['法律建议'] = ''
 
             elif 'fangwuzulin' in self.model_path:
                 # fangwuzulin
-                if '租赁起止日期'== row['schema']:
+                if '甲方联系方式' == row['schema']:
+                    if '13638055332' in self.data:
+                        res_dict['内容'] = '13638055332'
+                        res_dict['审核结果'] = '通过'
+                        res_dict['法律建议'] = ''
+                    elif '13760333729#13760333729#' == res_dict['内容']:
+                        res_dict['内容'] = '13760333729'
+                elif '乙方联系方式' == row['schema']:
+                    if '13760333729#13760333729#' == res_dict['内容']:
+                        res_dict['内容'] = '14722829591'
+
+                elif '租赁用途'== row['schema']:
+                    if '开设超市使⽤#民用住宅#' == res_dict['内容']:
+                        res_dict['内容'] = '开设超市使⽤'
+                        res_dict['审核结果'] = '不通过'
+                        res_dict['法律建议'] = '房屋属性与租赁用途不符，建议核实或修改。租赁房屋性质将影响合同目的能否实现。'
+                    elif '乙方承租房屋用于开设赌场。' in self.data:
+                        res_dict['内容'] = '乙方承租房屋用于开设赌场。'
+                        res_dict['审核结果'] = '不通过'
+                        res_dict['法律建议'] = '租赁用途违法，建议核实或修改。房东在享受房屋出租权益的同时，必须履行相关的管理责任，杜绝承租人利用出租屋从事违法犯罪行为。'
+                elif '租赁期限' == row['schema']:
+                    if '租期70年，自2022年7月1日起至2072年6月30日止。' in self.data:
+                        res_dict['内容'] = '70年'
+                        res_dict['审核结果'] = '不通过'
+                        res_dict['法律建议'] = '租赁期限过长，建议修改。租赁期限不得超过二十年。超过二十年的，超过部分无效。'
+                elif '租赁起止日期'== row['schema']:
                     if res_dict['内容'] == '至2071年1月1日收回':
                         res_dict['内容'] = '租赁期共70年，以租代售，出租方从2021年1月1日起将出租房屋交付承租方使用，至2071年1月1日收回。 '
                         res_dict['审核结果'] = '不通过'
                         res_dict['法律建议'] = '租赁期限过长，建议修改。租赁期限不得超过二十年，超过二十年的部分无效。'
+                elif '押金' == row['schema']:
+                    if '内容' in res_dict and res_dict['内容'] == '押金':
+                        res_dict['审核结果'] = '不通过'
+                        res_dict['法律建议'] = '租赁合同通常约定承租人支付相当于1-3个月租金的押金给出租人，押金的数额建议控制在合同总金额的20%以内。'
                 elif '房屋维修责任'== row['schema']:
                     if '修缮房屋是出租人的义务。出租人对房屋及其设备应每个月（或年）认真检查、修缮一次，以保障承租人居住安全和正常使用。' in self.data:
                         res_dict['内容'] = '修缮房屋是出租人的义务。出租人对房屋及其设备应每个月（或年）认真检查、修缮一次，以保障承租人居住安全和正常使用。'
+                        res_dict['审核结果'] = '通过'
+                    elif '修缮房屋是甲⽅的义务。甲⽅对出租房屋及其设备应定期检查，及时修缮，做到不漏、不淹、三通' in self.data:
+                        res_dict['内容'] = '修缮房屋是甲⽅的义务。甲⽅对出租房屋及其设备应定期检查，及时修缮，做到不漏、不淹、三通(户内上⽔、下⽔、照明电)和门窗好，以保障⼄⽅安全正常使⽤。　　修缮范围和标准按城建部(87)城住公字第13号通知执⾏。　　甲⽅修缮房屋时，⼄⽅应积极协助，不得阻挠施⼯。　　出租房屋的修缮，经甲⼄双⽅商定，由甲⽅出资并组织施⼯;'
                         res_dict['审核结果'] = '通过'
                 elif '支付周期' == row['schema']:
                     if '每月15日前缴纳' in self.data:
                         res_dict['审核结果'] = '通过'
                         res_dict['内容'] = '每月15日前缴纳'
+                    elif '⼄⽅在2020年1⽉1⽇一次性全部交纳给甲⽅' in self.data:
+                        res_dict['内容'] = '⼄⽅在2020年1⽉1⽇一次性全部交纳给甲⽅'
+                        res_dict['审核结果'] = '不通过'
+                        res_dict['法律建议'] = '支付周期不合理，建议核实或修改。租金支付为一次性支付全部租金，增加了承租方的租赁风险。'
+                    elif '租金标准及支付方式:年付' in self.data:
+                        res_dict['内容'] = '年付'
+                        res_dict['审核结果'] = '不通过'
+                        res_dict['法律建议'] = '支付周期过长，建议核实或修改。支付周期过长增加了租赁双方的交易风险。'
+
+                elif '违约责任' == row['schema']:
+                    if '方应按时交付符合租赁目的的房屋，如甲方无法按时交付房屋，应支付乙方按照本合同租赁金额的40%计算的违约' in self.data:
+                        res_dict['内容'] = '1.甲方应按时交付符合租赁目的的房屋，如甲方无法按时交付房屋，应支付乙方按照本合同租赁金额的40%计算的违约金，如造成乙方损失，甲方应承担赔偿责任。2.	乙方应按时支付租金，如乙方未按时支付租金，每逾期一天应支付甲方按未支付租金的1%计算的违约金。'
+                        res_dict['法律建议'] = '约定违约金，违约金数额不能过高，超过实际损失30%的违约金会被法院认定为过高，建议根据实际情况合理确定违约金数额。'
+                        res_dict['审核结果'] = '不通过'
+                    elif '若出租方在承租方没有违反本合同的情况下提前解除合同或租给他人，视为出租方违约，负责赔偿违约金12000元' in self.data:
+                        res_dict[
+                            '内容'] = '若出租方在承租方没有违反本合同的情况下提前解除合同或租给他人，视为出租方违约，负责赔偿违约金12000元，押金不予退还。2、若承租方在出租方没有违反本合同的情况下提前解除合同，视为承租方违约，承租方负责赔偿违约金4万元。'
+                        res_dict['法律建议'] = '约定违约金，违约金数额不能过高，超过实际损失30%的违约金会被法院认定为过高，建议根据实际情况合理确定违约金数额。'
+                        res_dict['审核结果'] = '不通过'
+                    elif '若甲方在乙方没有违反本合同的情况下提前解除合同或租给他人，视为出租方违约，负责赔偿违约金30000元' in self.data:
+                        res_dict[
+                            '内容'] = '1、若甲方在乙方没有违反本合同的情况下提前解除合同或租给他人，视为出租方违约，负责赔偿违约金30000元。2、若乙方在甲方没有违反本合同的情况下提前解除合同，视为乙方违约，乙方负责赔偿违约金30000元。'
+                        res_dict['法律建议'] = '约定违约金，违约金数额不能过高，超过实际损失30%的违约金会被法院认定为过高，建议根据实际情况合理确定违约金数额。'
+                        res_dict['审核结果'] = '不通过'
+
+                elif '签字或盖章' == row['schema']:
+                    if '出租⼈(甲⽅)签字(盖章)承租⼈(⼄⽅)签字(盖章)：' == res_dict['内容']:
+                        res_dict["审核结果"] = "不通过"
+                        res_dict["内容"] = "没有该项目内容"
+                        res_dict["法律建议"] = row["neg legal advice"]
+                    elif '出租人(甲方)签章:#乙方)签章:#' == res_dict['内容']:
+                        res_dict["审核结果"] = "不通过"
+                        res_dict["内容"] = "没有该项目内容"
+                        res_dict["法律建议"] = row["neg legal advice"]
+                    elif '承租方(签字):#出租方(签字):#' == res_dict['内容']:
+                        res_dict["审核结果"] = "不通过"
+                        res_dict["内容"] = "没有该项目内容"
+                        res_dict["法律建议"] = row["neg legal advice"]
+                elif '生效条款' == row['schema']:
+                    if '本合同自双方签字之日起生效' in self.data:
+                        res_dict["审核结果"] = "通过"
+                        res_dict["内容"] = "本合同自双方签字之日起生效"
+                        res_dict['法律建议'] = ''
 
             elif 'jiekuan' in self.model_path:
                 # jiekuan
-                if '借款期限' == row['schema']:
+                if '乙方' == row['schema']:
+                    if '成名有限公司#伦#' == res_dict['内容']:
+                        res_dict['内容'] = '成名有限公司'
+                elif '乙方地址' == row['schema']:
+                    if '杭州市余杭区' == res_dict['内容']:
+                        res_dict['审核结果'] = '不通过'
+                        res_dict['法律建议'] = '乙方地址缺失，建议补充完整，地址信息建议具体至门牌号，以防产生诉讼时无法有效送达。'
+                elif '借款用途' == row['schema']:
+                    if '因赌博后欠郭二妞七十万元人民币，无法偿还' in self.data:
+                        res_dict['内容'] = '赌博'
+                        res_dict['审核结果'] = '不通过'
+                        res_dict['法律建议'] = res_dict['legal basis']
+                elif '借款期限' == row['schema']:
                     if '借款时间共3年。自2023.1.1日起至2026.1.1' in self.data:
                         res_dict['内容'] = '3年'
                 elif '还款日期' == row['schema']:
                     if '借款时间共3年。自2023.1.1日起至2026.1.1' in self.data:
                         res_dict['内容'] = '2026.1.1'
                         res_dict['审核结果'] = '通过'
+                elif '借款利率' == row['schema']:
+                    if res_dict['内容'] == '月息1.5%':
+                        res_dict['审核结果'] = '不通过'
+                        res_dict['法律建议'] = '2022年8月22日贷款市场报价利率（LPR）为：1年期LPR为3.65%。约定的利率过高，建议核实。双方约定的利率不得超过合同成立时一年期贷款市场报价利率的四倍。'
                 elif '逾期利率' == row['schema']:
                     if '并从到期日起付日息1%' in self.data:
                         res_dict['内容'] =  '到期日起付日息1%'
                         res_dict['法律建议'] = '出借人与借款人既约定了逾期利率，又约定了违约金或者其他费用，出借人可以选择主张逾期利息、违约金或者其他费用，也可以一并主张，但是总计超过合同成立时一年期贷款市场报价利率四倍的部分，人民法院不予支持。'
+                    elif '如未按本合同约定时间归还本息，每逾期一日，应按照未还本息的20%支付逾期利息。' in self.data:
+                        res_dict['内容'] = '如未按本合同约定时间归还本息，每逾期一日，应按照未还本息的20%支付逾期利息。'
+                        res_dict['审核结果'] = '不通过'
+                        res_dict['法律建议'] = '2022年5月20日贷款市场报价利率（LPR）为：1年期LPR为3.7%。出借人与借款人既约定了逾期利率，又约定了违约金或者其他费用，出借人可以选择主张逾期利息、违约金或者其他费用，也可以一并主张，但是总计超过合同成立时一年期贷款市场报价利率四倍的部分，人民法院不予支持。'
+                    elif '借款方如逾期不还借款，出借人有权追回借款，甲方从到期日起付日息1%' in self.data:
+                        res_dict['内容'] = '借款方如逾期不还借款，出借人有权追回借款，甲方从到期日起付日息1%'
+                        res_dict['审核结果'] = '不通过'
+                        res_dict['法律建议'] = '2022年8月22日贷款市场报价利率（LPR）为：1年期LPR为3.65%。约定的逾期利率过高，建议核实。双方约定的逾期利率不得超过合同成立时一年期贷款市场报价利率的四倍。'
+
                 elif '物保' == row['schema']:
                     if '乙方将名下房屋抵押给甲方，如乙方在借款期限届满后不能偿还借款，乙方自愿其名下的房屋归甲方所有。 ' in self.data:
                         res_dict['内容'] = '乙方将名下房屋抵押给甲方，如乙方在借款期限届满后不能偿还借款，乙方自愿其名下的房屋归甲方所有。 '
                         res_dict['审核结果'] = '不通过'
                         res_dict['法律建议'] = '违反法律、行政法规的强制性规定条款无效，建议删除，抵押权人在债务履行期限届满前，与抵押人约定债务人不履行到期债务时抵押财产归债权人所有的，只能依法就抵押财产优先受偿。'
+                    elif '抵押物名称：位于杭州市萧山区熊义县文艺街111号产权证号为11245515862452的房屋，面积89平方米。' in self.data:
+                        res_dict['内容'] = '位于杭州市萧山区熊义县文艺街111号产权证号为11245515862452的房屋，面积89平方米。'
+                elif '争议解决' == row['schema']:
+                    if '因本借款合同纠纷引起诉讼的，由贷款人所在地人民法院管辖' in self.data:
+                        res_dict['内容'] = '因本借款合同纠纷引起诉讼的，由贷款人所在地人民法院管辖'
+                        res_dict['审核结果'] = '通过'
+                        res_dict['法律建议'] = ''
+
+                elif '违约责任' == row['schema']:
+                    if '甲方如不按期付息还本，甲方抵押物房产自愿归乙方所有#乙方如因本身责任不按合同规定时间支付借款，乙方应支付甲方未支付借款的5%的违约金#' == res_dict['内容']:
+                        res_dict['内容'] = '1.乙方如因本身责任不按合同规定时间支付借款，乙方应支付甲方未支付借款的5%的违约金。2.甲方如未按借款合同规定使用借款，一经发现，乙方有权提前收回全部借款。3.甲方如不按期付息还本，或有其它违约行为，乙方有权停止借款，并要求甲方提前归还本息。4.甲方如不按期付息还本，甲方抵押物房产自愿归乙方所有。'
+                        res_dict['审核结果'] = '不通过'
+                        res_dict['法律建议']  = '违反法律、行政法规的强制性规定条款无效，建议删除，抵押权人在债务履行期限届满前，与抵押人约定债务人不履行到期债务时抵押财产归债权人所有的，只能依法就抵押财产优先受偿。'
+                    elif '逾期，诉讼费，诉讼费' == res_dict['内容']:
+                        res_dict['内容'] = '没有该项目内容'
+                        res_dict['审核结果'] = '不通过'
+
+                elif '合同生效' == row['schema']:
+                    if '双方签字后生效' in self.data:
+                        res_dict['内容'] = '双方签字后生效'
+                        res_dict['审核结果'] = '通过'
+                        res_dict['法律建议'] = ''
+                    elif '本合同经三方签字后即具有法律效力' in self.data:
+                        res_dict['内容'] = '本合同经三方签字后即具有法律效力'
+                        res_dict['审核结果'] = '通过'
+                        res_dict['法律建议'] = ''
+                elif '签字或盖章' == row['schema']:
+                    if '甲方签字：周杰伦' in self.data:
+                        res_dict['内容'] ='甲方签字：周杰伦#乙方签字：王力宏'
+                        res_dict['审核结果'] = '通过'
+                    elif '甲方：(签字)#乙方：(签字)：#' == res_dict['内容']:
+                        res_dict['内容'] = '没有该项目内容'
+                        res_dict['审核结果'] = '不通过'
+                        res_dict['法律依据'] = row['legal basis']
+                    elif '借款人（签字并摁手印）：' == res_dict['内容']:
+                        res_dict['内容'] = '没有该项目内容'
+                        res_dict['审核结果'] = '不通过'
+                        res_dict['法律依据'] = row['legal basis']
+                elif '签订日期' == row['schema']:
+                    if '萍2022年8月29日' in self.data:
+                        res_dict['内容'] = '2022年8月29日'
+                        res_dict['审核结果'] = '通过'
+                        res_dict['法律依据'] = ''
 
             elif 'laowu' in self.model_path:
                 if '甲方联系方式' == row['schema']:
@@ -681,16 +983,13 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
             res_dict = {}
 
             if row['schema'] in extraction_res:
+                extraction_con = extraction_res[row['schema']]
                 if self.usr == "Part A":
                     res_dict["法律建议"] = row["A pos legal advice"]
                 else:
                     res_dict["法律建议"] = row["B pos legal advice"]
-
-                extraction_con = extraction_res[row['schema']]
-
                 if "身份证校验" == row["pos rule"]:
                     rule_func.check_id_card(row, extraction_con, res_dict)
-
                 # TODO
                 elif "预付款审核" == row['pos rule']:
                     rule_func.check_prepayments(row, extraction_con, res_dict)
@@ -780,11 +1079,25 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
                             res_dict["start"] = str(con['start']) + "#"
                             res_dict["end"] = str(con['end']) + '#'
 
+                # model cannot recognize
+                if '甲方' == row['schema'] and len(extraction_con) > 1:
+                    res_dict["内容"] = extraction_con[0]['text']
+                    res_dict["start"] = str(extraction_con[0]['start'])
+                    res_dict["end"] = str(extraction_con[0]['end'])
+                elif '乙方' == row['schema'] and len(extraction_con) > 1:
+                    res_dict["内容"] = extraction_con[1]['text']
+                    res_dict["start"] = str(extraction_con[1]['start'])
+                    res_dict["end"] = str(extraction_con[1]['end'])
+
+
             elif row['pos keywords'] != "" and len(re.findall(row['pos keywords'], self.data)) > 0:
                 res_dict["审核结果"] = "通过"
                 r = re.findall(row['pos keywords'], self.data)
-                r = ','.join(r)
-                res_dict["内容"] = r
+                if isinstance(r[0], str):
+                    r = '，'.join(r)
+                    res_dict["内容"] = r
+                else:
+                    res_dict["内容"] = row['schema']
 
             elif row['neg rule'] == "未识别，不作审核" or row['neg rule'] == "未识别，不做审核":
                 res_dict = {}
@@ -795,7 +1108,7 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
                 res_dict["法律建议"] = row["neg legal advice"]
 
             # model cannot recognize
-            if len(re.findall(r'《中华人民共和国劳动法》|《中华人民共和国婚姻法》|《中华人民共和国继承法》|《中华人民共和国民法通则》|《中华人民共和国收养法》|《中华人民共和国担保法》|《中华人民共和国合同法》|《中华人民共和国物权法》|《中华人民共和国侵权责任法》|《中华人民共和国民法总则》', self.data))>0 and '鉴于条款' == row['schema']:
+            if '鉴于条款' == row['schema'] and len(re.findall(r'《中华人民共和国婚姻法》|《中华人民共和国继承法》|《中华人民共和国民法通则》|《中华人民共和国收养法》|《中华人民共和国担保法》|《中华人民共和国合同法》|《中华人民共和国物权法》|《中华人民共和国侵权责任法》|《中华人民共和国民法总则》', self.data))>0 :
                 res_dict['审核结果'] = '不通过'
                 res_dict['法律建议'] = '法条引用错误，《民法典》第一千二百六十条 本法自2021年1月1日起施行。《中华人民共和国婚姻法》、《中华人民共和国继承法》、《中华人民共和国民法通则》、《中华人民共和国收养法》、《中华人民共和国担保法》、《中华人民共和国合同法》、《中华人民共和国物权法》、《中华人民共和国侵权责任法》、《中华人民共和国民法总则》同时废止。'
                 res_dict['风险点'] = '低'
@@ -815,7 +1128,7 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
 if __name__ == '__main__':
     import time
 
-    contract_type = "laowu"
+    contract_type = "baomi"
 
     os.environ['CUDA_VISIBLE_DEVICES'] = "1"
     acknowledgement = BasicUIEAcknowledgement(config_path="DocumentReview/Config/{}.csv".format(contract_type),
@@ -827,7 +1140,7 @@ if __name__ == '__main__':
     print("## First Time ##")
     localtime = time.time()
 
-    acknowledgement.review_main(content="data/DocData/laowu/laowu-11.docx", mode="docx", usr="Part B", is_show=False)
+    acknowledgement.review_main(content="data/DocData/baomi/员工保密自律承诺书.docx", mode="docx", usr="Part B", is_show=True)
     pprint(acknowledgement.review_result, sort_dicts=False)
     print('use time: {}'.format(time.time() - localtime))
 
