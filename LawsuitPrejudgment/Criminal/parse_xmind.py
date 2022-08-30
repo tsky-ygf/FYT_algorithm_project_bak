@@ -7,12 +7,11 @@
 # @Software: PyCharm
 import pandas as pd
 from xmindparser import xmind_to_dict
+from pprint import pprint
 
 
 def traversal_xmind(root, root_string, list_container):
     """
-    功能：递归dictionary文件得到容易写入Excel形式的格式。
-    注意：root string都用str来处理中文字符
     @param root: 将xmind处理后的dictionary文件
     @param root_string: xmind根标题
     @param list_container: 用于存储最终结果的list
@@ -78,12 +77,40 @@ def deal_xmind_to_df(xmind_path):
     root = xmind_to_dict(xmind_path)[0]["topic"]
     case = get_case(root)
     case = [con.split("&") for con in case]
-    # print(_case)
     case_df = pd.DataFrame(case)
-    # print(case_df)
     return case_df
+
+
+# def trans_list(case_list):
+
+
+def deal_xmind_to_dict(xmind_path):
+    root = xmind_to_dict(xmind_path)[0]["topic"]
+    case = get_case(root)
+    case = [con.split("&") for con in case]
+    # print(case)
+    res_dict = dict()
+
+    for row in case:
+        if row[0] not in res_dict:
+            res_dict[row[0]] = {}
+
+        if row[1] not in res_dict[row[0]]:
+            res_dict[row[0]][row[1]] = {}
+
+        if row[2] not in res_dict[row[0]][row[1]]:
+            res_dict[row[0]][row[1]][row[2]] = {}
+
+        if len(row) == 4:
+            res_dict[row[0]][row[1]][row[2]] = row[3]
+        else:
+            res_dict[row[0]][row[1]][row[2]][row[3]] = row[4]
+
+    # pprint(res_dict)
+    return res_dict
 
 
 if __name__ == "__main__":
     file_path = "LawsuitPrejudgment/Criminal/base_config/盗窃/base_logic.xmind"
-    print(deal_xmind_to_df(file_path))
+    # print(deal_xmind_to_df(file_path))
+    deal_mind_to_dict(file_path)
