@@ -153,7 +153,10 @@ class CriminalPrejudgment(PrejudgmentPipeline):
         _location = self.content["event"]["地点"]
         _person = self.content["event"]["人物"]
         _action = self.content["event"]["行为"]
-        _amount = self.content["event"]["总金额"]
+        if "量刑" in self.content["question_answers"]:
+            _amount = self.content["question_answers"]["量刑"]["usr_answer"]
+        else:
+            _amount = self.content["event"]["总金额"]
 
         if _time != "":
             _time += "，"

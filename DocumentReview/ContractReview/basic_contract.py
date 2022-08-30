@@ -1217,7 +1217,6 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
                     res_dict["start"] = str(extraction_con[1]['start'])
                     res_dict["end"] = str(extraction_con[1]['end'])
 
-
             elif row['pos keywords'] != "" and len(re.findall(row['pos keywords'], self.data)) > 0:
                 res_dict["审核结果"] = "通过"
                 r = re.findall(row['pos keywords'], self.data)
