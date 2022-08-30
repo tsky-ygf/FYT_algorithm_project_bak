@@ -68,7 +68,7 @@ def get_df_from_sql(_table_name, _db_name):
     connect_big_data = connect_mysql(_host=host, _user=user, _passwd=passwords, _db=db_name)
     cursor = connect_big_data.cursor()
     # 获取数据
-    sqlcmd = """select * from {}.{} limit 1000""".format(_db_name, _table_name)
+    sqlcmd = """select * from {}.{}""".format(_db_name, _table_name)
     # df = pd.read_sql(sqlcmd, connect_big_data)
     cursor.execute(sqlcmd)
     # df = cursor.fetchall()
