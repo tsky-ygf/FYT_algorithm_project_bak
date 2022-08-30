@@ -37,7 +37,10 @@ def get_columns():
 
 def _get_column_name(column_id):
     columns = get_columns()
-    return next((item.get("column_name") for item in columns if item.get("column_id") == column_id), None)
+    column_name = next((item.get("column_name") for item in columns if item.get("column_id") == column_id), None)
+    if column_name == "法律热点":
+        return "新闻热点"
+    return column_name
 
 
 def _has_special_format(column_name):

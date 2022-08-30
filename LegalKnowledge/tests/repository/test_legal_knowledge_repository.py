@@ -15,5 +15,3 @@ def test_get_news_by_id_list():
     print(news)
     assert news
     assert len(news) == len(id_list)
-    assert news[0]["id"] == id_list[0]
-    assert news[0]["title"] == "短视频成暑期沉迷“新选择”:不想学习想当网红"
