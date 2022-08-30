@@ -33,6 +33,12 @@ contract_type = st.sidebar.selectbox("请选择合同类型",
                                      key="合同类型")
 mode_type = st.sidebar.selectbox("请选择上传数据格式", ["docx", "文本", "txt"], key="text")
 usr = st.sidebar.selectbox("请选择立场", ['甲方', '乙方'], key="中立方")
+is_show = st.sidebar.selectbox("请选择是否用于对外展示", ['是', '否'], key="show")
+
+if is_show == "是":
+    is_show = True
+else:
+    is_show = False
 
 contract_type = ''.join(lazy_pinyin(contract_type))
 config_path = "DocumentReview/Config/{}.csv".format(contract_type)
@@ -57,7 +63,7 @@ else:
 
 acknowledgement = BasicUIEAcknowledgement(config_path=config_path,
                                           model_path=model_path,
-                                          device="1")
+                                          device="1", )
 correct = st.button("文本纠错")
 run = st.button("开始审核")
 
@@ -126,7 +132,7 @@ if correct:
         # result = []
 
 if run:
-    acknowledgement.review_main(content=text, mode="text", usr=usr)
+    acknowledgement.review_main(content=text, mode="text", usr=usr, is_show=is_show)
     pprint(acknowledgement.review_result, sort_dicts=False)
     index = 1
     for key, value in acknowledgement.review_result.items():

@@ -58,17 +58,23 @@ class CriminalPrejudgment(PrejudgmentPipeline):
                 self.content["event"]["事件"] = value["text"]
                 relations = value["relations"]
                 # self.logger.debug(relations)
-                self.content["event"]["物品"] = relations.get("物品", None)
-                self.content["event"]["时间"] = relations.get("时间", None)
-                self.content["event"]["地点"] = relations.get("地点", None)
-                self.content["event"]["人物"] = relations.get("人物", "被告人")
-                self.content["event"]["总金额"] = relations.get("总金额", None)
-                self.content["event"]["行为"] = relations.get("行为", self.content['anyou'])
+                self.content["event"]["物品"] = relations.get("物品", [{"text": "一些"}])
+
+                _thing = self.content["event"]["物品"]
+                _thing = [one_thing['text'] for one_thing in _thing]
+                _thing_str = "、".join(_thing)
+                self.content["event"]["物品"] = _thing_str
+
+                self.content["event"]["时间"] = relations.get("时间", [{"text": ""}])[0]["text"]
+                self.content["event"]["地点"] = relations.get("地点", [{"text": ""}])[0]["text"]
+                self.content["event"]["人物"] = relations.get("人物", [{"text": "嫌疑人"}])[0]["text"]
+                self.content["event"]["总金额"] = relations.get("总金额", [{"text": ""}])[0]["text"]
+                self.content["event"]["行为"] = relations.get("行为", [{"text": self.content['anyou']}])[0]["text"]
         # self.logger.debug(self.content)
 
         # if self.content["event"]["行为"] is not None:
         #     self.content["graph_process"]["情节"] = 1
-        if self.content["event"]["总金额"] is not None:
+        if self.content["event"]["总金额"] != "":
             self.content["graph_process"]["量刑"] = 1
 
     def parse_config_file(self):
@@ -98,13 +104,15 @@ class CriminalPrejudgment(PrejudgmentPipeline):
     def get_question(self):
         self.logger.debug(self.content["question_answers"])
 
+        # 通过问题将没有覆盖到的点进行点亮
         if len(self.content["question_answers"]) > 0:
-            for key in self.content["question_answers"].keys():
-                self.content["graph_process"][key] = 1
-
+            # for key in self.content["question_answers"].keys():
+            #     self.content["graph_process"][key] = 1
             if self.content["question_answers"]["前提"]["usr_answer"] == "是":
                 self.content["graph_process"]["情节"] = 1
                 self.content["graph_process"]["量刑"] = 1
+
+                # for key,v
 
         for key, value in self.content["graph_process"].items():
             if value == 0:
@@ -129,23 +137,21 @@ class CriminalPrejudgment(PrejudgmentPipeline):
         self.logger.info("开始生成报告")
 
         _thing = self.content["event"]["物品"]
-        _thing = [one_thing['text'] for one_thing in _thing]
-        _thing_str = "、".join(_thing)
-        if self.content["event"]["时间"] is not None:
-            _time = self.content["event"]["时间"][0]['text'] + "，"
-        else:
-            _time = ""
-        if self.content["event"]["地点"] is not None:
-            _location = "在" + self.content["event"]["地点"][0]['text'] + "，"
-        else:
-            _location = ""
+        _time = self.content["event"]["时间"][0]['text']
 
-        _person = self.content["event"]["人物"][0]['text']
+        _location = self.content["event"]["地点"][0]['text']
+        _person = self.content["event"]["人物"]
         _action = self.content["event"]["行为"]
         _amount = self.content["event"]["总金额"]
 
+        if _time != "":
+            _time += "，"
+
+        if _location != "":
+            _location = "在" + _location + "，"
+
         evaluation_report["案件事实"] = \
-            f"根据您的描述，{_time}{_location}{_person}存在{_action}等行为，窃得{_thing_str}等财物，盗窃金额为{_amount}。"
+            f"根据您的描述，{_time}{_location}{_person}存在{_action}等行为，窃得{_thing}财物，盗窃金额为{_amount}。"
 
         report_id = "reporr1"
         evaluation_report["评估理由"] = self.content['report_dict'][report_id]["评估理由"]
