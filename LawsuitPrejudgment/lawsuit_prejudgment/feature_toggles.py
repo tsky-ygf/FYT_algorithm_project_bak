@@ -15,3 +15,4 @@ class FeatureToggles(BaseFeatureToggle):
     http_situation_classifier: ToggleItem
     should_not_repeat_question_item: ToggleItem
     support_factor_format_in_xmind: ToggleItem
+    reformat_prejudgment_report: ToggleItem

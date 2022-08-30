@@ -14,3 +14,8 @@ support_factor_format_in_xmind:
     enabled: true
     name: Support Factor Format in Xmind File.
     description: 支持xmind文件中factor的格式：诉求支持_XXX。
+
+reformat_prejudgment_report:
+    enabled: true
+    name: Reformat Prejudgment Report
+    description: 为了能够自动配置诉讼预判的展示内容，重新组织了预判报告的数据格式。
