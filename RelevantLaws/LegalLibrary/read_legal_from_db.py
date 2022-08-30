@@ -7,19 +7,34 @@
 # @Software: PyCharm
 import pymysql
 import pandas as pd
-from pprint import pprint
+# from pprint import pprint
+# from sqlalchemy.engine import URL
+# from sqlalchemy import create_engine
 from elasticsearch import Elasticsearch, helpers
 import json
 import re
 
 pd.set_option('display.max_columns', None)
 
+__all__ = ['connect_mysql', 'get_df_from_sql', 'es_init', 'insert_data_to_es', 'search_data_from_es']
 
-def connect_mysql():
+host = '172.19.82.227'
+user = 'root'
+passwords = 'Nblh@2022'
+db = 'big_data_ceshi227'
+
+
+def connect_mysql(_host, _user, _passwd, _db):
     # 连接mysql
-    connect_big_data = pymysql.connect(host='172.19.82.227',
-                                       user='root', password='Nblh@2022',
-                                       db='big_data_ceshi227')
+    connect_big_data = pymysql.connect(host=_host,
+                                       user=_user, password=_passwd,
+                                       db=_db, charset='utf8')
+
+    # sever_string = f"SERVER={host};DATABASE={db};UID={user};PWD={passwords}"
+    # connection_string = "DRIVER={ODBC Driver 17 for SQL Server};" + sever_string
+    # connection_url = URL.create("mssql+pyodbc", query={"odbc_connect": connection_string})
+    # engine = create_engine(connection_url)
+    # return engine
     return connect_big_data
 
 
@@ -49,19 +64,25 @@ with open("RelevantLaws/LegalLibrary/law_items_graph/xingshi_item.json") as f:
 # sqlcmd = """select * from test_falvfagui_data.test_flfg_result_xzfg"""
 # sqlcmd = """select * from test_falvfagui_data.test_flfg_result_falv"""
 
-def get_df_from_sql(table_name):
-    connect_big_data = connect_mysql()
+def get_df_from_sql(_table_name, _db_name):
+    connect_big_data = connect_mysql(_host=host, _user=user, _passwd=passwords, _db=db_name)
+    cursor = connect_big_data.cursor()
     # 获取数据
-    sqlcmd = """select * from {}.{}""".format(db_name, table_name)
-    df = pd.read_sql(sqlcmd, connect_big_data)
+    sqlcmd = """select * from {}.{}""".format(_db_name, _table_name)
+    # df = pd.read_sql(sqlcmd, connect_big_data)
+    cursor.execute(sqlcmd)
+    # df = cursor.fetchall()
+    df = pd.DataFrame(cursor.fetchall())
+    df.columns = [one[0] for one in cursor.description]
+    cursor.close()
     return df
 
 
-def es_init():
-    es = Elasticsearch(hosts="127.0.0.1:9200")
+def es_init(_index_name="flfg", _es_hosts="127.0.0.1:9200"):
+    es = Elasticsearch(hosts=_es_hosts)
     # 重新创建索引
-    es.indices.delete(index=index_name, ignore=[400, 404])
-    es.indices.create(index=index_name, ignore=400)
+    es.indices.delete(index=_index_name, ignore=[400, 404])
+    es.indices.create(index=_index_name, ignore=400)
 
 
 def chuli_title(old_s):  # 保留中文、大小写、数字
@@ -71,7 +92,7 @@ def chuli_title(old_s):  # 保留中文、大小写、数字
 
 
 # 构造es插入迭代器
-def handle_es(df_data):
+def handle_es(df_data, *args, **kwargs):
     # 构造迭代器
     for index, row in df_data.iterrows():
         data_ori = row.to_dict()
@@ -91,20 +112,23 @@ def handle_es(df_data):
 
 #
 # inset_data
-def insert_data_to_es():
-    es = Elasticsearch(hosts="127.0.0.1:9200")
+def insert_data_to_es(_es_hosts="127.0.0.1:9200",
+                      _db_name=db_name,
+                      _table_name_list=table_name_list,
+                      _handle_es=handle_es):
+    es = Elasticsearch(hosts=_es_hosts)
 
-    for table_name in table_name_list:
-        df_data = get_df_from_sql(table_name)
+    for table_name in _table_name_list:
+        df_data = get_df_from_sql(_db_name=_db_name, _table_name=table_name)
         # 插入数据
-        helpers.bulk(es, handle_es(df_data))
+        helpers.bulk(es, _handle_es(df_data, _db_name=db_name, _table_name=table_name))
 
 
 #
 
-def search_data_from_es(query_body, _index_name='flfg'):
+def search_data_from_es(query_body, _index_name='flfg', _es_hosts="127.0.0.1:9200"):
     # 查询数据
-    es = Elasticsearch(hosts="127.0.0.1:9200")
+    es = Elasticsearch(hosts=_es_hosts)
     res = es.search(index=_index_name, body=query_body)
     # print("Got %d Hits:" % res['hits']['total']['value'])
     res_list = [hit['_source'] for hit in res['hits']['hits']]

@@ -210,7 +210,7 @@ def _predict_by_factor(problem, claim_list, fact, question_answers, factor_sente
             debug_info[str(suqiu)] = suqiu_debug_info
             break
         else:  # next = ('suqiu', suqiu)
-            tree = LogicTree(problem, next[1], debug)
+            tree = LogicTree(problem, next[1], debug, {"suqiu_factor": suqiu_factor, "factor_sentence_list": factor_sentence_list, "question_answers": question_answers})
 
             # 将特征结果加入
             for factor, flag in suqiu_factor.items():  # 特征默认值

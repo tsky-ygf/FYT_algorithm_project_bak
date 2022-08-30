@@ -90,4 +90,4 @@ def test_should_ask_for_claim_when_having_special_format_in_xmind():
     print(result_dict)
 
     assert result_dict["question_next"]
-    assert result_dict["result"] is None
+    assert not result_dict["result"]

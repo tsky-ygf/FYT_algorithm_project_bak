@@ -48,6 +48,7 @@ def get_law_search_result(text="", sxx_list=None, legal_list=None, size=10):
     }
 
     res = search_data_from_es(query_dict)
+    print(res)
     return res
 
 
