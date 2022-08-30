@@ -5,7 +5,9 @@
 # @Site    : 
 # @File    : text_error_correction.py
 # @Software: PyCharm
-from pycorrector.macbert.macbert_corrector import MacBertCorrector
+# from pycorrector.macbert.macbert_corrector import MacBertCorrector
+from collections import defaultdict
+
 import requests
 from pprint import pprint
 
@@ -59,7 +61,20 @@ error_sentences = [
 # res2 = text_correction('人生就是如此，经过磨练才能让自己更加拙壮，才能使自己更加乐观。')
 
 # print(res1)
+#
+# import pandas as pd
+# config_showing_type = 'jietiao'
+# config_showing_sample_path = 'DocumentReview/Config_showing_samples/{}.csv'.format(config_showing_type)
+# showing_data = pd.read_csv(config_showing_sample_path, encoding='utf-8')
+# print(showing_data)
+# for line in showing_data.values:
+#         print(line)
 
+# doc2content = defaultdict(list)
+# docs_name = set(showing_data['文档名'].values())
+
+# for line in showing_data.values():
+#     doc2content[line['文档名']] =
 
 r = requests.post("http://172.19.82.199:6598/macbert_correct", json={"text": error_sentences[0]})
 result = r.json()
