@@ -64,4 +64,4 @@ def test_get_news_by_news_id():
     assert resp_json.get("success")
     assert resp_json.get("result")
     # assert len(resp_json.get("result")) > 1
-    assert time_cost < 0.5, "接口{}用时{}秒，耗时过长。".format("/get_news_by_news_id", time_cost)
+    assert time_cost < 1, "接口{}用时{}秒，耗时过长。".format("/get_news_by_news_id", time_cost)

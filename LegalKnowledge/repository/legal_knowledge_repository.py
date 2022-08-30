@@ -24,7 +24,7 @@ def get_news_by_id_list(id_list: List[int]) -> List[Dict]:
     try:
         format_strings = ','.join(['%s'] * len(id_list))
         # 执行SQL语句
-        cursor.execute("SELECT id, title, release_time, content, raw_content, url FROM popular WHERE id in (%s)" % format_strings,
+        cursor.execute("SELECT id, title, release_time, content, raw_content, url FROM popular WHERE id in (%s) ORDER BY release_time DESC" % format_strings,
                        tuple(id_list))
         # 获取所有记录列表
         fetched_data = cursor.fetchall()
