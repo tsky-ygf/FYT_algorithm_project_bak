@@ -14,8 +14,9 @@ from LawsuitPrejudgment.Criminal.basic_prejudgment import PrejudgmentPipeline
 from autogluon.text import TextPredictor
 import os
 # from xmindparser import xmind_to_dict
-from LawsuitPrejudgment.Criminal.parse_xmind import deal_xmind_to_df
+from LawsuitPrejudgment.Criminal.parse_xmind import deal_xmind_to_dict
 import pandas as pd
+from pprint import pprint
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 pd.set_option('display.max_columns', None)
@@ -31,7 +32,6 @@ class CriminalPrejudgment(PrejudgmentPipeline):
         if self.config.situation_identify_model_path[:4] == "http":
             self.ie_url = self.config.situation_identify_model_path
 
-        # self.content["graph_process"] = {"前提": 0, "情节": 0, "量刑": 0}
         self.logger.info("加载预测模型成功")
 
     def anyou_identify(self):
@@ -58,17 +58,23 @@ class CriminalPrejudgment(PrejudgmentPipeline):
                 self.content["event"]["事件"] = value["text"]
                 relations = value["relations"]
                 # self.logger.debug(relations)
-                self.content["event"]["物品"] = relations.get("物品", None)
-                self.content["event"]["时间"] = relations.get("时间", None)
-                self.content["event"]["地点"] = relations.get("地点", None)
-                self.content["event"]["人物"] = relations.get("人物", "被告人")
-                self.content["event"]["总金额"] = relations.get("总金额", None)
-                self.content["event"]["行为"] = relations.get("行为", self.content['anyou'])
+                self.content["event"]["物品"] = relations.get("物品", [{"text": "一些"}])
+
+                _thing = self.content["event"]["物品"]
+                _thing = [one_thing['text'] for one_thing in _thing]
+                _thing_str = "、".join(_thing)
+                self.content["event"]["物品"] = _thing_str
+
+                self.content["event"]["时间"] = relations.get("时间", [{"text": ""}])[0]["text"]
+                self.content["event"]["地点"] = relations.get("地点", [{"text": ""}])[0]["text"]
+                self.content["event"]["人物"] = relations.get("人物", [{"text": "嫌疑人"}])[0]["text"]
+                self.content["event"]["总金额"] = relations.get("总金额", [{"text": ""}])[0]["text"]
+                self.content["event"]["行为"] = relations.get("行为", [{"text": self.content['anyou']}])[0]["text"]
         # self.logger.debug(self.content)
 
         # if self.content["event"]["行为"] is not None:
         #     self.content["graph_process"]["情节"] = 1
-        if self.content["event"]["总金额"] is not None:
+        if self.content["event"]["总金额"] != "":
             self.content["graph_process"]["量刑"] = 1
 
     def parse_config_file(self):
@@ -77,7 +83,7 @@ class CriminalPrejudgment(PrejudgmentPipeline):
         question_answers_path = Path(config_path, self.content["anyou"], "question_answers.csv")
         report_path = Path(config_path, self.content["anyou"], "report.csv")
 
-        base_logic_df = deal_xmind_to_df(xmind_path)
+        base_logic_dict = deal_xmind_to_dict(xmind_path)
         question_answers_df = pd.read_csv(question_answers_path)
         report_content = pd.read_csv(report_path)
 
@@ -89,22 +95,28 @@ class CriminalPrejudgment(PrejudgmentPipeline):
         for index, row in question_answers_df.iterrows():
             question_answers_dict[row['circumstances']] = row.to_dict()
 
-        self.content["base_logic_graph"] = base_logic_df
+        self.content["base_logic_graph"] = base_logic_dict
         self.content['question_answers_config'] = question_answers_dict
         self.content['report_dict'] = report_dict
 
-        self.content["graph_process"] = {key: 0 for key in base_logic_df[1].to_list()}
+        self.content["graph_process"] = {key: 0 for key in base_logic_dict[self.content['anyou']].keys()}
+        self.content["graph_process_content"] = {key: "" for key in base_logic_dict[self.content['anyou']].keys()}
 
     def get_question(self):
         self.logger.debug(self.content["question_answers"])
 
+        # 通过问题将没有覆盖到的点进行点亮
         if len(self.content["question_answers"]) > 0:
             for key in self.content["question_answers"].keys():
                 self.content["graph_process"][key] = 1
+                if self.content["graph_process_content"][key] == "":
+                    self.content["graph_process_content"][key] = self.content["question_answers"][key]["usr_answer"]
 
             if self.content["question_answers"]["前提"]["usr_answer"] == "是":
                 self.content["graph_process"]["情节"] = 1
                 self.content["graph_process"]["量刑"] = 1
+
+                # for key,v
 
         for key, value in self.content["graph_process"].items():
             if value == 0:
@@ -123,31 +135,35 @@ class CriminalPrejudgment(PrejudgmentPipeline):
         # evaluation_report["法律建议"] = "【盗窃罪XMind法律建议】"
         # evaluation_report["法律依据"] = "【盗窃罪XMind法律依据】【量刑情节XMind法律依据】"
         self.logger.debug(self.content["event"])
-        self.logger.debug(self.content["question_answers"])
+        self.logger.debug(self.content["graph_process_content"])
         self.logger.debug(self.content["base_logic_graph"])
         # self.logger.debug(self.content)
         self.logger.info("开始生成报告")
 
-        _thing = self.content["event"]["物品"]
-        _thing = [one_thing['text'] for one_thing in _thing]
-        _thing_str = "、".join(_thing)
-        if self.content["event"]["时间"] is not None:
-            _time = self.content["event"]["时间"][0]['text'] + "，"
-        else:
-            _time = ""
-        if self.content["event"]["地点"] is not None:
-            _location = "在" + self.content["event"]["地点"][0]['text'] + "，"
-        else:
-            _location = ""
+        # for key,value in self.content["base_logic_graph"][self.content["anyou"]].items():
+        case_num = self.content["base_logic_graph"][self.content["anyou"]]["情节"][
+            "【" + self.content["graph_process_content"]["情节"] + "】"]
 
-        _person = self.content["event"]["人物"][0]['text']
+        sentencing_dict = self.content["base_logic_graph"][self.content["anyou"]]["量刑"]
+        report_id = sentencing_dict["【" + self.content["graph_process_content"]["量刑"] + "】"][case_num]
+
+        _thing = self.content["event"]["物品"]
+        _time = self.content["event"]["时间"]
+
+        _location = self.content["event"]["地点"]
+        _person = self.content["event"]["人物"]
         _action = self.content["event"]["行为"]
         _amount = self.content["event"]["总金额"]
 
-        evaluation_report["案件事实"] = \
-            f"根据您的描述，{_time}{_location}{_person}存在{_action}等行为，窃得{_thing_str}等财物，盗窃金额为{_amount}。"
+        if _time != "":
+            _time += "，"
 
-        report_id = "reporr1"
+        if _location != "":
+            _location = "在" + _location + "，"
+
+        evaluation_report["案件事实"] = \
+            f"根据您的描述，{_time}{_location}{_person}存在{_action}等行为，窃得{_thing}财物，盗窃金额为{_amount}。"
+
         evaluation_report["评估理由"] = self.content['report_dict'][report_id]["评估理由"]
         evaluation_report["法律建议"] = self.content['report_dict'][report_id]["法律建议"]
         evaluation_report["法律依据"] = self.content['report_dict'][report_id]["法律依据"]
@@ -186,4 +202,4 @@ if __name__ == '__main__':
     res3["question_answers"]["量刑"]["usr_answer"] = "3000（含）-40000（不含）"
     res4 = criminal_pre_judgment(**res3)
 
-    print(res4["report_result"])
+    pprint(res4["report_result"])
