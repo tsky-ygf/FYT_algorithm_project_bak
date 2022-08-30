@@ -37,3 +37,6 @@ pypinyin
 paddle2onnx
 keras
 autogluon
+SQLAlchemy
+thulac
+h5py
