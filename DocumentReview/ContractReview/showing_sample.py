@@ -981,6 +981,15 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
         self.arti_rule()
         self.unreasonable_show()
 
+        # TODO 会出现错误
+        try:
+            if self.review_result['预付款']['审核结果'] == "通过" and self.review_result['预付款']["风险等级"] == "低":
+                pass
+        except Exception as e:
+            del self.review_result['预付款']
+
+
+
     def arti_rule(self):
         if 'jietiao' in self.model_path:
             config_showing_type = 'jietiao'
@@ -1002,17 +1011,22 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
             return
         if config_showing_type:
             config_showing_sample_path = 'DocumentReview/Config_showing_samples/{}.csv'.format(config_showing_type)
-            showing_data = pd.read_csv(config_showing_sample_path, encoding='utf-8')
+            showing_data = pd.read_csv(config_showing_sample_path, encoding='utf-8', na_values=' ',keep_default_na=False)
             for line in showing_data.values:
                 line[1] = line[1].replace(' ', '')
                 # 直接用line[1]， 有可能不能匹配到
                 temp = line[1].replace('\r', '').split('\n')[0]
+                if line[4] != '通过':
+                    line[4] = '不通过'
+                else:
+                    line[3] = ''
                 if temp in self.data or line[1] in self.data:
-                    res_dict_temp = {'内容': line[1], '审核结果': '不通过', '法律建议': line[3]}
+                    res_dict_temp = {'内容': line[1], '审核结果': line[4], '法律建议': line[3]}
                     self.review_result[line[2]].update(res_dict_temp)
                 else:
                     print('-' * 100)
                     print(line)
+
 
     def unreasonable_show(self):
         if 'fangwuzulin' in self.model_path:
@@ -1029,18 +1043,22 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
             config_unreasonable_type = 'yibanzulin'
         else:
             return
+
         config_unreasonable_path = 'DocumentReview/Config_unreasonable/{}.csv'.format(config_unreasonable_type)
 
         unr_data = pd.read_csv(config_unreasonable_path, encoding='utf-8', na_values=' ', keep_default_na=False)
         unr_id = 1
         for unr_line in unr_data.values:
             res_dict_unr = {}
-            unr_r = re.findall(unr_line[1], self.data)
-            if len(unr_r) > 0:
-                key = '不合理条款' + str(unr_id) + '_' + unr_line[0]
-                unr_id += 1
+            unr_r = re.findall(unr_line[1],self.data)
+            if len(unr_r)>0:
+                if unr_line[0]=='':
+                    key = '不合理条款'+str(unr_id)
+                else:
+                    key = '不合理条款'+str(unr_id)+'_'+unr_line[0]
+                unr_id+=1
                 res_dict_unr['审核结果'] = '不通过'
-                res_dict_unr['内容'] = unr_r[0]
+                res_dict_unr['内容'] = unr_line[1]
                 res_dict_unr['法律建议'] = unr_line[2]
                 res_dict_unr['风险等级'] = unr_line[3]
                 res_dict_unr['法律依据'] = unr_line[4]
@@ -1051,7 +1069,7 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
 if __name__ == '__main__':
     import time
 
-    contract_type = "fangwuzulin"
+    contract_type = "caigou"
 
     os.environ['CUDA_VISIBLE_DEVICES'] = "1"
     acknowledgement = BasicUIEAcknowledgementShow(config_path="DocumentReview/Config/{}.csv".format(contract_type),
@@ -1063,6 +1081,6 @@ if __name__ == '__main__':
     print("## First Time ##")
     localtime = time.time()
 
-    acknowledgement.review_main(content="data/DocData/fangwuzulin/fwzl1_show.docx", mode="docx", usr="Part B")
+    acknowledgement.review_main(content="data/DocData/caigou/caigou1.docx", mode="docx", usr="Part B")
     pprint(acknowledgement.review_result, sort_dicts=False)
     print('use time: {}'.format(time.time() - localtime))

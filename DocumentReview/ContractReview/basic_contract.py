@@ -131,20 +131,11 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
             # exit()
             res = self.predictor.predict([self.data])
             # res = self.ie(self.data)
-
         else:
             res = self.ie(self.data)
 
-        # 规则抽取
-        # if 'baomi' in self.model_path:
-        #     if '劳动者竞业限制补偿标准' not in res[0]:
-        #         find_str = re.findall('补偿金', self.data)
-        #         if len(find_str):
-
         self.logger.debug(pformat(res))
         return res
-
-
 
     def rule_judge(self, extraction_res):
         self.logger.debug("res: {}".format(extraction_res))
@@ -269,7 +260,6 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
 
             elif row['neg rule'] == "未识别，不作审核" or row['neg rule'] == "未识别，不做审核":
                 res_dict = {}
-
             else:
                 res_dict["审核结果"] = "不通过"
                 res_dict["内容"] = "没有该项目内容"
