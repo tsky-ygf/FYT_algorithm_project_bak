@@ -1,11 +1,28 @@
+import os
 import re
+from pprint import pprint
+
 import pandas as pd
 
 from DocumentReview.ContractReview.basic_contract import BasicUIEAcknowledgement
 from DocumentReview.ContractReview import rule_func
+from Utils.logger import print_run_time
 
 
 class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
+
+    @print_run_time
+    def review_main(self, content, mode, usr="Part A"):
+        self.review_result = self.init_review_result()
+        self.data_list = self.read_origin_content(content, mode)
+        data = '\n'.join(self.data_list)
+        data = data.replace('⾄', '至').replace('中华⼈民', '中华人民')
+        self.data = re.sub("[＿_]+", "", data)
+        extraction_res = self.check_data_func()
+
+        self.usr = usr
+        self.rule_judge2(extraction_res[0])
+        self.review_result = {key: value for key, value in self.review_result.items() if value != {}}
 
     def rule_judge2(self, extraction_res):
         print('*' * 100)
@@ -955,6 +972,7 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
             self.review_result[row['schema']].update(res_dict)
 
         self.arti_rule()
+        self.unreasonable_show()
 
     def arti_rule(self):
         if 'jietiao' in self.model_path:
@@ -974,7 +992,7 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
         elif 'jiekuan' in self.model_path:
             config_showing_type = 'jiekuan'
         else:
-            config_showing_type = None
+            return
         if config_showing_type:
             config_showing_sample_path = 'DocumentReview/Config_showing_samples/{}.csv'.format(config_showing_type)
             showing_data = pd.read_csv(config_showing_sample_path, encoding='utf-8')
@@ -988,3 +1006,57 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
                 else:
                     print('-' * 100)
                     print(line)
+
+    def unreasonable_show(self):
+        if 'fangwuzulin' in self.model_path:
+            config_unreasonable_type  = 'fangwuzulin'
+        elif 'jiekuan' in self.model_path:
+            config_unreasonable_type = 'jiekuan'
+        elif 'laodong' in self.model_path:
+            config_unreasonable_type = 'laodong'
+        elif 'laowu' in self.model_path:
+            config_unreasonable_type = 'laowu'
+        elif 'maimai' in self.model_path:
+            config_unreasonable_type = 'maimai'
+        elif 'yibanzulin' in self.model_path:
+            config_unreasonable_type = 'yibanzulin'
+        else:
+            return
+        config_unreasonable_path = 'DocumentReview/Config_unreasonable/{}.csv'.format(config_unreasonable_type)
+
+        unr_data = pd.read_csv(config_unreasonable_path, encoding='utf-8',na_values=' ',keep_default_na=False)
+        unr_id = 1
+        for unr_line in unr_data.values:
+            res_dict_unr = {}
+            unr_r = re.findall(unr_line[1],self.data)
+            if len(unr_r)>0:
+                key = '不合理条款'+str(unr_id)+'_'+unr_line[0]
+                unr_id+=1
+                res_dict_unr['审核结果'] = '不通过'
+                res_dict_unr['内容'] = unr_r[0]
+                res_dict_unr['法律建议'] = unr_line[2]
+                res_dict_unr['风险等级'] = unr_line[3]
+                res_dict_unr['法律依据'] = unr_line[4]
+                res_dict_unr['风险点'] = unr_line[5]
+                self.review_result[key] = res_dict_unr
+
+
+
+if __name__ == '__main__':
+    import time
+
+    contract_type = "fangwuzulin"
+
+    os.environ['CUDA_VISIBLE_DEVICES'] = "1"
+    acknowledgement = BasicUIEAcknowledgementShow(config_path="DocumentReview/Config/{}.csv".format(contract_type),
+                                              log_level="INFO",
+                                              model_path="model/uie_model/new/{}/model_best/".format(contract_type),
+                                              # model_path="model/uie_model/export_cpu/{}/inference".format(
+                                              #     contract_type),
+                                              device="1")
+    print("## First Time ##")
+    localtime = time.time()
+
+    acknowledgement.review_main(content="data/DocData/fangwuzulin/fwzl1_show.docx", mode="docx", usr="Part B")
+    pprint(acknowledgement.review_result, sort_dicts=False)
+    print('use time: {}'.format(time.time() - localtime))
