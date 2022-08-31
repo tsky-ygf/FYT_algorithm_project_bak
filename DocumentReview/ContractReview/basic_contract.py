@@ -45,7 +45,7 @@ class BasicAcknowledgement:
         self.review_result = self.init_review_result()
         self.data_list = self.read_origin_content(content, mode)
         data = '\n'.join(self.data_list)
-        data = data.replace('⾄', '至').replace('中华⼈民','中华人民')
+        data = data.replace('⾄', '至').replace('中华⼈民', '中华人民')
         self.data = re.sub("[＿_]+", "", data)
         extraction_res = self.check_data_func()
 
@@ -111,7 +111,7 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
         # self.review_result = {schema: {} for schema in self.schema}
         self.model_path = model_path
         self.data = ""
-        self.schema = [schema for schema in self.schema if schema!=""]
+        self.schema = [schema for schema in self.schema if schema != ""]
         if self.device == "cpu":
             args = InferArgs()
             args.model_path_prefix = model_path
@@ -148,8 +148,6 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
 
         self.logger.debug(pformat(res))
         return res
-
-
 
     def rule_judge(self, extraction_res):
         self.logger.debug("res: {}".format(extraction_res))
@@ -281,9 +279,12 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
                 res_dict["法律建议"] = row["neg legal advice"]
 
             # model cannot recognize
-            if '鉴于条款' == row['schema'] and len(re.findall(r'《中华人民共和国婚姻法》|《中华人民共和国继承法》|《中华人民共和国民法通则》|《中华人民共和国收养法》|《中华人民共和国担保法》|《中华人民共和国合同法》|《中华人民共和国物权法》|《中华人民共和国侵权责任法》|《中华人民共和国民法总则》', self.data))>0 :
+            if '鉴于条款' == row['schema'] and len(re.findall(
+                    r'《中华人民共和国婚姻法》|《中华人民共和国继承法》|《中华人民共和国民法通则》|《中华人民共和国收养法》|《中华人民共和国担保法》|《中华人民共和国合同法》|《中华人民共和国物权法》|《中华人民共和国侵权责任法》|《中华人民共和国民法总则》',
+                    self.data)) > 0:
                 res_dict['审核结果'] = '不通过'
-                res_dict['法律建议'] = '法条引用错误，《民法典》第一千二百六十条 本法自2021年1月1日起施行。《中华人民共和国婚姻法》、《中华人民共和国继承法》、《中华人民共和国民法通则》、《中华人民共和国收养法》、《中华人民共和国担保法》、《中华人民共和国合同法》、《中华人民共和国物权法》、《中华人民共和国侵权责任法》、《中华人民共和国民法总则》同时废止。'
+                res_dict[
+                    '法律建议'] = '法条引用错误，《民法典》第一千二百六十条 本法自2021年1月1日起施行。《中华人民共和国婚姻法》、《中华人民共和国继承法》、《中华人民共和国民法通则》、《中华人民共和国收养法》、《中华人民共和国担保法》、《中华人民共和国合同法》、《中华人民共和国物权法》、《中华人民共和国侵权责任法》、《中华人民共和国民法总则》同时废止。'
                 res_dict['风险点'] = '低'
 
             if res_dict != {}:
@@ -299,7 +300,6 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
 
     def rule_judge2(self, *args, **kwargs):
         pass
-
 
 
 class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
@@ -490,7 +490,8 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
                         res_dict['审核结果'] = '通过'
                         res_dict['法律建议'] = ''
                 elif '交货方式' == row['schema']:
-                    if res_dict['内容'] == '乙方应在合同约定的交货期限内将货物通过物流方式运送至甲方指定地址，运输费用由乙方承担。':
+                    if res_dict[
+                        '内容'] == '乙方应在合同约定的交货期限内将货物通过物流方式运送至甲方指定地址，运输费用由乙方承担。':
                         res_dict['审核结果'] = '不通过'
                         # res_dict['风险点'] = "交货地点条款缺失或约定不明确，建议补充完整。买卖双方应当按照约定的地点交付货物，当事人没有约定标的物的交付期限或者约定不明确的，可以协议补充；不能达成补充协议的，按照合同相关条款或者交易习惯确定。履行地点不明确，给付货币的，在接受货币一方所在地履行；交付不动产的，在不动产所在地履行；其他标的，在履行义务一方所在地履行。"
                         res_dict[
@@ -503,7 +504,8 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
                             '法律建议'] = '交货地点条款缺失或约定不明确，建议补充完整。买卖双方应当按照约定的地点交付货物，当事人没有约定标的物的交付期限或者约定不明确的，可以协议补充；不能达成补充协议的，按照合同相关条款或者交易习惯确定。履行地点不明确，给付货币的，在接受货币一方所在地履行；交付不动产的，在不动产所在地履行；其他标的，在履行义务一方所在地履行。'
                 elif '其他费用' == row['schema']:
                     if res_dict['内容'] == '肆万陆千元整#40000元#' or res_dict[
-                        '内容'] == '肆万玖千元整#30000#49000#10000#9000#' or '4980元#2.49元#肆仟玖佰捌拾元整#' == res_dict['内容']:
+                        '内容'] == '肆万玖千元整#30000#49000#10000#9000#' or '4980元#2.49元#肆仟玖佰捌拾元整#' == \
+                            res_dict['内容']:
                         res_dict['内容'] = '没有该项目内容'
                         res_dict['审核结果'] = '不通过'
                         res_dict['法律建议'] = row['jiaoyan error advice']
@@ -705,7 +707,8 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
                 elif '争议解决' == row['schema']:
                     if '可向甲方所在地有管辖权的人民法院或仲裁委员会申请处理' in self.data:
                         res_dict['审核结果'] = '不通过'
-                        res_dict['内容'] = '因本合同引起的或与本合同有关的任何争议，由合同各方协商解决，也可由有关部门调解。协商或调解不成的，可向甲方所在地有管辖权的人民法院或仲裁委员会申请处理。 '
+                        res_dict[
+                            '内容'] = '因本合同引起的或与本合同有关的任何争议，由合同各方协商解决，也可由有关部门调解。协商或调解不成的，可向甲方所在地有管辖权的人民法院或仲裁委员会申请处理。 '
                         res_dict[
                             '法律建议'] = '或裁或审的争议解决方式可能导致其中关于仲裁协议无效。【《最高人民法院关于适用<中华人民共和国仲裁法>若干问题的解释》第七条】当事人约定争议可以向仲裁机构申请仲裁也可以向人民法院起诉的，仲裁协议无效。但一方向仲裁机构申请仲裁，另一方未在仲裁法第二十条第二款规定期间内提出异议的除外。'
                 elif '合同生效' == row['schema']:
@@ -769,7 +772,8 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
                         res_dict['法律建议'] = ''
 
                 elif '甲方统一社会信用代码' == row['schema']:
-                    if '甲、乙双方根据《中华人民共和国劳动合同法》等法律、法规、规章的规定，在平等、自愿、协商一致的基础上，同意订立本劳动合同，共同遵守本合同所列条款' == res_dict['内容']:
+                    if '甲、乙双方根据《中华人民共和国劳动合同法》等法律、法规、规章的规定，在平等、自愿、协商一致的基础上，同意订立本劳动合同，共同遵守本合同所列条款' == \
+                            res_dict['内容']:
                         res_dict['内容'] = '没有该项目内容'
                         res_dict['审核结果'] = '不通过'
                         res_dict['法律依据'] = row['legal basis']
@@ -813,7 +817,8 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
                         res_dict['法律建议'] = ''
 
                 elif '工作时间' == row['schema']:
-                    if res_dict['内容'] == '乙方在合同期内根据国家规定以及本企业安排时间进行工作，并享有国家规定并结合本企业具体情况安排的各项休息、休假的权利':
+                    if res_dict[
+                        '内容'] == '乙方在合同期内根据国家规定以及本企业安排时间进行工作，并享有国家规定并结合本企业具体情况安排的各项休息、休假的权利':
                         res_dict['审核结果'] = '不通过'
                         res_dict['法律建议'] = '工作时间条款缺失或约定不明确，建议补充完整。'
                 elif '加班' == row['schema']:
@@ -829,7 +834,8 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
 
 
                 elif '社会保险' == row['schema']:
-                    if res_dict['内容'] == '甲乙双方都必须依法参加社会保险，乙方同意在转正六个月后购买、缴纳社会保险费。乙方缴纳部分，由甲方在其工资中代扣代缴。':
+                    if res_dict[
+                        '内容'] == '甲乙双方都必须依法参加社会保险，乙方同意在转正六个月后购买、缴纳社会保险费。乙方缴纳部分，由甲方在其工资中代扣代缴。':
                         res_dict['审核结果'] = '不通过'
                     elif '乙方自愿放弃社保，由此导致的损失由乙方自行承担。 ' in self.data:
                         res_dict['内容'] = '乙方自愿放弃社保，由此导致的损失由乙方自行承担。 '
@@ -1065,7 +1071,8 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
                         res_dict['法律建议'] = ''
 
                 elif '违约责任' == row['schema']:
-                    if '甲方如不按期付息还本，甲方抵押物房产自愿归乙方所有#乙方如因本身责任不按合同规定时间支付借款，乙方应支付甲方未支付借款的5%的违约金#' == res_dict['内容']:
+                    if '甲方如不按期付息还本，甲方抵押物房产自愿归乙方所有#乙方如因本身责任不按合同规定时间支付借款，乙方应支付甲方未支付借款的5%的违约金#' == \
+                            res_dict['内容']:
                         res_dict[
                             '内容'] = '1.乙方如因本身责任不按合同规定时间支付借款，乙方应支付甲方未支付借款的5%的违约金。2.甲方如未按借款合同规定使用借款，一经发现，乙方有权提前收回全部借款。3.甲方如不按期付息还本，或有其它违约行为，乙方有权停止借款，并要求甲方提前归还本息。4.甲方如不按期付息还本，甲方抵押物房产自愿归乙方所有。'
                         res_dict['审核结果'] = '不通过'
@@ -1289,7 +1296,7 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
 
     def unreasonable_show(self):
         if 'fangwuzulin' in self.model_path:
-            config_unreasonable_type  = 'fangwuzulin'
+            config_unreasonable_type = 'fangwuzulin'
         elif 'jiekuan' in self.model_path:
             config_unreasonable_type = 'jiekuan'
         elif 'laodong' in self.model_path:
@@ -1304,14 +1311,14 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
             return
         config_unreasonable_path = 'DocumentReview/Config_unreasonable/{}.csv'.format(config_unreasonable_type)
 
-        unr_data = pd.read_csv(config_unreasonable_path, encoding='utf-8',na_values=' ',keep_default_na=False)
+        unr_data = pd.read_csv(config_unreasonable_path, encoding='utf-8', na_values=' ', keep_default_na=False)
         unr_id = 1
         for unr_line in unr_data.values:
             res_dict_unr = {}
-            unr_r = re.findall(unr_line[1],self.data)
-            if len(unr_r)>0:
-                key = '不合理条款'+str(unr_id)+'_'+unr_line[0]
-                unr_id+=1
+            unr_r = re.findall(unr_line[1], self.data)
+            if len(unr_r) > 0:
+                key = '不合理条款' + str(unr_id) + '_' + unr_line[0]
+                unr_id += 1
                 res_dict_unr['审核结果'] = '不通过'
                 res_dict_unr['内容'] = unr_r[0]
                 res_dict_unr['法律建议'] = unr_line[2]
@@ -1328,11 +1335,11 @@ if __name__ == '__main__':
 
     os.environ['CUDA_VISIBLE_DEVICES'] = "1"
     acknowledgement = BasicUIEAcknowledgementShow(config_path="DocumentReview/Config/{}.csv".format(contract_type),
-                                              log_level="INFO",
-                                              model_path="model/uie_model/new/{}/model_best/".format(contract_type),
-                                              # model_path="model/uie_model/export_cpu/{}/inference".format(
-                                              #     contract_type),
-                                              device="1")
+                                                  log_level="INFO",
+                                                  model_path="model/uie_model/new/{}/model_best/".format(contract_type),
+                                                  # model_path="model/uie_model/export_cpu/{}/inference".format(
+                                                  #     contract_type),
+                                                  device="1")
     print("## First Time ##")
     localtime = time.time()
 
