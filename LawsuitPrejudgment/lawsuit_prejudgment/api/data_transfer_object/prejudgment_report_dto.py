@@ -52,3 +52,54 @@ class CivilReportDTO:
         ]
         self.response_dict["result"]["report"] = report
         return self.response_dict
+
+
+class AdministrativeReportDTO:
+    def __init__(self, response_dict):
+        self.response_dict = response_dict
+
+    def to_dict(self):
+        applicable_law = self.response_dict["applicable_law"]
+        similar_case = self.response_dict["similar_case"]
+        judging_rule = self.response_dict["judging_rule"]
+        report = [
+            [
+                {
+                    "type": "TYPE_TEXT",
+                    "title": "具体情形",
+                    "content": self.response_dict["specific_situation"]["content"]
+                },
+                {
+                    "type": "TYPE_LIST_OF_TEXT",
+                    "title": "涉嫌违法行为",
+                    "content": self.response_dict["suspected_illegal_act"]["content"]
+                },
+                {
+                    "type": "TYPE_LIST_OF_OBJECT",
+                    "title": "法条依据",
+                    "content": self.response_dict["legal_basis"]["content"]
+                },
+                {
+                    "type": "TYPE_LIST_OF_TEXT",
+                    "title": "处罚种类",
+                    "content": self.response_dict["punishment_type"]["content"]
+                },
+                {
+                    "type": "TYPE_LIST_OF_TEXT",
+                    "title": "punishment_range",
+                    "content": self.response_dict["punishment_type"]["content"]
+                },
+                {
+                    "type": "TYPE_LIST_OF_OBJECT",
+                    "title": "涉刑风险",
+                    "content": self.response_dict["criminal_risk"]["content"]
+                }
+            ]
+        ]
+        self.response_dict = {
+            "applicable_law": applicable_law,
+            "similar_case": similar_case,
+            "judging_rule": judging_rule,
+            "report": report
+        }
+        return self.response_dict

@@ -9,7 +9,8 @@ from flask import request
 
 from LawsuitPrejudgment.lawsuit_prejudgment.api.data_transfer_object.applicable_law_dto import \
     CriminalApplicableLawDictCreator
-from LawsuitPrejudgment.lawsuit_prejudgment.api.data_transfer_object.prejudgment_report_dto import CivilReportDTO
+from LawsuitPrejudgment.lawsuit_prejudgment.api.data_transfer_object.prejudgment_report_dto import CivilReportDTO, \
+    AdministrativeReportDTO
 from LawsuitPrejudgment.lawsuit_prejudgment.api.data_transfer_object.similar_case_dto import \
     CriminalSimilarCaseListCreator
 from LawsuitPrejudgment.lawsuit_prejudgment.constants import SUPPORTED_ADMINISTRATIVE_TYPES_CONFIG_PATH, \
@@ -296,6 +297,8 @@ def get_administrative_result():
         administrative_type = req_data.get("type_id")
         situation = req_data.get("situation")
         res = get_administrative_prejudgment_result(administrative_type, situation)
+        if FeatureToggles(FEATURE_TOGGLES_CONFIG_PATH).reformat_prejudgment_report:
+            res = AdministrativeReportDTO(res).to_dict()
         return response_successful_result(res)
     except Exception as e:
         logging.info(traceback.format_exc())
