@@ -7,9 +7,7 @@
 # @Software: PyCharm
 import streamlit as st
 
-from DocumentReview.ContractReview.showing_sample import BasicUIEAcknowledgementShow
 from DocumentReview.ParseFile.parse_word import read_docx_file
-from DocumentReview.ContractReview.basic_contract import BasicUIEAcknowledgement
 # from paddlenlp import Taskflow
 # import pycorrector
 from loguru import logger
@@ -19,9 +17,7 @@ from pypinyin import pinyin, lazy_pinyin
 
 # from annotated_text import annotated_text
 
-
 # text_correction = Taskflow("text_correction")
-
 
 @st.cache
 def get_data(_file):
@@ -63,10 +59,13 @@ if usr == '甲方':
 else:
     usr = 'Part B'
 if is_show:
+    from DocumentReview.ContractReview.showing_sample import BasicUIEAcknowledgementShow
+
     acknowledgement = BasicUIEAcknowledgementShow(config_path=config_path,
-                                              model_path=model_path,
-                                              device="1", )
+                                                  model_path=model_path,
+                                                  device="1", )
 else:
+    from DocumentReview.ContractReview.basic_contract import BasicUIEAcknowledgement
 
     acknowledgement = BasicUIEAcknowledgement(config_path=config_path,
                                               model_path=model_path,

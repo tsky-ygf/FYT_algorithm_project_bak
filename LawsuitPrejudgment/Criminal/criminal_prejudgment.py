@@ -38,6 +38,7 @@ class CriminalPrejudgment(PrejudgmentPipeline):
         sentence = self.content["fact"]
         predictions = self.predictor.predict({"fact": [sentence]}, as_pandas=False)
         self.content["anyou"] = predictions[0]
+        # print(predictions[0])
         # self.logger.debug(self.content)
 
     def suqiu_identify(self):
@@ -102,6 +103,10 @@ class CriminalPrejudgment(PrejudgmentPipeline):
         self.content["graph_process"] = {key: 0 for key in base_logic_dict[self.content['anyou']].keys()}
         self.content["graph_process_content"] = {key: "" for key in base_logic_dict[self.content['anyou']].keys()}
 
+        # if base_logic_dict[self.content["anyou"]]["量刑"].keys()[0] == "【量刑】":
+        #     self.content["graph_process"]["量刑"] = 1
+        #     self.content["graph_process_content"]["量刑"] = "量刑"
+
     def get_question(self):
         self.logger.debug(self.content["question_answers"])
 
@@ -153,6 +158,7 @@ class CriminalPrejudgment(PrejudgmentPipeline):
         _location = self.content["event"]["地点"]
         _person = self.content["event"]["人物"]
         _action = self.content["event"]["行为"]
+
         if "量刑" in self.content["question_answers"]:
             _amount = self.content["question_answers"]["量刑"]["usr_answer"]
         else:
@@ -184,6 +190,10 @@ if __name__ == '__main__':
 
     text = "浙江省诸暨市人民检察院指控，2019年7月22日10时30分许，被告人唐志强窜至诸暨市妇幼保健医院，在3楼21号病床床头柜内窃得被害人俞" \
            "某的皮包一只，内有现金￥1500元和银行卡、身份证等财物。"
+
+    # text = "湖南省涟源市人民检察院指控，2014年8月至2015年1月，被告人刘某甲先后多次容留刘2某、刘某乙、刘1某、刘某丙、袁某等人在其位于本市" \
+    #        "安平镇田心村二组的家中吸食甲基苯丙胺（冰毒）和甲基苯丙胺片剂（麻古）。具体事实如下：1、2014年8月份的一天，被告人" \
+    #        "刘某甲容留刘某丙、刘1某等人在其家中卧室吸食甲基苯丙胺和甲基苯丙胺片剂。"
 
     # question_answers = []
 
