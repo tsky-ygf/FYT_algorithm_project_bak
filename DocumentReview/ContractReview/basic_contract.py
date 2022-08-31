@@ -45,7 +45,7 @@ class BasicAcknowledgement:
         self.review_result = self.init_review_result()
         self.data_list = self.read_origin_content(content, mode)
         data = '\n'.join(self.data_list)
-        data = data.replace('⾄', '至').replace('中华⼈民','中华人民')
+        data = data.replace('⾄', '至').replace('中华⼈民', '中华人民')
         self.data = re.sub("[＿_]+", "", data)
         extraction_res = self.check_data_func()
 
@@ -106,7 +106,7 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
         # self.review_result = {schema: {} for schema in self.schema}
         self.model_path = model_path
         self.data = ""
-        self.schema = [schema for schema in self.schema if schema!=""]
+        self.schema = [schema for schema in self.schema if schema != ""]
         if self.device == "cpu":
             args = InferArgs()
             args.model_path_prefix = model_path
@@ -240,11 +240,13 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
                             res_dict["end"] = str(con['end']) + '#'
 
                 # model cannot recognize
-                if ('甲方' == row['schema'] or'甲方联系方式' == row['schema'] or '甲方地址' == row['schema']) and len(extraction_con) > 1:
+                if ('甲方' == row['schema'] or '甲方联系方式' == row['schema'] or '甲方地址' == row['schema']) and len(
+                        extraction_con) > 1:
                     res_dict["内容"] = extraction_con[0]['text']
                     res_dict["start"] = str(extraction_con[0]['start'])
                     res_dict["end"] = str(extraction_con[0]['end'])
-                elif ('乙方' == row['schema'] or'乙方联系方式' == row['schema'] or '乙方地址' == row['schema']) and len(extraction_con) > 1:
+                elif ('乙方' == row['schema'] or '乙方联系方式' == row['schema'] or '乙方地址' == row[
+                    'schema']) and len(extraction_con) > 1:
                     res_dict["内容"] = extraction_con[1]['text']
                     res_dict["start"] = str(extraction_con[1]['start'])
                     res_dict["end"] = str(extraction_con[1]['end'])
@@ -266,9 +268,12 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
                 res_dict["法律建议"] = row["neg legal advice"]
 
             # model cannot recognize
-            if '鉴于条款' == row['schema'] and len(re.findall(r'《中华人民共和国婚姻法》|《中华人民共和国继承法》|《中华人民共和国民法通则》|《中华人民共和国收养法》|《中华人民共和国担保法》|《中华人民共和国合同法》|《中华人民共和国物权法》|《中华人民共和国侵权责任法》|《中华人民共和国民法总则》', self.data))>0 :
+            if '鉴于条款' == row['schema'] and len(re.findall(
+                    r'《中华人民共和国婚姻法》|《中华人民共和国继承法》|《中华人民共和国民法通则》|《中华人民共和国收养法》|《中华人民共和国担保法》|《中华人民共和国合同法》|《中华人民共和国物权法》|《中华人民共和国侵权责任法》|《中华人民共和国民法总则》',
+                    self.data)) > 0:
                 res_dict['审核结果'] = '不通过'
-                res_dict['法律建议'] = '法条引用错误，《民法典》第一千二百六十条 本法自2021年1月1日起施行。《中华人民共和国婚姻法》、《中华人民共和国继承法》、《中华人民共和国民法通则》、《中华人民共和国收养法》、《中华人民共和国担保法》、《中华人民共和国合同法》、《中华人民共和国物权法》、《中华人民共和国侵权责任法》、《中华人民共和国民法总则》同时废止。'
+                res_dict[
+                    '法律建议'] = '法条引用错误，《民法典》第一千二百六十条 本法自2021年1月1日起施行。《中华人民共和国婚姻法》、《中华人民共和国继承法》、《中华人民共和国民法通则》、《中华人民共和国收养法》、《中华人民共和国担保法》、《中华人民共和国合同法》、《中华人民共和国物权法》、《中华人民共和国侵权责任法》、《中华人民共和国民法总则》同时废止。'
                 res_dict['风险点'] = '低'
 
             if res_dict != {}:
@@ -284,7 +289,6 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
 
     def rule_judge2(self, *args, **kwargs):
         pass
-
 
 
 if __name__ == '__main__':

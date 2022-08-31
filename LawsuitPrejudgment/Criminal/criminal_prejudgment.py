@@ -54,23 +54,7 @@ class CriminalPrejudgment(PrejudgmentPipeline):
         r = requests.post(self.ie_url, json={"criminal_type": criminal_type, "fact": self.content["fact"]})
         extract_result = r.json()['result'][0]
         self.content["event"] = dict()
-        for key, values in extract_result.items():
-            for value in values:
-                self.content["event"]["事件"] = value["text"]
-                relations = value["relations"]
-                # self.logger.debug(relations)
-                self.content["event"]["物品"] = relations.get("物品", [{"text": "一些"}])
 
-                _thing = self.content["event"]["物品"]
-                _thing = [one_thing['text'] for one_thing in _thing]
-                _thing_str = "、".join(_thing)
-                self.content["event"]["物品"] = _thing_str
-
-                self.content["event"]["时间"] = relations.get("时间", [{"text": ""}])[0]["text"]
-                self.content["event"]["地点"] = relations.get("地点", [{"text": ""}])[0]["text"]
-                self.content["event"]["人物"] = relations.get("人物", [{"text": "嫌疑人"}])[0]["text"]
-                self.content["event"]["总金额"] = relations.get("总金额", [{"text": ""}])[0]["text"]
-                self.content["event"]["行为"] = relations.get("行为", [{"text": self.content['anyou']}])[0]["text"]
         # self.logger.debug(self.content)
 
         # if self.content["event"]["行为"] is not None:
