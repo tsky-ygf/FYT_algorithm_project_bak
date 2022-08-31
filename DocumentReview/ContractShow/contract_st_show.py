@@ -6,8 +6,6 @@
 # @File    : contract_st_show.py
 # @Software: PyCharm
 import streamlit as st
-
-from DocumentReview.ContractReview.showing_sample import BasicUIEAcknowledgementShow
 from DocumentReview.ParseFile.parse_word import read_docx_file
 from DocumentReview.ContractReview.basic_contract import BasicUIEAcknowledgement
 # from paddlenlp import Taskflow
@@ -63,15 +61,9 @@ if usr == '甲方':
 else:
     usr = 'Part B'
 
-if is_show:
-    acknowledgement = BasicUIEAcknowledgementShow(config_path=config_path,
-                                              model_path=model_path,
-                                              device="1", )
-else:
-    acknowledgement = BasicUIEAcknowledgement(config_path=config_path,
-                                              model_path=model_path,
-                                              device="1", )
-
+acknowledgement = BasicUIEAcknowledgement(config_path=config_path,
+                                          model_path=model_path,
+                                          device="1", )
 correct = st.button("文本纠错")
 run = st.button("开始审核")
 
@@ -140,7 +132,7 @@ if correct:
         # result = []
 
 if run:
-    acknowledgement.review_main(content=text, mode="text", usr=usr)
+    acknowledgement.review_main(content=text, mode="text", usr=usr, is_show=is_show)
     pprint(acknowledgement.review_result, sort_dicts=False)
     index = 1
     for key, value in acknowledgement.review_result.items():
