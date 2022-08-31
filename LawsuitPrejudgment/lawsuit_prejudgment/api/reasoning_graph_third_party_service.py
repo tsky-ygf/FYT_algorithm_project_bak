@@ -226,10 +226,12 @@ def reasoning_graph_result():
                 "question_next": question_next,
                 "question_type": question_type,
                 "factor_sentence_list": factor_sentence_list,
-                "applicable_law": applicable_law,
-                "similar_case": similar_case,
-                "judging_rule": judging_rule,
-                "result": result
+                "result": {
+                    "applicable_law": applicable_law,
+                    "similar_case": similar_case,
+                    "judging_rule": judging_rule,
+                    "report": result
+                } if not question_next else None
             }
             if FeatureToggles(FEATURE_TOGGLES_CONFIG_PATH).reformat_prejudgment_report:
                 response_dict = CivilReportDTO(response_dict).to_dict()

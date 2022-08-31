@@ -15,7 +15,7 @@ class CivilReportDTO:
         if self.response_dict.get("question_next"):
             return self.response_dict
 
-        result = [
+        report = [
             [
                 {
                     "type": "TYPE_TEXT",
@@ -48,7 +48,7 @@ class CivilReportDTO:
                     "content": item["legal_advice"]
                 }
             ]
-            for item in self.response_dict["result"]
+            for item in self.response_dict["result"]["report"]
         ]
-        self.response_dict["result"] = result
+        self.response_dict["result"]["report"] = report
         return self.response_dict
