@@ -7,7 +7,7 @@
 """
 import requests
 
-INTELLIGENT_CONSULTATION_API_URL = "http://101.69.229.138:8130"
+INTELLIGENT_CONSULTATION_API_URL = "http://127.0.0.1:8130"
 
 
 def test_get_query_answer():

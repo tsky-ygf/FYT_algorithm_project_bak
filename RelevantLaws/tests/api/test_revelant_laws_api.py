@@ -11,7 +11,7 @@ from RelevantLaws.api.constants import SEPERATOR_BETWEEN_LAW_TABLE_AND_ID
 
 
 def test_get_filter_conditions():
-    url = "http://101.69.229.138:8135/get_filter_conditions_of_law"
+    url = "http://127.0.0.1:8135/get_filter_conditions_of_law"
     resp_json = requests.get(url).json()
 
     print(resp_json)
@@ -25,7 +25,7 @@ def test_get_filter_conditions():
 
 
 def test_search_laws():
-    url = "http://101.69.229.138:8135/search_laws"
+    url = "http://127.0.0.1:8135/search_laws"
     body = {
         "query": "侵权",
         "filter_conditions": {
@@ -56,7 +56,7 @@ def test_search_laws():
 
 
 def test_get_law_by_law_id():
-    url = "http://101.69.229.138:8135/get_law_by_law_id"
+    url = "http://127.0.0.1:8135/get_law_by_law_id"
     param = {
         "law_id": "flfg_result_falv" + SEPERATOR_BETWEEN_LAW_TABLE_AND_ID + "5a43120b27fe0457634a7420283b4aad"
     }

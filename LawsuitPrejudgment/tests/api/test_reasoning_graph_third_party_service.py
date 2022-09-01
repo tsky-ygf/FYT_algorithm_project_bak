@@ -11,7 +11,7 @@ attributes_in_judging_rule = {"rule_id", "content", "source", "source_url"}
 
 
 def test_get_civil_problem_summary():
-    url = "http://101.69.229.138:8100/get_civil_problem_summary"
+    url = "http://127.0.0.1:8100/get_civil_problem_summary"
     resp_json = requests.get(url).json()
 
     print(resp_json)
@@ -22,7 +22,7 @@ def test_get_civil_problem_summary():
 
 
 def test_get_template_by_problem_id():
-    url = "http://101.69.229.138:8100/get_template_by_problem_id"
+    url = "http://127.0.0.1:8100/get_template_by_problem_id"
     params = {"problem_id": 1564}
     resp_json = requests.get(url, params=params).json()
 
@@ -34,7 +34,7 @@ def test_get_template_by_problem_id():
 
 
 def test_get_claim_list_by_problem_id():
-    url = "http://101.69.229.138:8100/get_claim_list_by_problem_id"
+    url = "http://127.0.0.1:8100/get_claim_list_by_problem_id"
     params = {"problem_id": 1536}
     resp_json = requests.get(url, params=params).json()
 
@@ -46,7 +46,7 @@ def test_get_claim_list_by_problem_id():
 
 
 def test_should_ask_next_question_when_reasoning_graph_result():
-    url = "http://101.69.229.138:8100/reasoning_graph_result"
+    url = "http://127.0.0.1:8100/reasoning_graph_result"
     body = {
         "problem": "婚姻家庭",
         "claim_list": ["请求离婚"],
@@ -64,7 +64,7 @@ def test_should_ask_next_question_when_reasoning_graph_result():
 
 
 def test_show_have_report_when_reasoning_graph_result():
-    url = "http://101.69.229.138:8100/reasoning_graph_result"
+    url = "http://127.0.0.1:8100/reasoning_graph_result"
     body = {
         "problem": "婚姻家庭",
         "claim_list": ["请求离婚"],
@@ -84,7 +84,7 @@ def test_show_have_report_when_reasoning_graph_result():
 
 
 def test_get_administrative_type():
-    url = "http://101.69.229.138:8100/get_administrative_type"
+    url = "http://127.0.0.1:8100/get_administrative_type"
     resp_json = requests.get(url).json()
 
     print(resp_json)
@@ -100,7 +100,7 @@ def test_get_administrative_type():
 #     type_id_list = [item["type_id"] for item in supported_administrative_types]
 #
 #     for type_id in type_id_list:
-#         url = "http://101.69.229.138:8100/get_administrative_problem_and_situation_by_type_id?type_id={}".format(type_id)
+#         url = "http://127.0.0.1:8100/get_administrative_problem_and_situation_by_type_id?type_id={}".format(type_id)
 #         resp_json = requests.get(url).json()
 #         assert resp_json is not None, type_id
 #         assert resp_json.get("success") is True, type_id
@@ -109,7 +109,7 @@ def test_get_administrative_type():
 
 
 def test_get_administrative_result():
-    url = "http://101.69.229.138:8100/get_administrative_result"
+    url = "http://127.0.0.1:8100/get_administrative_result"
     data = {
         "type_id": "tax",
         "situation": "逃避税务机关检查"
@@ -126,7 +126,7 @@ def test_get_administrative_result():
 
 
 def test_get_criminal_result():
-    url = "http://101.69.229.138:8100/get_criminal_result"
+    url = "http://127.0.0.1:8100/get_criminal_result"
     data = {
         "fact": "我打人了，怎么办？",
         "question_answers": {},
@@ -147,7 +147,7 @@ def test_get_criminal_result():
 
 
 def test_should_ask_question_when_get_criminal_result():
-    url = "http://101.69.229.138:8100/get_criminal_result"
+    url = "http://127.0.0.1:8100/get_criminal_result"
     data = {
         "fact": "2020年7、8月份的一天，小黄电话联系我要买一小包毒品，我们约好当天下午3点在杭州市郊区某小区附近碰头。当天下午我们碰头后，我将一小包毒品塞给了小黄，收了他1500元，然后我们就各自回去了。",
         "question_answers": {},
@@ -180,7 +180,7 @@ def test_should_ask_question_when_get_criminal_result():
 
 
 def test_should_get_report_when_get_criminal_result():
-    url = "http://101.69.229.138:8100/get_criminal_result"
+    url = "http://127.0.0.1:8100/get_criminal_result"
     data = {
         "fact": "2020年7、8月份的一天，小黄电话联系我要买一小包毒品，我们约好当天下午3点在杭州市郊区某小区附近碰头。当天下午我们碰头后，我将一小包毒品塞给了小黄，收了他1500元，然后我们就各自回去了。",
         "question_answers": {

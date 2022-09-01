@@ -34,18 +34,6 @@
 		{
 			"type_id": "yibanzulin",
 			"contract_type": "一般租赁"
-		},
-		{
-			"type_id": "lihun",
-			"contract_type": "离婚"
-		},
-		{
-			"type_id": "wuye",
-			"contract_type": "物业服务"
-		},
-		{
-			"type_id": "guquan",
-			"contract_type": "股权转让"
 		}
 	],
 	"user_standpoints": [
