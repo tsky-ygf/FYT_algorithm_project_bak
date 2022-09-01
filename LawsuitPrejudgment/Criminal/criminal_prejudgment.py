@@ -123,10 +123,10 @@ class CriminalPrejudgment(PrejudgmentPipeline):
             schema_list = row["schema"].split("|")
             for schema in schema_list:
                 # if row["sentence"] in self.content["event"][schema]:
-                if len(re.findall(row["sentences"], self.content["event"][schema])) > 0:
+                if len(re.findall(row["sentences"], self.content["fact"])) > 0:
                     self.content["graph_process"]["情节"] = 1
                     self.content["graph_process_content"]["情节"] = row["crime_plot"]
-                    break
+                    # break
             if self.content["graph_process"]["情节"] == 1:
                 break
 
@@ -291,12 +291,14 @@ if __name__ == "__main__":
     #
     # pprint(res4["report_result"])
 
-    text = (
-        "湖南省涟源市人民检察院指控，2014年8月至2015年1月，被告人刘某甲先后多次容留刘2某、刘某乙、刘1某、刘某丙、袁某等人在其位于本市"
-        "安平镇田心村二组的家中吸食甲基苯丙胺（冰毒）和甲基苯丙胺片剂（麻古）。具体事实如下：1、2014年8月份的一天，被告人"
-        "刘某甲容留刘某丙、刘1某等人在其家中卧室吸食甲基苯丙胺和甲基苯丙胺片剂。"
-    )
-    # text = "x年x月x日，x在x地容留x吸食x毒品x次，存在x情况。"
+    # text = (
+    #     "湖南省涟源市人民检察院指控，2014年8月至2015年1月，被告人刘某甲先后多次容留刘2某、刘某乙、刘1某、刘某丙、袁某等人在其位于本市"
+    #     "安平镇田心村二组的家中吸食甲基苯丙胺（冰毒）和甲基苯丙胺片剂（麻古）。具体事实如下：1、2014年8月份的一天，被告人"
+    #     "刘某甲容留刘某丙、刘1某等人在其家中卧室吸食甲基苯丙胺和甲基苯丙胺片剂。"
+    # )
+
+    text = "2022年8月12日，罗某某利用螺丝刀撬开房间门锁进入某市某区某栋某单元某层某房间内，窃得现金50000元。2022年8月12日，趁邻居卢某家" \
+           "无人在家，从卢某家厨房后窗翻进其家，盗走现金50000元。"
     input_dict = {"fact": text}
     # 第一次调用
     res = criminal_pre_judgment(**input_dict)
@@ -306,8 +308,12 @@ if __name__ == "__main__":
     res2 = criminal_pre_judgment(**res)  # 传入上一次的结果
 
     if "report_result" in res2:
+        pprint(res2["question_answers"])
         pprint(res2["report_result"])
-        pprint(res2["report_result"])
+    else:
+        pprint(res2["question_answers"])
+
+        pprint(res2["event"])
     # pprint(res2["question_answers"])
     # pprint(res2["report_result"])
 
