@@ -47,53 +47,6 @@
         {
             "type_id": "health",
             "type_name": "卫生健康处罚预判"
-        },        {
-            "type_id": "health",
-            "type_name": "卫生健康处罚预判"
-        },
-        {
-            "type_id": "health",
-            "type_name": "卫生健康处罚预判"
-        },
-        {
-            "type_id": "health",
-            "type_name": "卫生健康处罚预判"
-        },
-        {
-            "type_id": "health",
-            "type_name": "卫生健康处罚预判"
-        },
-        {
-            "type_id": "health",
-            "type_name": "卫生健康处罚预判"
-        },
-        {
-            "type_id": "health",
-            "type_name": "卫生健康处罚预判"
-        },
-        {
-            "type_id": "health",
-            "type_name": "卫生健康处罚预判"
-        },
-        {
-            "type_id": "health",
-            "type_name": "卫生健康处罚预判"
-        },
-        {
-            "type_id": "health",
-            "type_name": "卫生健康处罚预判"
-        },
-        {
-            "type_id": "health",
-            "type_name": "卫生健康处罚预判"
-        },
-        {
-            "type_id": "health",
-            "type_name": "卫生健康处罚预判"
-        },
-        {
-            "type_id": "health",
-            "type_name": "卫生健康处罚预判"
         },
         {
             "type_id": "fishery",
@@ -102,6 +55,14 @@
         {
             "type_id": "construction",
             "type_name": "建设生产安全处罚预判"
+        },
+        {
+            "type_id": "fire",
+            "type_name": "消防应急处罚预判"
+        },
+        {
+            "type_id": "travel",
+            "type_name": "文广旅游处罚预判"
         }
     ]
 }

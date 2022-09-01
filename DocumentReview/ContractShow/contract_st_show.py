@@ -6,8 +6,8 @@
 # @File    : contract_st_show.py
 # @Software: PyCharm
 import streamlit as st
+
 from DocumentReview.ParseFile.parse_word import read_docx_file
-from DocumentReview.ContractReview.basic_contract import BasicUIEAcknowledgement
 # from paddlenlp import Taskflow
 # import pycorrector
 from loguru import logger
@@ -17,9 +17,7 @@ from pypinyin import pinyin, lazy_pinyin
 
 # from annotated_text import annotated_text
 
-
 # text_correction = Taskflow("text_correction")
-
 
 @st.cache
 def get_data(_file):
@@ -60,10 +58,18 @@ if usr == '甲方':
     usr = 'Part A'
 else:
     usr = 'Part B'
+if is_show:
+    from DocumentReview.ContractReview.showing_sample import BasicUIEAcknowledgementShow
 
-acknowledgement = BasicUIEAcknowledgement(config_path=config_path,
-                                          model_path=model_path,
-                                          device="1", )
+    acknowledgement = BasicUIEAcknowledgementShow(config_path=config_path,
+                                                  model_path=model_path,
+                                                  device="1", )
+else:
+    from DocumentReview.ContractReview.basic_contract import BasicUIEAcknowledgement
+
+    acknowledgement = BasicUIEAcknowledgement(config_path=config_path,
+                                              model_path=model_path,
+                                              device="1", )
 correct = st.button("文本纠错")
 run = st.button("开始审核")
 
@@ -132,7 +138,7 @@ if correct:
         # result = []
 
 if run:
-    acknowledgement.review_main(content=text, mode="text", usr=usr, is_show=is_show)
+    acknowledgement.review_main(content=text, mode="text", usr=usr)
     pprint(acknowledgement.review_result, sort_dicts=False)
     index = 1
     for key, value in acknowledgement.review_result.items():
