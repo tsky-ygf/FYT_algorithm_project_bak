@@ -45,7 +45,7 @@ while "report_result" not in res:
         option = st.radio("请选择答案", value["answer"].split("|"), key='answer')
         res['question_answers'][key]['usr_answer'] = option
         break
-    st.write(res)
+    # st.write(res)
     res = criminal_pre_judgment(**res)  # 传入上一次的结果
     # break
 

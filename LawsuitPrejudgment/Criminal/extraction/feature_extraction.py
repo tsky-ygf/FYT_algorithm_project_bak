@@ -34,6 +34,7 @@ def init_extract(criminal_type=""):
 def post_multi_thing(post_result, name):
     _thing = post_result[name]
     _thing = [one_thing["text"] for one_thing in _thing]
+    _thing = list(set(_thing))
     _thing_str = "、".join(_thing)
     post_result[name] = _thing_str
 
@@ -61,6 +62,7 @@ def post_process_uie_results(predictor, criminal_type, fact):
                 post_result["人物"] = relations.get("人物", [{"text": "嫌疑人"}])[0]["text"]
                 post_result["总金额"] = relations.get("总金额", [{"text": ""}])[0]["text"]
                 post_result["行为"] = relations.get("行为", [{"text": "盗窃"}])[0]["text"]
+
     elif criminal_type == "provide_drug":
         for key, values in extract_result.items():
             for value in values:

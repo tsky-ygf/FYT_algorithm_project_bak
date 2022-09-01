@@ -105,10 +105,10 @@ class CriminalPrejudgment(PrejudgmentPipeline):
 
     def match_graph(self):
         if (
-            list(self.content["base_logic_graph"][self.content["anyou"]]["量刑"].keys())[
-                0
-            ]
-            == "【量刑】"
+                list(self.content["base_logic_graph"][self.content["anyou"]]["量刑"].keys())[
+                    0
+                ]
+                == "【量刑】"
         ):
             self.content["graph_process"]["量刑"] = 1
             self.content["graph_process_content"]["量刑"] = "量刑"
@@ -206,7 +206,7 @@ class CriminalPrejudgment(PrejudgmentPipeline):
         # for key,value in self.content["base_logic_graph"][self.content["anyou"]].items():
         case_num = self.content["base_logic_graph"][self.content["anyou"]]["情节"][
             "【" + self.content["graph_process_content"]["情节"] + "】"
-        ]
+            ]
 
         sentencing_dict = self.content["base_logic_graph"][self.content["anyou"]]["量刑"]
         if self.content["question_answers"]["前提"]["usr_answer"] == "是":
@@ -214,13 +214,14 @@ class CriminalPrejudgment(PrejudgmentPipeline):
         else:
             report_id = sentencing_dict[
                 "【" + self.content["graph_process_content"]["量刑"] + "】"
-            ][case_num]
+                ][case_num]
 
         _time = self.content["event"]["时间"]
 
         _location = self.content["event"]["地点"]
         _person = self.content["event"]["人物"]
-        _action = self.content["event"]["行为"]
+        # _action = self.content["event"]["行为"]
+        _action = self.content["graph_process_content"]["情节"]
 
         if _time != "":
             _time += "，"
@@ -238,7 +239,7 @@ class CriminalPrejudgment(PrejudgmentPipeline):
 
             evaluation_report[
                 "案件事实"
-            ] = f"根据您的描述，{_time}{_location}{_person}存在{_action}等行为，窃得{_thing}财物，盗窃金额为{_amount}。"
+            ] = f"根据您的描述，{_time}{_location}{_person}存在{_action}等情形，窃得{_thing}财物，盗窃金额为{_amount}。"
 
         elif self.content["anyou"] == "容留他人吸毒":
             _drug_name = self.content["event"]["毒品名称"]
@@ -288,12 +289,12 @@ if __name__ == "__main__":
     #
     # pprint(res4["report_result"])
 
-    # text = (
-    #     "湖南省涟源市人民检察院指控，2014年8月至2015年1月，被告人刘某甲先后多次容留刘2某、刘某乙、刘1某、刘某丙、袁某等人在其位于本市"
-    #     "安平镇田心村二组的家中吸食甲基苯丙胺（冰毒）和甲基苯丙胺片剂（麻古）。具体事实如下：1、2014年8月份的一天，被告人"
-    #     "刘某甲容留刘某丙、刘1某等人在其家中卧室吸食甲基苯丙胺和甲基苯丙胺片剂。"
-    # )
-    text = "x年x月x日，x在x地容留x吸食x毒品x次，存在x情况。"
+    text = (
+        "湖南省涟源市人民检察院指控，2014年8月至2015年1月，被告人刘某甲先后多次容留刘2某、刘某乙、刘1某、刘某丙、袁某等人在其位于本市"
+        "安平镇田心村二组的家中吸食甲基苯丙胺（冰毒）和甲基苯丙胺片剂（麻古）。具体事实如下：1、2014年8月份的一天，被告人"
+        "刘某甲容留刘某丙、刘1某等人在其家中卧室吸食甲基苯丙胺和甲基苯丙胺片剂。"
+    )
+    # text = "x年x月x日，x在x地容留x吸食x毒品x次，存在x情况。"
     input_dict = {"fact": text}
     # 第一次调用
     res = criminal_pre_judgment(**input_dict)
