@@ -10,7 +10,7 @@ import time
 import requests
 
 
-CONTRACT_REVIEW_URL = "http://101.69.229.138:8110"
+CONTRACT_REVIEW_URL = "http://127.0.0.1:8110"
 
 
 def test_get_contract_type():

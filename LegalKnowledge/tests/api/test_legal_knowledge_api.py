@@ -10,7 +10,7 @@ import time
 import requests
 
 
-LEGAL_KNOWLEDGE_SERVICE_URL = "http://101.69.229.138:8120"
+LEGAL_KNOWLEDGE_SERVICE_URL = "http://127.0.0.1:8120"
 
 
 def test_get_columns():

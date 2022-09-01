@@ -7,7 +7,7 @@
 """
 import requests
 
-SIMILAR_CASE_RETRIEVAL_URL = "http://101.69.229.138:8140"
+SIMILAR_CASE_RETRIEVAL_URL = "http://127.0.0.1:8140"
 
 
 def _get_similar_cases(req_data):
@@ -37,7 +37,7 @@ def test_get_similar_cases_without_problem_and_claim():
 
 
 def test_get_filter_conditions():
-    url = "http://101.69.229.138:8140/get_filter_conditions_of_case"
+    url = "http://127.0.0.1:8140/get_filter_conditions_of_case"
     resp_json = requests.get(url).json()
 
     print(resp_json)
@@ -52,7 +52,7 @@ def test_get_filter_conditions():
 
 
 def test_search_cases():
-    url = "http://101.69.229.138:8140/search_cases"
+    url = "http://127.0.0.1:8140/search_cases"
     body = {
         "query": "离婚",
         "filter_conditions": {
@@ -104,7 +104,7 @@ def test_get_law_document():
 
 def test_get_criminal_law_document():
     doc_id = "24dbed45-904d-4992-aea7-a82000320181"
-    url = "http://101.69.229.138:8140/get_law_document"
+    url = "http://127.0.0.1:8140/get_law_document"
     resp_json = requests.get(url, params={"doc_id": doc_id}).json()
 
     print(resp_json)
