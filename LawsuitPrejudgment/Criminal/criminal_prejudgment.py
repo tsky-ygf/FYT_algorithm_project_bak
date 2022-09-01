@@ -54,7 +54,9 @@ class CriminalPrejudgment(PrejudgmentPipeline):
         elif self.content["anyou"] == "容留他人吸毒":
             criminal_type = "provide_drug"
         else:
-            raise Exception("暂时不支持该数据格式")
+            self.content["report_result"] = {
+                "敬请期待": f"你的行为属于{self.content['anyou']}犯罪,目前还未上线，正在训练优化中，敬请期待！"}
+            return
 
         r = requests.post(
             self.ie_url,
