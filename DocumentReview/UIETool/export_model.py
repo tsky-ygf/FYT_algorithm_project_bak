@@ -51,7 +51,7 @@ if __name__ == '__main__':
     #         output_path="model/uie_model/export_cpu/{}".format(export_type),
     #     )
     # print("Done.")
-    for export_type in ['theft']:
+    for export_type in ['provide_drug']:
         export_model_onnx(
             model_path="model/uie_model/criminal/{}/model_best".format(export_type),
             output_path="model/uie_model/export_cpu/{}".format(export_type),

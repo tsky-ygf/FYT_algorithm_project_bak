@@ -1028,7 +1028,7 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
                 temp = line[1].replace('\r', '').split('\n')[0]
                 if line[4] != '通过':
                     line[4] = '不通过'
-                elif line[4] == '未识别，不做审核':
+                elif line[4] == '未识别，不做审核' or line[4] == '不审核':
                     #TODO
                     self.review_result[line[2]] = {} # 若通过且无内容，则是未识别不做审核，删掉该schemas
                     continue
@@ -1071,7 +1071,7 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
             res_dict_unr = {}
             unr_r = re.findall(unr_line[1],self.data)
             if len(unr_r)>0:
-                if unr_line[0]=='':
+                if unr_line[0]=='' or unr_line[0] == ' ':
                     key = '不合理条款'+str(unr_id)
                 else:
                     key = '不合理条款'+str(unr_id)+'_'+unr_line[0]
@@ -1088,7 +1088,7 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
 if __name__ == '__main__':
     import time
 
-    contract_type = "baomi"
+    contract_type = "fangwuzulin"
 
     os.environ['CUDA_VISIBLE_DEVICES'] = "1"
     acknowledgement = BasicUIEAcknowledgementShow(config_path="DocumentReview/Config/{}.csv".format(contract_type),
@@ -1100,6 +1100,6 @@ if __name__ == '__main__':
     print("## First Time ##")
     localtime = time.time()
 
-    acknowledgement.review_main(content="data/DocData/baomi/baomi1.docx", mode="docx", usr="Part B")
+    acknowledgement.review_main(content="data/DocData/fangwuzulin/fwzl5_show.docx", mode="docx", usr="Part B")
     pprint(acknowledgement.review_result, sort_dicts=False)
     print('use time: {}'.format(time.time() - localtime))
