@@ -268,13 +268,16 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
                 res_dict["法律建议"] = row["neg legal advice"]
 
             # model cannot recognize
-            if '鉴于条款' == row['schema'] and len(re.findall(
-                    r'《中华人民共和国婚姻法》|《中华人民共和国继承法》|《中华人民共和国民法通则》|《中华人民共和国收养法》|《中华人民共和国担保法》|《中华人民共和国合同法》|《中华人民共和国物权法》|《中华人民共和国侵权责任法》|《中华人民共和国民法总则》',
-                    self.data)) > 0:
+            r_temp = re.findall(
+                r'《中华人民共和国婚姻法》|《中华人民共和国继承法》|《中华人民共和国民法通则》|《中华人民共和国收养法》|《中华人民共和国担保法》|《中华人民共和国合同法》|《中华人民共和国物权法》|《中华人民共和国侵权责任法》|《中华人民共和国民法总则》',
+                self.data)
+            if '鉴于条款' == row['schema'] and len(r_temp) > 0:
                 res_dict['审核结果'] = '不通过'
                 res_dict[
                     '法律建议'] = '法条引用错误，《民法典》第一千二百六十条 本法自2021年1月1日起施行。《中华人民共和国婚姻法》、《中华人民共和国继承法》、《中华人民共和国民法通则》、《中华人民共和国收养法》、《中华人民共和国担保法》、《中华人民共和国合同法》、《中华人民共和国物权法》、《中华人民共和国侵权责任法》、《中华人民共和国民法总则》同时废止。'
                 res_dict['风险点'] = '低'
+                if '内容' not in res_dict:
+                    res_dict['内容'] = r_temp[0]
 
             if res_dict != {}:
                 res_dict['法律依据'] = row['legal basis']
@@ -294,7 +297,7 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
 if __name__ == '__main__':
     import time
 
-    contract_type = "laowu"
+    contract_type = "baomi"
 
     os.environ['CUDA_VISIBLE_DEVICES'] = "1"
     acknowledgement = BasicUIEAcknowledgement(config_path="DocumentReview/Config/{}.csv".format(contract_type),
@@ -306,7 +309,7 @@ if __name__ == '__main__':
     print("## First Time ##")
     localtime = time.time()
 
-    acknowledgement.review_main(content="data/DocData/laowu/laowu1.docx", mode="docx", usr="Part B")
+    acknowledgement.review_main(content="data/DocData/baomi/baomi3.docx", mode="docx", usr="Part B")
     pprint(acknowledgement.review_result, sort_dicts=False)
     print('use time: {}'.format(time.time() - localtime))
 
