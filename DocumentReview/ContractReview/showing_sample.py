@@ -1015,6 +1015,8 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
             config_showing_type = 'laowu'
         elif 'jiekuan' in self.model_path:
             config_showing_type = 'jiekuan'
+        elif 'baomi' in self.model_path:
+            config_showing_type = 'baomi'
         else:
             return
         if config_showing_type:
@@ -1086,7 +1088,7 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
 if __name__ == '__main__':
     import time
 
-    contract_type = "yibanzulin"
+    contract_type = "baomi"
 
     os.environ['CUDA_VISIBLE_DEVICES'] = "1"
     acknowledgement = BasicUIEAcknowledgementShow(config_path="DocumentReview/Config/{}.csv".format(contract_type),
@@ -1098,6 +1100,6 @@ if __name__ == '__main__':
     print("## First Time ##")
     localtime = time.time()
 
-    acknowledgement.review_main(content="data/DocData/yibanzulin/ybzl5.docx", mode="docx", usr="Part B")
+    acknowledgement.review_main(content="data/DocData/baomi/baomi1.docx", mode="docx", usr="Part B")
     pprint(acknowledgement.review_result, sort_dicts=False)
     print('use time: {}'.format(time.time() - localtime))
