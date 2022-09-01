@@ -103,3 +103,37 @@ class AdministrativeReportDTO:
             "report": report
         }
         return self.response_dict
+
+
+class CriminalReportDTO:
+    def __init__(self, response_dict):
+        self.response_dict = response_dict
+
+    def to_dict(self):
+        if self.response_dict.get("question_next"):
+            return self.response_dict
+
+        applicable_law = self.response_dict["applicable_law"]
+        similar_case = self.response_dict["similar_case"]
+        judging_rule = self.response_dict["judging_rule"]
+        report = [
+            [
+                {
+                    "type": "TYPE_LIST_OF_OBJECT",
+                    "title": "预测罪名和相应法条",
+                    "content": self.response_dict["articles"]
+                },
+                {
+                    "type": "TYPE_TEXT",
+                    "title": "刑期(月数)",
+                    "content": self.response_dict["imprisonment"]
+                }
+            ]
+        ]
+        self.response_dict = {
+            "applicable_law": applicable_law,
+            "similar_case": similar_case,
+            "judging_rule": judging_rule,
+            "report": report
+        }
+        return self.response_dict

@@ -10,7 +10,7 @@ from flask import request
 from LawsuitPrejudgment.lawsuit_prejudgment.api.data_transfer_object.applicable_law_dto import \
     CriminalApplicableLawDictCreator
 from LawsuitPrejudgment.lawsuit_prejudgment.api.data_transfer_object.prejudgment_report_dto import CivilReportDTO, \
-    AdministrativeReportDTO
+    AdministrativeReportDTO, CriminalReportDTO
 from LawsuitPrejudgment.lawsuit_prejudgment.api.data_transfer_object.similar_case_dto import \
     CriminalSimilarCaseListCreator
 from LawsuitPrejudgment.lawsuit_prejudgment.constants import SUPPORTED_ADMINISTRATIVE_TYPES_CONFIG_PATH, \
@@ -338,6 +338,8 @@ def _construct_response_format(question, resp_json):
             }
         ]
     }
+    if FeatureToggles(FEATURE_TOGGLES_CONFIG_PATH).reformat_prejudgment_report:
+        result = CriminalReportDTO(result).to_dict()
     return result
 
 
