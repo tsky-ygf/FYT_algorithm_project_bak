@@ -132,7 +132,7 @@ class CriminalPrejudgment(PrejudgmentPipeline):
             self.content["graph_process"]["量刑"] = 1
 
             # output_amount = cn2an.cn2an(self.content["event"]["总金额"], "smart")
-            output_amount = cn2an.transform(output_amount, "cn2an")
+            output_amount = cn2an.transform(self.content["event"]["总金额"], "cn2an")
             output_amount = re.findall("\d+", output_amount)[0]
             output_amount = float(output_amount)
 
@@ -260,7 +260,7 @@ class CriminalPrejudgment(PrejudgmentPipeline):
 
 if __name__ == "__main__":
     criminal_config = {
-        "log_level": "debug",
+        "log_level": "info",
         "prejudgment_type": "criminal",
         "anyou_identify_model_path": "model/gluon_model/accusation",
         "situation_identify_model_path": "http://172.19.82.199:7777/information_result",
@@ -288,12 +288,12 @@ if __name__ == "__main__":
     #
     # pprint(res4["report_result"])
 
-    text = (
-        "湖南省涟源市人民检察院指控，2014年8月至2015年1月，被告人刘某甲先后多次容留刘2某、刘某乙、刘1某、刘某丙、袁某等人在其位于本市"
-        "安平镇田心村二组的家中吸食甲基苯丙胺（冰毒）和甲基苯丙胺片剂（麻古）。具体事实如下：1、2014年8月份的一天，被告人"
-        "刘某甲容留刘某丙、刘1某等人在其家中卧室吸食甲基苯丙胺和甲基苯丙胺片剂。"
-    )
-
+    # text = (
+    #     "湖南省涟源市人民检察院指控，2014年8月至2015年1月，被告人刘某甲先后多次容留刘2某、刘某乙、刘1某、刘某丙、袁某等人在其位于本市"
+    #     "安平镇田心村二组的家中吸食甲基苯丙胺（冰毒）和甲基苯丙胺片剂（麻古）。具体事实如下：1、2014年8月份的一天，被告人"
+    #     "刘某甲容留刘某丙、刘1某等人在其家中卧室吸食甲基苯丙胺和甲基苯丙胺片剂。"
+    # )
+    text = "x年x月x日，x在x地容留x吸食x毒品x次，存在x情况。"
     input_dict = {"fact": text}
     # 第一次调用
     res = criminal_pre_judgment(**input_dict)
@@ -302,8 +302,11 @@ if __name__ == "__main__":
     res["question_answers"]["前提"]["usr_answer"] = "否"
     res2 = criminal_pre_judgment(**res)  # 传入上一次的结果
 
-    pprint(res2["question_answers"])
-    pprint(res2["report_result"])
+    if "report_result" in res2:
+        pprint(res2["report_result"])
+        pprint(res2["report_result"])
+    # pprint(res2["question_answers"])
+    # pprint(res2["report_result"])
 
     # 第三次调用
     # res2["question_answers"]["情节"]["usr_answer"] = "以上都没有"
