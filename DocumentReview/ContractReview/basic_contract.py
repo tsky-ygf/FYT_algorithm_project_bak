@@ -45,7 +45,7 @@ class BasicAcknowledgement:
         self.review_result = self.init_review_result()
         self.data_list = self.read_origin_content(content, mode)
         data = '\n'.join(self.data_list)
-        data = data.replace('⾄', '至').replace('中华⼈民','中华人民')
+        data = data.replace('⾄', '至').replace('中华⼈民', '中华人民')
         self.data = re.sub("[＿_]+", "", data)
         extraction_res = self.check_data_func()
 
@@ -106,7 +106,7 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
         # self.review_result = {schema: {} for schema in self.schema}
         self.model_path = model_path
         self.data = ""
-        self.schema = [schema for schema in self.schema if schema!=""]
+        self.schema = [schema for schema in self.schema if schema != ""]
         if self.device == "cpu":
             args = InferArgs()
             args.model_path_prefix = model_path
@@ -240,11 +240,13 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
                             res_dict["end"] = str(con['end']) + '#'
 
                 # model cannot recognize
-                if ('甲方' == row['schema'] or'甲方联系方式' == row['schema'] or '甲方地址' == row['schema']) and len(extraction_con) > 1:
+                if ('甲方' == row['schema'] or '甲方联系方式' == row['schema'] or '甲方地址' == row['schema']) and len(
+                        extraction_con) > 1:
                     res_dict["内容"] = extraction_con[0]['text']
                     res_dict["start"] = str(extraction_con[0]['start'])
                     res_dict["end"] = str(extraction_con[0]['end'])
-                elif ('乙方' == row['schema'] or'乙方联系方式' == row['schema'] or '乙方地址' == row['schema']) and len(extraction_con) > 1:
+                elif ('乙方' == row['schema'] or '乙方联系方式' == row['schema'] or '乙方地址' == row[
+                    'schema']) and len(extraction_con) > 1:
                     res_dict["内容"] = extraction_con[1]['text']
                     res_dict["start"] = str(extraction_con[1]['start'])
                     res_dict["end"] = str(extraction_con[1]['end'])
@@ -290,7 +292,6 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
 
     def rule_judge2(self, *args, **kwargs):
         pass
-
 
 
 if __name__ == '__main__':
