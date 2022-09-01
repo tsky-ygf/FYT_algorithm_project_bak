@@ -121,12 +121,12 @@ class CriminalPrejudgment(PrejudgmentPipeline):
 
         for index, row in self.content["sentence_keywords"].iterrows():
             schema_list = row["schema"].split("|")
-            for schema in schema_list:
-                # if row["sentence"] in self.content["event"][schema]:
-                if len(re.findall(row["sentences"], self.content["fact"])) > 0:
-                    self.content["graph_process"]["情节"] = 1
-                    self.content["graph_process_content"]["情节"] = row["crime_plot"]
-                    # break
+            # for schema in schema_list:
+            # if row["sentence"] in self.content["event"][schema]:
+            if len(re.findall(row["sentences"], self.content["fact"])) > 0:
+                self.content["graph_process"]["情节"] = 1
+                self.content["graph_process_content"]["情节"] = row["crime_plot"]
+                # break
             if self.content["graph_process"]["情节"] == 1:
                 break
 
