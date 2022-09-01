@@ -2,12 +2,13 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2022/8/24 16:30
 # @Author  : Adolf
-# @Site    : 
+# @Site    :
 # @File    : basic_prejudgment.py
 # @Software: PyCharm
 import sys
 from loguru import logger
 from dataclasses import dataclass
+from pprint import pprint, pformat
 
 
 @dataclass
@@ -27,7 +28,7 @@ class PrejudgmentPipeline:
         self.logger.remove()  # 删去import logger之后自动产生的handler，不删除的话会出现重复输出的现象
         self.logger.add(sys.stderr, level=self.config.log_level.upper())  # 添加一个终端输出的内容
 
-        self.content['graph_process'] = dict()
+        self.content["graph_process"] = dict()
 
     def anyou_identify(self, *args, **kwargs):
         raise NotImplemented
@@ -44,10 +45,13 @@ class PrejudgmentPipeline:
     def parse_config_file(self, *args, **kwargs):
         raise NotImplemented
 
+    def match_graph(self, *args, **kwargs):
+        raise NotImplemented
+
     def generate_report(self, *args, **kwargs):
         raise NotImplemented
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, **kwargs):
         self.content.update(kwargs)
         if "question_answers" not in self.content:
             self.content["question_answers"] = dict()
@@ -63,6 +67,7 @@ class PrejudgmentPipeline:
 
         if "event" not in self.content:
             self.situation_identify()
+            self.match_graph()
 
         self.get_question()
 
@@ -71,5 +76,5 @@ class PrejudgmentPipeline:
                 return self.content
 
         self.generate_report()
-        self.logger.info(self.content)
+        self.logger.info(pformat(self.content))
         return self.content

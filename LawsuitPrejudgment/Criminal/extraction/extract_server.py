@@ -12,10 +12,10 @@ from loguru import logger
 
 import json
 
-from LawsuitPrejudgment.Criminal.extraction.feature_extraction import init_extract
+from LawsuitPrejudgment.Criminal.extraction.feature_extraction import init_extract, post_process_uie_results
 from Utils.http_response import response_successful_result, response_failed_result
 
-criminal_list = ['theft']
+criminal_list = ['theft', 'provide_drug']
 predictor_dict = {}
 for criminal_type in criminal_list:
     model_path = "model/uie_model/export_cpu/{}/inference".format(criminal_type)
@@ -34,7 +34,8 @@ def get_information_result():
             in_dict = json.loads(in_json.decode("utf-8"))
             _criminal_type = in_dict['criminal_type']
             _fact = in_dict['fact']
-            result = predictor_dict[_criminal_type].predict([_fact])
+            # result = predictor_dict[_criminal_type].predict([_fact])
+            result = post_process_uie_results(predictor_dict[_criminal_type], _criminal_type, _fact)
             return response_successful_result(result)
         else:
             return json.dumps({"error_msg": "no data", "status": 1}, ensure_ascii=False)
