@@ -135,5 +135,5 @@ dmypy.json
 data/
 model/
 log/
-
+nohup.out
 LawsuitPrejudgment/Administrative/result_show/*.json
