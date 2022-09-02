@@ -59,6 +59,7 @@ class AdministrativeReportDTO:
         self.response_dict = response_dict
 
     def to_dict(self):
+        return self.response_dict
         applicable_law = self.response_dict["applicable_law"]
         similar_case = self.response_dict["similar_case"]
         judging_rule = self.response_dict["judging_rule"]
