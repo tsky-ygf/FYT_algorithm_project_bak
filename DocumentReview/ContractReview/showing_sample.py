@@ -25,9 +25,9 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
         self.review_result = {key: value for key, value in self.review_result.items() if value != {}}
 
     def rule_judge2(self, extraction_res):
-        print('*' * 100)
-        print(self.data)
-        print('*' * 100)
+        # print('*' * 100)
+        # print(self.data)
+        # print('*' * 100)
         self.logger.debug("res: {}".format(extraction_res))
         self.data = self.data.replace(' ', '')
         for index, row in self.config.iterrows():
@@ -1043,8 +1043,9 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
                     res_dict_temp = {'内容': line[1], '审核结果': line[4], '法律建议': line[3]}
                     self.review_result[line[2]].update(res_dict_temp)
                 else:
-                    print('-' * 100)
-                    print(line)
+                    # print('-' * 100)
+                    # print(line)
+                    pass
 
 
     def unreasonable_show(self):
@@ -1088,7 +1089,7 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
 if __name__ == '__main__':
     import time
 
-    contract_type = "fangwuzulin"
+    contract_type = "jietiao"
 
     os.environ['CUDA_VISIBLE_DEVICES'] = "1"
     acknowledgement = BasicUIEAcknowledgementShow(config_path="DocumentReview/Config/{}.csv".format(contract_type),
@@ -1100,6 +1101,6 @@ if __name__ == '__main__':
     print("## First Time ##")
     localtime = time.time()
 
-    acknowledgement.review_main(content="data/DocData/fangwuzulin/fwzl5_show.docx", mode="docx", usr="Part B")
+    acknowledgement.review_main(content="data/DocData/jietiao/jietiao5.docx", mode="docx", usr="Part B")
     pprint(acknowledgement.review_result, sort_dicts=False)
     print('use time: {}'.format(time.time() - localtime))
