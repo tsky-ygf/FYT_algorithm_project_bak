@@ -324,6 +324,7 @@ if __name__ == "__main__":
     # 第一次调用
     res = criminal_pre_judgment(**input_dict)
     pprint(res)
+    # print('@@@@@@@@@@')
 
     # 第二次调用
     res["question_answers"]["前提"]["usr_answer"] = "否"
