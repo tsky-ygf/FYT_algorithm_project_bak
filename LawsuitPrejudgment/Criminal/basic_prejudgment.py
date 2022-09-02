@@ -67,6 +67,8 @@ class PrejudgmentPipeline:
 
         if "event" not in self.content:
             self.situation_identify()
+            if "report_result" in self.content:
+                return self.content
             self.match_graph()
 
         self.get_question()
