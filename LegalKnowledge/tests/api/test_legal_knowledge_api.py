@@ -36,13 +36,13 @@ def test_get_news_by_column_id():
         assert resp_json.get("success"), "column_id:{}".format(column_id)
         assert resp_json.get("result"), "column_id:{}".format(column_id)
         # assert len(resp_json.get("result")) > 1, "column_id:{}".format(column_id)
-        assert time_cost < 0.5, "接口{}用时{}秒，耗时过长。column_id:{}。".format("/get_news_by_column_id", time_cost, column_id)
+        assert time_cost < 0.6, "接口{}用时{}秒，耗时过长。column_id:{}。".format("/get_news_by_column_id", time_cost, column_id)
 
 
 def test_get_news_by_keyword():
     url = LEGAL_KNOWLEDGE_SERVICE_URL + "/get_news_by_keyword"
     start_time = time.time()
-    resp_json = requests.get(url, {"keyword": "游泳", "page_number": 1, "page_size": 10}).json()
+    resp_json = requests.get(url, {"keyword": "税", "page_number": 1, "page_size": 10}).json()
     time_cost = time.time() - start_time
 
     print(resp_json)
@@ -50,7 +50,7 @@ def test_get_news_by_keyword():
     assert resp_json.get("success")
     assert resp_json.get("result")
     # assert len(resp_json.get("result")) > 1
-    assert time_cost < 0.5, "接口{}用时{}秒，耗时过长。".format("/get_news_by_keyword", time_cost)
+    assert time_cost < 0.6, "接口{}用时{}秒，耗时过长。".format("/get_news_by_keyword", time_cost)
 
 
 def test_get_news_by_news_id():

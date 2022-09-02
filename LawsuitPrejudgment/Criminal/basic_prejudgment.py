@@ -76,5 +76,5 @@ class PrejudgmentPipeline:
                 return self.content
 
         self.generate_report()
-        self.logger.info(pformat(self.content))
+        # self.logger.info(pformat(self.content))
         return self.content
