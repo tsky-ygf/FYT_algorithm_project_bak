@@ -217,6 +217,7 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
                         res_dict['审核结果'] = '不通过'
                         res_dict['法律建议'] = '金额的大小写校验错误，建议核实。'
                     elif '肆万玖千元整（大写）人民币（￥49000）' in self.data:
+                        self.add_start_end('肆万玖千元整（大写）人民币（￥49000）',res_dict)
                         res_dict['内容'] = '肆万玖千元整（大写）人民币（￥49000）'
                     elif '2.49元#4980元#肆仟玖佰捌拾元整#4980元#' == res_dict.get('内容',''):
                         res_dict['内容'] = '4980元#肆仟玖佰捌拾元整#'
@@ -225,10 +226,12 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
                         res_dict['内容'] = '交货期限：本合同签订之日起7日内交货。如供应商缺货等原因，导致一方延迟交货，乙方不承担违约责任。 '
                         res_dict['审核结果'] = '不通过'
                         res_dict['法律建议'] = '交付期限未严格按照合同约定执行，增加买方风险，建议核实。'
+                        self.add_start_end('交货期限：本合同签订之日起7日内交货。如供应商缺货等原因，导致一方延迟交货，乙方不承担违约责任。',res_dict)
                     elif '2022年7月5日前' in self.data:
                         res_dict['内容'] = '2022年7月5日前'
                         res_dict['审核结果'] = '通过'
                         res_dict['法律建议'] = ''
+                        self.add_start_end('2022年7月5日前',res_dict)
                 elif '交货方式' == row['schema']:
                     if res_dict.get('内容','') == '乙方应在合同约定的交货期限内将货物通过物流方式运送至甲方指定地址，运输费用由乙方承担。':
                         res_dict['审核结果'] = '不通过'
@@ -241,6 +244,7 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
                         res_dict['审核结果'] = '不通过'
                         res_dict[
                             '法律建议'] = '交货地点条款缺失或约定不明确，建议补充完整。买卖双方应当按照约定的地点交付货物，当事人没有约定标的物的交付期限或者约定不明确的，可以协议补充；不能达成补充协议的，按照合同相关条款或者交易习惯确定。履行地点不明确，给付货币的，在接受货币一方所在地履行；交付不动产的，在不动产所在地履行；其他标的，在履行义务一方所在地履行。'
+
                 elif '其他费用' == row['schema']:
                     if res_dict.get('内容','') == '肆万陆千元整#40000元#' or res_dict.get('内容','') == '肆万玖千元整#30000#49000#10000#9000#' or '4980元#2.49元#肆仟玖佰捌拾元整#' == \
                             res_dict.get('内容',''):
@@ -257,6 +261,7 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
                         res_dict['审核结果'] = '不通过'
                         res_dict['法律建议'] = '验收期限约定过短，建议核实。'
                         res_dict['内容'] = '甲方收到货物后当天检验，逾期视为验收合格，放弃向乙方提出质量问题的权利。'
+                        self.add_start_end('甲方收到货物后当天检验，逾期视为验收合格，放弃向乙方提出质量问题的权利。', res_dict)
                     elif res_dict.get('内容','') == '收货30日内':
                         res_dict['审核结果'] = '不通过'
                         res_dict['法律建议'] = '验收期限过长，锦衣修改。买卖合同应当约定合理的验收期限以及验收的异议时间。'
@@ -264,22 +269,24 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
                         res_dict['内容'] = '甲方应当于收到货物后1日内'
                         res_dict['审核结果'] = '不通过'
                         res_dict['法律建议'] = '验收期限过短，建议修改。买卖合同应当约定合理的验收期限以及验收的异议时间。'
+                        self.add_start_end('甲方应当于收到货物后1日内', res_dict)
                 elif '合同解除' == row['schema']:
                     if '因气候等因素造成合同无法履行，合同自动解除' in self.data:
                         res_dict['审核结果'] = '不通过'
                         res_dict['内容'] = '因气候等因素造成合同无法履行，合同自动解除'
                         res_dict['法律建议'] = '合同解除条款约定不合理，增加交易风险'
+                        self.add_start_end('因气候等因素造成合同无法履行，合同自动解除', res_dict)
                     elif '本合同一经签订，任何一方禁止解除。' in self.data:
                         res_dict['审核结果'] = '不通过'
                         res_dict['内容'] = '本合同一经签订，任何一方禁止解除。'
                         res_dict['法律建议'] = '合同解除条款缺失或约定不明确，建议补充完整。'
-
+                        self.add_start_end('本合同一经签订，任何一方禁止解除。', res_dict)
                 elif '违约责任' == row['schema']:
                     if '甲方有权要求乙方支付合同总价款百分之35%的违约金。' in self.data:
                         res_dict['审核结果'] = '不通过'
                         res_dict['内容'] = '甲方有权要求乙方支付合同总价款百分之35%的违约金。 '
                         res_dict['法律建议'] = '约定违约金的，违约金不得超过损失的30%。'
-
+                        self.add_start_end('甲方有权要求乙方支付合同总价款百分之35%的违约金。', res_dict)
                 elif '定金' == row['schema']:
                     if '内容' in res_dict and res_dict.get('内容','') == '10000元':
                         res_dict['审核结果'] = '不通过'
@@ -289,23 +296,31 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
                         res_dict['审核结果'] = '不通过'
                         res_dict[
                             '法律建议'] = '争议解决条款缺失或约定不明确，建议补充完整。如发生争议双方应友好协商解决。如果管辖法院约定不明确，一般应根据《民事诉讼法》第二十三条规定“因合同纠纷提起的诉讼，由被告住所地或者合同履行地人民法院管辖”。既约定仲裁又约定了诉讼的争议条款的，一般认定为无效条款。'
+                        self.add_start_end('争议的，由双方协商解决，协商不成可提交仲裁委员会仲裁，或向人民法院起诉。', res_dict)
                 elif '签订日期' == row['schema']:
                     if '2021年10月1' in self.data:
                         res_dict['审核结果'] = '通过'
                         res_dict['内容'] = '2021年10月1日'
                         res_dict['法律建议'] = ''
+                        self.add_start_end('2021年10月1', res_dict)
                     elif '2022年1月5日' in self.data:
                         res_dict['审核结果'] = '通过'
-                        res_dict['内容'] = '2021年10月1日'
+                        res_dict['内容'] = '2022年1月5日'
+                        self.add_start_end('2022年1月5日', res_dict)
                 elif '开票缺失' == row['schema']:
                     if '本价格系不含税价格，不开具发票，如需开票，需另行支付税费后开具。 ' in self.data:
-                        res_dict['内容'] = '本价格系不含税价格，不开具发票，如需开票，需另行支付税费后开具。 '
+                        res_dict['内容'] = '本价格系不含税价格，不开具发票，如需开票，需另行支付税费后开具。'
                         res_dict['审核结果'] = '不通过'
                         res_dict["法律建议"] = row["jiaoyan error advice"]
-                    elif '双方协商一致本合同价款均为优惠价，为不含税价，无需开票。 ' in self.data:
+                        res_dict['法律依据'] = row['legal basis']
+                        res_dict['风险等级'] = row['risk level']
+                        res_dict["风险点"] = row["risk statement"]
+                        self.add_start_end('本价格系不含税价格，不开具发票，如需开票，需另行支付税费后开具。', res_dict)
+                    elif '双方协商一致本合同价款均为优惠价，为不含税价，无需开票。' in self.data:
                         res_dict['内容'] = '双方协商一致本合同价款均为优惠价，为不含税价，无需开票。 '
                         res_dict['审核结果'] = '不通过'
                         res_dict["法律建议"] = row["jiaoyan error advice"]
+                        self.add_start_end('双方协商一致本合同价款均为优惠价，为不含税价，无需开票。', res_dict)
 
                 # maimai2
                 elif '产品数量（重量）' == row['schema']:
@@ -315,27 +330,44 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
                     if '产品运抵指定地点后，甲方应及时对产品进行验收。' in self.data:
                         res_dict['内容'] = '产品运抵指定地点后，甲方应及时对产品进行验收。'
                         res_dict['审核结果'] = '通过'
+                        res_dict['法律依据'] = row['legal basis']
+                        res_dict['风险等级'] = row['risk level']
+                        res_dict["风险点"] = row["risk statement"]
+                        self.add_start_end('产品运抵指定地点后，甲方应及时对产品进行验收。', res_dict)
+
                 elif '开户名称' == row['schema']:
                     if '开户名：崔秀秀' in self.data and '联系人：  崔建' in self.data:
                         res_dict['审核结果'] = '不通过'
                         res_dict['法律建议'] = '收款账户的开户名与乙方名称不一致，建议核实。建议款项直接支付至合同相对方，谨防向业务员或合同签署主体不一致的账户打款。'
+                        res_dict['法律依据'] = row['legal basis']
+                        res_dict['风险等级'] = row['risk level']
+                        res_dict["风险点"] = row["risk statement"]
                 elif '开票时间' == row['schema']:
                     if '无需开票' in self.data:
                         res_dict['审核结果'] = '不通过'
                         res_dict['法律建议'] = '填开发票的单位和个人必须在发生经营业务确认营业收入时开具发票。'
+                        res_dict['法律依据'] = row['legal basis']
+                        res_dict['风险等级'] = row['risk level']
+                        res_dict["风险点"] = row["risk statement"]
                 elif '发票类型' == row['schema']:
                     if '无需开票' in self.data:
                         res_dict['审核结果'] = '不通过'
                         res_dict['法律建议'] = '填开发票的单位和个人必须在发生经营业务确认营业收入时开具发票。'
+                        res_dict['法律依据'] = row['legal basis']
+                        res_dict['风险等级'] = row['risk level']
+                        res_dict["风险点"] = row["risk statement"]
                 elif '开票信息' == row['schema']:
                     if '无需开票' in self.data:
                         res_dict['审核结果'] = '不通过'
                         res_dict['法律建议'] = '填开发票的单位和个人必须在发生经营业务确认营业收入时开具发票。'
+                        res_dict['法律依据'] = row['legal basis']
+                        res_dict['风险等级'] = row['risk level']
+                        res_dict["风险点"] = row["risk statement"]
 
             elif 'baomi' in self.model_path:
                 if '保密内容和范围' == row['schema']:
                     if '姚桂英' in self.data:
-                        res_dict['内容'] = '''（1）甲方公司重大决策中的秘密事项；
+                        temp = '''（1）甲方公司重大决策中的秘密事项；
     （2）甲方公司内部掌握的合同、协议、会议纪要；
     （3）甲方公司规划、设计、工程图纸等；
     （4）应甲方公司客户要求保密的资料；
@@ -345,8 +377,10 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
     （8）影响甲方单位稳定和安全的事项；
     （9）影响甲方单位对外承担保密义务的事项。
     '''
+                        res_dict['内容'] = temp
                         res_dict['审核结果'] = '通过'
                         res_dict['法律建议'] = ''
+                        # self.add_start_end(t, res_dict)
                     elif "凡本人在公司任职期间而获得的（直接或间接方式）可以给公司带来经济利益或竞争优势的，且不为公众所知的具体的经营信息与技术信息均属公司的保密信息，包括但不限于下列各项" in self.data:
                         res_dict['内容'] = """凡本人在公司任职期间而获得的（直接或间接方式）可以给公司带来经济利益或竞争优势的，且不为公众所知的具体的经营信息与技术信息均属公司的保密信息，包括但不限于下列各项：
     1.未被公众所知的有关公司的产品、方法、工艺、改良、公式和设计等信息；
@@ -482,32 +516,39 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
                         res_dict['审核结果'] = '通过'
                         res_dict['内容'] = '天开传媒有限公司'
                         res_dict['法律建议'] = ''
+                        self.add_start_end('天开传媒有限公司', res_dict)
                     elif '艾提科信网络有限公司' in self.data:
                         res_dict['审核结果'] = '通过'
                         res_dict['内容'] = '艾提科信网络有限公司'
                         res_dict['法律建议'] = ''
+                        self.add_start_end('艾提科信网络有限公司', res_dict)
                     elif '华成育卓传媒有限公司' in self.data:
                         res_dict['审核结果'] = '通过'
                         res_dict['内容'] = '华成育卓传媒有限公司'
                         res_dict['法律建议'] = ''
+                        self.add_start_end('华成育卓传媒有限公司', res_dict)
                     elif '图龙信息网络有限公司' in self.data:
                         res_dict['审核结果'] = '通过'
                         res_dict['内容'] = '图龙信息网络有限公司'
                         res_dict['法律建议'] = ''
+                        self.add_start_end('图龙信息网络有限公司', res_dict)
 
                 elif '乙方' == row['schema']:
                     if '李静' in self.data:
                         res_dict['审核结果'] = '通过'
                         res_dict['内容'] = '李静'
                         res_dict['法律建议'] = ''
+                        self.add_start_end('李静', res_dict)
                     elif '金萌璐' in self.data:
                         res_dict['审核结果'] = '通过'
                         res_dict['内容'] = '金萌璐'
                         res_dict['法律建议'] = ''
+                        self.add_start_end('金萌璐', res_dict)
                     elif '张红' in self.data:
                         res_dict['审核结果'] = '通过'
                         res_dict['内容'] = '张红'
                         res_dict['法律建议'] = ''
+                        self.add_start_end('张红', res_dict)
 
                 elif '甲方统一社会信用代码' == row['schema']:
                     if '甲、乙双方根据《中华人民共和国劳动合同法》等法律、法规、规章的规定，在平等、自愿、协商一致的基础上，同意订立本劳动合同，共同遵守本合同所列条款' == \
@@ -534,10 +575,11 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
                         res_dict['内容'] = '1个⽉'
                         res_dict['法律建议'] = ''
                 elif '试用期工资' == row['schema']:
-                    if '试⽤期(⻅习期)⼯资待遇为3000元每月 ' in self.data:
+                    if '试⽤期(⻅习期)⼯资待遇为3000元每月' in self.data:
                         res_dict['审核结果'] = '不通过'
                         res_dict['内容'] = '3000元每月 '
                         res_dict['法律建议'] = '约定的试用期工资过低，建议核实。试用期工资不得少于正式工资的80%'
+                        self.add_start_end('试⽤期(⻅习期)⼯资待遇为3000元每月', res_dict)
 
                 elif '工资' == row['schema']:
                     if '满后的⼯资待遇为5000元每月' in self.data:
@@ -549,6 +591,8 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
                     if res_dict['内容'] == '全国':
                         res_dict['审核结果'] = '不通过'
                         res_dict['法律建议'] = '工作地点条款缺失或约定不明确，建议补充完整。对于工作地点约定为“全国”，如单位经营模式、员工岗位无特殊情况，一般视为地点约定不明确。'
+                        self.add_start_end('全国', res_dict)
+
                     elif '负责在华南区域内开展公司' in self.data:
                         res_dict['内容'] = '华南区域'
                         res_dict['审核结果'] = '通过'
@@ -562,6 +606,7 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
                     if '本人工作任务以内加班加点的，不计加班工资。' in self.data:
                         res_dict['审核结果'] = '不通过'
                         res_dict['法律建议'] = '用人单位安排加班的，应当按照国家有关规定向劳动者支付加班费或安排调休。'
+                        self.add_start_end('本人工作任务以内加班加点的，不计加班工资。', res_dict)
 
                 elif '工资发放时间' == row['schema']:
                     if '在下一个月的20日前发放，工资发放日遇节假日后移。' in self.data:
@@ -580,7 +625,7 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
                     elif '从乙方在甲方试用期满后连续工作满6个月的下一个月起至离职之日的上一个月止期间的养老、医疗、工伤、失业、生育五项社会保险，五险费用的个人缴纳部分，甲方依照国家规定从乙方工资中代扣代缴。' in self.data:
                         res_dict['审核结果'] = '不通过'
                         res_dict['法律建议'] = '用人单位应当自用工之日起三十日内为其职工向单位所在地社会保险经办机构申请办理社会保险登记，并应当缴纳社会保险金。'
-
+                        self.add_start_end('从乙方在甲方试用期满后连续工作满6个月的下一个月起至离职之日的上一个月止期间的养老、医疗、工伤、失业、生育五项社会保险，五险费用的个人缴纳部分，甲方依照国家规定从乙方工资中代扣代缴。', res_dict)
 
                 elif '用人单位解除' == row['schema']:
                     if '乙方有下列情形之一，甲方可立即解除合同，辞退乙方：' in self.data:
@@ -607,7 +652,7 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
                     if '发⽣劳动争议后，甲⼄双⽅应积极协商解决，不愿协商或协商不成的，任何⼀⽅均可向甲方所在地⼈⺠法院提起诉讼。' in self.data:
                         res_dict['审核结果'] = '不通过'
                         res_dict['法律依据'] = '如发生争议，双方应友好协商解决，必须先经过劳动争议仲裁委员会仲裁程序，对仲裁不服的，再向法院起诉。'
-
+                        self.add_start_end('发⽣劳动争议后，甲⼄双⽅应积极协商解决，不愿协商或协商不成的，任何⼀⽅均可向甲方所在地⼈⺠法院提起诉讼。', res_dict)
 
                 elif '竞业限制补偿' == row['schema']:
                     if res_dict.get('内容','') == '10万元违约金':
@@ -633,6 +678,7 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
                         res_dict['法律依据'] = row['legal basis']
                         res_dict['风险等级'] = row['risk level']
                         res_dict["风险点"] = row["risk statement"]
+                        self.add_start_end('在五年内不得与甲方形成竞争关系', res_dict)
                     elif '乙方自离开甲方之日起三年内不得到与甲方经营有同种项目的企业从业' in self.data:
                         res_dict['审核结果'] = '不通过'
                         res_dict['内容'] = '乙方不论何种原因离开甲方，乙方自离开甲方之日起三年内不得到与甲方经营有同种项目的企业从业'
@@ -640,6 +686,7 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
                         res_dict['法律依据'] = row['legal basis']
                         res_dict['风险等级'] = row['risk level']
                         res_dict["风险点"] = row["risk statement"]
+                        self.add_start_end('乙方不论何种原因离开甲方，乙方自离开甲方之日起三年内不得到与甲方经营有同种项目的企业从业', res_dict)
                 elif '签订日期' == row['schema']:
                     if '天开传媒有限公司' in self.data and '2022年1月5日' in self.data:
                         res_dict['审核结果'] = '通过'
@@ -678,11 +725,13 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
                         res_dict['内容'] = '乙方承租房屋用于开设赌场。'
                         res_dict['审核结果'] = '不通过'
                         res_dict['法律建议'] = '租赁用途违法，建议核实或修改。房东在享受房屋出租权益的同时，必须履行相关的管理责任，杜绝承租人利用出租屋从事违法犯罪行为。'
+                        self.add_start_end('乙方承租房屋用于开设赌场', res_dict)
                 elif '租赁期限' == row['schema']:
                     if '租期70年，自2022年7月1日起至2072年6月30日止。' in self.data:
                         res_dict['内容'] = '70年'
                         res_dict['审核结果'] = '不通过'
                         res_dict['法律建议'] = '租赁期限过长，建议修改。租赁期限不得超过二十年。超过二十年的，超过部分无效。'
+                        self.add_start_end('租期70年，自2022年7月1日起至2072年6月30日止。', res_dict)
                 elif '租赁起止日期' == row['schema']:
                     if res_dict.get('内容','') == '至2071年1月1日收回':
                         res_dict['内容'] = '租赁期共70年，以租代售，出租方从2021年1月1日起将出租房屋交付承租方使用，至2071年1月1日收回。 '
@@ -1005,6 +1054,14 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
             if '预付款' in self.review_result:
                 del self.review_result['预付款']
 
+        try:
+            if self.review_result['试用期']['审核结果'] == "通过" and self.review_result['试用期']["风险等级"] == "低":
+                pass
+        except Exception as e:
+            if '试用期' in self.review_result:
+                del self.review_result['试用期']
+
+
 
     def arti_rule(self):
         if 'jietiao' in self.model_path:
@@ -1105,6 +1162,16 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
                 res_dict_unr['end'] = end_t
                 self.review_result[key] = res_dict_unr
 
+    def add_start_end(self, content, res_dict):
+        if content in self.data:
+            index_r = self.data.index(content)
+            start_t = index_r
+            end_t = index_r + len(content)
+            res_dict['start'] = start_t
+            res_dict['end'] = end_t
+
+
+
 
 if __name__ == '__main__':
     import time
@@ -1121,6 +1188,6 @@ if __name__ == '__main__':
     print("## First Time ##")
     localtime = time.time()
 
-    acknowledgement.review_main(content="data/DocData/maimai/maimai2.docx", mode="docx", usr="Part B")
+    acknowledgement.review_main(content="data/DocData/maimai/huahui.docx", mode="docx", usr="Part B")
     pprint(acknowledgement.review_result, sort_dicts=False)
     print('use time: {}'.format(time.time() - localtime))
