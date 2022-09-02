@@ -23,11 +23,12 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
         self.usr = usr
         self.rule_judge2(extraction_res[0])
         self.review_result = {key: value for key, value in self.review_result.items() if value != {}}
+        # self.review_result['origin_data'] = self.data
 
     def rule_judge2(self, extraction_res):
-        # print('*' * 100)
-        # print(self.data)
-        # print('*' * 100)
+        print('*' * 100)
+        print(self.data)
+        print('*' * 100)
         self.logger.debug("res: {}".format(extraction_res))
         self.data = self.data.replace(' ', '')
         for index, row in self.config.iterrows():
@@ -45,8 +46,8 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
                     rule_func.check_id_card(row, extraction_con, res_dict)
 
                 # TODO
-                elif "预付款审核" == row['pos rule']:
-                    rule_func.check_prepayments(row, extraction_con, res_dict)
+                # elif "预付款审核" == row['pos rule']:
+                #     rule_func.check_prepayments(row, extraction_con, res_dict)
                 elif '产品名称审核' == row['pos rule']:
                     rule_func.check_product_name(row, extraction_con, res_dict)
                 elif '试用期期限审核' == row['pos rule']:
@@ -171,17 +172,22 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
                 if "classify" in row:
                     res_dict["classify"] = row["classify"]
 
+
             # model cannot recognize
-            r_temp = re.findall(
-                r'《中华人民共和国婚姻法》|《中华人民共和国继承法》|《中华人民共和国民法通则》|《中华人民共和国收养法》|《中华人民共和国担保法》|《中华人民共和国合同法》|《中华人民共和国物权法》|《中华人民共和国侵权责任法》|《中华人民共和国民法总则》',
-                self.data)
-            if '鉴于条款' == row['schema'] and len(r_temp) > 0:
-                res_dict['审核结果'] = '不通过'
-                res_dict[
-                    '法律建议'] = '法条引用错误，《民法典》第一千二百六十条 本法自2021年1月1日起施行。《中华人民共和国婚姻法》、《中华人民共和国继承法》、《中华人民共和国民法通则》、《中华人民共和国收养法》、《中华人民共和国担保法》、《中华人民共和国合同法》、《中华人民共和国物权法》、《中华人民共和国侵权责任法》、《中华人民共和国民法总则》同时废止。'
-                res_dict['风险点'] = '低'
-                if '内容' not in res_dict:
-                    res_dict['内容'] = r_temp[0]
+            if '鉴于条款' == row['schema']:
+                if '内容' in res_dict:
+                    r_temp = re.findall(
+                        r'《中华人民共和国婚姻法》|《中华人民共和国继承法》|《中华人民共和国民法通则》|《中华人民共和国收养法》|《中华人民共和国担保法》|《中华人民共和国合同法》|《中华人民共和国物权法》|《中华人民共和国侵权责任法》|《中华人民共和国民法总则》',
+                        res_dict['内容'])
+                    if len(r_temp) > 0:
+                        res_dict['审核结果'] = '不通过'
+                        res_dict[
+                            '法律建议'] = '法条引用错误，《民法典》第一千二百六十条 本法自2021年1月1日起施行。《中华人民共和国婚姻法》、《中华人民共和国继承法》、《中华人民共和国民法通则》、《中华人民共和国收养法》、《中华人民共和国担保法》、《中华人民共和国合同法》、《中华人民共和国物权法》、《中华人民共和国侵权责任法》、《中华人民共和国民法总则》同时废止。'
+                        res_dict['风险点'] = '低'
+                        if '内容' not in res_dict:
+                            res_dict['内容'] = r_temp[0]
+                    else:
+                        pass
 
             if 'maimai' in self.model_path:
 
@@ -189,7 +195,9 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
                 if '产品质量' == row['schema']:
                     if '品级别应符合特级茶叶标准，外形匀整，洁净，内质香高持久，浓厚，芽业完整，汤色嫩绿' in self.data:
                         res_dict["审核结果"] = "通过"
-                        res_dict['内容'] = "1、产品级别应符合特级茶叶标准，外形匀整，洁净，内质香高持久，浓厚，芽业完整，汤色嫩绿明亮。2、绿色无公害，无农药、重金属残留。3、含水量不超过7%。"
+                        res_dict['内容'] = '''产品级别应符合特级茶叶标准，外形匀整，洁净，内质香高持久，浓厚，芽业完整，汤色嫩绿明亮。
+绿色无公害，无农药、重金属残留。
+含水量不超过7%。'''
                         res_dict['法律依据'] = row['legal basis']
                         res_dict['风险等级'] = row['risk level']
                         res_dict["风险点"] = row["risk statement"]
@@ -1039,8 +1047,16 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
                         self.review_result[line[2]] = {} # 若通过且无内容，则是未识别不做审核，删掉该schemas
                         continue
 
-                if temp in self.data or line[1] in self.data:
-                    res_dict_temp = {'内容': line[1], '审核结果': line[4], '法律建议': line[3]}
+                if line[1] in self.data:
+                    start_t = self.data.index(line[1])
+                    end_t = start_t+len(line[1])
+                    res_dict_temp = {'内容': line[1], '审核结果': line[4], '法律建议': line[3], 'start': start_t, 'end': end_t}
+                    self.review_result[line[2]].update(res_dict_temp)
+                elif temp in self.data:
+                    # 会有点问题， 暂时这样
+                    start_t = self.data.index(temp)
+                    end_t = start_t + len(line[1])
+                    res_dict_temp = {'内容': line[1], '审核结果': line[4], '法律建议': line[3],'start':start_t,'end':end_t}
                     self.review_result[line[2]].update(res_dict_temp)
                 else:
                     # print('-' * 100)
@@ -1070,8 +1086,10 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
         unr_id = 1
         for unr_line in unr_data.values:
             res_dict_unr = {}
-            unr_r = re.findall(unr_line[1],self.data)
+            unr_r = re.findall(unr_line[1], self.data)
             if len(unr_r)>0:
+                start_t = self.data.index(unr_r[0])
+                end_t = start_t + len(unr_r[0])
                 if unr_line[0]=='' or unr_line[0] == ' ':
                     key = '不合理条款'+str(unr_id)
                 else:
@@ -1083,13 +1101,15 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
                 res_dict_unr['风险等级'] = unr_line[3]
                 res_dict_unr['法律依据'] = unr_line[4]
                 res_dict_unr['风险点'] = unr_line[5]
+                res_dict_unr['start'] = start_t
+                res_dict_unr['end'] = end_t
                 self.review_result[key] = res_dict_unr
 
 
 if __name__ == '__main__':
     import time
 
-    contract_type = "jietiao"
+    contract_type = "maimai"
 
     os.environ['CUDA_VISIBLE_DEVICES'] = "1"
     acknowledgement = BasicUIEAcknowledgementShow(config_path="DocumentReview/Config/{}.csv".format(contract_type),
@@ -1101,6 +1121,6 @@ if __name__ == '__main__':
     print("## First Time ##")
     localtime = time.time()
 
-    acknowledgement.review_main(content="data/DocData/jietiao/jietiao5.docx", mode="docx", usr="Part B")
+    acknowledgement.review_main(content="data/DocData/maimai/maimai2.docx", mode="docx", usr="Part B")
     pprint(acknowledgement.review_result, sort_dicts=False)
     print('use time: {}'.format(time.time() - localtime))
