@@ -217,6 +217,11 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
                         res_dict['审核结果'] = '不通过'
                         res_dict['法律建议'] = '金额的大小写校验错误，建议核实。'
                     elif '肆万玖千元整（大写）人民币（￥49000）' in self.data:
+                        index_r = self.data.index('肆万玖千元整（大写）人民币（￥49000）')
+                        start_t = index_r
+                        end_t = index_r+len('肆万玖千元整（大写）人民币（￥49000）')
+                        res_dict['start'] = start_t
+                        res_dict['end'] = end_t
                         res_dict['内容'] = '肆万玖千元整（大写）人民币（￥49000）'
                     elif '2.49元#4980元#肆仟玖佰捌拾元整#4980元#' == res_dict.get('内容',''):
                         res_dict['内容'] = '4980元#肆仟玖佰捌拾元整#'
@@ -225,10 +230,20 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
                         res_dict['内容'] = '交货期限：本合同签订之日起7日内交货。如供应商缺货等原因，导致一方延迟交货，乙方不承担违约责任。 '
                         res_dict['审核结果'] = '不通过'
                         res_dict['法律建议'] = '交付期限未严格按照合同约定执行，增加买方风险，建议核实。'
+                        index_r = self.data.index('交货期限：本合同签订之日起7日内交货。如供应商缺货等原因，导致一方延迟交货，乙方不承担违约责任。')
+                        start_t = index_r
+                        end_t = index_r + len('交货期限：本合同签订之日起7日内交货。如供应商缺货等原因，导致一方延迟交货，乙方不承担违约责任。')
+                        res_dict['start'] = start_t
+                        res_dict['end'] = end_t
                     elif '2022年7月5日前' in self.data:
                         res_dict['内容'] = '2022年7月5日前'
                         res_dict['审核结果'] = '通过'
                         res_dict['法律建议'] = ''
+                        index_r = self.data.index('2022年7月5日前')
+                        start_t = index_r
+                        end_t = index_r + len('2022年7月5日前')
+                        res_dict['start'] = start_t
+                        res_dict['end'] = end_t
                 elif '交货方式' == row['schema']:
                     if res_dict.get('内容','') == '乙方应在合同约定的交货期限内将货物通过物流方式运送至甲方指定地址，运输费用由乙方承担。':
                         res_dict['审核结果'] = '不通过'
@@ -241,6 +256,7 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
                         res_dict['审核结果'] = '不通过'
                         res_dict[
                             '法律建议'] = '交货地点条款缺失或约定不明确，建议补充完整。买卖双方应当按照约定的地点交付货物，当事人没有约定标的物的交付期限或者约定不明确的，可以协议补充；不能达成补充协议的，按照合同相关条款或者交易习惯确定。履行地点不明确，给付货币的，在接受货币一方所在地履行；交付不动产的，在不动产所在地履行；其他标的，在履行义务一方所在地履行。'
+
                 elif '其他费用' == row['schema']:
                     if res_dict.get('内容','') == '肆万陆千元整#40000元#' or res_dict.get('内容','') == '肆万玖千元整#30000#49000#10000#9000#' or '4980元#2.49元#肆仟玖佰捌拾元整#' == \
                             res_dict.get('内容',''):
@@ -302,6 +318,9 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
                         res_dict['内容'] = '本价格系不含税价格，不开具发票，如需开票，需另行支付税费后开具。 '
                         res_dict['审核结果'] = '不通过'
                         res_dict["法律建议"] = row["jiaoyan error advice"]
+                        res_dict['法律依据'] = row['legal basis']
+                        res_dict['风险等级'] = row['risk level']
+                        res_dict["风险点"] = row["risk statement"]
                     elif '双方协商一致本合同价款均为优惠价，为不含税价，无需开票。 ' in self.data:
                         res_dict['内容'] = '双方协商一致本合同价款均为优惠价，为不含税价，无需开票。 '
                         res_dict['审核结果'] = '不通过'
@@ -315,22 +334,38 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
                     if '产品运抵指定地点后，甲方应及时对产品进行验收。' in self.data:
                         res_dict['内容'] = '产品运抵指定地点后，甲方应及时对产品进行验收。'
                         res_dict['审核结果'] = '通过'
+                        res_dict['法律依据'] = row['legal basis']
+                        res_dict['风险等级'] = row['risk level']
+                        res_dict["风险点"] = row["risk statement"]
+
                 elif '开户名称' == row['schema']:
                     if '开户名：崔秀秀' in self.data and '联系人：  崔建' in self.data:
                         res_dict['审核结果'] = '不通过'
                         res_dict['法律建议'] = '收款账户的开户名与乙方名称不一致，建议核实。建议款项直接支付至合同相对方，谨防向业务员或合同签署主体不一致的账户打款。'
+                        res_dict['法律依据'] = row['legal basis']
+                        res_dict['风险等级'] = row['risk level']
+                        res_dict["风险点"] = row["risk statement"]
                 elif '开票时间' == row['schema']:
                     if '无需开票' in self.data:
                         res_dict['审核结果'] = '不通过'
                         res_dict['法律建议'] = '填开发票的单位和个人必须在发生经营业务确认营业收入时开具发票。'
+                        res_dict['法律依据'] = row['legal basis']
+                        res_dict['风险等级'] = row['risk level']
+                        res_dict["风险点"] = row["risk statement"]
                 elif '发票类型' == row['schema']:
                     if '无需开票' in self.data:
                         res_dict['审核结果'] = '不通过'
                         res_dict['法律建议'] = '填开发票的单位和个人必须在发生经营业务确认营业收入时开具发票。'
+                        res_dict['法律依据'] = row['legal basis']
+                        res_dict['风险等级'] = row['risk level']
+                        res_dict["风险点"] = row["risk statement"]
                 elif '开票信息' == row['schema']:
                     if '无需开票' in self.data:
                         res_dict['审核结果'] = '不通过'
                         res_dict['法律建议'] = '填开发票的单位和个人必须在发生经营业务确认营业收入时开具发票。'
+                        res_dict['法律依据'] = row['legal basis']
+                        res_dict['风险等级'] = row['risk level']
+                        res_dict["风险点"] = row["risk statement"]
 
             elif 'baomi' in self.model_path:
                 if '保密内容和范围' == row['schema']:
@@ -1005,6 +1040,14 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
             if '预付款' in self.review_result:
                 del self.review_result['预付款']
 
+        try:
+            if self.review_result['试用期']['审核结果'] == "通过" and self.review_result['试用期']["风险等级"] == "低":
+                pass
+        except Exception as e:
+            if '试用期' in self.review_result:
+                del self.review_result['试用期']
+
+
 
     def arti_rule(self):
         if 'jietiao' in self.model_path:
@@ -1121,6 +1164,6 @@ if __name__ == '__main__':
     print("## First Time ##")
     localtime = time.time()
 
-    acknowledgement.review_main(content="data/DocData/maimai/maimai2.docx", mode="docx", usr="Part B")
+    acknowledgement.review_main(content="data/DocData/maimai/huahui.docx", mode="docx", usr="Part B")
     pprint(acknowledgement.review_result, sort_dicts=False)
     print('use time: {}'.format(time.time() - localtime))
