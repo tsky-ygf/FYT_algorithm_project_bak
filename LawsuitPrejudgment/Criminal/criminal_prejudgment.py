@@ -72,6 +72,9 @@ class CriminalPrejudgment(PrejudgmentPipeline):
         #     self.content["graph_process"]["情节"] = 1
 
     def parse_config_file(self):
+        if self.content["anyou"] not in ["盗窃", "容留他人吸毒"]:
+            return
+
         config_path = "LawsuitPrejudgment/Criminal/base_config"
         xmind_path = Path(config_path, self.content["anyou"], "base_logic.xmind")
         question_answers_path = Path(
@@ -109,10 +112,10 @@ class CriminalPrejudgment(PrejudgmentPipeline):
 
     def match_graph(self):
         if (
-            list(self.content["base_logic_graph"][self.content["anyou"]]["量刑"].keys())[
-                0
-            ]
-            == "【量刑】"
+                list(self.content["base_logic_graph"][self.content["anyou"]]["量刑"].keys())[
+                    0
+                ]
+                == "【量刑】"
         ):
             self.content["graph_process"]["量刑"] = 1
             self.content["graph_process_content"]["量刑"] = "量刑"
@@ -210,23 +213,23 @@ class CriminalPrejudgment(PrejudgmentPipeline):
         # for key,value in self.content["base_logic_graph"][self.content["anyou"]].items():
         case_num = self.content["base_logic_graph"][self.content["anyou"]]["情节"][
             "【" + self.content["graph_process_content"]["情节"] + "】"
-        ]
+            ]
 
         sentencing_dict = self.content["base_logic_graph"][self.content["anyou"]]["量刑"]
         if self.content["question_answers"]["前提"]["usr_answer"] == "是":
             report_id = "report-1"
         else:
             if (
-                case_num
-                not in sentencing_dict[
-                    "【" + self.content["graph_process_content"]["量刑"] + "】"
-                ]
+                    case_num
+                    not in sentencing_dict[
+                "【" + self.content["graph_process_content"]["量刑"] + "】"
+            ]
             ):
                 case_num = "case0"
 
             report_id = sentencing_dict[
                 "【" + self.content["graph_process_content"]["量刑"] + "】"
-            ][case_num]
+                ][case_num]
 
         _time = self.content["event"]["时间"]
 
@@ -270,9 +273,9 @@ class CriminalPrejudgment(PrejudgmentPipeline):
         evaluation_report["法律建议"] = self.content["report_dict"][report_id]["法律建议"]
 
         evaluation_report["相关类案"] = (
-            self.content["report_dict"][report_id]["相似案例1"]
-            + "|"
-            + self.content["report_dict"][report_id]["相似案例2"]
+                self.content["report_dict"][report_id]["相似案例1"]
+                + "|"
+                + self.content["report_dict"][report_id]["相似案例2"]
         )
 
         evaluation_report["相关类案"] = evaluation_report["相关类案"].split("|")
@@ -316,10 +319,11 @@ if __name__ == "__main__":
     #     "刘某甲容留刘某丙、刘1某等人在其家中卧室吸食甲基苯丙胺和甲基苯丙胺片剂。"
     # )
 
-    text = (
-        "2022年8月12日，罗某某利用螺丝刀撬开房间门锁进入某市某区某栋某单元某层某房间内，窃得现金50000元。2022年8月12日，趁邻居卢某家"
-        "无人在家，从卢某家厨房后窗翻进其家，盗走现金50000元。"
-    )
+    # text = (
+    #     "2022年8月12日，罗某某利用螺丝刀撬开房间门锁进入某市某区某栋某单元某层某房间内，窃得现金50000元。2022年8月12日，趁邻居卢某家"
+    #     "无人在家，从卢某家厨房后窗翻进其家，盗走现金50000元。"
+    # )
+    text = "罗某贩毒被抓。"
     input_dict = {"fact": text}
     # 第一次调用
     res = criminal_pre_judgment(**input_dict)
@@ -327,8 +331,8 @@ if __name__ == "__main__":
     # print('@@@@@@@@@@')
 
     # 第二次调用
-    res["question_answers"]["前提"]["usr_answer"] = "否"
-    res2 = criminal_pre_judgment(**res)  # 传入上一次的结果
+    # res["question_answers"]["前提"]["usr_answer"] = "否"
+    # res2 = criminal_pre_judgment(**res)  # 传入上一次的结果
     #
     # if "report_result" in res2:
     #     pprint(res2["question_answers"])
