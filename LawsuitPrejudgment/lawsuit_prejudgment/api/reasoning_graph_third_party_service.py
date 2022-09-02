@@ -7,6 +7,7 @@ import requests
 from flask import Flask
 from flask import request
 
+from LawsuitPrejudgment.Criminal.criminal_prejudgment import CriminalPrejudgment
 from LawsuitPrejudgment.lawsuit_prejudgment.api.data_transfer_object.applicable_law_dto import \
     CriminalApplicableLawDictCreator
 from LawsuitPrejudgment.lawsuit_prejudgment.api.data_transfer_object.prejudgment_report_dto import CivilReportDTO, \
@@ -21,7 +22,6 @@ from LawsuitPrejudgment.main.reasoning_graph_predict import predict_fn
 from LawsuitPrejudgment.Administrative.administrative_api_v1 import *
 from Utils.http_response import response_successful_result, response_failed_result
 from LawsuitPrejudgment.common.config_loader import user_ps
-
 
 """
 推理图谱的接口
@@ -58,7 +58,8 @@ def get_civil_problem_summary():
 
 def _get_mapped_problem_id(problem_id):
     problem_id_mapping_list = read_json_attribute_value(CIVIL_PROBLEM_ID_MAPPING_CONFIG_PATH, "value")
-    return next((item.get("mapped_id") for item in problem_id_mapping_list if str(item.get("id")) == str(problem_id)), None)
+    return next((item.get("mapped_id") for item in problem_id_mapping_list if str(item.get("id")) == str(problem_id)),
+                None)
 
 
 def _get_mapped_problem(attribute_value, attribute_name="id"):
@@ -72,7 +73,8 @@ def _get_mapped_problem(attribute_value, attribute_name="id"):
         mapped problem.
     """
     problem_id_mapping_list = read_json_attribute_value(CIVIL_PROBLEM_ID_MAPPING_CONFIG_PATH, "value")
-    return next((item.get("mapped_problem") for item in problem_id_mapping_list if str(item.get(attribute_name)) == str(attribute_value)), None)
+    return next((item.get("mapped_problem") for item in problem_id_mapping_list if
+                 str(item.get(attribute_name)) == str(attribute_value)), None)
 
 
 @app.route('/get_template_by_problem_id', methods=["get"])
@@ -180,7 +182,7 @@ def reasoning_graph_result():
                     "law_name": "《中华人民共和国民法典》",
                     "law_item": "第一千零八十九条",
                     "law_content": "离婚时,夫妻共同债务应当共同偿还。共同财产不足清偿或者财产归各自所有的，由双方协议清偿;协议不成的，由人民法院判决。"
-                    },
+                },
                     {
                         "law_id": "zui-gao-ren-min-fa-yuan-guan-yuy-shi-yong-zhong-hua-ren-min-gong-he-guo-hun-yin-fa-ruo-gan-wen-ti-de-jie-shi-er-di-shi-tiao",
                         "law_name": "《最高人民法院关于适用《中华人民共和国婚姻法》若干问题的解释(二)》",
@@ -355,42 +357,88 @@ def _get_criminal_report(fact):
 
 class CriminalDemo:
     def __init__(self):
-        self.demo_fact = "2020年7、8月份的一天，小黄电话联系我要买一小包毒品，我们约好当天下午3点在杭州市郊区某小区附近碰头。当天下午我们碰头后，我将一小包毒品塞给了小黄，收了他1500元，然后我们就各自回去了。"
-        self.first_question = "请问贩卖的毒品是以下哪种类型？:冰毒;海洛因;鸦片;其他"
-        self.next_question_dict = {
-            "请问贩卖的毒品是以下哪种类型？:冰毒;海洛因;鸦片;其他": "请问贩卖的毒品数量有多少克？",
-            "请问贩卖的毒品数量有多少克？": None
+        criminal_config = {
+            "log_level": "info",
+            "prejudgment_type": "criminal",
+            "anyou_identify_model_path": "model/gluon_model/accusation",
+            "situation_identify_model_path": "http://172.19.82.199:7777/information_result",
         }
-        self.question_type_dict = {
-            "请问贩卖的毒品是以下哪种类型？:冰毒;海洛因;鸦片;其他": "1",
-            "请问贩卖的毒品数量有多少克？": "0"
-        }
+        self.criminal_pre_judgment = CriminalPrejudgment(**criminal_config)
+        self.res = None
 
-    def is_demo(self, fact):
-        return fact == self.demo_fact
+    @property
+    def is_supported(self):
+        if self.res is not None and "敬请期待" in self.res.get("report_result", {}):
+            return False
+        return True
 
-    def get_next_question(self, fact, question_answers):
-        if not self.is_demo(fact):
+    def get_question_element(self, question):
+        if self.res:
+            for element, info in self.res.get("question_answers", dict()):
+                if str(info["question"]) + str(info["answer"]).replace("|", ";") == question:
+                    return element
+            raise Exception("invalid question.")
+        raise Exception("self.res is None.")
+
+    @property
+    def next_question(self):
+        if self.res:
+            for element, info in self.res.get("question_answers", dict()):
+                if not info.get("usr_answer"):
+                    return str(info.get("question")) + str(info.get("answer")).replace("|", ";")
             return None
-        if not question_answers:
-            return self.first_question
+        raise Exception("self.res is None.")
 
-        last_asked_question = list(question_answers.keys())[-1]
-        return self.next_question_dict.get(last_asked_question)
+    @property
+    def question_type(self):
+        if self.res:
+            for element, info in self.res.get("question_answers", dict()):
+                if not info.get("usr_answer"):
+                    return "1" if info.get("multiplechoice", 0) == 0 else "2"
+            return "1"
+        raise Exception("self.res is None.")
 
-    def get_question_type(self, question):
-        return self.question_type_dict.get(question, "1")
+    @property
+    def result(self):
+        if self.res:
+            if "report_result" not in self.res:
+                return None
+            if self.is_supported is False:
+                return {
+                    "unsupport_reason": self.res.get("report_result", "你的行为属于尚未支持的犯罪类型，正在训练优化中，敬请期待！")
+                }
+            return {
+                "crime": "盗窃罪",
+                "case_fact": "根据您的描述，2022年8月12日，在某市某区某栋某单元某层某房间内，罗某某存在携带凶器盗窃等情形，窃得现金50000元财物，盗窃金额为50000元。",
+                "reason_of_evaluation": "根据您的描述，盗窃数额已满 40000元人民币，但是不满80000元人民币。",
+                "legal_advice": "建议受害人发现财物被盗后及时报警、保护现场，协助警方调查。",
+                "similar_case": [
+                    "李春华走私、贩卖、运输、制造毒品二审刑事裁定书",
+                    "董志惠走私、贩卖、运输、制造毒品复核刑事裁定书"
+                ],
+                "applicable_law": "根据《浙江省高级人民法院、浙江省人民检察院关于印发确定盗窃罪数额标准的通知》的规定，盗窃公私财物价值人民币三千元以上不满八万元的，认定为刑法第二百六十四条规定的“数额较大。"
+            }
+        raise Exception("self.res is None.")
+
+    def recover_status(self, fact, question_answers):
+        input_dict = {"fact": fact}
+        self.res = self.criminal_pre_judgment(**input_dict)
+        for question, answer in question_answers.items():
+            element = self.get_question_element(question)
+            self.res["question_answers"][element]["usr_answer"] = answer
+            self.res = self.criminal_pre_judgment(**self.res)
 
     def successful_response(self, fact, question_answers, factor_sentence_list):
-        next_question = self.get_next_question(fact, question_answers)
+        self.recover_status(fact, question_answers)
         return json.dumps({
             "success": True,
             "error_msg": "",
             "question_asked": question_answers,
-            "question_next": next_question,
-            "question_type": self.get_question_type(next_question),
+            "question_next": self.next_question,
+            "question_type": self.question_type,
             "factor_sentence_list": [],
-            "result": None if next_question else _get_criminal_report(fact)
+            "support": self.is_supported,
+            "result": self.result
         }, ensure_ascii=False)
 
 
