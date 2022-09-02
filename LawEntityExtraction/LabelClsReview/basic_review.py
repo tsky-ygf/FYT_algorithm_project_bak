@@ -12,7 +12,7 @@ from Utils import Logger
 from DocumentReview.ParseFile.parse_word import read_docx_file
 
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
-
+from onnxruntime import InferenceSession
 
 class BasicSituation:
     def __init__(self, config_path):
@@ -68,10 +68,14 @@ class BasicBertSituation(BasicSituation):
     def __init__(self, device_id=0, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.tokenizer = AutoTokenizer.from_pretrained(self.config["tokenizer"])
-        self.param = torch.load(self.config["task_model"], map_location=lambda storage, loc: storage.cuda(0))
-        self.model = AutoModelForSequenceClassification.from_pretrained(self.config["model"], num_labels=self.config["num_labels"])
-        self.model.to(device_id)
-        self.model.load_state_dict(self.param)
+
+        # self.param = torch.load(self.config["task_model"], map_location=lambda storage, loc: storage.cuda(0))
+        # self.model = AutoModelForSequenceClassification.from_pretrained(self.config["model"], num_labels=self.config["num_labels"])
+        # self.model.to(device_id)
+        # self.model.load_state_dict(self.param)
+
+        self.sess = InferenceSession(self.config["task_model"])
+
         self.threshold = self.config["threshold"]
         self.logger.info(self.config["model"])
 
@@ -80,19 +84,22 @@ class BasicBertSituation(BasicSituation):
         pred_map = dict(zip(map_df['index'], map_df['label']))
         res_pro = {}
         inputs = self.tokenizer(text,
-                                add_special_tokens=True,
+                                # add_special_tokens=True,
                                 max_length=self.config['max_len'],
                                 padding="max_length",
                                 truncation=True,
                                 return_offsets_mapping=False,
-                                return_tensors="pt")
-        inputs = inputs.to(device=torch.device('cuda' if torch.cuda.is_available() else 'cpu'))
+                                return_tensors="np")
+        # inputs = inputs.to(device=torch.device('cuda' if torch.cuda.is_available() else 'cpu'))
+        # outputs = self.model(**inputs)
 
-        outputs = self.model(**inputs)
-        predictions = torch.sigmoid(outputs.logits) > 0.5
+        outputs = self.sess.run(output_names=["output"], input_feed={'input': inputs['input_ids']})
+        # predictions = torch.sigmoid(outputs.logits) > 0.5
+        predictions = torch.sigmoid(torch.tensor(outputs[0])) > 0.5
         predictions = predictions.detach().cpu().numpy().astype(int)
 
-        probability = torch.sigmoid(outputs.logits)[0].detach().cpu().numpy()
+        # probability = torch.sigmoid(outputs.logits).squeeze().detach().cpu().numpy()
+        probability = torch.sigmoid(torch.tensor(outputs)).squeeze().detach().cpu().numpy()
         # predictions = np.argmax(outputs.logits.detach().cpu().numpy(), axis=-1)
         # predictions = predictions.astype(int)
         for index, res in enumerate(predictions[0]):

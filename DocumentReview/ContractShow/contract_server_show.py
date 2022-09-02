@@ -84,6 +84,7 @@ def get_contract_review_result():
 
             acknowledgement.review_main(content=text, mode="text", usr=usr)
             res = acknowledgement.review_result
+            origin_data = acknowledgement.data
             # 编排返回结果的内容
             result = []
             for review_point, review_result in res.items():
@@ -99,7 +100,8 @@ def get_contract_review_result():
                     "risk_level": review_result.get("风险等级", ""),
                     "risk_point": review_result.get("风险点", "")
                 })
-            return response_successful_result(result)
+            body = {"success": True, "error_msg": "", "result": result,'origin_data':origin_data}
+            return json.dumps(body, ensure_ascii=False)
         else:
             return json.dumps({"error_msg": "no data", "status": 1}, ensure_ascii=False)
     except Exception as e:
