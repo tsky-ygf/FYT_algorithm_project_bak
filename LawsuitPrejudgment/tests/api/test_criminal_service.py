@@ -9,7 +9,7 @@ import requests
 
 
 def test_should_ask_question_when_get_criminal_result():
-    url = "http://101.69.229.138:8115/get_criminal_result"
+    url = "http://172.19.82.199:5080/get_criminal_result"
     data = {
         "fact": "2022年8月12日，罗某某利用螺丝刀撬开房间门锁进入某市某区某栋某单元某层某房间内，窃得现金50000元。2022年8月12日，趁邻居卢某家无人在家，从卢某家厨房后窗翻进其家，盗走现金50000元。",
         "question_answers": {},
@@ -26,7 +26,7 @@ def test_should_ask_question_when_get_criminal_result():
 
 
 def test_should_get_report_when_get_criminal_result():
-    url = "http://101.69.229.138:8115/get_criminal_result"
+    url = "http://172.19.82.199:5080/get_criminal_result"
     data = {
         "fact": "2022年8月12日，罗某某利用螺丝刀撬开房间门锁进入某市某区某栋某单元某层某房间内，窃得现金50000元。2022年8月12日，趁邻居卢某家无人在家，从卢某家厨房后窗翻进其家，盗走现金50000元。",
         "question_answers": {
@@ -46,7 +46,7 @@ def test_should_get_report_when_get_criminal_result():
 
 
 def test_should_get_unsupport_report_when_get_criminal_result():
-    url = "http://101.69.229.138:8115/get_criminal_result"
+    url = "http://172.19.82.199:5080/get_criminal_result"
     data = {
         "fact": "罗某贩毒被抓。",
         "question_answers": {},
