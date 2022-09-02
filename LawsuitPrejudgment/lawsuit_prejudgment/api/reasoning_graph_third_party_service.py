@@ -407,16 +407,14 @@ class CriminalDemo:
                 return {
                     "unsupport_reason": self.res.get("report_result", "你的行为属于尚未支持的犯罪类型，正在训练优化中，敬请期待！")
                 }
+            report_result = self.res.get("report_result", dict())
             return {
-                "crime": "盗窃罪",
-                "case_fact": "根据您的描述，2022年8月12日，在某市某区某栋某单元某层某房间内，罗某某存在携带凶器盗窃等情形，窃得现金50000元财物，盗窃金额为50000元。",
-                "reason_of_evaluation": "根据您的描述，盗窃数额已满 40000元人民币，但是不满80000元人民币。",
-                "legal_advice": "建议受害人发现财物被盗后及时报警、保护现场，协助警方调查。",
-                "similar_case": [
-                    "李春华走私、贩卖、运输、制造毒品二审刑事裁定书",
-                    "董志惠走私、贩卖、运输、制造毒品复核刑事裁定书"
-                ],
-                "applicable_law": "根据《浙江省高级人民法院、浙江省人民检察院关于印发确定盗窃罪数额标准的通知》的规定，盗窃公私财物价值人民币三千元以上不满八万元的，认定为刑法第二百六十四条规定的“数额较大。"
+                "crime": report_result.get("涉嫌罪名", ""),
+                "case_fact": report_result.get("案件事实", ""),
+                "reason_of_evaluation": report_result.get("评估理由", ""),
+                "legal_advice": report_result.get("法律建议", ""),
+                "similar_case": report_result.get("相关类案", []),
+                "applicable_law": report_result.get("法律依据", "")
             }
         raise Exception("self.res is None.")
 
@@ -460,4 +458,4 @@ def get_criminal_result():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8100, debug=True)  # , use_reloader=False)
+    app.run(host="0.0.0.0", port=8115, debug=True)  # , use_reloader=False)
