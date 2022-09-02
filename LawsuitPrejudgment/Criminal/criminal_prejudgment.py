@@ -120,7 +120,7 @@ class CriminalPrejudgment(PrejudgmentPipeline):
         self.logger.debug(self.content["sentence_keywords"])
 
         for index, row in self.content["sentence_keywords"].iterrows():
-            schema_list = row["schema"].split("|")
+            # schema_list = row["schema"].split("|")
             # for schema in schema_list:
             # if row["sentence"] in self.content["event"][schema]:
             if len(re.findall(row["sentences"], self.content["fact"])) > 0:
@@ -214,6 +214,9 @@ class CriminalPrejudgment(PrejudgmentPipeline):
         if self.content["question_answers"]["前提"]["usr_answer"] == "是":
             report_id = "report-1"
         else:
+            if case_num not in sentencing_dict["【" + self.content["graph_process_content"]["量刑"] + "】"]:
+                case_num = 'case0'
+
             report_id = sentencing_dict[
                 "【" + self.content["graph_process_content"]["量刑"] + "】"
                 ][case_num]
@@ -254,9 +257,10 @@ class CriminalPrejudgment(PrejudgmentPipeline):
                 "案件事实"
             ] = f"根据您的描述，{_time}{_location}{_person}容留{_provided_person}吸食{_drug_type}（俗称{_drug_name}）{_provide_count}，存在{_action}等情形。"
 
+        evaluation_report["涉嫌罪名"] = self.content["anyou"]
         evaluation_report["评估理由"] = self.content["report_dict"][report_id]["评估理由"]
-        evaluation_report["法律建议"] = self.content["report_dict"][report_id]["法律建议"]
         evaluation_report["法律依据"] = self.content["report_dict"][report_id]["法律依据"]
+        evaluation_report["法律建议"] = self.content["report_dict"][report_id]["法律建议"]
 
         self.content["report_result"] = evaluation_report
 
@@ -302,18 +306,19 @@ if __name__ == "__main__":
     input_dict = {"fact": text}
     # 第一次调用
     res = criminal_pre_judgment(**input_dict)
+    pprint(res)
 
     # 第二次调用
     res["question_answers"]["前提"]["usr_answer"] = "否"
     res2 = criminal_pre_judgment(**res)  # 传入上一次的结果
-
-    if "report_result" in res2:
-        pprint(res2["question_answers"])
-        pprint(res2["report_result"])
-    else:
-        pprint(res2["question_answers"])
-
-        pprint(res2["event"])
+    #
+    # if "report_result" in res2:
+    #     pprint(res2["question_answers"])
+    #     pprint(res2["report_result"])
+    # else:
+    #     pprint(res2["question_answers"])
+    # #
+    #     pprint(res2["event"])
     # pprint(res2["question_answers"])
     # pprint(res2["report_result"])
 
