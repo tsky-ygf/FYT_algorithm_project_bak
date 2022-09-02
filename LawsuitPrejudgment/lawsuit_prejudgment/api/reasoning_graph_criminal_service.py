@@ -7,6 +7,9 @@ from flask import Flask
 from flask import request
 from LawsuitPrejudgment.Administrative.administrative_api_v1 import get_administrative_prejudgment_situation
 from LawsuitPrejudgment.Criminal.criminal_prejudgment import CriminalPrejudgment
+from LawsuitPrejudgment.lawsuit_prejudgment.constants import SUPPORTED_ADMINISTRATIVE_TYPES_CONFIG_PATH
+from Utils.http_response import response_successful_result, response_failed_result
+from Utils.io import read_json_attribute_value
 
 """
 推理图谱的接口
@@ -39,15 +42,8 @@ def _get_administrative_prejudgment_result(administrative_type, situation):
     with open('data/administrative_config/{}_config.json'.format(administrative_type), 'r') as f1:
         info_data = json.load(f1)
 
-    # with open('LawsuitPrejudgment/Administrative/result_show/{}_config.json'.format(administrative_type), 'r') as f1:
-    #     info_data = json.load(f1)
-
-    # with open('LawsuitPrejudgment/Administrative/result_show/{}_type.json'.format(administrative_type), 'r') as f2:
-    #     type_data = json.load(f2)
-
     prejudgment_result = dict()
     prejudgment_result["具体情形"] = '{}({})'.format(situation, info_data[situation]['法条类别'])
-
     prejudgment_result["涉嫌违法行为"] = info_data[situation]['处罚依据']
     prejudgment_result["法条依据"] = info_data[situation]['法条依据']
     prejudgment_result["处罚种类"] = info_data[situation]['处罚种类']
@@ -58,24 +54,14 @@ def _get_administrative_prejudgment_result(administrative_type, situation):
     return prejudgment_result
 
 
+def _get_supported_administrative_types():
+    return read_json_attribute_value(SUPPORTED_ADMINISTRATIVE_TYPES_CONFIG_PATH, "supported_administrative_types")
+
+
 @app.route('/get_administrative_type', methods=["get"])
 def get_administrative_type():
-    # mock data
-    return json.dumps({
-        "success": True,
-        "error_msg": "",
-        "result": [{
-            "type_id": "tax",
-            "type_name": "税务处罚预判"
-        }, {
-            "type_id": "police",
-            "type_name": "公安处罚预判"
-        }, {
-            "type_id": "transportation",
-            "type_name": "道路运输处罚预判"
-        }]
-    }, ensure_ascii=False)
-    pass
+    supported_administrative_types = _get_supported_administrative_types()
+    return response_successful_result(supported_administrative_types)
 
 
 @app.route('/get_administrative_problem_and_situation_by_type_id', methods=["get", "post"])
@@ -115,17 +101,10 @@ def get_administrative_result():
         administrative_type = req_data.get("type_id")
         situation = req_data.get("situation")
         res = _get_administrative_prejudgment_result(administrative_type, situation)
-        return json.dumps({
-            "success": True,
-            "error_msg": "",
-            "result": res,
-        }, ensure_ascii=False)
+        return response_successful_result(res)
     except Exception as e:
         logging.info(traceback.format_exc())
-        return json.dumps({
-            "success": False,
-            "error_msg": "unknown error:" + repr(e)
-        }, ensure_ascii=False)
+        return response_failed_result("unknown error:" + repr(e))
 
 class CriminalDemo:
     def __init__(self):

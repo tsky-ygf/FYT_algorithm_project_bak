@@ -60,4 +60,4 @@ def test_should_get_unsupport_report_when_get_criminal_result():
     assert resp_json.get("question_next") is None
     assert resp_json.get("question_type") == "1"
     assert resp_json.get("support") is False
-    assert resp_json.get("result") is None
+    assert "unsupport_reason" in resp_json.get("result")
