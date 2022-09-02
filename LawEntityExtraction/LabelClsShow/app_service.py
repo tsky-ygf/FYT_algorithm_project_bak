@@ -10,7 +10,7 @@ import json
 
 import os
 
-os.environ['CUDA_LAUNCH_BLOCKING'] = '3'
+# os.environ['CUDA_LAUNCH_BLOCKING'] = '3'
 
 app = Flask(__name__)
 app.config['JSON_SORT_KEYS'] = False
@@ -47,15 +47,15 @@ def get_situation_res():
         if input_json is not None:
             input_dict = json.loads(input_json.decode("utf-8"))
             text = input_dict['content']
-            suqiu_type_user = [input_dict['suqiu']]
+            suqiu_type_user = input_dict['suqiu'].split(',')
             suqiu_pro_new = {}
             if len(input_dict) > 2:
                 for suqiu_user_sub in suqiu_type_user:
                     suqiu_pro_new[suqiu_user_sub] = float(input_dict["suqiu_pro"][suqiu_user_sub])
             else:
-                suqiu_type = get_suqiu_type(text)
+                # suqiu_type = get_suqiu_type(text)
                 for suqiu_user_sub in suqiu_type_user:
-                    suqiu_pro_new[suqiu_user_sub] = float(0.8)
+                    suqiu_pro_new[suqiu_user_sub] = float(1.0)
 
             situation_type = get_situation_type(suqiu_pro_new, text)
             print(text)
@@ -84,17 +84,32 @@ def get_suqiu_type(text):
     suqiu_pro = situation.review_main(content=text, mode="text")
     #  如果概率高于阿尔法，则使用正则表达式检查，是否存在该诉求
     suqiu_pro_new = {}
+    if len(suqiu_pro) == 0:
+        suqiu_exist_list = have_suqiu_list(text)
+        for exist_list_sub in suqiu_exist_list:
+            suqiu_pro_new[exist_list_sub] = float(1)
+    else:
+        suqiu_pro_new = get_suqiupro_new(situation, suqiu_pro, text)
+    return json.dumps({'suqiu_pro': suqiu_pro_new, "status": 0}, ensure_ascii=False)
+
+def get_suqiupro_new(situation, suqiu_pro, text):
+    suqiu_pro_new = {}
     for suqiu_pro_key, suqiu_pro_val in suqiu_pro.items():
         if suqiu_pro_val > float(situation.threshold):
             suqiu_exist_bool = have_suqiu_bool(suqiu_pro_key, text)
             if suqiu_exist_bool:
                 suqiu_pro_new[suqiu_pro_key] = suqiu_pro_val
+            else:
+                suqiu_exist_list = have_suqiu_list(text)
+                for exist_list_sub in suqiu_exist_list:
+                    suqiu_pro_new[exist_list_sub] = float(1)
+                break
         else:  # 如果概率低于阿尔法，则使用正则表达式依次匹配诉求
-            suqiu_exist_bool = have_suqiu_bool(suqiu_pro_key, text)
-            if suqiu_exist_bool:
-                suqiu_pro_new[suqiu_pro_key] = float(1)  # 规则匹配到的设置为1
-    return json.dumps({'suqiu_pro': suqiu_pro_new, "status": 0}, ensure_ascii=False)
-
+            suqiu_exist_list = have_suqiu_list(text)
+            for exist_list_sub in suqiu_exist_list:
+                suqiu_pro_new[exist_list_sub] = float(1)  # 规则匹配到的设置为1
+            break
+    return suqiu_pro_new
 
 def have_suqiu_bool(suqiu_pro_key, text):
 
@@ -105,7 +120,7 @@ def have_suqiu_bool(suqiu_pro_key, text):
         return True
     elif suqiu_pro_key == '金融借贷' and re.search('|'.join([reg_loan_csv.iat[0, 0], reg_loan_csv.iat[0, 1], reg_loan_csv.iat[0, 2]]), text):
         return True
-    elif suqiu_pro_key == '离婚' and re.search('|'.join([reg_marr_csv.iat[0, 0], reg_marr_csv.iat[0, 1], reg_marr_csv.iat[0, 2]]), text):
+    elif suqiu_pro_key == '离婚' and re.search('|'.join([reg_marr_csv.iat[13, 0], reg_marr_csv.iat[13, 1], reg_marr_csv.iat[13, 2]]), text):
         return True
     elif suqiu_pro_key == '支付赡养费' and re.search('|'.join([reg_marr_csv.iat[10, 0], reg_marr_csv.iat[10, 1], reg_marr_csv.iat[10, 2]]), text):
         return True
@@ -121,8 +136,6 @@ def have_suqiu_bool(suqiu_pro_key, text):
         return True
     elif suqiu_pro_key == '行使探望权' and re.search('|'.join([reg_marr_csv.iat[9, 0], reg_marr_csv.iat[9, 1], reg_marr_csv.iat[9, 2]]), text):
         return True
-    elif suqiu_pro_key == '有遗嘱继承' and re.search('|'.join([reg_marr_csv.iat[12, 0], reg_marr_csv.iat[12, 1], reg_marr_csv.iat[12, 2]]), text):
-        return True
     elif suqiu_pro_key == '确认抚养权' and re.search('|'.join([reg_marr_csv.iat[5, 0], reg_marr_csv.iat[5, 1], reg_marr_csv.iat[5, 2]]), text):
         return True
     elif suqiu_pro_key == '返还彩礼' and re.search('|'.join([reg_marr_csv.iat[2, 0], reg_marr_csv.iat[2, 1], reg_marr_csv.iat[2, 2]]), text):
@@ -134,6 +147,40 @@ def have_suqiu_bool(suqiu_pro_key, text):
     else:
         return False
 
+def have_suqiu_list(text):
+    suqiu_exist_list = []
+    reg_loan_csv = pd.read_csv('/home/fyt/huangyulin/project/fyt/LawEntityExtraction/LabelClsReview/Config/loan.csv', usecols=[4, 5, 6])
+    reg_marr_csv = pd.read_csv('/home/fyt/huangyulin/project/fyt/LawEntityExtraction/LabelClsReview/Config/marrige.csv', usecols=[4, 5, 6])
+
+    if re.search('|'.join([reg_loan_csv.iat[2, 0], reg_loan_csv.iat[2, 1], reg_loan_csv.iat[2, 2]]), text):
+        suqiu_exist_list.append('民间借贷')
+    if re.search('|'.join([reg_loan_csv.iat[0, 0], reg_loan_csv.iat[0, 1], reg_loan_csv.iat[0, 2]]), text):
+        suqiu_exist_list.append('金融借贷')
+    if re.search('|'.join([reg_marr_csv.iat[13, 0], reg_marr_csv.iat[13, 1], reg_marr_csv.iat[13, 2]]), text):
+        suqiu_exist_list.append('离婚')
+    if re.search('|'.join([reg_marr_csv.iat[10, 0], reg_marr_csv.iat[10, 1], reg_marr_csv.iat[10, 2]]), text):
+        suqiu_exist_list.append('支付赡养费')
+    if re.search('|'.join([reg_marr_csv.iat[8, 0], reg_marr_csv.iat[8, 1], reg_marr_csv.iat[8, 2]]), text):
+        suqiu_exist_list.append('减少抚养费')
+    if re.search('|'.join([reg_marr_csv.iat[6, 0], reg_marr_csv.iat[6, 1], reg_marr_csv.iat[6, 2]]), text):
+        suqiu_exist_list.append('支付抚养费')
+    if re.search('|'.join([reg_marr_csv.iat[7, 0], reg_marr_csv.iat[7, 1], reg_marr_csv.iat[7, 2]]), text):
+        suqiu_exist_list.append('增加抚养费')
+    if re.search('|'.join([reg_marr_csv.iat[3, 0], reg_marr_csv.iat[3, 1], reg_marr_csv.iat[3, 2]]), text):
+        suqiu_exist_list.append('财产分割')
+    if re.search('|'.join([reg_marr_csv.iat[1, 0], reg_marr_csv.iat[1, 1], reg_marr_csv.iat[1, 2]]), text):
+        suqiu_exist_list.append('确认婚姻无效')
+    if re.search('|'.join([reg_marr_csv.iat[9, 0], reg_marr_csv.iat[9, 1], reg_marr_csv.iat[9, 2]]), text):
+        suqiu_exist_list.append('行使探望权')
+    if re.search('|'.join([reg_marr_csv.iat[5, 0], reg_marr_csv.iat[5, 1], reg_marr_csv.iat[5, 2]]), text):
+        suqiu_exist_list.append('确认抚养权')
+    if re.search('|'.join([reg_marr_csv.iat[2, 0], reg_marr_csv.iat[2, 1], reg_marr_csv.iat[2, 2]]), text):
+        suqiu_exist_list.append('返还彩礼')
+    if re.search('|'.join([reg_marr_csv.iat[12, 0], reg_marr_csv.iat[12, 1], reg_marr_csv.iat[12, 2]]), text):
+        suqiu_exist_list.append('遗产继承')
+    if re.search('|'.join([reg_marr_csv.iat[0, 0], reg_marr_csv.iat[0, 1], reg_marr_csv.iat[0, 2]]), text):
+        suqiu_exist_list.append('夫妻共同债务')
+    return suqiu_exist_list
 
 def get_situation_type(suqiu_pro, text):
     situation_res = ''
@@ -150,4 +197,4 @@ def get_situation_type(suqiu_pro, text):
 
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=7997, debug=True)  # , use_reloader=False)
+    app.run(host="0.0.0.0", port=7995, debug=True)  # , use_reloader=False)
