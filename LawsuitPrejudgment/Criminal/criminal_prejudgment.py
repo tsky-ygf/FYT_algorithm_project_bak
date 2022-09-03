@@ -55,7 +55,7 @@ class CriminalPrejudgment(PrejudgmentPipeline):
             criminal_type = "provide_drug"
         else:
             self.content["report_result"] = {
-                "敬请期待": f"目前仅支持盗窃罪和容留他人吸毒罪的预测,你的行为属于{self.content['anyou']}犯罪,目前还未上线，正在训练优化中，敬请期待！"
+                "敬请期待": f"你的行为属于{self.content['anyou']}犯罪，目前还未上线，正在训练优化中，敬请期待！"
             }
             return
 
@@ -284,8 +284,6 @@ class CriminalPrejudgment(PrejudgmentPipeline):
 
 
 if __name__ == "__main__":
-    import time
-
     criminal_config = {
         "log_level": "info",
         "prejudgment_type": "criminal",
@@ -328,11 +326,7 @@ if __name__ == "__main__":
     # text = "罗某贩毒被抓。"
     input_dict = {"fact": text}
     # 第一次调用
-
-    local_time = time.time()
     res = criminal_pre_judgment(**input_dict)
-
-    print("use time: ", time.time() - local_time)
     # pprint(res)
     # print('@@@@@@@@@@')
 

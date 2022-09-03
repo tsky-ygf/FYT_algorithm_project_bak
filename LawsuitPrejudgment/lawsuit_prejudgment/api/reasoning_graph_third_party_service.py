@@ -176,10 +176,10 @@ def reasoning_graph_result():
                         "legal_advice": report.get("legal_advice")
                     })
                 applicable_law = [{
-                    "law_id": "zhong-hua-ren-min-gong-he-guo-min-fa-dian-di-yi-qian-ling-ba-shi-jiu-tiao",
-                    "law_name": "《中华人民共和国民法典》",
-                    "law_item": "第一千零八十九条",
-                    "law_content": "离婚时,夫妻共同债务应当共同偿还。共同财产不足清偿或者财产归各自所有的，由双方协议清偿;协议不成的，由人民法院判决。"
+                        "law_id": "zhong-hua-ren-min-gong-he-guo-min-fa-dian-di-yi-qian-ling-ba-shi-jiu-tiao",
+                        "law_name": "《中华人民共和国民法典》",
+                        "law_item": "第一千零八十九条",
+                        "law_content": "离婚时,夫妻共同债务应当共同偿还。共同财产不足清偿或者财产归各自所有的，由双方协议清偿;协议不成的，由人民法院判决。"
                     },
                     {
                         "law_id": "zui-gao-ren-min-fa-yuan-guan-yuy-shi-yong-zhong-hua-ren-min-gong-he-guo-hun-yin-fa-ruo-gan-wen-ti-de-jie-shi-er-di-shi-tiao",

@@ -8,6 +8,8 @@
 from flask import Flask, request
 from Utils.http_response import response_successful_result
 from SimilarCaseRetrieval.core import similar_case_retrieval_service as service
+from SimilarCaseRetrieval.core.relevant_cases_search import get_case_search_result
+from typing import List
 
 app = Flask(__name__)
 
@@ -77,29 +79,13 @@ def get_filter_conditions_of_case():
 
 
 def _get_search_result(query, filter_conditions):
-    return [
-        {
-            "doc_id": "2b2ed441-4a86-4f7e-a604-0251e597d85e",
-            # "doc_id": "24dbed45-904d-4992-aea7-a82000320181",
-            "title": "原告王某某与被告郝某某等三人婚约财产纠纷一等婚约财产纠纷一审民事判决书",
-            "court": "公主岭市人民法院",
-            "judge_date": "2016-04-11",
-            "case_number": "（2016）吉0381民初315号",
-            "tag": "彩礼 证据 结婚 给付 协议 女方 当事人 登记 离婚",
-            "is_guiding_case": True,
-            "problem_id": 17
-        },
-        {
-            "doc_id": "ws_c4b1e568-b253-4ac3-afd7-437941f1b17a",
-            "title": "原告彭华刚诉被告王金梅、王本忠、田冬英婚约财产纠纷一案",
-            "court": "龙山县人民法院",
-            "judge_date": "2011-07-12",
-            "case_number": "（2011）龙民初字第204号",
-            "tag": "彩礼 酒席 结婚 费用 订婚 电视 女方 买家 猪肉",
-            "is_guiding_case": False,
-            "problem_id": 17
-        }
-    ]
+    search_result = get_case_search_result(query,
+                                           filter_conditions.get("type_of_case"),
+                                           filter_conditions.get("court_level"),
+                                           filter_conditions.get("type_of_document"),
+                                           filter_conditions.get("region"),
+                                           filter_conditions.get("size", 10))
+    return _construct_result_format(search_result)
 
 
 @app.route('/search_cases', methods=["post"])
@@ -120,3 +106,17 @@ def get_law_document():
 
     mock_doc_id = "24dbed45-904d-4992-aea7-a82000320181"
     return response_successful_result(service.get_criminal_law_document(mock_doc_id))
+
+
+def _construct_result_format(search_result) -> List:
+    result = []
+    for index, row in search_result.iterrows():
+
+        result.append({
+            "doc_id": row['uq_id'],
+            "court": row['faYuan_name'],
+            "case_number": row['event_num']})
+    return result
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8801, debug=True)

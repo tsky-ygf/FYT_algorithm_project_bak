@@ -68,13 +68,15 @@ def get_df_from_sql(_table_name, _db_name):
     connect_big_data = connect_mysql(_host=host, _user=user, _passwd=passwords, _db=db_name)
     cursor = connect_big_data.cursor()
     # 获取数据
-    sqlcmd = """select * from {}.{}""".format(_db_name, _table_name)
+    print("sql查询开始")
+    sqlcmd = """select uq_id, content, event_num, faYuan_name, jfType, event_type from {}.{} limit 0, 2000000""".format(_db_name, _table_name)
     # df = pd.read_sql(sqlcmd, connect_big_data)
     cursor.execute(sqlcmd)
     # df = cursor.fetchall()
     df = pd.DataFrame(cursor.fetchall())
     df.columns = [one[0] for one in cursor.description]
     cursor.close()
+    print("sql查询完成")
     return df
 
 
@@ -150,7 +152,7 @@ if __name__ == '__main__':
     # es_init()
     # es = Elasticsearch(hosts="127.0.0.1:9200")
     # print(es.cat.indices())
-    insert_data_to_es()
+    # insert_data_to_es()
     query_dict = {'query': {'bool':
         {'must': [
             {'bool': {'should': [{'match_phrase': {'resultClause': "涉外"}},
@@ -168,8 +170,8 @@ if __name__ == '__main__':
 
     # pd.set_option('display.width', 1000)
     # res_df = search_data_from_es({"query": {"match_all": {}}, "size": 10})
-    # res_df = search_data_from_es(query_dict)
-    # for index, row in res_df.iterrows():
-    #     pprint(row.to_dict())
-    # #     print(row['resultClause'])
-    # #     print('-' * 100)
+    res_df = search_data_from_es(query_dict)
+    for index, row in res_df.iterrows():
+        print(row.to_dict())
+    #     print(row['resultClause'])
+    #     print('-' * 100)
