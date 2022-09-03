@@ -30,6 +30,10 @@ class PrejudgmentPipeline:
 
         self.content["graph_process"] = dict()
 
+    def init_content(self):
+        self.content = dict()
+        self.content["graph_process"] = dict()
+
     def anyou_identify(self, *args, **kwargs):
         raise NotImplemented
 

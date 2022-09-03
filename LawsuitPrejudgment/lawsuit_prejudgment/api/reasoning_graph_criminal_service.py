@@ -113,10 +113,13 @@ class CriminalDemo:
             "log_level": "info",
             "prejudgment_type": "criminal",
             "anyou_identify_model_path": "model/gluon_model/accusation",
-            "situation_identify_model_path": "http://172.19.82.199:7777/information_result",
+            "situation_identify_model_path": "http://127.0.0.1:7777/information_result",
         }
         self.criminal_pre_judgment = CriminalPrejudgment(**criminal_config)
         self.res = None
+
+    def init_content(self):
+        self.criminal_pre_judgment.init_content()
 
     @property
     def is_supported(self):
@@ -202,6 +205,8 @@ def get_criminal_result():
         fact = request.json.get("fact")
         question_answers = request.json.get("question_answers")
         factor_sentence_list = request.json.get("factor_sentence_list")
+
+        criminal_demo.init_content()
 
         return criminal_demo.successful_response(fact, question_answers, factor_sentence_list)
     except Exception as e:
