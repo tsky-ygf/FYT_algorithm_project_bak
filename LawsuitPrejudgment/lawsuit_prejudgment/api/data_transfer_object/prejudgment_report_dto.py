@@ -23,11 +23,6 @@ class CivilReportDTO:
                     "content": item["claim"]
                 },
                 {
-                    "type": "TYPE_TEXT",
-                    "title": "结论",
-                    "content": item["support_or_not"]
-                },
-                {
                     "type": "TYPE_GRAPH_OF_PROB",
                     "title": "支持概率",
                     "content": item["possibility_support"]
@@ -41,7 +36,7 @@ class CivilReportDTO:
                     "type": "TYPE_TEXT",
                     "title": "证据材料",
                     "content": item["evidence_module"]
-                },
+                } if item["evidence_module"] else None,
                 {
                     "type": "TYPE_TEXT",
                     "title": "法律建议",
@@ -50,6 +45,12 @@ class CivilReportDTO:
             ]
             for item in self.response_dict["result"]["report"]
         ]
+
+        # 删除证据为空的内容
+        for claim_report in report:
+            if None in claim_report:
+                claim_report.remove(None)
+
         self.response_dict["result"]["report"] = report
         return self.response_dict
 
