@@ -319,24 +319,24 @@ if __name__ == "__main__":
     #     "刘某甲容留刘某丙、刘1某等人在其家中卧室吸食甲基苯丙胺和甲基苯丙胺片剂。"
     # )
 
-    # text = (
-    #     "2022年8月12日，罗某某利用螺丝刀撬开房间门锁进入某市某区某栋某单元某层某房间内，窃得现金50000元。2022年8月12日，趁邻居卢某家"
-    #     "无人在家，从卢某家厨房后窗翻进其家，盗走现金50000元。"
-    # )
-    text = "罗某贩毒被抓。"
+    text = (
+        "2022年8月12日，罗某某利用螺丝刀撬开房间门锁进入某市某区某栋某单元某层某房间内，窃得现金50000元。2022年8月12日，趁邻居卢某家"
+        "无人在家，从卢某家厨房后窗翻进其家，盗走现金50000元。"
+    )
+    # text = "罗某贩毒被抓。"
     input_dict = {"fact": text}
     # 第一次调用
     res = criminal_pre_judgment(**input_dict)
-    pprint(res)
+    # pprint(res)
     # print('@@@@@@@@@@')
 
     # 第二次调用
-    # res["question_answers"]["前提"]["usr_answer"] = "否"
-    # res2 = criminal_pre_judgment(**res)  # 传入上一次的结果
-    #
-    # if "report_result" in res2:
-    #     pprint(res2["question_answers"])
-    #     pprint(res2["report_result"])
+    res["question_answers"]["前提"]["usr_answer"] = "否"
+    res2 = criminal_pre_judgment(**res)  # 传入上一次的结果
+
+    if "report_result" in res2:
+        pprint(res2["question_answers"])
+        pprint(res2["report_result"])
     # else:
     #     pprint(res2["question_answers"])
     # #
