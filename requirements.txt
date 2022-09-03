@@ -40,3 +40,6 @@ autogluon
 SQLAlchemy
 thulac
 h5py
+connectorx
+onnxruntime
+pyltp

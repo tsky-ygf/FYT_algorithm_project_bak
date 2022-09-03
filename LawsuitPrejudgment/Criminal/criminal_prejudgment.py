@@ -55,7 +55,7 @@ class CriminalPrejudgment(PrejudgmentPipeline):
             criminal_type = "provide_drug"
         else:
             self.content["report_result"] = {
-                "敬请期待": f"你的行为属于{self.content['anyou']}犯罪，目前还未上线，正在训练优化中，敬请期待！"
+                "敬请期待": f"目前仅支持盗窃罪和容留他人吸毒罪的预测，你的行为属于{self.content['anyou']}犯罪，目前还未上线，正在训练优化中，敬请期待！"
             }
             return
 

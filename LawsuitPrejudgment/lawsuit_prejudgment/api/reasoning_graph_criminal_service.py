@@ -106,6 +106,7 @@ def get_administrative_result():
         logging.info(traceback.format_exc())
         return response_failed_result("unknown error:" + repr(e))
 
+
 class CriminalDemo:
     def __init__(self):
         criminal_config = {
@@ -156,7 +157,8 @@ class CriminalDemo:
                 return None
             if self.is_supported is False:
                 return {
-                    "unsupport_reason": self.res.get("report_result", "你的行为属于尚未支持的犯罪类型，正在训练优化中，敬请期待！")
+                    "unsupport_reason": self.res.get("report_result",
+                                                     "你的行为属于尚未支持的犯罪类型，正在训练优化中，敬请期待！")
                 }
             report_result = self.res.get("report_result", dict())
             return {
@@ -191,6 +193,9 @@ class CriminalDemo:
         }, ensure_ascii=False)
 
 
+criminal_demo = CriminalDemo()
+
+
 @app.route('/get_criminal_result', methods=["post"])
 def get_criminal_result():
     try:
@@ -198,7 +203,6 @@ def get_criminal_result():
         question_answers = request.json.get("question_answers")
         factor_sentence_list = request.json.get("factor_sentence_list")
 
-        criminal_demo = CriminalDemo()
         return criminal_demo.successful_response(fact, question_answers, factor_sentence_list)
     except Exception as e:
         logging.info(traceback.format_exc())
