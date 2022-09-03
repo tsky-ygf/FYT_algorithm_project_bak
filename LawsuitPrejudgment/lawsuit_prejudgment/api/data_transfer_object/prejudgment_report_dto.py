@@ -86,8 +86,8 @@ class AdministrativeReportDTO:
                 },
                 {
                     "type": "TYPE_LIST_OF_TEXT",
-                    "title": "punishment_range",
-                    "content": self.response_dict["punishment_type"]["content"]
+                    "title": "处罚幅度",
+                    "content": self.response_dict["punishment_range"]["content"]
                 },
                 {
                     "type": "TYPE_LIST_OF_OBJECT",
