@@ -1,6 +1,6 @@
 {
 	"value": [{
-		"groupName": "婚姻继承",
+		"groupName": "婚姻纠纷",
 		"groupList": [{
 			"id": 1536,
 			"problem": "财产分割"
@@ -72,7 +72,7 @@
 			"problem": "支付利息"
 		}]
 	}, {
-		"groupName": "交通事故",
+		"groupName": "交通纠纷",
 		"groupList": [{
 			"id": 1552,
 			"problem": "交通事故纠纷"
