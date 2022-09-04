@@ -21,7 +21,7 @@ from LawsuitPrejudgment.Criminal.parse_xmind import deal_xmind_to_dict
 import pandas as pd
 from pprint import pprint
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "3"
 pd.set_option("display.max_columns", None)
 
 
@@ -231,12 +231,16 @@ class CriminalPrejudgment(PrejudgmentPipeline):
                 "【" + self.content["graph_process_content"]["量刑"] + "】"
                 ][case_num]
 
-        _time = self.content["event"]["时间"]
+        _time = self.content["event"].get("时间", "")
 
-        _location = self.content["event"]["地点"]
-        _person = self.content["event"]["人物"]
+        _location = self.content["event"].get("地点", "")
+        _person = self.content["event"].get("人物", "")
         # _action = self.content["event"]["行为"]
         _action = self.content["graph_process_content"]["情节"]
+        if _action != "以上都没有":
+            _action = f"存在{_action}等情形。"
+        else:
+            _action = ""
 
         if _time != "":
             _time += "，"
@@ -254,10 +258,15 @@ class CriminalPrejudgment(PrejudgmentPipeline):
 
             evaluation_report[
                 "案件事实"
-            ] = f"根据您的描述，{_time}{_location}{_person}存在{_action}等情形，窃得{_thing}财物，盗窃金额为{_amount}。"
+            ] = f"根据您的描述，{_time}{_location}{_person}{_action}窃得{_thing}财物，盗窃金额为{_amount}。"
 
         elif self.content["anyou"] == "容留他人吸毒":
             _drug_name = self.content["event"]["毒品名称"]
+            if _drug_name != "毒品":
+                _drug_name = f"（俗称{_drug_name}）"
+            else:
+                _drug_name = ""
+
             _drug_type = self.content["event"]["毒品种类"]
 
             _provide_count = self.content["event"]["容留次数"]
@@ -265,7 +274,7 @@ class CriminalPrejudgment(PrejudgmentPipeline):
 
             evaluation_report[
                 "案件事实"
-            ] = f"根据您的描述，{_time}{_location}{_person}容留{_provided_person}吸食{_drug_type}（俗称{_drug_name}）{_provide_count}，存在{_action}等情形。"
+            ] = f"根据您的描述，{_time}{_location}{_person}容留{_provided_person}吸食{_drug_type}{_drug_name}{_provide_count}。{_action}"
 
         evaluation_report["涉嫌罪名"] = self.content["anyou"]
         evaluation_report["评估理由"] = self.content["report_dict"][report_id]["评估理由"]
@@ -323,18 +332,30 @@ if __name__ == "__main__":
     #     "2022年8月12日，罗某某利用螺丝刀撬开房间门锁进入某市某区某栋某单元某层某房间内，窃得现金50000元。2022年8月12日，趁邻居卢某家"
     #     "无人在家，从卢某家厨房后窗翻进其家，盗走现金50000元。"
     # )
-    text = "2001年王某容留李某在家中吸毒"
+    text = "入室盗窃"
     input_dict = {"fact": text}
     # 第一次调用
+
+    import time
+
+    s_time = time.time()
     res = criminal_pre_judgment(**input_dict)
     pprint(res)
     # print('@@@@@@@@@@')
 
     # 第二次调用
-    res["question_answers"]["前提"]["usr_answer"] = "是"
+    res["question_answers"]["前提"]["usr_answer"] = "否"
     res2 = criminal_pre_judgment(**res)  # 传入上一次的结果
     #
-    pprint(res2)
+    # pprint(res2)
+    res2["question_answers"]["量刑"]["usr_answer"] = "40000（含）-80000（不含）"
+
+    res3 = criminal_pre_judgment(**res2)
+    if "report_result" in res3:
+        #     pprint(res2["question_answers"])
+        print('---------------------------')
+        pprint(res3["report_result"])
+        # exit()
     # res2["question_answers"]["情节"]["usr_answer"] = "以上都没有"
     #
     # # 第三次调用
