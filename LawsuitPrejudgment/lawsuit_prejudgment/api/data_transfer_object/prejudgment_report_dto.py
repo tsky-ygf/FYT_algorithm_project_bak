@@ -25,7 +25,7 @@ class CivilReportDTO:
                 {
                     "type": "TYPE_GRAPH_OF_PROB",
                     "title": "支持概率",
-                    "content": item["possibility_support"]
+                    "content": round(float(item.get("possibility_support", 0.5)), 2)
                 },
                 {
                     "type": "TYPE_TEXT",

@@ -31,12 +31,16 @@ if __name__ == '__main__':
         'size': 10
 }
 
-    query_dict = {'query': {'bool':
-        {'must': [
+    query_dict = {
+        'from':0,
+        'size':10,
+        'query': {'bool':
+        {'should': [
             # {'bool': {'should': [{'match_phrase': {'content': "家庭"}}]}}, # query
             {'bool': {'should': [{'match_phrase': {'content': "离婚"}}]}}, # query
             {'bool': {'should': [{'match_phrase': {'content': "江苏"}}]}}, # 地域
             {'bool': {'should': [{'match_phrase': {'faYuan_name': '中级'}}]}},  # 非基层法院过滤
+            # {'bool': {'should': [{'match_phrase': {'faYuan_name': '高级'}}]}},  # 非基层法院过滤
             {'bool': {'should': [{'match_phrase': {'event_type': '判决'}}]}},  # 非基层法院过滤
             {'bool': {'should': [{'match_phrase': {'jfType': '故意'}}]}},  # 非基层法院过滤
             # {'terms': {'faYuan_name.keyword': ['最高']}},
@@ -49,7 +53,6 @@ if __name__ == '__main__':
         }
 
     },
-        'size': 10
     }
     res_df = search_data_from_es(query_dict)
     print(res_df)

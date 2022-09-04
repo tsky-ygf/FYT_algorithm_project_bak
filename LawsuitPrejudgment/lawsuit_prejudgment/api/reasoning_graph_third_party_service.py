@@ -15,6 +15,8 @@ from LawsuitPrejudgment.lawsuit_prejudgment.api.data_transfer_object.similar_cas
     CriminalSimilarCaseListCreator
 from LawsuitPrejudgment.lawsuit_prejudgment.constants import SUPPORTED_ADMINISTRATIVE_TYPES_CONFIG_PATH, \
     CIVIL_PROBLEM_ID_MAPPING_CONFIG_PATH, CIVIL_PROBLEM_TEMPLATE_CONFIG_PATH, FEATURE_TOGGLES_CONFIG_PATH
+from LawsuitPrejudgment.lawsuit_prejudgment.core.civil_relevant_law import CivilRelevantLaw
+from LawsuitPrejudgment.lawsuit_prejudgment.core.civil_similar_case import CivilSimilarCase
 from LawsuitPrejudgment.lawsuit_prejudgment.feature_toggles import FeatureToggles
 from Utils.io import read_json_attribute_value
 from LawsuitPrejudgment.main.reasoning_graph_predict import predict_fn
@@ -59,6 +61,10 @@ def get_civil_problem_summary():
 def _get_mapped_problem_id(problem_id):
     problem_id_mapping_list = read_json_attribute_value(CIVIL_PROBLEM_ID_MAPPING_CONFIG_PATH, "value")
     return next((item.get("mapped_id") for item in problem_id_mapping_list if str(item.get("id")) == str(problem_id)), None)
+
+def _get_mapped_problem_id_by_name(problem):
+    problem_id_mapping_list = read_json_attribute_value(CIVIL_PROBLEM_ID_MAPPING_CONFIG_PATH, "value")
+    return next((item.get("mapped_id") for item in problem_id_mapping_list if str(item.get("problem")) == str(problem)), None)
 
 
 def _get_mapped_problem(attribute_value, attribute_name="id"):
@@ -138,7 +144,10 @@ def reasoning_graph_result():
         if in_json is not None:
             in_dict = json.loads(in_json.decode("utf-8"))
             problem = in_dict['problem']
+            problem_name_for_search = problem
+            mapped_problem_id = _get_mapped_problem_id_by_name(problem)
             problem = _get_mapped_problem(problem, "problem")
+            problem_name_for_search += " " + problem
             claim_list = in_dict['claim_list']
             fact = in_dict.get('fact', '')
             question_answers = in_dict.get('question_answers', {})
@@ -175,41 +184,45 @@ def reasoning_graph_result():
                         "evidence_module": report.get("evidence_module"),
                         "legal_advice": report.get("legal_advice")
                     })
-                applicable_law = [{
-                        "law_id": "zhong-hua-ren-min-gong-he-guo-min-fa-dian-di-yi-qian-ling-ba-shi-jiu-tiao",
-                        "law_name": "《中华人民共和国民法典》",
-                        "law_item": "第一千零八十九条",
-                        "law_content": "离婚时,夫妻共同债务应当共同偿还。共同财产不足清偿或者财产归各自所有的，由双方协议清偿;协议不成的，由人民法院判决。"
-                    },
-                    {
-                        "law_id": "zui-gao-ren-min-fa-yuan-guan-yuy-shi-yong-zhong-hua-ren-min-gong-he-guo-hun-yin-fa-ruo-gan-wen-ti-de-jie-shi-er-di-shi-tiao",
-                        "law_name": "《最高人民法院关于适用《中华人民共和国婚姻法》若干问题的解释(二)》",
-                        "law_item": "第十条",
-                        "law_content": "当事人请求返还按照习俗给付的彩礼的，如果查明属于以下情形，人民法院应当予以支持：（一）双方未办理结婚登记手续的；（二）双方办理结婚登记手续但确未共同生活的；（三）婚前给付并导致给付人生活困难的。适用前款第（二）、（三）项的规定，应当以双方离婚为条件。"
-                    }
-                ]
-                similar_case = [
-                    {
-                        "doc_id": "2b2ed441-4a86-4f7e-a604-0251e597d85e",
-                        "similar_rate": 0.88,
-                        "title": "原告王某某与被告郝某某等三人婚约财产纠纷一等婚约财产纠纷一审民事判决书",
-                        "court": "公主岭市人民法院",
-                        "judge_date": "2016-04-11",
-                        "case_number": "（2016）吉0381民初315号",
-                        "tag": "彩礼 证据 结婚 给付 协议 女方 当事人 登记 离婚",
-                        "is_guiding_case": True
-                    },
-                    {
-                        "doc_id": "ws_c4b1e568-b253-4ac3-afd7-437941f1b17a",
-                        "similar_rate": 0.80,
-                        "title": "原告彭华刚诉被告王金梅、王本忠、田冬英婚约财产纠纷一案",
-                        "court": "龙山县人民法院",
-                        "judge_date": "2011-07-12",
-                        "case_number": "（2011）龙民初字第204号",
-                        "tag": "彩礼 酒席 结婚 费用 订婚 电视 女方 买家 猪肉",
-                        "is_guiding_case": False
-                    }
-                ]
+                # applicable_law = [{
+                #         "law_id": "zhong-hua-ren-min-gong-he-guo-min-fa-dian-di-yi-qian-ling-ba-shi-jiu-tiao",
+                #         "law_name": "《中华人民共和国民法典》",
+                #         "law_item": "第一千零八十九条",
+                #         "law_content": "离婚时,夫妻共同债务应当共同偿还。共同财产不足清偿或者财产归各自所有的，由双方协议清偿;协议不成的，由人民法院判决。"
+                #     },
+                #     {
+                #         "law_id": "zui-gao-ren-min-fa-yuan-guan-yuy-shi-yong-zhong-hua-ren-min-gong-he-guo-hun-yin-fa-ruo-gan-wen-ti-de-jie-shi-er-di-shi-tiao",
+                #         "law_name": "《最高人民法院关于适用《中华人民共和国婚姻法》若干问题的解释(二)》",
+                #         "law_item": "第十条",
+                #         "law_content": "当事人请求返还按照习俗给付的彩礼的，如果查明属于以下情形，人民法院应当予以支持：（一）双方未办理结婚登记手续的；（二）双方办理结婚登记手续但确未共同生活的；（三）婚前给付并导致给付人生活困难的。适用前款第（二）、（三）项的规定，应当以双方离婚为条件。"
+                #     }
+                # ]
+                relevant_law = CivilRelevantLaw(fact, problem, claim_list)
+                applicable_law = relevant_law.get_relevant_laws()
+                # similar_case = [
+                #     {
+                #         "doc_id": "2b2ed441-4a86-4f7e-a604-0251e597d85e",
+                #         "similar_rate": 0.88,
+                #         "title": "原告王某某与被告郝某某等三人婚约财产纠纷一等婚约财产纠纷一审民事判决书",
+                #         "court": "公主岭市人民法院",
+                #         "judge_date": "2016-04-11",
+                #         "case_number": "（2016）吉0381民初315号",
+                #         "tag": "彩礼 证据 结婚 给付 协议 女方 当事人 登记 离婚",
+                #         "is_guiding_case": True
+                #     },
+                #     {
+                #         "doc_id": "ws_c4b1e568-b253-4ac3-afd7-437941f1b17a",
+                #         "similar_rate": 0.80,
+                #         "title": "原告彭华刚诉被告王金梅、王本忠、田冬英婚约财产纠纷一案",
+                #         "court": "龙山县人民法院",
+                #         "judge_date": "2011-07-12",
+                #         "case_number": "（2011）龙民初字第204号",
+                #         "tag": "彩礼 酒席 结婚 费用 订婚 电视 女方 买家 猪肉",
+                #         "is_guiding_case": False
+                #     }
+                # ]
+                civilSimilarCase = CivilSimilarCase(fact, problem_name_for_search, claim_list, mapped_problem_id)
+                similar_case = civilSimilarCase.get_similar_cases()
                 judging_rule = [
                     {
                         "rule_id": "rule_176",

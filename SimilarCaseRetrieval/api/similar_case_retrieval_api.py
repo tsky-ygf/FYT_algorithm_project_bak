@@ -5,7 +5,11 @@
 @Time    : 2022/8/10 13:14 
 @Desc    : None
 """
+import json
+
 from flask import Flask, request
+
+from LawsuitPrejudgment.lawsuit_prejudgment.core import civil_similar_case
 from Utils.http_response import response_successful_result
 from SimilarCaseRetrieval.core import similar_case_retrieval_service as service
 from SimilarCaseRetrieval.core.relevant_cases_search import get_case_search_result
@@ -78,34 +82,59 @@ def get_filter_conditions_of_case():
     return response_successful_result(filter_conditions)
 
 
-def _get_search_result(query, filter_conditions):
+def _get_search_result(query, filter_conditions,page_num,page_size):
     search_result = get_case_search_result(query,
                                            filter_conditions.get("type_of_case"),
                                            filter_conditions.get("court_level"),
                                            filter_conditions.get("type_of_document"),
                                            filter_conditions.get("region"),
-                                           filter_conditions.get("size", 10))
+                                            page_num,
+                                            page_size)
     return _construct_result_format(search_result)
 
 
 @app.route('/search_cases', methods=["post"])
 def search_cases():
-    query = request.json.get("query")
-    filter_conditions = request.json.get("filter_conditions")
-    result = _get_search_result(query, filter_conditions)
-    # TODO: 实现用于分页的total_amount
-    return response_successful_result(result, {"total_amount": len(result)})
+    # query = request.json.get("query")
+    # filter_conditions = request.json.get("filter_conditions")
+    # result = _get_search_result(query, filter_conditions)
+    # try:
+    input_json = request.get_data()
+    if input_json is not None:
+        input_dict = json.loads(input_json.decode("utf-8"))
+        query = input_dict['query']
+        filter_conditions = input_dict['filter_conditions']
+        page_number = input_dict['page_number']
+        page_size = input_dict['page_size']
+        if query is not None and filter_conditions is not None:
+            result = _get_search_result(query, filter_conditions, page_number, page_size)
+            return response_successful_result(result, {"total_amount": len(result)})
+        else:
+            return response_successful_result([], {"total_amount": len([])})
+        # TODO: 实现用于分页的total_amount
+    else:
+        return json.dumps({"error_msg": "no data", "status": 1}, ensure_ascii=False)
 
+    # except Exception as e:
+    #     logging.info(traceback.format_exc())
+    #     return json.dumps({"error_msg": "unknown error:" + repr(e), "status": 1}, ensure_ascii=False)
 
 @app.route('/get_law_document', methods=["get"])
 def get_law_document():
     doc_id = request.args.get("doc_id")
     result = service.get_criminal_law_document(doc_id)
     if result:
-        response_successful_result(result)
+        return response_successful_result(result)
 
-    mock_doc_id = "24dbed45-904d-4992-aea7-a82000320181"
-    return response_successful_result(service.get_criminal_law_document(mock_doc_id))
+    law_documents = civil_similar_case.get_civil_law_documents_by_id_list([doc_id])
+    if law_documents:
+        result = {
+            "doc_id": law_documents[0]["doc_id"],
+            "html_content": law_documents[0]["raw_content"]
+        }
+    else:
+        result = None
+    return response_successful_result(result)
 
 
 def _construct_result_format(search_result) -> List:
@@ -119,4 +148,4 @@ def _construct_result_format(search_result) -> List:
     return result
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8801, debug=True)
+    app.run(host="0.0.0.0", port=8140, debug=True)
