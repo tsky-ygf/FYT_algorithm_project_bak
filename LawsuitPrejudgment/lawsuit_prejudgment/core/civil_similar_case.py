@@ -92,7 +92,7 @@ from typing import List, Dict
 import pymysql
 
 
-def get_civil_law_documents_by_id_list(id_list: List[str], table_name) -> List[Dict]:
+def _get_civil_law_documents_by_id_list(id_list: List[str], table_name) -> List[Dict]:
     # 打开数据库连接
     db = pymysql.connect(host='172.19.82.153',
                          user='root',
@@ -106,7 +106,7 @@ def get_civil_law_documents_by_id_list(id_list: List[str], table_name) -> List[D
     try:
         format_strings = ','.join(['%s'] * len(id_list))
         # 执行SQL语句
-        cursor.execute("SELECT f2, f1, f5, f14, f3, f41, f7 FROM "+table_name+" WHERE f2 in (%s)" % format_strings,
+        cursor.execute("SELECT f2, f1, f5, f14, f3, f41, f7 FROM " + table_name + " WHERE f2 in (%s)" % format_strings,
                        tuple(id_list))
         # 获取所有记录列表
         fetched_data = cursor.fetchall()
@@ -125,6 +125,18 @@ def get_civil_law_documents_by_id_list(id_list: List[str], table_name) -> List[D
     # 关闭数据库连接
     db.close()
     return law_documents
+
+
+def get_civil_law_documents_by_id_list(id_list: List[str], table_name=None) -> List[Dict]:
+    if table_name:
+        return _get_civil_law_documents_by_id_list(id_list, table_name)
+    table_names = list(set(id2table.values()))
+    for table_name in table_names:
+        law_documents = _get_civil_law_documents_by_id_list(id_list, table_name)
+        if law_documents:
+            return law_documents
+    return []
+
 
 class CivilSimilarCase:
     def __init__(self, fact, problem, claim_list, problem_id):
@@ -164,20 +176,3 @@ class CivilSimilarCase:
             }
             for item in law_documents
         ]
-        # result = []
-        # cnt = 0
-        # for doc_id, sim, tag in zip(doc_ids, sim_list, tags_list):
-        #     result.append(
-        #         {
-        #             "doc_id": doc_id,
-        #             "similar_rate": sim,
-        #             "title": "原告王某某与被告郝某某等三人婚约财产纠纷一等婚约财产纠纷一审民事判决书",
-        #             "court": "公主岭市人民法院",
-        #             "judge_date": "2016-04-11",
-        #             "case_number": "（2016）吉0381民初315号",
-        #             "tag": tag,
-        #             "is_guiding_case": False
-        #         }
-        #     )
-        #     cnt += 1
-        # return result
