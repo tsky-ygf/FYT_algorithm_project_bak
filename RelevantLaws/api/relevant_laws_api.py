@@ -103,3 +103,4 @@ def get_law_by_law_id():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8135, debug=True)
+

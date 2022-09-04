@@ -6,7 +6,7 @@
 @Desc    : None
 """
 from flask import Flask, request
-
+import re
 from LawsuitPrejudgment.lawsuit_prejudgment.core import civil_similar_case
 from Utils.http_response import response_successful_result
 from SimilarCaseRetrieval.core import similar_case_retrieval_service as service
@@ -25,7 +25,7 @@ def get_law_document():
     if law_documents:
         result = {
             "doc_id": law_documents[0]["doc_id"],
-            "html_content": law_documents[0]["raw_content"]
+            "html_content": re.sub("href='.+?'", "", law_documents[0]["raw_content"])
         }
     else:
         result = None
@@ -33,4 +33,4 @@ def get_law_document():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8145, debug=True)
+    app.run(host="0.0.0.0", port=8145, debug=False)
