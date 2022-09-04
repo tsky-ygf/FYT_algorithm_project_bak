@@ -11,6 +11,7 @@ from flask import Flask
 from flask import request
 
 from LawsuitPrejudgment.lawsuit_prejudgment.api.data_transfer_object.applicable_law_dto import ApplicableLawDTO
+from LawsuitPrejudgment.lawsuit_prejudgment.core.civil_relevant_law import CivilRelevantLaw
 from RelevantLaws.LegalLibrary.relevant_laws_search import get_law_search_result
 from RelevantLaws.api.constants import SEPERATOR_BETWEEN_LAW_TABLE_AND_ID
 from Utils.io import read_json_attribute_value
@@ -85,6 +86,10 @@ def search_laws():
 def get_law_by_law_id():
     try:
         raw_law_id = request.args.get("law_id")
+        result = CivilRelevantLaw.get_law_in_memory(raw_law_id)
+        if result:
+            return response_successful_result(result)
+
         pair = str(raw_law_id).split(SEPERATOR_BETWEEN_LAW_TABLE_AND_ID)
         if len(pair) != 2:
             return response_successful_result(dict())

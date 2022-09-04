@@ -23,6 +23,10 @@ class CivilRelevantLaw:
             lazy_pinyin(str(law_name).replace("》", "").replace("《", "").strip())) + "-" + "".join(
             lazy_pinyin(str(law_item).strip()))
 
+    @staticmethod
+    def get_law_in_memory(law_id):
+        return _memory.get(law_id)
+
     def _reformat(self, resp_json):
         law_name_and_items = resp_json.get("law_name_and_items")
         if not law_name_and_items:
