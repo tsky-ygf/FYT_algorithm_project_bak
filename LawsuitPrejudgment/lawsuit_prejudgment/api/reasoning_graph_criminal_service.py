@@ -176,9 +176,17 @@ class CriminalDemo:
 
     def recover_status(self, fact, question_answers):
         input_dict = {"fact": fact}
+        # from pprint import pprint
+        # input_dict.update(self.criminal_pre_judgment.content)
+        # pprint(self.res)
+        # print('------------')
+        # pprint(self.criminal_pre_judgment.content)
+        # print('------------')
+
         self.res = self.criminal_pre_judgment(**input_dict)
         for question, answer in question_answers.items():
             element = self.get_question_element(question)
+            # if self.res["question_answers"][element]["usr_answer"] == "":
             self.res["question_answers"][element]["usr_answer"] = answer
             self.res = self.criminal_pre_judgment(**self.res)
 
@@ -206,6 +214,7 @@ def get_criminal_result():
         question_answers = request.json.get("question_answers")
         factor_sentence_list = request.json.get("factor_sentence_list")
 
+        # if question_answers == {}:
         criminal_demo.init_content()
 
         return criminal_demo.successful_response(fact, question_answers, factor_sentence_list)
@@ -218,4 +227,4 @@ def get_criminal_result():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5080, debug=True)  # , use_reloader=False)
+    app.run(host="0.0.0.0", port=5081, debug=True)  # , use_reloader=False)
