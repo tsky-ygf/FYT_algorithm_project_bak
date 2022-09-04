@@ -111,30 +111,63 @@ class CriminalReportDTO:
         self.response_dict = response_dict
 
     def to_dict(self):
+        print("############WWW########")
+        print(self.response_dict)
         if self.response_dict.get("question_next"):
             return self.response_dict
 
-        applicable_law = self.response_dict["applicable_law"]
-        similar_case = self.response_dict["similar_case"]
-        judging_rule = self.response_dict["judging_rule"]
-        report = [
-            [
-                {
-                    "type": "TYPE_LIST_OF_OBJECT",
-                    "title": "预测罪名和相应法条",
-                    "content": self.response_dict["articles"]
-                },
-                {
-                    "type": "TYPE_TEXT",
-                    "title": "刑期(月数)",
-                    "content": self.response_dict["imprisonment"]
-                }
+        if not self.response_dict["result"]:
+            return self.response_dict
+
+        if "unsupport_reason" in self.response_dict["result"]:
+            report = [
+                [
+                    {
+                        "type": "TYPE_TEXT",
+                        "title": "敬请期待",
+                        "content": self.response_dict["result"]["unsupport_reason"]
+                    }
+                ]
             ]
-        ]
-        self.response_dict = {
-            "applicable_law": applicable_law,
-            "similar_case": similar_case,
-            "judging_rule": judging_rule,
+        else:
+            report = [
+                [
+                    {
+                        "type": "TYPE_TEXT",
+                        "title": "涉嫌罪名",
+                        "content": self.response_dict["result"]["crime"]
+                    },
+                    {
+                        "type": "TYPE_TEXT",
+                        "title": "案件事实",
+                        "content": self.response_dict["result"]["case_fact"]
+                    },
+                    {
+                        "type": "TYPE_TEXT",
+                        "title": "评估理由",
+                        "content": self.response_dict["result"]["reason_of_evaluation"]
+                    },
+                    {
+                        "type": "TYPE_TEXT",
+                        "title": "法律建议",
+                        "content": self.response_dict["result"]["legal_advice"]
+                    },
+                    {
+                        "type": "TYPE_LIST_OF_TEXT",
+                        "title": "相关类案",
+                        "content": self.response_dict["result"]["similar_case"]
+                    },
+                    {
+                        "type": "TYPE_TEXT",
+                        "title": "法律依据",
+                        "content": self.response_dict["result"]["applicable_law"]
+                    }
+                ]
+            ]
+        self.response_dict["result"] = {
+            "applicable_law": None,
+            "similar_case": None,
+            "judging_rule": None,
             "report": report
         }
         return self.response_dict
