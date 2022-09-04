@@ -15,6 +15,7 @@ from LawsuitPrejudgment.lawsuit_prejudgment.api.data_transfer_object.similar_cas
     CriminalSimilarCaseListCreator
 from LawsuitPrejudgment.lawsuit_prejudgment.constants import SUPPORTED_ADMINISTRATIVE_TYPES_CONFIG_PATH, \
     CIVIL_PROBLEM_ID_MAPPING_CONFIG_PATH, CIVIL_PROBLEM_TEMPLATE_CONFIG_PATH, FEATURE_TOGGLES_CONFIG_PATH
+from LawsuitPrejudgment.lawsuit_prejudgment.core.civil_relevant_law import CivilRelevantLaw
 from LawsuitPrejudgment.lawsuit_prejudgment.core.civil_similar_case import CivilSimilarCase
 from LawsuitPrejudgment.lawsuit_prejudgment.feature_toggles import FeatureToggles
 from Utils.io import read_json_attribute_value
@@ -183,19 +184,21 @@ def reasoning_graph_result():
                         "evidence_module": report.get("evidence_module"),
                         "legal_advice": report.get("legal_advice")
                     })
-                applicable_law = [{
-                        "law_id": "zhong-hua-ren-min-gong-he-guo-min-fa-dian-di-yi-qian-ling-ba-shi-jiu-tiao",
-                        "law_name": "《中华人民共和国民法典》",
-                        "law_item": "第一千零八十九条",
-                        "law_content": "离婚时,夫妻共同债务应当共同偿还。共同财产不足清偿或者财产归各自所有的，由双方协议清偿;协议不成的，由人民法院判决。"
-                    },
-                    {
-                        "law_id": "zui-gao-ren-min-fa-yuan-guan-yuy-shi-yong-zhong-hua-ren-min-gong-he-guo-hun-yin-fa-ruo-gan-wen-ti-de-jie-shi-er-di-shi-tiao",
-                        "law_name": "《最高人民法院关于适用《中华人民共和国婚姻法》若干问题的解释(二)》",
-                        "law_item": "第十条",
-                        "law_content": "当事人请求返还按照习俗给付的彩礼的，如果查明属于以下情形，人民法院应当予以支持：（一）双方未办理结婚登记手续的；（二）双方办理结婚登记手续但确未共同生活的；（三）婚前给付并导致给付人生活困难的。适用前款第（二）、（三）项的规定，应当以双方离婚为条件。"
-                    }
-                ]
+                # applicable_law = [{
+                #         "law_id": "zhong-hua-ren-min-gong-he-guo-min-fa-dian-di-yi-qian-ling-ba-shi-jiu-tiao",
+                #         "law_name": "《中华人民共和国民法典》",
+                #         "law_item": "第一千零八十九条",
+                #         "law_content": "离婚时,夫妻共同债务应当共同偿还。共同财产不足清偿或者财产归各自所有的，由双方协议清偿;协议不成的，由人民法院判决。"
+                #     },
+                #     {
+                #         "law_id": "zui-gao-ren-min-fa-yuan-guan-yuy-shi-yong-zhong-hua-ren-min-gong-he-guo-hun-yin-fa-ruo-gan-wen-ti-de-jie-shi-er-di-shi-tiao",
+                #         "law_name": "《最高人民法院关于适用《中华人民共和国婚姻法》若干问题的解释(二)》",
+                #         "law_item": "第十条",
+                #         "law_content": "当事人请求返还按照习俗给付的彩礼的，如果查明属于以下情形，人民法院应当予以支持：（一）双方未办理结婚登记手续的；（二）双方办理结婚登记手续但确未共同生活的；（三）婚前给付并导致给付人生活困难的。适用前款第（二）、（三）项的规定，应当以双方离婚为条件。"
+                #     }
+                # ]
+                relevant_law = CivilRelevantLaw(fact, problem, claim_list)
+                applicable_law = relevant_law.get_relevant_laws()
                 # similar_case = [
                 #     {
                 #         "doc_id": "2b2ed441-4a86-4f7e-a604-0251e597d85e",
