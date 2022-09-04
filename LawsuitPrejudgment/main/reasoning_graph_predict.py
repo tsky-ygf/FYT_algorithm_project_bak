@@ -142,7 +142,12 @@ def _predict_by_factor(problem, claim_list, fact, question_answers, factor_sente
     if len(factor_sentence_list_) > 0 or len(question_answers) > 0:
         # KIWI:不是首轮，已经匹配过特征，直接取出来就行。
         for factor_flags in factor_sentence_list_:
-            sentence_matched, factor, flag, _ = factor_flags
+            if len(factor_flags) == 3:
+                # 适配第三方app的参数问题
+                factor, flag, _ = factor_flags
+                sentence_matched = None
+            else:
+                sentence_matched, factor, flag, _ = factor_flags
             factor_sentence_list[factor] = [sentence_matched, flag]
     else:
         # 为什么在所有的logic_problem_suqius中匹配特征？

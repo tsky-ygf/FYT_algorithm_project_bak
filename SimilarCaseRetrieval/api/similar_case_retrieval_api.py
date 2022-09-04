@@ -6,10 +6,10 @@
 @Desc    : None
 """
 import json
-import logging
-import traceback
 
 from flask import Flask, request
+
+from LawsuitPrejudgment.lawsuit_prejudgment.core import civil_similar_case
 from Utils.http_response import response_successful_result
 from SimilarCaseRetrieval.core import similar_case_retrieval_service as service
 from SimilarCaseRetrieval.core.relevant_cases_search import get_case_search_result
@@ -124,10 +124,17 @@ def get_law_document():
     doc_id = request.args.get("doc_id")
     result = service.get_criminal_law_document(doc_id)
     if result:
-        response_successful_result(result)
+        return response_successful_result(result)
 
-    mock_doc_id = "24dbed45-904d-4992-aea7-a82000320181"
-    return response_successful_result(service.get_criminal_law_document(mock_doc_id))
+    law_documents = civil_similar_case.get_civil_law_documents_by_id_list([doc_id])
+    if law_documents:
+        result = {
+            "doc_id": law_documents[0]["doc_id"],
+            "html_content": law_documents[0]["raw_content"]
+        }
+    else:
+        result = None
+    return response_successful_result(result)
 
 
 def _construct_result_format(search_result) -> List:
