@@ -125,7 +125,7 @@ class CriminalReportDTO:
                     {
                         "type": "TYPE_TEXT",
                         "title": "敬请期待",
-                        "content": self.response_dict["result"]["unsupport_reason"]
+                        "content": self.response_dict["result"]["unsupport_reason"]["敬请期待"]
                     }
                 ]
             ]
