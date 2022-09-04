@@ -22,12 +22,20 @@ def get_columns():
     return response_successful_result(service.get_columns())
 
 
+def _get_short_content(content):
+    try:
+        short_content = str(content).split("。")[0].split(" ")[-1].split("\u3000")[-1]
+        return short_content[:30] + "..."
+    except Exception:
+        return "..."
+
+
 def _get_simple_news(news):
     return [
         {
             "id": item["id"],
-            "title": item["title"],
-            "content": str(item["content"]).strip()[:40]
+            "title": str(item["title"]).strip().strip("."),
+            "content": _get_short_content(item["content"])
         }
         for item in news
     ]
