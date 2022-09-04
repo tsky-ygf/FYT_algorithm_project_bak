@@ -211,14 +211,14 @@ class CriminalPrejudgment(PrejudgmentPipeline):
         self.logger.info("开始生成报告")
 
         # for key,value in self.content["base_logic_graph"][self.content["anyou"]].items():
-        case_num = self.content["base_logic_graph"][self.content["anyou"]]["情节"][
-            "【" + self.content["graph_process_content"]["情节"] + "】"
-            ]
-
-        sentencing_dict = self.content["base_logic_graph"][self.content["anyou"]]["量刑"]
         if self.content["question_answers"]["前提"]["usr_answer"] == "是":
             report_id = "report-1"
         else:
+
+            case_num = self.content["base_logic_graph"][self.content["anyou"]]["情节"][
+                "【" + self.content["graph_process_content"]["情节"] + "】"]
+            sentencing_dict = self.content["base_logic_graph"][self.content["anyou"]]["量刑"]
+
             if (
                     case_num
                     not in sentencing_dict[
@@ -323,18 +323,24 @@ if __name__ == "__main__":
     #     "2022年8月12日，罗某某利用螺丝刀撬开房间门锁进入某市某区某栋某单元某层某房间内，窃得现金50000元。2022年8月12日，趁邻居卢某家"
     #     "无人在家，从卢某家厨房后窗翻进其家，盗走现金50000元。"
     # )
-    text = "罗某贩毒被抓。"
+    text = "2001年王某容留李某在家中吸毒"
     input_dict = {"fact": text}
     # 第一次调用
     res = criminal_pre_judgment(**input_dict)
-    # pprint(res)
+    pprint(res)
     # print('@@@@@@@@@@')
 
     # 第二次调用
-    # res["question_answers"]["前提"]["usr_answer"] = "否"
-    # res2 = criminal_pre_judgment(**res)  # 传入上一次的结果
+    res["question_answers"]["前提"]["usr_answer"] = "是"
+    res2 = criminal_pre_judgment(**res)  # 传入上一次的结果
     #
-    # if "report_result" in res2:
+    pprint(res2)
+    # res2["question_answers"]["情节"]["usr_answer"] = "以上都没有"
+    #
+    # # 第三次调用
+    # res3 = criminal_pre_judgment(**res2)
+    # pprint(res3)
+    # # if "report_result" in res2:
     #     pprint(res2["question_answers"])
     #     pprint(res2["report_result"])
     # # else:
