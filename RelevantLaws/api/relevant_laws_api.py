@@ -61,9 +61,12 @@ def _construct_result_format(search_result) -> List:
     return result
 
 
-def _get_search_result(query, filter_conditions):
-    search_result = get_law_search_result(query, filter_conditions.get("timeliness"),
-                                          filter_conditions.get("types_of_law"), filter_conditions.get("size", 10))
+def _get_search_result(query, filter_conditions,page_number, page_size):
+    search_result = get_law_search_result(query,
+                                          filter_conditions.get("timeliness"),
+                                          filter_conditions.get("types_of_law"),
+                                          page_number,
+                                          page_size)
     return _construct_result_format(search_result)
 
 
@@ -71,7 +74,9 @@ def _get_search_result(query, filter_conditions):
 def search_laws():
     query = request.json.get("query")
     filter_conditions = request.json.get("filter_conditions", dict())
-    result = _get_search_result(query, filter_conditions)
+    page_number = request.json.get("page_number")
+    page_size = request.json.get("page_size")
+    result = _get_search_result(query, filter_conditions,page_number, page_size)
     # TODO: 用实现于分页的total amount
     return response_successful_result(result, {"total_amount": len(result)})
 
@@ -92,4 +97,4 @@ def get_law_by_law_id():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8800, debug=True)
+    app.run(host="0.0.0.0", port=8135, debug=True)

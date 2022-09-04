@@ -5,6 +5,10 @@
 @Time    : 2022/8/10 13:14 
 @Desc    : None
 """
+import json
+import logging
+import traceback
+
 from flask import Flask, request
 from Utils.http_response import response_successful_result
 from SimilarCaseRetrieval.core import similar_case_retrieval_service as service
@@ -78,24 +82,42 @@ def get_filter_conditions_of_case():
     return response_successful_result(filter_conditions)
 
 
-def _get_search_result(query, filter_conditions):
+def _get_search_result(query, filter_conditions,page_num,page_size):
     search_result = get_case_search_result(query,
                                            filter_conditions.get("type_of_case"),
                                            filter_conditions.get("court_level"),
                                            filter_conditions.get("type_of_document"),
                                            filter_conditions.get("region"),
-                                           filter_conditions.get("size", 10))
+                                            page_num,
+                                            page_size)
     return _construct_result_format(search_result)
 
 
 @app.route('/search_cases', methods=["post"])
 def search_cases():
-    query = request.json.get("query")
-    filter_conditions = request.json.get("filter_conditions")
-    result = _get_search_result(query, filter_conditions)
-    # TODO: 实现用于分页的total_amount
-    return response_successful_result(result, {"total_amount": len(result)})
+    # query = request.json.get("query")
+    # filter_conditions = request.json.get("filter_conditions")
+    # result = _get_search_result(query, filter_conditions)
+    # try:
+    input_json = request.get_data()
+    if input_json is not None:
+        input_dict = json.loads(input_json.decode("utf-8"))
+        query = input_dict['query']
+        filter_conditions = input_dict['filter_conditions']
+        page_number = input_dict['page_number']
+        page_size = input_dict['page_size']
+        if query is not None and filter_conditions is not None:
+            result = _get_search_result(query, filter_conditions, page_number, page_size)
+            return response_successful_result(result, {"total_amount": len(result)})
+        else:
+            return response_successful_result([], {"total_amount": len([])})
+        # TODO: 实现用于分页的total_amount
+    else:
+        return json.dumps({"error_msg": "no data", "status": 1}, ensure_ascii=False)
 
+    # except Exception as e:
+    #     logging.info(traceback.format_exc())
+    #     return json.dumps({"error_msg": "unknown error:" + repr(e), "status": 1}, ensure_ascii=False)
 
 @app.route('/get_law_document', methods=["get"])
 def get_law_document():
@@ -115,8 +137,12 @@ def _construct_result_format(search_result) -> List:
         result.append({
             "doc_id": row['uq_id'],
             "court": row['faYuan_name'],
-            "case_number": row['event_num']})
+            "case_number": row['event_num'],
+            "jfType": row['jfType'],
+            "event_type": row['event_type'],
+            "faYuan_name": row['faYuan_name'],
+            "content": row['content']})
     return result
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8801, debug=True)
+    app.run(host="0.0.0.0", port=8140, debug=True)
