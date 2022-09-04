@@ -144,11 +144,7 @@ def _construct_result_format(search_result) -> List:
         result.append({
             "doc_id": row['uq_id'],
             "court": row['faYuan_name'],
-            "case_number": row['event_num'],
-            "jfType": row['jfType'],
-            "event_type": row['event_type'],
-            "faYuan_name": row['faYuan_name'],
-            "content": row['content']})
+            "case_number": row['event_num']})
     return result
 
 if __name__ == "__main__":
