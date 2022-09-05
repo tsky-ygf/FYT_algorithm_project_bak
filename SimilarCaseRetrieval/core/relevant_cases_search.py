@@ -1,4 +1,5 @@
 import jieba
+import pandas as pd
 
 from SimilarCaseRetrieval.core.read_case_from_db import search_data_from_es
 
@@ -31,7 +32,12 @@ def get_case_search_result(text="", type_case_list=None,
         page_num = 1
     if page_size is None:
         page_size = 10
-
+    if region_list is not None and region_list[0] == "台湾省":
+        return pd.DataFrame(columns=[''])
+    if region_list is not None and region_list[0] == "香港特别行政区":
+        return pd.DataFrame(columns=[''])
+    if region_list is not None and region_list[0] == "澳门特别行政区":
+        return pd.DataFrame(columns=[''])
     text = " ".join(jieba.cut(text))
     # logger.info(text)
     text_list = text.split(' ')
