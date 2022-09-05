@@ -147,4 +147,4 @@ def _construct_result_format(search_result) -> List:
     return result
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8152, debug=True)
+    app.run(host="0.0.0.0", port=8140, debug=True)
