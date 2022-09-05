@@ -144,9 +144,8 @@ def _construct_result_format(search_result) -> List:
         result.append({
             "doc_id":  row['table_name'] +'_SEP_'+ row['uq_id'],
             "court": row['faYuan_name'],
-            "case_number": row['event_num'],
-            "content": row['content']})
+            "case_number": row['event_num']})
     return result
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8140, debug=True)
+    app.run(host="0.0.0.0", port=8152, debug=True)
