@@ -32,13 +32,11 @@ def get_law_document():
         else:
             result = None
     else:
-        result = service.get_criminal_law_document(doc_id)
-        if result:
-            return response_successful_result(result)
-
-        result = service.get_civil_law_document(doc_id)
-        if result:
-            return response_successful_result(result)
+        table_name, doc_id = doc_id.split("_SEP_")
+        if table_name == "judgment_xingshi_data":
+            result = service.get_criminal_law_document(doc_id)
+        else:
+            result = service.get_civil_law_document(doc_id)
 
     print("doc_id", doc_id)
     print("result", result)
