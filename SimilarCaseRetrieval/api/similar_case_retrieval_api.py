@@ -142,9 +142,10 @@ def _construct_result_format(search_result) -> List:
     for index, row in search_result.iterrows():
 
         result.append({
-            "doc_id": row['uq_id'],
+            "doc_id":  row['table_name'] +'_SEP_'+ row['uq_id'],
             "court": row['faYuan_name'],
-            "case_number": row['event_num']})
+            "case_number": row['event_num'],
+            "content": row['content']})
     return result
 
 if __name__ == "__main__":
