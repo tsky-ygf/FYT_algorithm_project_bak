@@ -70,3 +70,9 @@ def get_criminal_law_document_list(doc_id_list):
         return []
     return repository.get_criminal_law_documents_by_id_list(doc_id_list)
 
+
+def get_civil_law_document(doc_id):
+    law_documents = repository.get_civil_law_documents_by_id_list([doc_id], "linux_minshi_document_03")
+    if not law_documents:
+        law_documents = repository.get_civil_law_documents_by_id_list([doc_id], "linux_minshi_document_05")
+    return law_documents[0] if law_documents else None

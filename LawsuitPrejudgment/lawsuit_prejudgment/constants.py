@@ -21,3 +21,5 @@ CRIMINAL_SIMILIARITY_URL = "http://172.19.82.198:5061/criminal_similiarity"
 CIVIL_PROBLEM_ID_MAPPING_CONFIG_PATH = "LawsuitPrejudgment/main/civil_problem_id_mapping.json"
 # 民事纠纷经过描述模板
 CIVIL_PROBLEM_TEMPLATE_CONFIG_PATH = "LawsuitPrejudgment/main/civil_problem_template.json"
+# 民事预判相似案例的id前缀
+CIVIL_SIMILAR_CASE_ID_PREFIX = "_CIVIL_"
