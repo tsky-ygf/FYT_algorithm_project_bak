@@ -147,7 +147,7 @@ def reasoning_graph_result():
             problem_name_for_search = problem
             mapped_problem_id = _get_mapped_problem_id_by_name(problem)
             problem = _get_mapped_problem(problem, "problem")
-            problem_name_for_search += " " + problem
+            problem_name_for_search = str(problem_name_for_search) + " " + str(problem)
             claim_list = in_dict['claim_list']
             fact = in_dict.get('fact', '')
             question_answers = in_dict.get('question_answers', {})
@@ -318,104 +318,20 @@ def get_administrative_result():
         return response_failed_result("unknown error:" + repr(e))
 
 
-def _construct_response_format(question, resp_json):
-    # 编排接口返回内容的格式
-    accusation = []
-    for item in eval(resp_json.get("accusation")):
-        for crime, prob in item.items():
-            accusation.append({
-                "crime": crime,
-                "probability": prob
-            })
-    articles = []
-    for item in eval(resp_json.get("articles")):
-        articles.append({
-            "law_name": item[0],
-            "law_item": item[1],
-            "crime": item[2],
-            "law_content": item[3],
-            "probability": item[4]
-        })
-    result = {
-        "accusation": accusation,
-        "articles": articles,
-        "imprisonment": int(resp_json.get("imprisonment")),
-        "similar_case": CriminalSimilarCaseListCreator.create(question),
-        "applicable_law": [CriminalApplicableLawDictCreator.create(law) for law in articles],
-        "judging_rule": [
-            {
-                "rule_id": "rule_153",
-                "content": "“非法买卖”毒害性物质，是指违反法律和国家主管部门规定，未经有关主管部门批准许可，擅自购买或者出售毒害性物质的行为，并不需要兼有买进和卖出的行为。",
-                "source": "中国司法案例研究中心",
-                "source_url": "http://www5.zzu.edu.cn/fxyzx/info/1006/2608.htm"
-            }
-        ]
-    }
-    if FeatureToggles(FEATURE_TOGGLES_CONFIG_PATH).reformat_prejudgment_report:
-        result = CriminalReportDTO(result).to_dict()
-    return result
-
-
-def _get_criminal_report(fact):
-    # 调用刑事预判的接口，获取结果
-    url = "http://172.19.82.198:5060/get_criminal_report"
-    data = {
-        "question": fact
-    }
-    resp_json = requests.post(url, json=data).json()
-    return _construct_response_format(fact, resp_json)
-
-
-class CriminalDemo:
-    def __init__(self):
-        self.demo_fact = "2020年7、8月份的一天，小黄电话联系我要买一小包毒品，我们约好当天下午3点在杭州市郊区某小区附近碰头。当天下午我们碰头后，我将一小包毒品塞给了小黄，收了他1500元，然后我们就各自回去了。"
-        self.first_question = "请问贩卖的毒品是以下哪种类型？:冰毒;海洛因;鸦片;其他"
-        self.next_question_dict = {
-            "请问贩卖的毒品是以下哪种类型？:冰毒;海洛因;鸦片;其他": "请问贩卖的毒品数量有多少克？",
-            "请问贩卖的毒品数量有多少克？": None
-        }
-        self.question_type_dict = {
-            "请问贩卖的毒品是以下哪种类型？:冰毒;海洛因;鸦片;其他": "1",
-            "请问贩卖的毒品数量有多少克？": "0"
-        }
-
-    def is_demo(self, fact):
-        return fact == self.demo_fact
-
-    def get_next_question(self, fact, question_answers):
-        if not self.is_demo(fact):
-            return None
-        if not question_answers:
-            return self.first_question
-
-        last_asked_question = list(question_answers.keys())[-1]
-        return self.next_question_dict.get(last_asked_question)
-
-    def get_question_type(self, question):
-        return self.question_type_dict.get(question, "1")
-
-    def successful_response(self, fact, question_answers, factor_sentence_list):
-        next_question = self.get_next_question(fact, question_answers)
-        return json.dumps({
-            "success": True,
-            "error_msg": "",
-            "question_asked": question_answers,
-            "question_next": next_question,
-            "question_type": self.get_question_type(next_question),
-            "factor_sentence_list": [],
-            "result": None if next_question else _get_criminal_report(fact)
-        }, ensure_ascii=False)
-
-
 @app.route('/get_criminal_result', methods=["post"])
 def get_criminal_result():
     try:
-        fact = request.json.get("fact")
-        question_answers = request.json.get("question_answers")
-        factor_sentence_list = request.json.get("factor_sentence_list")
-
-        criminal_demo = CriminalDemo()
-        return criminal_demo.successful_response(fact, question_answers, factor_sentence_list)
+        url = "http://172.19.82.199:5080/get_criminal_result"
+        body = {
+            "fact": request.json.get("fact", ""),
+            "question_answers": request.json.get("question_answers", {}),
+            "factor_sentence_list": request.json.get("factor_sentence_list", [])
+        }
+        resp_json = requests.post(url, json=body).json()
+        resp_json = CriminalReportDTO(resp_json).to_dict()
+        print("###########Result########")
+        print(resp_json)
+        return json.dumps(resp_json, ensure_ascii=False)
     except Exception as e:
         logging.info(traceback.format_exc())
         return json.dumps({

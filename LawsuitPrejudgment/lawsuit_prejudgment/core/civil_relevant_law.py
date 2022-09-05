@@ -8,8 +8,6 @@
 import requests
 from pypinyin import lazy_pinyin
 
-_memory = dict()
-
 
 class CivilRelevantLaw:
     def __init__(self, fact, problem, claim_list):
@@ -22,6 +20,27 @@ class CivilRelevantLaw:
         return "MEMORY_" + "".join(
             lazy_pinyin(str(law_name).replace("》", "").replace("《", "").strip())) + "-" + "".join(
             lazy_pinyin(str(law_item).strip()))
+
+    @staticmethod
+    def get_law_in_memory(law_id):
+        try:
+            url = "http://172.19.82.199:5090/get_law_in_memory"
+            body = {
+                "law_id": law_id
+            }
+            resp_json = requests.post(url, json=body).json()
+            return resp_json.get("result")
+        except Exception:
+            return None
+
+    @staticmethod
+    def store_law_in_memory(law):
+        try:
+            url = "http://172.19.82.199:5090/store_law_in_memroy"
+            resp_json = requests.post(url, json=law).json()
+            return resp_json.get("success")
+        except Exception:
+            return None
 
     def _reformat(self, resp_json):
         law_name_and_items = resp_json.get("law_name_and_items")
@@ -37,10 +56,10 @@ class CivilRelevantLaw:
                 "law_id": law_id,
                 "law_name": item[0],
                 "law_item": item[1],
-                "law_content": item[2]
+                "law_content": str(item[1]) + ":" + str(item[2])
             }
             result.append(content)
-            _memory[law_id] = content
+            self.store_law_in_memory(content)
         return result
 
     def get_relevant_laws(self):
