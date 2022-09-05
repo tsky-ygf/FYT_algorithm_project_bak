@@ -68,7 +68,7 @@ def get_csv():
 # main()
 # get_csv()
 def main():
-    ori_df = pd.read_csv("data/DocData/合同模板20.csv")
+    ori_df = pd.read_csv("data/DocData/缺失的名称.csv")
     # print(ori_df)
     for index, row in ori_df.iterrows():
         file = row['文件']
@@ -78,7 +78,7 @@ def main():
         #     print(file_list)
         # continue
         pic_name = ''.join(file_list)
-        create_pic(file_list, f"data/DocData/合同图片/{pic_name}.jpg")
+        create_pic(file_list, f"data/DocData/buchong/{pic_name}.jpg")
 
 
 if __name__ == "__main__":
