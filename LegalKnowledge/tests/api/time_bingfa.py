@@ -32,5 +32,5 @@ def call_gevent(count):
     print('累计测试时间 s:', end - begin_time)
 
 
-test_count = 4
+test_count = 10
 call_gevent(count=test_count)

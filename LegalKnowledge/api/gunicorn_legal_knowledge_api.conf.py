@@ -1,5 +1,14 @@
+import os
+import gevent.monkey
+gevent.monkey.patch_all()
+import multiprocessing
+
 # worker的个数
-workers = 8
+workers = multiprocessing.cpu_count() * 2 +1
+worker_class = 'gevent'
+threads = 20
+preload_app = True
+
 # 监听内网端口
 bind = '0.0.0.0:8120'
 # 设置守护进程【关闭连接时，程序仍在运行】
