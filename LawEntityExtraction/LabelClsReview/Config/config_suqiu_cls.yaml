@@ -9,7 +9,7 @@ task_name: "suqiu_cls"
 
 threshold: 0.8 # 如果概率高于阈值，则使用正则表达式检查，是否存在该诉求
 
-label_mapping_path: "Config/jiufen.csv"
+label_mapping_path: "../LabelClsReview/Config/jiufen.csv"
 
 batch_size: 16
 max_len: 512
