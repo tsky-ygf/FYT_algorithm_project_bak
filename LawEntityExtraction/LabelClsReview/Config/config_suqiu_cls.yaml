@@ -1,18 +1,15 @@
 log_level: "INFO"
 
-tokenizer: "/home/fyt/model/language_model/chinese-roberta-wwm-ext"
-model: "/home/fyt/model/language_model/chinese-roberta-wwm-ext"
-task_model: "/home/fyt/huangyulin/project/BalanceidLossTextPro/Reuters/jiufen_model.onnx"
+tokenizer: "../../model/language_model/chinese-roberta-wwm-ext"
+model: "../../model/language_model/chinese-roberta-wwm-ext"
+task_model: "../../model/cls_onnx_model/jiufen_model.onnx"
 
-#task_model: "/home/fyt/huangyulin/project/fyt/model/legal_advice_model/text_cls/jiufen/reuters_chinese-roberta-wwm-ext_FL_json_epoch8para"
 num_labels: 14
 task_name: "suqiu_cls"
 
 threshold: 0.8 # 如果概率高于阈值，则使用正则表达式检查，是否存在该诉求
 
-test_data_path: "/home/fyt/data/fyt_train_use_data/CAIL-Long/civil/test.json"
-#label_mapping_path: "/home/fyt/huangyulin/project/fyt/LawEntityExtraction/data/bert/marriage/marriage.csv"
-label_mapping_path: "/home/fyt/huangyulin/project/fyt/LawEntityExtraction/LabelClsReview/Config/jiufen.csv"
+label_mapping_path: "Config/jiufen.csv"
 
 batch_size: 16
 max_len: 512
