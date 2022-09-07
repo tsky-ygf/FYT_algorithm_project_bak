@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2022/8/4 18:15
 # @Author  : Adolf
-# @Site    : 
+# @Site    :
 # @File    : handle_base_data.py
 # @Software: PyCharm
 import json
@@ -41,9 +41,10 @@ import json
 # with open("data/law/law_lib/statistics_json.json", "w") as f:
 #     f.write(statistics_json)
 
+
 def chuli(old_s):  # 保留中文、大小写、数字
     cop = re.compile("[^\u4e00-\u9fa5^0-9]")  # 匹配不是中文、大小写、数字的其他字符
-    nwe_s = cop.sub('', old_s)  # 将old_s中匹配到的字符替换成空s字符
+    nwe_s = cop.sub("", old_s)  # 将old_s中匹配到的字符替换成空s字符
     return nwe_s
 
 
@@ -62,7 +63,7 @@ def statistics_items_amount(df_path):
         law_list = [x for x in law_list if "诉讼" not in x]
         # print(law_list)
         for one_law in law_list:
-            law_name_list = re.findall('《(.*?)》', one_law)
+            law_name_list = re.findall("《(.*?)》", one_law)
             # print(law_name_list)
             for law_name in law_name_list:
 
@@ -86,16 +87,20 @@ def statistics_items_amount(df_path):
     # statistics_json = json.dumps(items_amount_dict, sort_keys=False, indent=4, separators=(',', ': '))
     # with open("data/law/law_lib/statistics_json.json", "w") as f:
     #     f.write(statistics_json)
-    items_amount_res = sorted(items_amount_dict.items(), key=lambda x: x[1], reverse=True)
+    items_amount_res = sorted(
+        items_amount_dict.items(), key=lambda x: x[1], reverse=True
+    )
     # pprint(items_amount_dict)
     # print(items_amount_res)
     items_amount_dict = dict(items_amount_res)
 
     pprint(items_amount_dict, sort_dicts=False)
 
-    items_amount_json = json.dumps(items_amount_dict, sort_keys=False, indent=4, separators=(',', ': '))
+    items_amount_json = json.dumps(
+        items_amount_dict, sort_keys=False, indent=4, separators=(",", ": ")
+    )
 
-    with open('RelevantLaws/LegalLibrary/law_items_graph/minshi_item.json', 'w') as f:
+    with open("RelevantLaws/LegalLibrary/law_items_graph/minshi_item.json", "w") as f:
         f.write(items_amount_json)
 
     print(len(items_amount_dict))
@@ -104,11 +109,11 @@ def statistics_items_amount(df_path):
 
 def old_to_new():
     # print('test')
-    df = pd.read_csv('data/law/law_lib/民法典新旧映射表.csv')
+    df = pd.read_csv("data/law/law_lib/民法典新旧映射表.csv")
     old_to_new_dict = dict()
     for index, row in df.iterrows():
-        old_name = row['old_law_name']
-        new_name = row['new_law_name']
+        old_name = row["old_law_name"]
+        new_name = row["new_law_name"]
         if pd.isna(old_name) or pd.isna(new_name):
             continue
         old_name = chuli(old_name)
@@ -120,6 +125,6 @@ def old_to_new():
     return old_to_new_dict
 
 
-if __name__ == '__main__':
-    statistics_items_amount(df_path='data/law/law_lib/item_minshi.csv')
+if __name__ == "__main__":
+    statistics_items_amount(df_path="data/law/law_lib/item_minshi.csv")
     # pprint(old_to_new())

@@ -80,7 +80,7 @@ def get_suqiu_type(text):
     from LawEntityExtraction.LabelClsReview.basic_review import BasicBertSituation
 
     situation = BasicBertSituation(
-        config_path="/home/fyt/huangyulin/project/fyt/LawEntityExtraction/LabelClsReview/Config/config_suqiu_cls.yaml")
+        config_path="../LabelClsReview/Config/config_suqiu_cls.yaml")
     suqiu_pro = situation.review_main(content=text, mode="text")
     #  如果概率高于阿尔法，则使用正则表达式检查，是否存在该诉求
     suqiu_pro_new = {}
@@ -113,8 +113,8 @@ def get_suqiupro_new(situation, suqiu_pro, text):
 
 def have_suqiu_bool(suqiu_pro_key, text):
 
-    reg_loan_csv = pd.read_csv('/home/fyt/huangyulin/project/fyt/LawEntityExtraction/LabelClsReview/Config/loan.csv', usecols=[4, 5, 6])
-    reg_marr_csv = pd.read_csv('/home/fyt/huangyulin/project/fyt/LawEntityExtraction/LabelClsReview/Config/marrige.csv', usecols=[4, 5, 6])
+    reg_loan_csv = pd.read_csv('../LabelClsReview/Config/loan.csv', usecols=[4, 5, 6])
+    reg_marr_csv = pd.read_csv('../LabelClsReview/Config/marrige.csv', usecols=[4, 5, 6])
 
     if suqiu_pro_key == '民间借贷' and re.search('|'.join([reg_loan_csv.iat[2, 0], reg_loan_csv.iat[2, 1], reg_loan_csv.iat[2, 2]]), text):
         return True
@@ -149,8 +149,8 @@ def have_suqiu_bool(suqiu_pro_key, text):
 
 def have_suqiu_list(text):
     suqiu_exist_list = []
-    reg_loan_csv = pd.read_csv('/home/fyt/huangyulin/project/fyt/LawEntityExtraction/LabelClsReview/Config/loan.csv', usecols=[4, 5, 6])
-    reg_marr_csv = pd.read_csv('/home/fyt/huangyulin/project/fyt/LawEntityExtraction/LabelClsReview/Config/marrige.csv', usecols=[4, 5, 6])
+    reg_loan_csv = pd.read_csv('../LabelClsReview/Config/loan.csv', usecols=[4, 5, 6])
+    reg_marr_csv = pd.read_csv('../LabelClsReview/Config/marrige.csv', usecols=[4, 5, 6])
 
     if re.search('|'.join([reg_loan_csv.iat[2, 0], reg_loan_csv.iat[2, 1], reg_loan_csv.iat[2, 2]]), text):
         suqiu_exist_list.append('民间借贷')
@@ -188,7 +188,7 @@ def get_situation_type(suqiu_pro, text):
     for suqiu_type, pro in suqiu_pro.items():
         from LawEntityExtraction.LabelClsReview.basic_review import BasicBertSituation
         situation = BasicBertSituation(
-            config_path="/home/fyt/huangyulin/project/fyt/LawEntityExtraction/LabelClsReview/Config"
+            config_path="../LabelClsReview/Config"
                         "/config_situa_cls.yaml")
         res_pro = situation.review_main(content=suqiu_type+','+text+','+suqiu_type, mode="text")
         sit_pro[suqiu_type] = res_pro
