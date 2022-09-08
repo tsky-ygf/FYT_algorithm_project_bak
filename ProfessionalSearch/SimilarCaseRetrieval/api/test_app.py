@@ -46,4 +46,3 @@ if __name__=='__main__':
     req_case(url_search_case, input_json)
     # req_law_document(url_law_document, input_json_doc)
     # req_situa(url_situation, input_json)
-

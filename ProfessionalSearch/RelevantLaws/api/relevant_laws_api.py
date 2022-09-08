@@ -65,6 +65,7 @@ def _get_search_result(query, filter_conditions,page_number, page_size):
     search_result = get_law_search_result(query,
                                           filter_conditions.get("timeliness"),
                                           filter_conditions.get("types_of_law"),
+                                          filter_conditions.get("scope_of_use"),
                                           page_number,
                                           page_size)
     return _construct_result_format(search_result)
@@ -101,5 +102,5 @@ def get_law_by_law_id():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8135, debug=True)
+    app.run(host="0.0.0.0", port=8160, debug=True)
 

@@ -44,15 +44,16 @@ def get_filter_conditions_of_case():
             "name": "案件类型",
             "is_multiple_choice": True,
             "value": [
-                "合同纠纷",
-                "婚姻家庭",
-                "刑事案件"
+                "全部"
+                "刑事",
+                "民事"   # 刑事、民事、行政、执行、其他
             ]
         },
         "court_level": {
             "name": "法院层级",
             "is_multiple_choice": True,
             "value": [
+                "全部",
                 "最高",
                 "高级",
                 "中级",
@@ -63,6 +64,7 @@ def get_filter_conditions_of_case():
             "name": "文书类型",
             "is_multiple_choice": True,
             "value": [
+                "全部",
                 "判决",
                 "裁定",
                 "调解"
@@ -72,9 +74,10 @@ def get_filter_conditions_of_case():
             "name": "地域",
             "is_multiple_choice": True,
             "value": [
-                '安徽省', '澳门特别行政区', '北京市', '重庆市', '福建省', '甘肃省', '广东省', '广西壮族自治区', '贵州省', '海南省', '河北省', '河南省', '黑龙江省',
+                '全国',
+                '安徽省', '北京市', '重庆市', '福建省', '甘肃省', '广东省', '广西壮族自治区', '贵州省', '海南省', '河北省', '河南省', '黑龙江省',
                 '湖北省', '湖南省', '吉林省', '江苏省', '江西省', '辽宁省', '内蒙古自治区', '宁夏回族自治区', '青海省', '山东省', '山西省', '陕西省', '上海市', '四川省',
-                '台湾省', '天津市', '西藏自治区', '香港特别行政区', '新疆维吾尔自治区', '云南省', '浙江省'
+                '天津市', '西藏自治区', '新疆维吾尔自治区', '云南省', '浙江省'
                     ]
         }
     }
@@ -143,8 +146,10 @@ def _construct_result_format(search_result) -> List:
         result.append({
             "doc_id":  row['table_name'] +'_SEP_'+ row['uq_id'],
             "court": row['faYuan_name'],
-            "case_number": row['event_num']})
+            "case_number": row['event_num'],
+            "jfType": row['jfType'],
+            "content": row['content']})
     return result
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8140, debug=True)
+    app.run(host="0.0.0.0", port=8156, debug=True)
