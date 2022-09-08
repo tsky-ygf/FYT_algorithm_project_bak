@@ -11,6 +11,8 @@ from fastapi import FastAPI
 from loguru import logger
 from pydantic import BaseModel
 
+from typing import Union
+
 from LawsuitPrejudgment.Criminal.extraction.feature_extraction import (
     init_extract,
     post_process_uie_results,
@@ -25,17 +27,17 @@ for criminal_type in criminal_list:
 app = FastAPI()
 
 
-class Input(BaseModel):
-    criminal_type: str
-    fact: str
+class Item(BaseModel):
+    criminal_type: str = "theft"
+    fact: str = "我偷了同事的3000元"
 
 
 @app.post("/information_result")
-async def get_information_result(data: Input):
+async def get_information_result(item: Item):
     # result = predictor_dict[_criminal_type].predict([_fact])
-    logger.info(data)
+    logger.info(item)
     result = post_process_uie_results(
-        predictor_dict[data.criminal_type], data.criminal_type, data.fact
+        predictor_dict[item.criminal_type], item.criminal_type, item.fact
     )
     logger.info(result)
     return {"result": result}
@@ -48,4 +50,5 @@ if __name__ == "__main__":
     # 路径，每日分割时间，是否异步记录，日志是否序列化，编码格式，最长保存日志时间
     logger.add(path_log, rotation='0:00', enqueue=True, serialize=False, encoding="utf-8", retention="10 days")
     logger.debug("服务器重启！")
-    uvicorn.run('LawsuitPrejudgment.Criminal.extraction.extract_server:app', host="0.0.0.0", port=7777, reload=False)
+    uvicorn.run('LawsuitPrejudgment.Criminal.extraction.extract_server:app', host="0.0.0.0", port=7777, reload=False,
+                workers=4)
