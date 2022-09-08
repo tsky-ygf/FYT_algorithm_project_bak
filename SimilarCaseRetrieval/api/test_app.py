@@ -25,17 +25,19 @@ def req_law_document(url_law_document, input_json_doc):
 
 if __name__=='__main__':
     url_filter_conditions = 'http://101.69.229.138:8140/get_filter_conditions_of_case'
-    url_search_case = 'http://101.69.229.138:8140/search_cases'
+    url_search_case = 'http://172.19.82.199:8140/search_cases'
     url_law_document = 'http://101.69.229.138:8140/get_law_document'
     query = ""
     filter_conditions = {
-        # 'type_of_case': ['刑事案件'],
-        # 'court_level': ['基层'],
-        # 'type_of_document': ['判决'],
-        # 'region': ['江苏'],
+        'type_of_case': ['刑事案件'],
+        'court_level': ['基层'],
+        'type_of_document': ['裁定'],
+        'region': '江苏',
         # 'size': 10,
     }
     input_json = {
+        "from":1,
+        "size":2,
         "query": query
         , "filter_conditions": filter_conditions  # 预测诉求时，目前输入参数无效， 预测情形时需要输入
     }

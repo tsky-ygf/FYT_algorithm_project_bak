@@ -215,6 +215,7 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
                             ends = res_dict['start'].split('#')
                             ends = [str(int(_)+2) for _ in ends]
                             res_dict['end'] = '#'.join(ends)
+
                     elif '4980元#2.49元#肆仟玖佰捌拾元整#4980元#' == res_dict.get('内容', ''):
                         res_dict['内容'] = '2.49元'
                         self.add_start_end(res_dict['内容'], res_dict)
@@ -230,12 +231,14 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
                     elif '2.49元#4980元#肆仟玖佰捌拾元整#4980元#' == res_dict.get('内容', ''):
                         res_dict['内容'] = '4980元（大写：肆仟玖佰捌拾元整）'
                         self.add_start_end(res_dict['内容'], res_dict)
+
                 elif '交货时间' == row['schema']:
                     if '交货期限：本合同签订之日起7日内交货。如供应商缺货等原因，导致一方延迟交货，乙方不承担违约责任。' in self.data:
                         res_dict['内容'] = '交货期限：本合同签订之日起7日内交货。如供应商缺货等原因，导致一方延迟交货，乙方不承担违约责任。 '
                         res_dict['审核结果'] = '不通过'
                         res_dict['法律建议'] = '交付期限未严格按照合同约定执行，增加买方风险，建议核实。'
                         self.add_start_end('交货期限：本合同签订之日起7日内交货。如供应商缺货等原因，导致一方延迟交货，乙方不承担违约责任。', res_dict)
+
                     elif '2022年7月5日前' in self.data:
                         res_dict['内容'] = '2022年7月5日前'
                         res_dict['审核结果'] = '通过'
@@ -243,6 +246,7 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
                         self.add_start_end('2022年7月5日前', res_dict)
                 elif '交货方式' == row['schema']:
                     if res_dict.get('内容', '') == '乙方应在合同约定的交货期限内将货物通过物流方式运送至甲方指定地址，运输费用由乙方承担。':
+
                         res_dict['审核结果'] = '不通过'
                         res_dict[
                             '法律建议'] = '交货地点条款缺失或约定不明确，建议补充完整。买卖双方应当按照约定的地点交付货物，当事人没有约定标的物的交付期限或者约定不明确的，可以协议补充；不能达成补充协议的，按照合同相关条款或者交易习惯确定。履行地点不明确，给付货币的，在接受货币一方所在地履行；交付不动产的，在不动产所在地履行；其他标的，在履行义务一方所在地履行。'
@@ -312,7 +316,8 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
                         res_dict['审核结果'] = '不通过'
                         res_dict[
                             '法律建议'] = '争议解决条款缺失或约定不明确，建议补充完整。如发生争议双方应友好协商解决。如果管辖法院约定不明确，一般应根据《民事诉讼法》第二十三条规定“因合同纠纷提起的诉讼，由被告住所地或者合同履行地人民法院管辖”。既约定仲裁又约定了诉讼的争议条款的，一般认定为无效条款。'
-                        self.add_start_end('争议的，由双方协商解决，协商不成可提交仲裁委员会仲裁，或向人民法院起诉。', res_dict)
+                        self.add_start_end('争议的，由双方协商解决，协商不成可提交仲裁委员会仲裁，或向人民法院起诉。',
+                                           res_dict)
                 elif '签订日期' == row['schema']:
                     if '2021年10月1' in self.data:
                         res_dict['审核结果'] = '通过'
@@ -664,6 +669,7 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
 
                 elif '社会保险' == row['schema']:
                     if res_dict.get('内容', '') == '甲乙双方都必须依法参加社会保险，乙方同意在转正六个月后购买、缴纳社会保险费。乙方缴纳部分，由甲方在其工资中代扣代缴。':
+
                         res_dict['审核结果'] = '不通过'
                         self.add_start_end('甲乙双方都必须依法参加社会保险，乙方同意在转正六个月后购买、缴纳社会保险费。乙方缴纳部分，由甲方在其工资中代扣代缴。', res_dict)
                         res_dict['法律建议'] = '用人单位应当自用工之日起三十日内为其职工向单位所在地社会保险经办机构申请办理社会保险登记，并应当缴纳社会保险金。'
@@ -680,7 +686,6 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
                         self.add_start_end(
                             '从乙方在甲方试用期满后连续工作满6个月的下一个月起至离职之日的上一个月止期间的养老、医疗、工伤、失业、生育五项社会保险，五险费用的个人缴纳部分，甲方依照国家规定从乙方工资中代扣代缴。',
                             res_dict)
-
                 elif '用人单位解除' == row['schema']:
                     if '乙方有下列情形之一，甲方可立即解除合同，辞退乙方' in self.data:
                         res_dict['审核结果'] = '通过'
@@ -708,7 +713,9 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
                     if '发⽣劳动争议后，甲⼄双⽅应积极协商解决，不愿协商或协商不成的，任何⼀⽅均可向甲方所在地⼈⺠法院提起诉讼。' in self.data:
                         res_dict['审核结果'] = '不通过'
                         res_dict['法律依据'] = '如发生争议，双方应友好协商解决，必须先经过劳动争议仲裁委员会仲裁程序，对仲裁不服的，再向法院起诉。'
-                        self.add_start_end('发⽣劳动争议后，甲⼄双⽅应积极协商解决，不愿协商或协商不成的，任何⼀⽅均可向甲方所在地⼈⺠法院提起诉讼。', res_dict)
+                        self.add_start_end(
+                            '发⽣劳动争议后，甲⼄双⽅应积极协商解决，不愿协商或协商不成的，任何⼀⽅均可向甲方所在地⼈⺠法院提起诉讼。',
+                            res_dict)
 
                 elif '竞业限制补偿' == row['schema']:
                     if res_dict.get('内容', '') == '10万元违约金':
@@ -745,7 +752,9 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
                         res_dict['法律依据'] = row['legal basis']
                         res_dict['风险等级'] = row['risk level']
                         res_dict["风险点"] = row["risk statement"]
-                        self.add_start_end('乙方不论何种原因离开甲方，乙方自离开甲方之日起三年内不得到与甲方经营有同种项目的企业从业', res_dict)
+                        self.add_start_end(
+                            '乙方不论何种原因离开甲方，乙方自离开甲方之日起三年内不得到与甲方经营有同种项目的企业从业',
+                            res_dict)
                 elif '签订日期' == row['schema']:
                     if '天开传媒有限公司' in self.data and '2022年1月5日' in self.data:
                         res_dict['审核结果'] = '通过'
@@ -970,6 +979,7 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
                         res_dict['审核结果'] = '不通过'
                         res_dict['法律建议'] = '违反法律、行政法规的强制性规定条款无效，建议删除，抵押权人在债务履行期限届满前，与抵押人约定债务人不履行到期债务时抵押财产归债权人所有的，只能依法就抵押财产优先受偿。'
                         self.add_start_end(res_dict['内容'], res_dict)
+
                     elif '逾期，诉讼费，诉讼费' == res_dict.get('内容', ''):
                         res_dict['内容'] = '没有该项目内容'
                         res_dict['审核结果'] = '不通过'
@@ -1081,6 +1091,7 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
                         res_dict['审核结果'] = '通过'
                         res_dict['法律建议'] = ''
                         self.add_start_end(res_dict['内容'], res_dict)
+
                     elif '甲方（盖章）：乙方（签名）：\n2019年7月3日#2019年7月3日#' == res_dict.get('内容', ''):
                         res_dict['内容'] = '2019年7月3日'
                         res_dict['审核结果'] = '通过'
@@ -1210,6 +1221,7 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
                     start_t = self.data.index(temp)
                     end_t = start_t + len(line[1])
                     res_dict_temp = {'内容': line[1], '审核结果': line[4], '法律建议': line[3], 'start': start_t, 'end': end_t}
+
                     self.review_result[line[2]].update(res_dict_temp)
                 else:
                     # print('-' * 100)

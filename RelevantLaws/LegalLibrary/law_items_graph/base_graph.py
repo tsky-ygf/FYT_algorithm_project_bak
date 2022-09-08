@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2022/8/4 17:10
 # @Author  : Adolf
-# @Site    : 
+# @Site    :
 # @File    : base_graph.py
 # @Software: PyCharm
 import json
@@ -31,10 +31,10 @@ for key, value in statistics_json.items():
     node2 = key.split("#")[1]
 
     if node1 not in law_item_index_dict:
-        law_item_index_dict[node1] = 'node_{}'.format(len(law_item_index_dict))
+        law_item_index_dict[node1] = "node_{}".format(len(law_item_index_dict))
 
     if node2 not in law_item_index_dict:
-        law_item_index_dict[node2] = 'node_{}'.format(len(law_item_index_dict))
+        law_item_index_dict[node2] = "node_{}".format(len(law_item_index_dict))
 
     G.add_edge(law_item_index_dict[node1], law_item_index_dict[node2], weight=value)
 
@@ -44,7 +44,7 @@ pos = nx.spring_layout(G)
 #
 Gdegree = nx.degree(G)
 Gdegree = dict(Gdegree)
-Gdegree = pd.DataFrame({'name': list(Gdegree.keys()), 'degree': list(Gdegree.values())})
+Gdegree = pd.DataFrame({"name": list(Gdegree.keys()), "degree": list(Gdegree.values())})
 # # node
 nx.draw_networkx_nodes(G, pos, alpha=0.6, node_size=Gdegree.degree * 10)
 
@@ -52,6 +52,6 @@ elarge = [(u, v) for (u, v, d) in G.edges(data=True)]
 
 nx.draw_networkx_edges(G, pos, edgelist=elarge, width=0.5, alpha=0.6)
 nx.draw_networkx_labels(G, pos, font_size=10)
-plt.axis('off')
-plt.title('law item graph')
+plt.axis("off")
+plt.title("law item graph")
 plt.show()

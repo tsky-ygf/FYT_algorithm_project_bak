@@ -78,4 +78,4 @@ def get_news_by_news_id():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8122, debug=True)
+    app.run(host="0.0.0.0", port=8122, debug=False)

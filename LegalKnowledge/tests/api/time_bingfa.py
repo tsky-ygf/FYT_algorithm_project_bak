@@ -32,5 +32,14 @@ def call_gevent(count):
     print('累计测试时间 s:', end - begin_time)
 
 
-test_count = 4
-call_gevent(count=test_count)
+# test_count = 10
+# call_gevent(count=test_count)
+
+
+def get_recommend_news():
+    url = "http://47.111.0.124:8110/recommend_laws"
+    res = requests.post(url=url).text
+    print(res)
+    return res
+
+get_recommend_news()

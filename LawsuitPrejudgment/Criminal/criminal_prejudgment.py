@@ -332,7 +332,7 @@ if __name__ == "__main__":
     #     "2022年8月12日，罗某某利用螺丝刀撬开房间门锁进入某市某区某栋某单元某层某房间内，窃得现金50000元。2022年8月12日，趁邻居卢某家"
     #     "无人在家，从卢某家厨房后窗翻进其家，盗走现金50000元。"
     # )
-    text = "入室盗窃"
+    text = "我偷了同事的4500块。"
     input_dict = {"fact": text}
     # 第一次调用
 
@@ -348,7 +348,7 @@ if __name__ == "__main__":
     res2 = criminal_pre_judgment(**res)  # 传入上一次的结果
     #
     # pprint(res2)
-    res2["question_answers"]["量刑"]["usr_answer"] = "40000（含）-80000（不含）"
+    # res2["question_answers"]["量刑"]["usr_answer"] = "40000（含）-80000（不含）"
 
     res3 = criminal_pre_judgment(**res2)
     if "report_result" in res3:

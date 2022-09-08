@@ -3,6 +3,8 @@ import json
 import traceback
 import logging
 import logging.handlers
+
+import pandas as pd
 import requests
 from flask import Flask
 from flask import request
@@ -57,6 +59,9 @@ def get_civil_problem_summary():
         logging.info(traceback.format_exc())
         return json.dumps({"success": False, "error_msg": repr(e), "value": None}, ensure_ascii=False)
 
+def _get_problem(problem_id):
+    problem_id_mapping_list = read_json_attribute_value(CIVIL_PROBLEM_ID_MAPPING_CONFIG_PATH, "value")
+    return next((item.get("problem") for item in problem_id_mapping_list if str(item.get("id")) == str(problem_id)), None)
 
 def _get_mapped_problem_id(problem_id):
     problem_id_mapping_list = read_json_attribute_value(CIVIL_PROBLEM_ID_MAPPING_CONFIG_PATH, "value")
@@ -83,14 +88,14 @@ def _get_mapped_problem(attribute_value, attribute_name="id"):
 
 @app.route('/get_template_by_problem_id', methods=["get"])
 def get_template_by_problem_id():
-    mapped_problem_id = _get_mapped_problem_id(request.args.get("problem_id"))
-    civil_problem_template_dict = read_json_attribute_value(CIVIL_PROBLEM_TEMPLATE_CONFIG_PATH, "value")
+    problem = _get_problem(request.args.get("problem_id"))
+    df = pd.read_csv("LawsuitPrejudgment/main/用户描述案例.csv", encoding="utf-8")
 
     return json.dumps({
         "success": True,
         "error_msg": "",
         "value": {
-            "template": civil_problem_template_dict.get(str(mapped_problem_id), "")
+            "template": next((row["描述模板"] for index, row in df.iterrows() if str(row["案由名称"]).strip() == str(problem).strip()), "")
         }}, ensure_ascii=False)
 
 
@@ -341,4 +346,4 @@ def get_criminal_result():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8100, debug=True)  # , use_reloader=False)
+    app.run(host="0.0.0.0", port=8100, debug=False)  # , use_reloader=False)

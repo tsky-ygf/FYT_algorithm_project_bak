@@ -7,6 +7,8 @@
 """
 import requests
 
+from LawsuitPrejudgment.lawsuit_prejudgment.constants import CIVIL_SIMILAR_CASE_ID_PREFIX
+
 id2table = {
     "6": "case_list_original_labor",
     "15": "case_list_original_labor_2",
@@ -165,7 +167,7 @@ class CivilSimilarCase:
             return []
         return [
             {
-                "doc_id": item["doc_id"],
+                "doc_id": CIVIL_SIMILAR_CASE_ID_PREFIX + str(item["doc_id"]),
                 "similar_rate": next((sim for idx, sim in enumerate(sim_list) if str(doc_ids[idx]) == str(item["doc_id"])), 0.6),
                 "title": item["doc_title"],
                 "court": item["court"],

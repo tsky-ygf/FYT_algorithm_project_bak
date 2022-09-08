@@ -227,4 +227,4 @@ def get_criminal_result():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5081, debug=True)  # , use_reloader=False)
+    app.run(host="0.0.0.0", port=5080, debug=False)  # , use_reloader=False)
