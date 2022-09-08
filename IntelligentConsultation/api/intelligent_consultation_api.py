@@ -19,4 +19,4 @@ def get_query_answer():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8130, debug=True)
+    app.run(host="0.0.0.0", port=8130, debug=False)
