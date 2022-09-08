@@ -6,10 +6,10 @@
 @Desc    : None
 """
 import logging
-from typing import List, Dict
+from typing import Dict
 import pymysql
 
-from RelevantLaws.api.constants import SEPERATOR_BETWEEN_LAW_TABLE_AND_ID
+from ProfessionalSearch.RelevantLaws.api.constants import SEPERATOR_BETWEEN_LAW_TABLE_AND_ID
 
 
 def get_law_by_law_id(law_id: str, table_name: str) -> Dict:

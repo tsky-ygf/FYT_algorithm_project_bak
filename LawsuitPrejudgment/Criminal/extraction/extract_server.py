@@ -5,44 +5,47 @@
 # @Site    : 
 # @File    : extract_server.py
 # @Software: PyCharm
-import traceback
-from flask import Flask, request
-from flask_cors import CORS
+import os
+import uvicorn
+from fastapi import FastAPI
 from loguru import logger
+from pydantic import BaseModel
 
-import json
+from LawsuitPrejudgment.Criminal.extraction.feature_extraction import (
+    init_extract,
+    post_process_uie_results,
+)
 
-from LawsuitPrejudgment.Criminal.extraction.feature_extraction import init_extract, post_process_uie_results
-from Utils.http_response import response_successful_result, response_failed_result
-
-criminal_list = ['theft', 'provide_drug']
+criminal_list = ["theft", "provide_drug"]
 predictor_dict = {}
 for criminal_type in criminal_list:
-    model_path = "model/uie_model/export_cpu/{}/inference".format(criminal_type)
+    # model_path = "model/uie_model/export_cpu/{}/inference".format(criminal_type)
     predictor_dict[criminal_type] = init_extract(criminal_type=criminal_type)
 
-app = Flask(__name__)
-app.config['JSON_SORT_KEYS'] = False
-CORS(app)
+app = FastAPI()
 
 
-@app.route('/information_result', methods=["post"])
-def get_information_result():
-    try:
-        in_json = request.get_data()
-        if in_json is not None:
-            in_dict = json.loads(in_json.decode("utf-8"))
-            _criminal_type = in_dict['criminal_type']
-            _fact = in_dict['fact']
-            # result = predictor_dict[_criminal_type].predict([_fact])
-            result = post_process_uie_results(predictor_dict[_criminal_type], _criminal_type, _fact)
-            return response_successful_result(result)
-        else:
-            return json.dumps({"error_msg": "no data", "status": 1}, ensure_ascii=False)
-    except Exception as e:
-        logger.info(traceback.format_exc())
-        return response_failed_result(traceback.format_exc())
+class Input(BaseModel):
+    criminal_type: str
+    fact: str
 
 
-if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=7777, debug=False)  # , use_reloader=False)
+@app.post("/information_result")
+async def get_information_result(data: Input):
+    # result = predictor_dict[_criminal_type].predict([_fact])
+    logger.info(data)
+    result = post_process_uie_results(
+        predictor_dict[data.criminal_type], data.criminal_type, data.fact
+    )
+    logger.info(result)
+    return {"result": result}
+
+
+if __name__ == "__main__":
+    # 日志设置
+    dir_log = "log/lawsuit_prejudgment"
+    path_log = os.path.join(dir_log, 'criminal_extract.log')
+    # 路径，每日分割时间，是否异步记录，日志是否序列化，编码格式，最长保存日志时间
+    logger.add(path_log, rotation='0:00', enqueue=True, serialize=False, encoding="utf-8", retention="10 days")
+    logger.debug("服务器重启！")
+    uvicorn.run('LawsuitPrejudgment.Criminal.extraction.extract_server:app', host="0.0.0.0", port=7777, reload=False)

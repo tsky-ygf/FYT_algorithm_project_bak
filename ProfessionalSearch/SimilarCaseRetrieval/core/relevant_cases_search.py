@@ -1,7 +1,7 @@
 import jieba
 import pandas as pd
 
-from SimilarCaseRetrieval.core.read_case_from_db import search_data_from_es
+from ProfessionalSearch.SimilarCaseRetrieval.core.read_case_from_db import search_data_from_es
 
 
 def get_case_search_result(text="", type_case_list=None,

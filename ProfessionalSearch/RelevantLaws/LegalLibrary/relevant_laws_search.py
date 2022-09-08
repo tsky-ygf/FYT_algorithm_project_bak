@@ -6,7 +6,7 @@
 # @File    : relevant_laws_search.py
 # @Software: PyCharm
 import jieba
-from RelevantLaws.LegalLibrary.read_legal_from_db import search_data_from_es
+from ProfessionalSearch.RelevantLaws.LegalLibrary.read_legal_from_db import search_data_from_es
 
 
 def get_law_search_result(

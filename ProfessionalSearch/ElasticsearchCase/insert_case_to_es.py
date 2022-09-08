@@ -5,9 +5,8 @@
 # @Site    : 
 # @File    : insert_case_to_es.py
 # @Software: PyCharm
-from elasticsearch import Elasticsearch
-from RelevantLaws.LegalLibrary.read_legal_from_db import *
 from pprint import pprint
+from BasicTask.SearchEngine.es_tools import BaseESTool
 
 host = '172.19.82.227'
 user = 'root'

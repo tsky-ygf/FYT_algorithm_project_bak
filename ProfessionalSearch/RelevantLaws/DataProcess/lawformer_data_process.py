@@ -5,10 +5,9 @@
 # @Site    : 
 # @File    : lawformer_data_process.py
 # @Software: PyCharm
-import time
 import hanlp
 import json
-from RelevantLaws.DataProcess.data_process import get_fileter_data
+from ProfessionalSearch.RelevantLaws.DataProcess.data_process import get_fileter_data
 from Utils.logger import print_run_time
 from tqdm import tqdm
 # from pathos.multiprocessing import ProcessingPool as Pool

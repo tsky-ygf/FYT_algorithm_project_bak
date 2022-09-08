@@ -7,7 +7,7 @@
 # @Software: PyCharm
 import jieba
 import streamlit as st
-from RelevantLaws.LegalLibrary.read_legal_from_db import search_data_from_es
+from ProfessionalSearch.RelevantLaws.LegalLibrary.read_legal_from_db import search_data_from_es
 from pprint import pprint
 
 from Utils.logger import Logger
