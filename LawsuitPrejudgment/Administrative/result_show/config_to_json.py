@@ -111,8 +111,12 @@ if __name__ == '__main__':
     # department_list = ["tax", "police", "transportation", "port", "other_traffic", "traffic_police"]
     # department_list = ["chengguan", "huazhuang", "market", "shipin","health"]
     # department_list = ["fishery", 'construction']
-    department_list = ['fire', 'travel']
-
+    # department_list = ['fire', 'travel']
+    with open('LawsuitPrejudgment/Administrative/config/supported_administrative_types.json', 'r', encoding='utf-8') as f:
+        config = json.load(f)
+        department_list = [one_type['type_id'] for one_type in config["supported_administrative_types"]]
+        # print(department_list)
+    #
     for department in department_list:
         _config_csv_path = "LawsuitPrejudgment/Administrative/config/{}_config.csv".format(department)
         _config_json_path = "data/administrative_config/{}_config.json".format(department)

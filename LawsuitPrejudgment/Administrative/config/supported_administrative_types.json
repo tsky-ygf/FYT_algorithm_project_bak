@@ -63,6 +63,10 @@
         {
             "type_id": "travel",
             "type_name": "文广旅游处罚预判"
+        },
+        {
+            "type_id": "judicial",
+            "type_name": "司法公证处罚预判"
         }
     ]
 }
