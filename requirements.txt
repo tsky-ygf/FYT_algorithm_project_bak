@@ -44,3 +44,6 @@ connectorx
 onnxruntime
 pyltp
 Pillow
+gevent
+fastapi
+pydantic
