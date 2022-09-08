@@ -7,15 +7,13 @@
 # @Software: PyCharm
 import json
 import pandas as pd
-import jieba
 from typing import List
 import random
 from tqdm.auto import tqdm
 # import ray
 # import psutil
-import pathos.multiprocessing
 from Utils.logger import print_run_time
-from RelevantLaws.DataProcess.data_process import get_fileter_data
+from ProfessionalSearch.RelevantLaws.DataProcess.data_process import get_fileter_data
 import hanlp
 
 # from torch.multiprocessing import set_start_method

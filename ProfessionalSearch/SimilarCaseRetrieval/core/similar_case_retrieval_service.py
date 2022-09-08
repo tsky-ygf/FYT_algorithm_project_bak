@@ -5,7 +5,7 @@
 @Time    : 2022/8/10 14:46 
 @Desc    : None
 """
-from SimilarCaseRetrieval.repository import similar_case_retrieval_repository as repository
+from ProfessionalSearch.SimilarCaseRetrieval.repository import similar_case_retrieval_repository as repository
 
 
 def get_similar_cases(problem, claim_list, fact):

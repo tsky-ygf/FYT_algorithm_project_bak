@@ -112,10 +112,7 @@ class CriminalPrejudgment(PrejudgmentPipeline):
 
     def match_graph(self):
         if (
-                list(self.content["base_logic_graph"][self.content["anyou"]]["量刑"].keys())[
-                    0
-                ]
-                == "【量刑】"
+                list(self.content["base_logic_graph"][self.content["anyou"]]["量刑"].keys())[0] == "【量刑】"
         ):
             self.content["graph_process"]["量刑"] = 1
             self.content["graph_process_content"]["量刑"] = "量刑"
@@ -220,10 +217,7 @@ class CriminalPrejudgment(PrejudgmentPipeline):
             sentencing_dict = self.content["base_logic_graph"][self.content["anyou"]]["量刑"]
 
             if (
-                    case_num
-                    not in sentencing_dict[
-                "【" + self.content["graph_process_content"]["量刑"] + "】"
-            ]
+                    case_num not in sentencing_dict["【" + self.content["graph_process_content"]["量刑"] + "】"]
             ):
                 case_num = "case0"
 
@@ -332,7 +326,7 @@ if __name__ == "__main__":
     #     "2022年8月12日，罗某某利用螺丝刀撬开房间门锁进入某市某区某栋某单元某层某房间内，窃得现金50000元。2022年8月12日，趁邻居卢某家"
     #     "无人在家，从卢某家厨房后窗翻进其家，盗走现金50000元。"
     # )
-    text = "我偷了同事的4500块。"
+    text = "我吸毒了"
     input_dict = {"fact": text}
     # 第一次调用
 
@@ -341,26 +335,32 @@ if __name__ == "__main__":
     s_time = time.time()
     res = criminal_pre_judgment(**input_dict)
     pprint(res)
+    exit()
     # print('@@@@@@@@@@')
 
     # 第二次调用
     res["question_answers"]["前提"]["usr_answer"] = "否"
     res2 = criminal_pre_judgment(**res)  # 传入上一次的结果
+
+    pprint(res["report_result"])
     #
     # pprint(res2)
     # res2["question_answers"]["量刑"]["usr_answer"] = "40000（含）-80000（不含）"
 
-    res3 = criminal_pre_judgment(**res2)
-    if "report_result" in res3:
-        #     pprint(res2["question_answers"])
-        print('---------------------------')
-        pprint(res3["report_result"])
-        # exit()
-    # res2["question_answers"]["情节"]["usr_answer"] = "以上都没有"
+    # res3 = criminal_pre_judgment(**res2)
+    # if "report_result" in res3:
+    #     pprint(res2["question_answers"])
+    # print('---------------------------')
+    # pprint(res3["report_result"])
+    # exit()
+    res2["question_answers"]["情节"]["usr_answer"] = "以上都没有"
     #
     # # 第三次调用
-    # res3 = criminal_pre_judgment(**res2)
-    # pprint(res3)
+    res3 = criminal_pre_judgment(**res2)
+    res3["question_answers"]["量刑"]["usr_answer"] = "40000（含）-80000（不含）"
+
+    res4 = criminal_pre_judgment(**res3)
+    pprint(res4["report_result"])
     # # if "report_result" in res2:
     #     pprint(res2["question_answers"])
     #     pprint(res2["report_result"])

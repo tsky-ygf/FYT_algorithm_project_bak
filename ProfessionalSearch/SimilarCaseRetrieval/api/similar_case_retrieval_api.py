@@ -11,8 +11,8 @@ from flask import Flask, request
 
 from LawsuitPrejudgment.lawsuit_prejudgment.core import civil_similar_case
 from Utils.http_response import response_successful_result
-from SimilarCaseRetrieval.core import similar_case_retrieval_service as service
-from SimilarCaseRetrieval.core.relevant_cases_search import get_case_search_result
+from ProfessionalSearch.SimilarCaseRetrieval.core import similar_case_retrieval_service as service
+from ProfessionalSearch.SimilarCaseRetrieval.core.relevant_cases_search import get_case_search_result
 from typing import List
 
 app = Flask(__name__)

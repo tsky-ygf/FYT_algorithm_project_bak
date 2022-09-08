@@ -8,7 +8,7 @@
 import requests
 
 from LawsuitPrejudgment.lawsuit_prejudgment.constants import CRIMINAL_SIMILIARITY_URL
-from SimilarCaseRetrieval.core import similar_case_retrieval_service
+from ProfessionalSearch.SimilarCaseRetrieval.core import similar_case_retrieval_service
 
 
 class SimilarCaseDTO:

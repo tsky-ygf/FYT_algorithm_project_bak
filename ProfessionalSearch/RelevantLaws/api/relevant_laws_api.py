@@ -10,13 +10,12 @@ from typing import List
 from flask import Flask
 from flask import request
 
-from LawsuitPrejudgment.lawsuit_prejudgment.api.data_transfer_object.applicable_law_dto import ApplicableLawDTO
 from LawsuitPrejudgment.lawsuit_prejudgment.core.civil_relevant_law import CivilRelevantLaw
-from RelevantLaws.LegalLibrary.relevant_laws_search import get_law_search_result
-from RelevantLaws.api.constants import SEPERATOR_BETWEEN_LAW_TABLE_AND_ID
+from ProfessionalSearch.RelevantLaws.LegalLibrary.relevant_laws_search import get_law_search_result
+from ProfessionalSearch.RelevantLaws.api.constants import SEPERATOR_BETWEEN_LAW_TABLE_AND_ID
 from Utils.io import read_json_attribute_value
 from Utils.http_response import response_successful_result, response_failed_result
-from RelevantLaws.repository import relevant_laws_repository as repository
+from ProfessionalSearch.RelevantLaws.repository import relevant_laws_repository as repository
 
 app = Flask(__name__)
 

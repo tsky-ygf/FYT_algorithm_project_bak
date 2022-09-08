@@ -11,7 +11,7 @@ import re
 from LawsuitPrejudgment.lawsuit_prejudgment.constants import CIVIL_SIMILAR_CASE_ID_PREFIX
 from LawsuitPrejudgment.lawsuit_prejudgment.core import civil_similar_case
 from Utils.http_response import response_successful_result
-from SimilarCaseRetrieval.core import similar_case_retrieval_service as service
+from ProfessionalSearch.SimilarCaseRetrieval.core import similar_case_retrieval_service as service
 
 app = Flask(__name__)
 

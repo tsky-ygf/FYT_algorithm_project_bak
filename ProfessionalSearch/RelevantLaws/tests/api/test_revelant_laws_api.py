@@ -7,7 +7,7 @@
 """
 import requests
 
-from RelevantLaws.api.constants import SEPERATOR_BETWEEN_LAW_TABLE_AND_ID
+from ProfessionalSearch.RelevantLaws.api.constants import SEPERATOR_BETWEEN_LAW_TABLE_AND_ID
 
 
 def test_get_filter_conditions():
