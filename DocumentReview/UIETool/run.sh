@@ -15,3 +15,10 @@ python DocumentReview/UIETool/finetune.py \
     --logging_steps 100 \
     --valid_steps 500 \
     --device "gpu"
+
+
+python DocumentReview/UIETool/evaluate.py \
+    --model_path model/uie_model/new/maimai/mdel_best \
+    --test_path data/doccano_data/maimai/dev.txt \
+    --batch_size 16 \
+    --max_seq_len 512
