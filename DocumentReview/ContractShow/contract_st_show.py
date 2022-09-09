@@ -6,6 +6,7 @@
 # @File    : contract_st_show.py
 # @Software: PyCharm
 import streamlit as st
+from annotated_text import annotated_text
 
 from DocumentReview.ParseFile.parse_word import read_docx_file
 # from paddlenlp import Taskflow
@@ -141,6 +142,9 @@ if run:
     acknowledgement.review_main(content=text, mode="text", usr=usr)
     pprint(acknowledgement.review_result, sort_dicts=False)
     index = 1
+
+    st.write(acknowledgement.data)
+
     for key, value in acknowledgement.review_result.items():
         # st.write(key, value)
         pprint(value)
@@ -163,6 +167,14 @@ if run:
                 st.markdown("法律依据：{}".format(value['法律依据']))
             if "风险等级" in value and value["风险等级"] != "":
                 st.markdown("风险等级：{}".format(value['风险等级']))
+
+            if 'start' in value and value['start'] != "":
+                st.markdown("start: {}".format(value['start']))
+            if 'end' in value and value['end'] != "":
+                st.markdown("end: {}".format(value['end']))
+
+
+
         except Exception as e:
             print(e)
             st.write("这个审核点小朱正在赶制，客官请稍等。。。。可爱")
