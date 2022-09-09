@@ -52,7 +52,7 @@ class BaseESTool:
         es.indices.create(index=self.index_name, ignore=400)
 
     # 处理数据
-    def handle_es(self, df_data, table_name):
+    def handle_es(self, df_data, *args, **kwargs):
         for index, row in df_data.iterrows():
             data_ori = row.to_dict()
             yield {"_index": self.index_name, "_type": "_doc", "_source": data_ori}
