@@ -8,12 +8,12 @@
 import sys
 from loguru import logger
 from dataclasses import dataclass
-from pprint import pprint, pformat
 
 
 @dataclass
 class PrejudgmentConfig:
     log_level: str = "INFO"
+    log_path: str = ""
     prejudgment_type: str = ""
     anyou_identify_model_path: str = ""
     situation_identify_model_path: str = ""
@@ -27,12 +27,27 @@ class PrejudgmentPipeline:
         self.logger = logger
         self.logger.remove()  # 删去import logger之后自动产生的handler，不删除的话会出现重复输出的现象
         self.logger.add(sys.stderr, level=self.config.log_level.upper())  # 添加一个终端输出的内容
+        # 添加一个文件输出的内容
+        if self.config.log_path != "":
+            self.logger.remove()
+            logger.add(self.config.log_path, rotation='0:00', enqueue=True, retention="10 days")
 
         self.content["graph_process"] = dict()
 
     def init_content(self):
         self.content = dict()
         self.content["graph_process"] = dict()
+
+    def get_next_question(self):
+        # if "question_answers" not in self.content:
+        #     self.content["question_answers"] = dict()
+        self.logger.debug(self.content["question_answers"])
+        for key, question in self.content["question_answers"].items():
+            if question["status"] == 0:
+                return {key: question}
+        #     print(question)
+        # if self.content["question_answers"][question] == "":
+        #     return question
 
     def anyou_identify(self, *args, **kwargs):
         raise NotImplemented

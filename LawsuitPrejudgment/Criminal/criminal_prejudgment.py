@@ -118,8 +118,8 @@ class CriminalPrejudgment(PrejudgmentPipeline):
             self.content["graph_process_content"]["量刑"] = "量刑"
 
         # if self.content["anyou"] == "容留他人吸毒":
-        self.logger.debug(self.content["event"])
-        self.logger.debug(self.content["sentence_keywords"])
+        self.logger.trace(self.content["event"])
+        self.logger.trace(self.content["sentence_keywords"])
 
         for index, row in self.content["sentence_keywords"].iterrows():
             # schema_list = row["schema"].split("|")
@@ -166,26 +166,29 @@ class CriminalPrejudgment(PrejudgmentPipeline):
                 self.content["graph_process_content"]["量刑"] = "400000（含）以上"
 
     def get_question(self):
-        self.logger.debug(self.content["question_answers"])
+        self.logger.trace(self.content["question_answers"])
 
         # 通过问题将没有覆盖到的点进行点亮
         if len(self.content["question_answers"]) > 0:
             for key in self.content["question_answers"].keys():
                 self.content["graph_process"][key] = 1
                 if self.content["graph_process_content"][key] == "":
-                    self.content["graph_process_content"][key] = self.content[
-                        "question_answers"
-                    ][key]["usr_answer"]
+                    self.content["graph_process_content"][key] = self.content["question_answers"][key]["usr_answer"]
+                    self.content["question_answers"][key]["status"] = 1
 
             if self.content["question_answers"]["前提"]["usr_answer"] == "是":
                 self.content["graph_process"]["情节"] = 1
                 self.content["graph_process"]["量刑"] = 1
+
+        self.logger.debug(self.content["graph_process"])
+        self.logger.debug(self.content["question_answers"])
 
         for key, value in self.content["graph_process"].items():
             if value == 0:
                 qa_dict = self.content["question_answers_config"][key]
                 qa_dict.pop("circumstances")
                 qa_dict["usr_answer"] = ""
+                qa_dict["status"] = 0
                 self.content["question_answers"][key] = qa_dict
                 break
 
