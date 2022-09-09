@@ -78,6 +78,24 @@ if __name__ == "__main__":
             }
         },
     }
+    query_dict = {
+        "from": 1,
+        "size": 10,
+        "query": {
+            "bool": {
+                "must": [
+                    # {"match_phrase": {"content": "石家庄市"}},
+                    {"match_phrase": {"faYuan_name": "中级"}},
+                    {"match_phrase": {"jfType": "合同纠纷"}},
+                    {"match_phrase": {"event_type": "裁定书"}},
+                    {"match_phrase": {"content": "河北省"}},
+                ],
+                "should": [
+                    {"match_phrase": {"content": "卖淫"}}
+                ]
+            }
+        }
+    }
 
     res_df = search_data_from_es(query_dict)
     # res_df = pd.DataFrame(columns=[''])
