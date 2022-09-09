@@ -5,16 +5,11 @@
 # @Site    : 
 # @File    : train_fasttext.py
 # @Software: PyCharm
-import sys
 
 import jieba
 import fasttext
-import pandas as pd
-from math import ceil
-from sklearn.model_selection import train_test_split
 
-from RelevantLaws.DataProcess.fasttext_train_data_process import read_stopwords
-from fasttext_train_data_process import generate_train_data, generate_model_data
+from ProfessionalSearch.RelevantLaws.DataProcess.fasttext_train_data_process import read_stopwords
 
 fasttext.FastText.eprint = lambda x: None
 

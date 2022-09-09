@@ -49,7 +49,7 @@ def post_process_uie_results(predictor, criminal_type, fact):
             for value in values:
                 post_result["事件"] = value["text"]
                 # relations = value["relations"]
-                relations = value.get("relations", {"内容", "没有"})
+                relations = value.get("relations", {"内容": "没有"})
                 # self.logger.debug(relations)
                 post_result["物品"] = relations.get("物品", [{"text": "一些"}])
 
@@ -78,7 +78,7 @@ def post_process_uie_results(predictor, criminal_type, fact):
             for value in values:
                 post_result["事件"] = value["text"]
                 # relations = value["relations"]
-                relations = value.get("relations", {"内容", "没有"})
+                relations = value.get("relations", {"内容": "没有"})
                 # print(relations)
                 # self.logger.debug(relations)
                 post_result["毒品名称"] = relations.get("毒品名称", [{"text": "毒品"}])
@@ -117,6 +117,6 @@ def post_process_uie_results(predictor, criminal_type, fact):
 #        "刘某甲容留刘某丙、刘1某等人在其家中卧室吸食甲基苯丙胺和甲基苯丙胺片剂。"
 #
 
-# text = '11111111111'
+# text = '我吸毒了'
 # predictor_ = init_extract(criminal_type="provide_drug")
-# pprint(post_process_uie_results(predictor=predictor_, criminal_type="theft", fact=text))
+# pprint(post_process_uie_results(predictor=predictor_, criminal_type="provide_drug", fact=text))

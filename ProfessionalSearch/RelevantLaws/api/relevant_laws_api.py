@@ -10,13 +10,12 @@ from typing import List
 from flask import Flask
 from flask import request
 
-from LawsuitPrejudgment.lawsuit_prejudgment.api.data_transfer_object.applicable_law_dto import ApplicableLawDTO
 from LawsuitPrejudgment.lawsuit_prejudgment.core.civil_relevant_law import CivilRelevantLaw
-from RelevantLaws.LegalLibrary.relevant_laws_search import get_law_search_result
-from RelevantLaws.api.constants import SEPERATOR_BETWEEN_LAW_TABLE_AND_ID
+from ProfessionalSearch.RelevantLaws.LegalLibrary.relevant_laws_search import get_law_search_result
+from ProfessionalSearch.RelevantLaws.api.constants import SEPERATOR_BETWEEN_LAW_TABLE_AND_ID
 from Utils.io import read_json_attribute_value
 from Utils.http_response import response_successful_result, response_failed_result
-from RelevantLaws.repository import relevant_laws_repository as repository
+from ProfessionalSearch.RelevantLaws.repository import relevant_laws_repository as repository
 
 app = Flask(__name__)
 
@@ -66,6 +65,7 @@ def _get_search_result(query, filter_conditions,page_number, page_size):
     search_result = get_law_search_result(query,
                                           filter_conditions.get("timeliness"),
                                           filter_conditions.get("types_of_law"),
+                                          filter_conditions.get("scope_of_use"),
                                           page_number,
                                           page_size)
     return _construct_result_format(search_result)
@@ -102,5 +102,5 @@ def get_law_by_law_id():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8135, debug=True)
+    app.run(host="0.0.0.0", port=8160, debug=True)
 

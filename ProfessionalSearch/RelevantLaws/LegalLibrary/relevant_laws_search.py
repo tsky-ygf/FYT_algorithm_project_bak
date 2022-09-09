@@ -6,11 +6,29 @@
 # @File    : relevant_laws_search.py
 # @Software: PyCharm
 import jieba
-from RelevantLaws.LegalLibrary.read_legal_from_db import search_data_from_es
+from ProfessionalSearch.RelevantLaws.LegalLibrary.read_legal_from_db import search_data_from_es
+
+import addressparser
+
+
+def filter_scope_of_use(res, scope_of_use):
+    if scope_of_use[0] == "全国":
+        return res
+    res_drop = res
+    for index, row in res_drop.iterrows():
+        pro_df = addressparser.transform([row["locality"]])
+        if scope_of_use[0] != pro_df.at[0, "省"]:
+            res_drop = res_drop.drop([index])
+    return res_drop
 
 
 def get_law_search_result(
-    text="", sxx_list=None, legal_list=None, page_number=None, page_size=None
+    text="",
+    sxx_list=None,
+    legal_list=None,
+    scope_of_use=None,
+    page_number=None,
+    page_size=None,
 ):
     """
     法条搜索
@@ -28,12 +46,14 @@ def get_law_search_result(
         page_number = 1
     if page_size is None:
         page_size = 10
+    if scope_of_use is None:
+        scope_of_use = ["全国"]
     text = " ".join(jieba.cut(text))
     # logger.info(text)
     text_list = text.split(" ")
     query_list = []
 
-    if len(text_list) > 0:
+    if text_list[0] != "" and len(text_list) > 0:
         for one_text in text_list:
             query_list.append(
                 {
@@ -45,10 +65,17 @@ def get_law_search_result(
                     }
                 }
             )
-    if len(sxx_list) > 0:
+    if scope_of_use is not None and len(scope_of_use) > 0 and scope_of_use[0] == "全国":
+        pass
+
+    if len(sxx_list) > 0 and "全部" not in sxx_list:
         query_list.append({"terms": {"isValid.keyword": sxx_list}})
-    if len(legal_list) > 0:
+    else:
+        pass
+    if len(legal_list) > 0 and "全部" not in legal_list:
         query_list.append({"terms": {"source.keyword": legal_list}})
+    else:
+        pass
 
     query_dict = {
         "from": page_number,
@@ -62,8 +89,10 @@ def get_law_search_result(
     }
 
     res = search_data_from_es(query_dict)
-    print(res)
-    return res
+    if scope_of_use is not None and len(scope_of_use) > 0:
+        res_filtered_scope = filter_scope_of_use(res, scope_of_use)
+    print(res_filtered_scope)
+    return res_filtered_scope
 
 
 if __name__ == "__main__":

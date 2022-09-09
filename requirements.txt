@@ -47,3 +47,4 @@ Pillow
 gevent
 fastapi
 pydantic
+uvicorn

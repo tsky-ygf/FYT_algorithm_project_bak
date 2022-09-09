@@ -7,7 +7,6 @@
 # @Software: PyCharm
 import jieba
 import fasttext
-from RelevantLaws.DataProcess.fasttext_train_data_process import read_stopwords
 
 fasttext.FastText.eprint = lambda x: None
 

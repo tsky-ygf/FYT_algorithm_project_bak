@@ -141,7 +141,8 @@ def extract_paragraph(folder):
 
 
 
-def sample()
+def sample():
+    pass
 if __name__ == '__main__':
     folder = './data_excel/case_list_original_hetong_all_20210110'
     des_folder = './data_excel/case_list_original_hetong_all_20210110_sample2'
