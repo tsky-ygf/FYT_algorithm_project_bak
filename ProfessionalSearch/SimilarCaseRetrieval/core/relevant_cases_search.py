@@ -93,7 +93,7 @@ def get_case_search_result(text="", type_case_list=None,
         query_list.append({"match_phrase": {"event_type": {"query": type_document_list[0], "boost": 3}}})
 
     if region_list and len(region_list) > 0 and region_list[0] != '' and region_list[0] != "全国":
-        prev_short_name = read_json_attribute_value("/home/fyt/huangyulin/project/fyt/ProfessionalSearch/SimilarCaseRetrieval/api/provin_short_name.json", region_list[0])
+        prev_short_name = read_json_attribute_value("ProfessionalSearch/SimilarCaseRetrieval/api/provin_short_name.json", region_list[0])
         query_list.append({"match_phrase": {"event_num": {"query": prev_short_name, "boost": 5}}})
 
     bool_value['must'] = query_list

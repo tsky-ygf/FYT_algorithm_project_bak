@@ -36,10 +36,10 @@ class LawItemsESTool(BaseESTool):
         self.valid_mapping = {"有效": 0, "": 1, "已修改": 2, "尚未生效": 3, "已废止": 4}
         self.legal_mapping = {"法律": 0, "行政法规": 1, "监察法规": 2, "司法解释": 3, "宪法": 5, "地方性法规": 4}
 
-        with open("/home/fyt/huangyulin/project/fyt/ProfessionalSearch/RelevantLaws/LegalLibrary/law_items_graph/minshi_item.json") as f:
+        with open("ProfessionalSearch/RelevantLaws/LegalLibrary/law_items_graph/minshi_item.json") as f:
             self.minshi_item = json.load(f)
 
-        with open("/home/fyt/huangyulin/project/fyt/ProfessionalSearch/RelevantLaws/LegalLibrary/law_items_graph/xingshi_item.json") as f:
+        with open("ProfessionalSearch/RelevantLaws/LegalLibrary/law_items_graph/xingshi_item.json") as f:
             self.xingshi_item = json.load(f)
 
     @staticmethod
