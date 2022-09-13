@@ -85,14 +85,35 @@ if __name__ == "__main__":
             "bool": {
                 "must": [
                     # {"match_phrase": {"content": "石家庄市"}},
-                    {"match_phrase": {"faYuan_name": "中级"}},
-                    {"match_phrase": {"jfType": "合同纠纷"}},
-                    {"match_phrase": {"event_type": "裁定书"}},
-                    {"match_phrase": {"content": "河北省"}},
+                    # {"match_phrase": {"faYuan_name": "中级"}},
+                    # {"match_phrase": {"jfType": "合同纠纷"}},
+                    # {"match_phrase": {"event_type": "裁定书"}},
+                    {"match": {"faYuan_name": {"query": "中级",
+                                              # "operator": "and"
+                                               "boost": 3
+                                              }}},
+                    {"match_phrase": {"jfType": {"query": "合同纠纷",
+                                          "boost": 3
+                                              # "operator": "and"
+                                              }}},
+
+                    {"match": {"event_type": {"query": "裁定书",
+                                              "boost": 3
+                                           # "operator": "and"
+                                           }}},
+                    {"match": {"event_num": {"query": "青",
+                                           "boost": 5,
+                                           # "operator": "and"
+                                           }}},
+                    {"match": {"content": {"query": "买卖",
+                                           "boost": 5,
+                                            # "operator": "and"
+                                      }}},
+                    {"match": {"content": {"query": "契约",
+                                           "boost": 5,
+                                           # "operator": "and"
+                                           }}},
                 ],
-                "should": [
-                    {"match_phrase": {"content": "卖淫"}}
-                ]
             }
         }
     }

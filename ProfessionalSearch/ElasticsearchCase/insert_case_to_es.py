@@ -13,7 +13,9 @@ case_es_tools = {
     "passwords": "Nblh@2022",
     "db_name": "judgments_data",
     "table_list": ["judgment_minshi_data", "judgment_xingshi_data"],
-    "index_name": "case_index_test",
+    # "db_name": "falvfagui_data",
+    # "table_list": ["flfg_result_dfxfg"],
+    "index_name": "case_index",
     "debug": True,
 }
 
@@ -26,6 +28,7 @@ class CaseESTool(BaseESTool):
         for index, row in df_data.iterrows():
             data_ori = row.to_dict()
             use_data = [
+                "id",
                 "uq_id",
                 "content",
                 "event_num",
@@ -36,7 +39,7 @@ class CaseESTool(BaseESTool):
             data_body = {key: value for key, value in data_ori.items() if key in use_data}
             data_body["db_name"] = self.db_name
             data_body["table_name"] = table_name
-            yield {"_index": self.index_name, "_type": "_doc", "_source": data_body}
+            yield {"_index": self.index_name, "_type": "_doc", "_id": row['id'], "_source": data_body}
 
 
 if __name__ == '__main__':
@@ -47,7 +50,7 @@ if __name__ == '__main__':
         df_data_ = case_es.get_df_data_from_db(table_name_)
         case_es.insert_data_to_es(df_data_, table_name_)
 
-    query_dict = {"query": {"match": {"content": "劫走"}}}
+    query_dict = {"query": {"match": {"content": "买卖"}}}
     res = case_es.search_data_from_es(query_body=query_dict)
 
     print(res)

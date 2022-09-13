@@ -15,6 +15,8 @@ from ProfessionalSearch.SimilarCaseRetrieval.core import similar_case_retrieval_
 from ProfessionalSearch.SimilarCaseRetrieval.core.relevant_cases_search import get_case_search_result
 from typing import List
 
+from Utils.io import read_json_attribute_value
+
 app = Flask(__name__)
 
 
@@ -44,7 +46,7 @@ def get_filter_conditions_of_case():
             "name": "案件类型",
             "is_multiple_choice": True,
             "value": [
-                "全部"
+                "全部",
                 "刑事",
                 "民事"   # 刑事、民事、行政、执行、其他
             ]
@@ -123,20 +125,24 @@ def search_cases():
 
 @app.route('/get_law_document', methods=["get"])
 def get_law_document():
-    doc_id = request.args.get("doc_id")
-    result = service.get_criminal_law_document(doc_id)
-    if result:
-        return response_successful_result(result)
+    # doc_id = request.args.get("doc_id")
+    input_json = request.get_data()
+    if input_json is not None:
+        input_dict = json.loads(input_json.decode("utf-8"))
+        doc_id = input_dict['doc_id']
+        result = service.get_criminal_law_document(doc_id)
+        if result:
+            return response_successful_result(result)
 
-    law_documents = civil_similar_case.get_civil_law_documents_by_id_list([doc_id])
-    if law_documents:
-        result = {
-            "doc_id": law_documents[0]["doc_id"],
-            "html_content": law_documents[0]["raw_content"]
-        }
-    else:
-        result = None
-    return response_successful_result(result)
+        law_documents = civil_similar_case.get_civil_law_documents_by_id_list([doc_id])
+        if law_documents:
+            result = {
+                "doc_id": law_documents[0]["doc_id"],
+                "html_content": law_documents[0]["raw_content"]
+            }
+        else:
+            result = None
+        return response_successful_result(result)
 
 
 def _construct_result_format(search_result) -> List:
@@ -152,4 +158,4 @@ def _construct_result_format(search_result) -> List:
     return result
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8156, debug=True)
+    app.run(host="0.0.0.0", port=8140, debug=True)

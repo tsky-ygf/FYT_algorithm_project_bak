@@ -21,7 +21,7 @@ case_es_tools = {
         "flfg_result_xf",
         "flfg_result_xzfg",
     ],
-    "index_name": "flfg_test",
+    "index_name": "flfg",
     "debug": False,
 }
 
@@ -36,10 +36,10 @@ class LawItemsESTool(BaseESTool):
         self.valid_mapping = {"有效": 0, "": 1, "已修改": 2, "尚未生效": 3, "已废止": 4}
         self.legal_mapping = {"法律": 0, "行政法规": 1, "监察法规": 2, "司法解释": 3, "宪法": 5, "地方性法规": 4}
 
-        with open("ProfessionalSearch/RelevantLaws/LegalLibrary/law_items_graph/minshi_item.json") as f:
+        with open("/home/fyt/huangyulin/project/fyt/ProfessionalSearch/RelevantLaws/LegalLibrary/law_items_graph/minshi_item.json") as f:
             self.minshi_item = json.load(f)
 
-        with open("ProfessionalSearch/RelevantLaws/LegalLibrary/law_items_graph/xingshi_item.json") as f:
+        with open("/home/fyt/huangyulin/project/fyt/ProfessionalSearch/RelevantLaws/LegalLibrary/law_items_graph/xingshi_item.json") as f:
             self.xingshi_item = json.load(f)
 
     @staticmethod
@@ -53,6 +53,7 @@ class LawItemsESTool(BaseESTool):
         for index, row in df_data.iterrows():
             data_ori = row.to_dict()
             use_data = [
+                "id",
                 "isValid",
                 "resultChapter",
                 "resultClause",
@@ -60,7 +61,7 @@ class LawItemsESTool(BaseESTool):
                 "title",
                 "md5Clause",
                 "source",
-                "locality",
+                "prov",
             ]
             data_body = {key: value for key, value in data_ori.items() if key in use_data}
             data_body["isValid_weight"] = self.valid_mapping[data_body["isValid"]]
@@ -71,7 +72,7 @@ class LawItemsESTool(BaseESTool):
                 data_body["title_weight"] += self.minshi_item[title]
             if title in self.xingshi_item:
                 data_body["title_weight"] += self.xingshi_item[title]
-            yield {"_index": self.index_name, "_type": "_doc", "_source": data_body}
+            yield {"_index": self.index_name, "_type": "_doc", "_id": row['id'], "_source": data_body}
 
 
 if __name__ == '__main__':
