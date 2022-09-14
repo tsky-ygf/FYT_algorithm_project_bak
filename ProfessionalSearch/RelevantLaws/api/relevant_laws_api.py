@@ -22,7 +22,7 @@ app = Flask(__name__)
 
 @app.route('/get_filter_conditions_of_law', methods=["get"])
 def get_filter_conditions():
-    filer_conditions = read_json_attribute_value("RelevantLaws/api/filter_conditions.json", "filter_conditions")
+    filer_conditions = read_json_attribute_value("ProfessionalSearch/RelevantLaws/api/filter_conditions.json", "filter_conditions")
     return response_successful_result(filer_conditions)
 
 
@@ -43,8 +43,8 @@ def _construct_result_format(search_result) -> List:
     for index, row in search_result.iterrows():
         if row['isValid'] == '有效':
             row['isValid'] = '现行有效'
-        if row['locality'] == '':
-            row['locality'] = '全国'
+        if row['prov'] == '' or row['prov'] == None:
+            row['prov'] = '全国'
         # TODO:这里的判断有点简单了。目的是当law_item为空字符串时，把内容填上。需要修改。
         if row['resultSection'] == "" and str(row['resultClause']).startswith("第"):
             row['resultSection'] = str(row['resultClause']).split(":")[0]
@@ -54,7 +54,7 @@ def _construct_result_format(search_result) -> List:
             "law_name": row['title'],
             "law_type": row['source'],
             "timeliness": row['isValid'],
-            "using_range": row['locality'],
+            "using_range": row['prov'],
             "law_chapter": row['resultChapter'],
             "law_item": row['resultSection'],
             "law_content": row['resultClause']})
@@ -102,5 +102,5 @@ def get_law_by_law_id():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8160, debug=True)
+    app.run(host="0.0.0.0", port=8135, debug=True)
 

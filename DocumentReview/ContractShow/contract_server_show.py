@@ -110,4 +110,4 @@ def get_contract_review_result():
 
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=7998, debug=False)  # , use_reloader=False)
+    app.run(host="0.0.0.0", port=8110, debug=False)  # , use_reloader=False)

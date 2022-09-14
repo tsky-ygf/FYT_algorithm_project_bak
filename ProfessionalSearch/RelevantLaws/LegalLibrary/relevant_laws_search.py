@@ -38,15 +38,11 @@ def get_law_search_result(
     :param size: 搜索结果数量
     :return:
     """
-    if sxx_list is None:
-        sxx_list = ["有效", "已修改", "尚未生效", "已废止"]
-    if legal_list is None:
-        legal_list = ["宪法", "法律", "行政法规", "监察法规", "司法解释", "地方性法规"]
     if page_number is None:
         page_number = 1
     if page_size is None:
         page_size = 10
-    if scope_of_use is None:
+    if scope_of_use is None or scope_of_use[0] == "":
         scope_of_use = ["全国"]
     text = " ".join(jieba.cut(text))
     # logger.info(text)
@@ -65,34 +61,32 @@ def get_law_search_result(
                     }
                 }
             )
-    if scope_of_use is not None and len(scope_of_use) > 0 and scope_of_use[0] == "全国":
-        pass
+    if scope_of_use and scope_of_use[0] != "" and len(scope_of_use) > 0 and  "全国" not in scope_of_use:
+            query_list.append({"match_phrase": {"prov": {"query": scope_of_use[0], "boost": 5}}})
 
-    if len(sxx_list) > 0 and "全部" not in sxx_list:
-        query_list.append({"terms": {"isValid.keyword": sxx_list}})
-    else:
-        pass
-    if len(legal_list) > 0 and "全部" not in legal_list:
-        query_list.append({"terms": {"source.keyword": legal_list}})
-    else:
-        pass
+    if sxx_list and sxx_list[0] != "" and len(sxx_list) > 0 and "全部" not in sxx_list:
+            query_list.append({"match_phrase": {"isValid": {"query": sxx_list[0], "boost": 5}}})
+
+    if legal_list and legal_list[0] != "" and len(legal_list) > 0 and "全部" not in legal_list:
+            query_list.append({"match_phrase": {"source": {"query": legal_list[0], "boost": 5}}})
+
 
     query_dict = {
         "from": page_number,
         "size": page_size,
-        "query": {"bool": {"must": query_list,}},
-        "sort": [
-            {"title_weight": {"order": "desc"}},
-            {"isValid_weight": {"order": "asc"}},
-            {"legal_type_weight": {"order": "asc"}},
-        ],
+        "query": {"bool": {"must": query_list}},
+        # "sort": [
+        #     {"title_weight": {"order": "desc"}},
+        #     {"isValid_weight": {"order": "asc"}},
+        #     {"legal_type_weight": {"order": "asc"}},
+        # ],
     }
 
     res = search_data_from_es(query_dict)
-    if scope_of_use is not None and len(scope_of_use) > 0:
-        res_filtered_scope = filter_scope_of_use(res, scope_of_use)
-    print(res_filtered_scope)
-    return res_filtered_scope
+    # if scope_of_use is not None and len(scope_of_use) > 0:
+    #     res_filtered_scope = filter_scope_of_use(res, scope_of_use)
+    print(res)
+    return res
 
 
 if __name__ == "__main__":

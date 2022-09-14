@@ -10,8 +10,8 @@ import requests
 from ProfessionalSearch.RelevantLaws.api.constants import SEPERATOR_BETWEEN_LAW_TABLE_AND_ID
 
 
-def test_get_filter_conditions():
-    url = "http://101.69.229.138:8135/get_filter_conditions_of_law"
+def get_filter_conditions():
+    url = "http://172.19.82.199:8160/get_filter_conditions_of_law"
     resp_json = requests.get(url).json()
 
     print(resp_json)
@@ -24,21 +24,23 @@ def test_get_filter_conditions():
     pass
 
 
-def test_search_laws():
+def search_laws():
     url = "http://101.69.229.138:8135/search_laws"
+    url = "http://172.19.82.199:8160/search_laws"
     body = {
-        "query": "侵权",
+        "query": "",
         "filter_conditions": {
             "types_of_law": [
                 "法律",
-                "司法解释"
+                # "司法解释"
             ],
             "timeliness": [
-                "有效",
-                "已修改"
+                # "有效",
+                # "已修改",
+                "尚未生效"
             ],
             "scope_of_use": [
-                "全国"
+                "广州省"
             ]
         },
         "page_number": 1,
@@ -55,8 +57,8 @@ def test_search_laws():
     assert "law_name" in resp_json["result"][0]
 
 
-def test_get_law_by_law_id():
-    url = "http://101.69.229.138:8135/get_law_by_law_id"
+def get_law_by_law_id():
+    url = "http://172.19.82.199:8160/get_law_by_law_id"
     param = {
         "law_id": "flfg_result_falv" + SEPERATOR_BETWEEN_LAW_TABLE_AND_ID + "5a43120b27fe0457634a7420283b4aad"
     }
@@ -66,3 +68,8 @@ def test_get_law_by_law_id():
     assert resp_json.get("success")
     assert resp_json.get("result")
     assert resp_json["result"]["law_id"] == param["law_id"]
+
+if __name__=='__main__':
+    get_filter_conditions()
+    search_laws()
+    get_law_by_law_id()

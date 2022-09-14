@@ -14,6 +14,8 @@ import requests
 from LegalKnowledge.constants import RECOMMEND_NEWS_URL, SEARCH_NEWS_URL
 from LegalKnowledge.repository import legal_knowledge_repository as repository
 
+_memory = dict()
+
 
 def get_columns():
     return [
@@ -81,25 +83,28 @@ def _get_news_by_column_name(column_name) -> List[Dict]:
 
 def get_news_by_column_id(column_id) -> List[Dict]:
     # fake function
-    df = pd.read_csv("LegalKnowledge/core/recommend_news.csv", encoding="utf-8")
-    return [
-        {
-            "id": row["id"],
-            "title": row["title"],
-            "release_time": row["release_time"],
-            "content": row["content"],
-            "raw_content": row["raw_content"],
-            "source_url": row["source_url"]
-        }
-        for index, row in df.iterrows() if str(row["column_id"]) == str(column_id)
-    ]
+    # df = pd.read_csv("LegalKnowledge/core/recommend_news.csv", encoding="utf-8")
+    # return [
+    #     {
+    #         "id": row["id"],
+    #         "title": row["title"],
+    #         "release_time": row["release_time"],
+    #         "content": row["content"],
+    #         "raw_content": row["raw_content"],
+    #         "source_url": row["source_url"]
+    #     }
+    #     for index, row in df.iterrows() if str(row["column_id"]) == str(column_id)
+    # ]
 
     # real function
     column_name = _get_column_name(column_id)
     if column_name is None:
         return []
 
-    return _get_news_by_column_name(column_name)
+    news_list = _get_news_by_column_name(column_name)
+    for news in news_list:
+        _memory[news["id"]] = news
+    return news_list
 
 
 def _get_id_list_after_query(keyword) -> List[int]:
@@ -124,17 +129,21 @@ def get_news_by_keyword(keyword):
 
 def get_news_by_news_id(news_id):
     # fake function
-    df = pd.read_csv("LegalKnowledge/core/recommend_news.csv", encoding="utf-8")
-    return [
-        {
-            "id": row["id"],
-            "title": row["title"],
-            "release_time": row["release_time"],
-            "content": row["content"],
-            "raw_content": re.sub("href='.+?'", "", row["raw_content"]),
-            "source_url": row["source_url"]
-        }
-        for index, row in df.iterrows() if str(row["id"]) == str(news_id)
-    ]
+    # df = pd.read_csv("LegalKnowledge/core/recommend_news.csv", encoding="utf-8")
+    # return [
+    #     {
+    #         "id": row["id"],
+    #         "title": row["title"],
+    #         "release_time": row["release_time"],
+    #         "content": row["content"],
+    #         "raw_content": re.sub("href='.+?'", "", row["raw_content"]),
+    #         "source_url": row["source_url"]
+    #     }
+    #     for index, row in df.iterrows() if str(row["id"]) == str(news_id)
+    # ]
     # real function
-    return repository.get_news_by_id_list([news_id])
+    if news_id in _memory:
+        return _memory.get(news_id)
+    news = repository.get_news_by_id_list([news_id])
+    _memory[news_id] = news
+    return news
