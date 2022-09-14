@@ -41,8 +41,8 @@ else:
 
 contract_type = ''.join(lazy_pinyin(contract_type))
 config_path = "DocumentReview/Config/{}.csv".format(contract_type)
-model_path = "model/uie_model/new/{}/model_best/".format(contract_type)
-# model_path = "model/uie_model/export_cpu/{}/inference".format(contract_type)
+# model_path = "model/uie_model/new/{}/model_best/".format(contract_type)
+model_path = "model/uie_model/export_cpu/{}/inference".format(contract_type)
 # print(contract_type)
 
 if mode_type == "docx":
@@ -64,13 +64,15 @@ if is_show:
 
     acknowledgement = BasicUIEAcknowledgementShow(config_path=config_path,
                                                   model_path=model_path,
-                                                  device="1", )
+                                                  device="cpu", )
 else:
     from DocumentReview.ContractReview.basic_contract import BasicUIEAcknowledgement
 
     acknowledgement = BasicUIEAcknowledgement(config_path=config_path,
                                               model_path=model_path,
-                                              device="1", )
+                                              device="cpu", )
+# result = requests.post(url,json={"user_standpoint_id":usr})
+
 correct = st.button("文本纠错")
 run = st.button("开始审核")
 
@@ -143,11 +145,13 @@ if run:
     pprint(acknowledgement.review_result, sort_dicts=False)
     index = 1
 
-    st.write(acknowledgement.data)
+    # st.write(acknowledgement.data)
+    origin_text = acknowledgement.data
+    origin_text = list(origin_text)
 
     for key, value in acknowledgement.review_result.items():
         # st.write(key, value)
-        pprint(value)
+        # st.wr(value)
         st.markdown('### {}、审核点：{}'.format(index, key))
         index += 1
         try:
@@ -163,18 +167,38 @@ if run:
                 st.markdown("法律建议：{}".format(value['法律建议']))
             if "风险点" in value and value["风险点"] != "":
                 st.markdown("风险点：{}".format(value['风险点']))
+
             if "法律依据" in value and value["法律依据"] != "":
                 st.markdown("法律依据：{}".format(value['法律依据']))
+            dang = 0
             if "风险等级" in value and value["风险等级"] != "":
                 st.markdown("风险等级：{}".format(value['风险等级']))
+                if value['风险等级'] == '低':
+                    dang = "#8ef"
+                elif value['风险等级'] == '中':
+                    dang = "#afa"
+                elif value['风险等级'] == '高':
+                    dang = "#faa"
 
-            if 'start' in value and value['start'] != "":
+            if 'start' in value and value['start'] != "" and 'end' in value and value['end'] != "":
                 st.markdown("start: {}".format(value['start']))
-            if 'end' in value and value['end'] != "":
                 st.markdown("end: {}".format(value['end']))
-
-
-
+                starts = str(value['start']).split('#')
+                starts = list(filter(None, starts))
+                starts = list(map(lambda x:int(x),starts))
+                ends = str(value['end']).split('#')
+                ends = list(filter(None, ends))
+                ends = list(map(lambda x:int(x), ends))
+                if dang!=0:
+                    for start, end in zip(starts, ends):
+                        for ind in range(start, end):
+                            if isinstance(origin_text[ind], str):
+                                origin_text[ind] =  (str(origin_text[ind]),dang)
         except Exception as e:
             print(e)
             st.write("这个审核点小朱正在赶制，客官请稍等。。。。可爱")
+    for i in range(len(origin_text)):
+        if not isinstance(origin_text[i], str):
+            origin_text[i] = (str(origin_text[i][0]),'' ,str(origin_text[i][1]))
+    annotated_text(*origin_text)
+

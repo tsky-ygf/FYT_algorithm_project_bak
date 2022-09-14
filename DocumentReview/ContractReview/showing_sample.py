@@ -135,13 +135,14 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
                             res_dict["end"] += str(con['end']) + '#'
 
                 # model cannot recognize
-                if ('甲方' == row['schema'] or '甲方联系方式' == row['schema'] or '甲方地址' == row['schema']) and len(
+                if ('甲方' == row['schema'] or '甲方联系方式' == row['schema'] or '甲方地址' == row['schema']
+                    or '甲方身份证号/统一社会信用代码' ==row['schema']) and len(
                         extraction_con) > 1:
                     res_dict["内容"] = extraction_con[0]['text']
                     res_dict["start"] = str(extraction_con[0]['start'])
                     res_dict["end"] = str(extraction_con[0]['end'])
                 elif ('乙方' == row['schema'] or '乙方联系方式' == row['schema'] or '乙方地址' == row[
-                    'schema']) and len(extraction_con) > 1:
+                    'schema'] or '乙方身份证号/统一社会信用代码'==row['schema']) and len(extraction_con) > 1:
                     res_dict["内容"] = extraction_con[1]['text']
                     res_dict["start"] = str(extraction_con[1]['start'])
                     res_dict["end"] = str(extraction_con[1]['end'])
@@ -1146,9 +1147,6 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
                         res_dict['start'] = str(self.data.index('1000斤'))+'#'+str(self.data.index('2000斤'))+'#'
                         res_dict['end'] = str(self.data.index('1000斤')+5)+'#'+str(self.data.index('2000斤')+5)+'#'
 
-
-
-
             self.review_result[row['schema']].update(res_dict)
 
         self.arti_rule()
@@ -1281,18 +1279,18 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
 if __name__ == '__main__':
     import time
 
-    contract_type = "caigou"
+    contract_type = "jietiao"
 
     os.environ['CUDA_VISIBLE_DEVICES'] = "2"
     acknowledgement = BasicUIEAcknowledgementShow(config_path="DocumentReview/Config/{}.csv".format(contract_type),
                                                   log_level="INFO",
-                                                  model_path="model/uie_model/new/{}/model_best/".format(contract_type),
-                                                  # model_path="model/uie_model/export_cpu/{}/inference".format(
-                                                  #     contract_type),
-                                                  device="2")
+                                                  # model_path="model/uie_model/new/{}/model_best/".format(contract_type),
+                                                  model_path="model/uie_model/export_cpu/{}/inference".format(
+                                                      contract_type),
+                                                  device="cpu")
     print("## First Time ##")
     localtime = time.time()
 
-    acknowledgement.review_main(content="data/DocData/caigou/caigou1.docx", mode="docx", usr="Part B")
+    acknowledgement.review_main(content="data/DocData/jietiao/jietiao4.docx", mode="docx", usr="Part A")
     pprint(acknowledgement.review_result, sort_dicts=False)
     print('use time: {}'.format(time.time() - localtime))
