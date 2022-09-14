@@ -1,11 +1,11 @@
-python DocumentReview/UIETool/doccano.py --doccano_file data/doccano_data/laowu/origin.json \
-      --task_type "ext" --save_dir data/doccano_data/laowu/ --splits 0.8 0.2 0
+python DocumentReview/UIETool/doccano.py --doccano_file data/doccano_data/wuye/origin.json \
+      --task_type "ext" --save_dir data/doccano_data/wuye/ --splits 0.8 0.2 0
 
-export CUDA_VISIBLE_DEVICES=1;
+export CUDA_VISIBLE_DEVICES=2;
 python DocumentReview/UIETool/finetune.py \
-    --train_path "data/doccano_data/laowu/train.txt" \
-    --dev_path "data/doccano_data/laowu/dev.txt" \
-    --save_dir "model/uie_model/new/laowu/" \
+    --train_path "data/doccano_data/wuye/train.txt" \
+    --dev_path "data/doccano_data/wuye/dev.txt" \
+    --save_dir "model/uie_model/new/wuye/" \
     --learning_rate 1e-5 \
     --batch_size 16 \
     --max_seq_len 512 \
@@ -16,8 +16,7 @@ python DocumentReview/UIETool/finetune.py \
     --valid_steps 500 \
     --device "gpu"
 
-
-#python DocumentReview/UIETool/evaluate.py \
+# python DocumentReview/UIETool/evaluate.py \
 #    --model_path model/uie_model/new/maimai/mdel_best \
 #    --test_path data/doccano_data/maimai/dev.txt \
 #    --batch_size 16 \

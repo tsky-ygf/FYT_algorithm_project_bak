@@ -13,10 +13,9 @@ case_es_tools = {
     "passwords": "Nblh@2022",
     "db_name": "judgments_data",
     "table_list": ["judgment_minshi_data", "judgment_xingshi_data"],
-    # "db_name": "falvfagui_data",
-    # "table_list": ["flfg_result_dfxfg"],
     "index_name": "case_index",
     "debug": True,
+    "use_big_data": True
 }
 
 
@@ -43,6 +42,10 @@ class CaseESTool(BaseESTool):
 
 
 if __name__ == '__main__':
+    import pandas as pd
+
+    pd.set_option("display.max_columns", None)
+
     case_es = CaseESTool(**case_es_tools)
     case_es.es_init()
 

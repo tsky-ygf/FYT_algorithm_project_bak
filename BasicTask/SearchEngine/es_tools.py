@@ -20,7 +20,8 @@ class BaseESTool:
                  es_host='127.0.0.1:9200',
                  index_name='flfg',
                  table_list=["flfg_result_dfxfg"],
-                 debug=False):
+                 debug=False,
+                 use_big_data=False):
         self.mysql_url = f"mysql://{user}:{passwords}@{host}:{port}/{db_name}"
 
         self.es_host = es_host
@@ -30,6 +31,7 @@ class BaseESTool:
         self.table_list = table_list
 
         self.debug = debug
+        self.use_big_data = use_big_data
 
     # 从数据库中获取数据
     def get_df_data_from_db(self, table_name):
@@ -38,9 +40,13 @@ class BaseESTool:
         else:
             query = "select * from {}".format(table_name)
 
+        if self.use_big_data:
+            return_type = "dask"
+        else:
+            return_type = "pandas"
         res_df = cx.read_sql(self.mysql_url,
                              query=query,
-                             return_type="pandas",
+                             return_type=return_type,
                              partition_num=10)
         return res_df
 

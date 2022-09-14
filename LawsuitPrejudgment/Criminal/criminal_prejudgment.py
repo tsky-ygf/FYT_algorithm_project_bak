@@ -21,7 +21,7 @@ from LawsuitPrejudgment.Criminal.parse_xmind import deal_xmind_to_dict
 import pandas as pd
 from pprint import pprint
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "3"
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 pd.set_option("display.max_columns", None)
 
 
