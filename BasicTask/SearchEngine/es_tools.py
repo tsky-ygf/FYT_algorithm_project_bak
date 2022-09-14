@@ -87,8 +87,9 @@ class BaseESTool:
         res = es.delete_by_query(index=self.index_name, body=query_body)
         print(res)
 
-    # def __call__(self, query_body):
-    #     self.es_init()
-    #     self.insert_data_to_es()
-    #     res_df = self.search_data_from_es(query_body)
-    #     print(res_df)
+    def __call__(self):
+        self.es_init()
+
+        for table_name in self.table_list:
+            df_data = self.get_df_data_from_db(table_name)
+            self.insert_data_to_es(df_data, table_name)

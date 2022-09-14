@@ -77,11 +77,7 @@ class LawItemsESTool(BaseESTool):
 
 if __name__ == '__main__':
     laws_es = LawItemsESTool(**case_es_tools)
-    laws_es.es_init()
-
-    for table_name_ in laws_es.table_list:
-        df_data_ = laws_es.get_df_data_from_db(table_name_)
-        laws_es.insert_data_to_es(df_data_)
+    laws_es()
 
     query_dict = {
         "query": {

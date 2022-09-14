@@ -14,7 +14,7 @@ case_es_tools = {
     "db_name": "judgments_data",
     "table_list": ["judgment_minshi_data", "judgment_xingshi_data"],
     "index_name": "case_index",
-    "debug": True,
+    "debug": False,
     "use_big_data": True
 }
 
@@ -47,11 +47,7 @@ if __name__ == '__main__':
     pd.set_option("display.max_columns", None)
 
     case_es = CaseESTool(**case_es_tools)
-    case_es.es_init()
-
-    for table_name_ in case_es.table_list:
-        df_data_ = case_es.get_df_data_from_db(table_name_)
-        case_es.insert_data_to_es(df_data_, table_name_)
+    case_es()
 
     query_dict = {"query": {"match": {"content": "买卖"}}}
     res = case_es.search_data_from_es(query_body=query_dict)
