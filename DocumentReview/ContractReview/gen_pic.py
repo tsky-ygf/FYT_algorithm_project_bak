@@ -81,6 +81,16 @@ def main():
         create_pic(file_list, f"data/DocData/buchong/{pic_name}.jpg")
 
 
+def main_v2():
+    for doc in Path("data/word").rglob("*.docx"):
+        doc_name = doc.stem
+        pic_name = doc.stem
+        doc_name = doc_name.replace('(', '|').replace(')', '')
+        file_list = doc_name.split("|")
+        create_pic(file_list, f"data/DocData/buchong/{pic_name}.jpg")
+
+
 if __name__ == "__main__":
     # create_pic(["为什么是我呢为什么是我呢这"], "DocumentReview/ContractReview/test.jpg")
-    main()
+    # main()
+    main_v2()
