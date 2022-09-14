@@ -33,12 +33,17 @@ class BaseESTool:
         self.debug = debug
         self.use_big_data = use_big_data
 
-    # 从数据库中获取数据
-    def get_df_data_from_db(self, table_name):
+    def get_query(self, table_name):
         if self.debug:
             query = "select * from {} limit 1000".format(table_name)
         else:
             query = "select * from {}".format(table_name)
+
+        return query
+
+    # 从数据库中获取数据
+    def get_df_data_from_db(self, table_name):
+        query = self.get_query(table_name)
 
         if self.use_big_data:
             return_type = "dask"

@@ -42,6 +42,14 @@ class LawItemsESTool(BaseESTool):
         with open("ProfessionalSearch/RelevantLaws/LegalLibrary/law_items_graph/xingshi_item.json") as f:
             self.xingshi_item = json.load(f)
 
+    # def get_query(self, table_name):
+    #     if self.debug:
+    #         query = "select * from {} limit 1000".format(table_name)
+    #     else:
+    #         query = "select * from {}".format(table_name)
+    #
+    #     return query
+
     @staticmethod
     def chuli_title(old_s):  # 保留中文、大小写、数字
         cop = re.compile("[^\u4e00-\u9fa5^0-9]")  # 匹配不是中文、大小写、数字的其他字符

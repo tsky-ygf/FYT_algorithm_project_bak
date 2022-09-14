@@ -23,6 +23,14 @@ case_es_tools = {
 
 
 class CaseESTool(BaseESTool):
+    # def get_query(self, table_name):
+    #     if self.debug:
+    #         query = "select * from {} limit 1000".format(table_name)
+    #     else:
+    #         query = "select * from {}".format(table_name)
+    #
+    #     return query
+
     def handle_es(self, df_data, table_name):
         for index, row in df_data.iterrows():
             data_ori = row.to_dict()
