@@ -34,7 +34,7 @@ class BaseESTool:
         self.debug = debug
         self.use_big_data = use_big_data
 
-    def get_query(self, table_name):
+    def get_query(self, table_name, *args, **kwargs):
         if self.debug:
             query = "select * from {} limit 1000".format(table_name)
         else:
@@ -43,7 +43,7 @@ class BaseESTool:
         return query
 
     # 从数据库中获取数据
-    def get_df_data_from_db(self, table_name):
+    def get_df_data_from_db(self, table_name, *args, **kwargs):
         query = self.get_query(table_name)
 
         if self.use_big_data:

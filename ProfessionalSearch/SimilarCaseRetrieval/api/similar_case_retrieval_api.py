@@ -48,9 +48,42 @@ def get_filter_conditions_of_case():
             "value": [
                 "全部",
                 "刑事",
-                "民事"   # 刑事、民事、行政、执行、其他
+                "民事"
+                # ,
+                # "行政",
+                # "执行"   # 刑事、民事、行政、执行、其他
             ]
         },
+        # "type_of_anyou":{
+        #     "xingshi":{
+        #         "name":"刑事",
+        #         "is_multiple_choice":True,
+        #         "value":[
+        #
+        #         ]
+        #     },
+        #     "mingshi": {
+        #         "name": "民事",
+        #         "is_multiple_choice": True,
+        #         "value": [
+        #
+        #         ]
+        #     },
+        #     "xingzhen": {
+        #         "name": "行政",
+        #         "is_multiple_choice": True,
+        #         "value": [
+        #
+        #         ]
+        #     },
+        #     "zhixing": {
+        #         "name": "执行",
+        #         "is_multiple_choice": True,
+        #         "value": [
+        #
+        #         ]
+        #     },
+        # },
         "court_level": {
             "name": "法院层级",
             "is_multiple_choice": True,
