@@ -72,7 +72,7 @@ def _get_detailed_news(news):
             "title": str(item["title"]).strip().strip("."),
             "release_time": item["release_time"],
             "content": _get_short_content(item["content"]),
-            "raw_content": item["raw_content"] + _get_suffix_content(item["source_char"]),
+            "raw_content": str(item["raw_content"]) + _get_suffix_content(item["source_char"]),
             "source_url": item["source_url"]
         }
         for item in news
