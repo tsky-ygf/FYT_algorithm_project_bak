@@ -45,10 +45,10 @@ class BasicAcknowledgement:
         self.review_result = self.init_review_result()
         self.data_list = self.read_origin_content(content, mode)
         data = '\n'.join(self.data_list)
-        data = data.replace('⾄', '至').replace('中华⼈民', '中华人民')
+        data = data.replace('⾄', '至').replace('中华⼈民', '中华人民').replace(' ','').replace(u'\xa0','')
         self.data = re.sub("[＿_]+", "", data)
         extraction_res = self.check_data_func()
-
+        print('where here! '*100)
         self.usr = usr
         self.rule_judge(extraction_res[0])
         self.review_result = {key: value for key, value in self.review_result.items() if value != {}}
@@ -188,6 +188,7 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
                                                      extraction_res["借款日期"][0]["text"],
                                                      extraction_res["还款日期"][0]["text"])
                     except Exception as e:
+                        self.logger.error('-'*50+'error!')
                         self.logger.error(e)
                         self.logger.error(extraction_res)
                 elif "日期外部关房屋租赁期限】" == row["pos rule"]:
