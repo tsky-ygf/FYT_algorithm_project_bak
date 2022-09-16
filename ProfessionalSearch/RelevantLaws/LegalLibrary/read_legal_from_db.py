@@ -306,7 +306,6 @@ if __name__ == "__main__":
         "query": {
             "bool": {
                 "must": [
-                    # {"match": {"isValid": {"query": "尚未生效", "boost": 5}}},
                     {"match": {"source": {"query": "监察法规", "boost": 5}}}
                 ]
             }

@@ -15,7 +15,7 @@ case_es_tools = {
     "user": "root",
     "passwords": "Nblh@2022",
     "db_name": "judgments_data",
-    "table_list": ["judgment_minshi_data", "judgment_xingshi_data"],
+    "table_list": ["judgment_minshi_data", "judgment_xingshi_data", "judgment_xingzheng_data", "judgment_zhixing_data"],
     "index_name": "case_index",
     "debug": False,
     "use_big_data": True
@@ -59,15 +59,20 @@ class CaseESTool(BaseESTool):
                      , raise_on_exception=False, raise_on_error=False)
 
     def __call__(self):
-        self.es_init()
-        start_end_mingshi = [[0, 2000000], [2000000, 2000000], [4000000, 2000000], [6000000, 2000000],[8000000, 2000000],[10000000, 2000000],[12000000, 2000000]
-                             ,[14000000, 2000000]]
+        # self.es_init()
+        start_end_mingshi = [[16000000, 2972566]] # judgement_mingshi_data 0-16000000 插入的_id 为 id， 16000000-18972566 插入的_id 为uq_id, 除此之外，尽量插入用uq_id
         start_end_xingshi = [[0, 2000000]]
+        start_end_xingzheng = [[0, 354799]]
+        start_end_zhixing = [[0, 2000000], [2000000, 2140804]]
         for table_name in self.table_list:
             if table_name == 'judgment_minshi_data':
                 start_end_df = pd.DataFrame(start_end_mingshi)
-            else:
+            elif table_name == 'judgment_xingshi_data':
                 start_end_df = pd.DataFrame(start_end_xingshi)
+            elif table_name == 'judgment_xingzheng_data':
+                start_end_df = pd.DataFrame(start_end_xingzheng)
+            elif table_name == 'judgment_zhixing_data':
+                start_end_df = pd.DataFrame(start_end_zhixing)
             for index, start_and_end in start_end_df.iterrows():
                 df_data = self.get_df_data_from_db(table_name, start_and_end[0], start_and_end[1])
                 self.insert_data_to_es(df_data, table_name)
@@ -88,7 +93,7 @@ class CaseESTool(BaseESTool):
             data_body = {key: value for key, value in data_ori.items() if key in use_data}
             data_body["db_name"] = self.db_name
             data_body["table_name"] = table_name
-            yield {"_op_type": "create", "_index": self.index_name, "_type": "_doc", "_id": row['id'], "_source": data_body}
+            yield {"_op_type": "create", "_index": self.index_name, "_type": "_doc", "_id": row['uq_id'], "_source": data_body}
 
 
 if __name__ == '__main__':

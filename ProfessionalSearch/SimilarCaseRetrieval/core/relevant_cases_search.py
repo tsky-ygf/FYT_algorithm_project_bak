@@ -128,12 +128,15 @@ def get_case_search_result(
         and region_list[0] != ""
         and region_list[0] != "全国"
     ):
-        prev_short_name = read_json_attribute_value(
-            "ProfessionalSearch/SimilarCaseRetrieval/api/provin_short_name.json",
-            region_list[0],
-        )
+        # prev_short_name = read_json_attribute_value(
+        #     "ProfessionalSearch/SimilarCaseRetrieval/api/provin_short_name.json",
+        #     region_list[0],
+        # )
+        # query_list.append(
+        #     {"match_phrase": {"event_num": {"query": prev_short_name, "boost": 5}}}
+        # )
         query_list.append(
-            {"match_phrase": {"event_num": {"query": prev_short_name, "boost": 5}}}
+            {"match_phrase": {"content": {"query": region_list[0], "boost": 5}}}
         )
 
     bool_value["must"] = query_list
