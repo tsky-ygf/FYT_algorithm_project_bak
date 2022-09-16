@@ -31,9 +31,7 @@ class Item(BaseModel):
 
 @app.post("/criminal_prejudgment")
 async def get_criminal_prejudgment(item: Item):
-    # result = predictor_dict[_criminal_type].predict([_fact])
     print("input item: ", item)
-    # next_question = criminal_pre_judgment(fact=item.fact, question_answers=item.question_answers).get_next_question()
     if item.question_answers == {}:
         criminal_pre_judgment.init_content()
 
@@ -42,8 +40,6 @@ async def get_criminal_prejudgment(item: Item):
         next_question = criminal_pre_judgment.get_next_question()
         return {"next_question": next_question}
 
-    # logger.info(result)
-    # print("next_question:", next_question)
     return {"result": criminal_pre_judgment.content["report_result"]}
 
 

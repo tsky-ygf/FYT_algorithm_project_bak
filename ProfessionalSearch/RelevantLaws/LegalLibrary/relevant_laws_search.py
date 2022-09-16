@@ -5,6 +5,8 @@
 # @Site    :
 # @File    : relevant_laws_search.py
 # @Software: PyCharm
+import re
+
 import jieba
 from ProfessionalSearch.RelevantLaws.LegalLibrary.read_legal_from_db import search_data_from_es
 
@@ -44,6 +46,7 @@ def get_law_search_result(
         page_size = 10
     if scope_of_use is None or scope_of_use[0] == "":
         scope_of_use = ["全国"]
+    text = re.sub('\W*', '', text)  # 去除标点符号，空格等
     text = " ".join(jieba.cut(text))
     # logger.info(text)
     text_list = text.split(" ")

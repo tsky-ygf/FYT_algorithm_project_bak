@@ -59,6 +59,7 @@ if usr == '甲方':
     usr = 'Part A'
 else:
     usr = 'Part B'
+
 if is_show:
     from DocumentReview.ContractReview.showing_sample import BasicUIEAcknowledgementShow
 
