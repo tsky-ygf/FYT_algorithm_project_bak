@@ -5,26 +5,45 @@
 # @Site    : 
 # @File    : contract_st_show.py
 # @Software: PyCharm
+import os
+import re
+
+import requests as requests
 import streamlit as st
 from annotated_text import annotated_text
+from docx import Document
 
-from DocumentReview.ParseFile.parse_word import read_docx_file
 # from paddlenlp import Taskflow
 # import pycorrector
 from loguru import logger
 from pprint import pprint
 from pypinyin import pinyin, lazy_pinyin
 
-
 # from annotated_text import annotated_text
 
 # text_correction = Taskflow("text_correction")
 
+# 读取docx 文件
+def read_docx_file(docx_path):
+    document = Document(docx_path)
+    # tables = document.tables
+    all_paragraphs = document.paragraphs
+    return_text_list = []
+    for index, paragraph in enumerate(all_paragraphs):
+        one_text = paragraph.text.replace(" ", "").replace("\u3000", "")
+        if one_text != "":
+            return_text_list.append(one_text)
+    # print(return_text_list)
+    data = '\n'.join(return_text_list)
+    data = data.replace('⾄', '至').replace('中华⼈民', '中华人民') \
+        .replace(' ', '').replace(u'\xa0', '').replace('\r\n', '\n')
+    data = re.sub("[＿_]+", "", data)
+    return data
+
 @st.cache
 def get_data(_file):
     _text = read_docx_file(_file)
-    # print(_text)
-    return "\n".join(_text)
+    return _text
 
 
 contract_type = st.sidebar.selectbox("请选择合同类型",
@@ -45,6 +64,13 @@ config_path = "DocumentReview/Config/{}.csv".format(contract_type)
 model_path = "model/uie_model/export_cpu/{}/inference".format(contract_type)
 # print(contract_type)
 
+if usr == '甲方':
+    usr = 'Part A'
+    usr2 = "party_a"
+else:
+    usr = 'Part B'
+    usr2 = "party_b"
+
 if mode_type == "docx":
     file = st.file_uploader('上传文件', type=['docx'], key=None)
     text = get_data(file)
@@ -55,17 +81,16 @@ elif mode_type == "文本":
 else:
     raise Exception("暂时不支持该数据格式")
 
-if usr == '甲方':
-    usr = 'Part A'
-else:
-    usr = 'Part B'
+correct = st.button("文本纠错")
+run = st.button("开始审核")
 
 if is_show:
     from DocumentReview.ContractReview.showing_sample import BasicUIEAcknowledgementShow
-
-    acknowledgement = BasicUIEAcknowledgementShow(config_path=config_path,
-                                                  model_path=model_path,
-                                                  device="cpu", )
+    # acknowledgement = BasicUIEAcknowledgementShow(config_path=config_path,
+    #                                               model_path=model_path,
+    #                                               device="cpu", )
+    # print(resp_json)
+    pass
 else:
     from DocumentReview.ContractReview.basic_contract import BasicUIEAcknowledgement
 
@@ -74,8 +99,6 @@ else:
                                               device="cpu", )
 # result = requests.post(url,json={"user_standpoint_id":usr})
 
-correct = st.button("文本纠错")
-run = st.button("开始审核")
 
 # use paddleNLP to correct the text
 # if correct:
@@ -142,16 +165,39 @@ if correct:
         # result = []
 
 if run:
-    acknowledgement.review_main(content=text, mode="text", usr=usr)
-    pprint(acknowledgement.review_result, sort_dicts=False)
+    # url = "http://101.69.229.138:8111/upload_docx_to_get_text"
+    # response_text = requests.post(url, files={'file':file.getvalue()})
+    # print("response_text_________________________")
+    # print(response_text.text)
+    url = "http://172.19.82.199:8110/get_contract_review_result"
+    req_data = {
+        "contract_type_id": contract_type,
+        "user_standpoint_id": usr2,
+        "contract_content": text
+    }
+    resp_json = requests.post(url, json=req_data).json()
+    # acknowledgement.review_main(content=text, mode="text", usr=usr)
+    # pprint(acknowledgement.review_result, sort_dicts=False)
     index = 1
 
     # st.write(acknowledgement.data)
-    origin_text = acknowledgement.data
+    # origin_text = acknowledgement.data
+    origin_text = text
     origin_text = list(origin_text)
     length_origin_text = len(origin_text)
+    value_list = resp_json['result']
+    for value_en in value_list:
+        key = value_en.get('review_point','')
+        value = {}
+        value['审核结果'] = value_en.get('review_result','')
+        value['内容'] = value_en.get('review_content','')
+        value['风险等级'] = value_en.get('risk_level','')
+        value['风险点'] = value_en.get('risk_point','')
+        value['法律建议'] = value_en.get('legal_basis','')
+        value['start'] = value_en.get('review_content_start','')
+        value['end'] = value_en.get('review_content_end','')
 
-    for key, value in acknowledgement.review_result.items():
+    # for key, value in acknowledgement.review_result.items():
         # st.write(key, value)
         # st.wr(value)
         st.markdown('### {}、审核点：{}'.format(index, key))
@@ -206,4 +252,4 @@ if run:
             origin_text[i] = (str(origin_text[i][0]), '', str(origin_text[i][1]))
     annotated_text(*origin_text)
     st.write('-'*100)
-    st.text(acknowledgement.data)
+    st.text(text)

@@ -21,9 +21,6 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 # 16M
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1000 * 1000
 app.secret_key = 'qweasdqwe'
-@app.route('/', methods=['GET', 'POST'])
-def hello_world():
-    return 'Hello, World!'
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -44,6 +41,8 @@ def file_link_path_to_text():
                 return json.dumps({'text': '', 'status': 0, 'message': 'not allowed file, only .docx and .txt'}, ensure_ascii=False)
             os.system('cd data/uploads && wget '+file_path)
             filename = file_path.split('/')[-1]
+            if not os.path.exists(os.path.join('data/uploads',filename)):
+                return json.dumps({'text': '', 'status': 0, 'message': 'not get file'}, ensure_ascii=False)
             if '.docx' in file_path:
                 data = read_docx_file(os.path.join('data/uploads',filename))
             elif '.txt' in file_path:
@@ -52,8 +51,6 @@ def file_link_path_to_text():
                  return json.dumps({'text': '', 'status': 0, 'message': 'not allowed file, only .docx and .txt'},
                                   ensure_ascii=False)
             os.remove(os.path.join('data/uploads',filename))
-            if not os.path.exists(os.path.join('data/uploads',filename)):
-                return json.dumps({'text': '', 'status': 0, 'message': 'not get file'}, ensure_ascii=False)
             return json.dumps({'text': data, 'status':1, 'message':'ok'},ensure_ascii=False)
         else:
             return json.dumps({'text': '', 'status': 0, 'message': 'no input'}, ensure_ascii=False)
