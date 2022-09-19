@@ -99,14 +99,15 @@ def get_template_by_problem_id():
         }}, ensure_ascii=False)
 
 
-@app.route('/get_claim_list_by_problem_id', methods=["get"])
+@app.route('/get_claim_list_by_problem_id', methods=["get", "post"])
 def get_claim_list_by_problem_id():
-    mapped_problem = _get_mapped_problem(request.args.get("problem_id"))
+    req_data = _request_parse(request)
+    mapped_problem = _get_mapped_problem(req_data.get("problem_id"))
     claim_list = user_ps.get(str(mapped_problem), [])
     return json.dumps({
         "success": True,
         "error_msg": "",
-        "value": [{"id": idx, "claim": claim} for idx, claim in enumerate(claim_list)]
+        "value": [{"id": idx, "claim": claim, "is_recommended": True if idx % 3 == 1 else False} for idx, claim in enumerate(claim_list)]
     }, ensure_ascii=False)
 
 

@@ -34,15 +34,15 @@ def test_get_template_by_problem_id():
 
 
 def test_get_claim_list_by_problem_id():
-    url = "http://101.69.229.138:8100/get_claim_list_by_problem_id"
-    params = {"problem_id": 1536}
-    resp_json = requests.get(url, params=params).json()
+    url = "http://101.69.229.138:7100/get_claim_list_by_problem_id"
+    body = {"problem_id": 1536, "fact": "婚后男的方父母出资首得到付，夫妻名义贷款还贷，房产证只写男方名，离婚后财产如何分配"}
+    resp_json = requests.post(url, json=body).json()
 
     print(resp_json)
     assert resp_json
     assert resp_json.get("success")
     assert resp_json.get("value")
-    assert next((item.get("claim") for item in resp_json["value"] if item.get("claim") == "请求返还彩礼"), None)
+    assert next((item.get("claim") for item in resp_json["value"] if item.get("claim") == "返还彩礼"), None)
 
 
 def test_should_ask_next_question_when_reasoning_graph_result():
