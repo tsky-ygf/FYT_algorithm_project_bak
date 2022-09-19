@@ -41,7 +41,7 @@ tokenizer = BertTokenizer.from_pretrained("model/language_model/macbert4csc-base
 model = BertForMaskedLM.from_pretrained("model/language_model/macbert4csc-base-chinese")
 model.to(device)
 
-texts = '整体上培训对我的收获还是非常之大，也有很多很多的心得感悟，以上只是一部分自己的随感而发，也因文笔功力也实属有限，再写怕成了懒婆娘的脚。'
+texts = '谈客户，大家技术基本都差不多，你很难技术去吊打别人。比拼的，就是谁脏活累活干的多，别人懒得做的奇葩需求，你要多做。这些都没啥沉淀和成长。都是成本和负担'
 with torch.no_grad():
     outputs = model(**tokenizer(texts, padding=True, return_tensors='pt').to(device))
 

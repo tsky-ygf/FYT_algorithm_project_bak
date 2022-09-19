@@ -91,6 +91,6 @@ def main_v2():
 
 
 if __name__ == "__main__":
-    # create_pic(["为什么是我呢为什么是我呢这"], "DocumentReview/ContractReview/test.jpg")
+    create_pic(["二手车买卖居间服务合同（深圳市）"], "DocumentReview/ContractReview/test.jpg")
     # main()
-    main()
+    # main()
