@@ -23,15 +23,19 @@ def _get_initial_answer(question: str):
     return None
 
 
+def _post_process(answer: str):
+    return str(answer).replace("\r\n", "\n")
+
+
 def get_query_answer(question: str):
     initial_answer = _get_initial_answer(question)
     if initial_answer:
         return {
-            "answer": initial_answer
+            "answer": _post_process(initial_answer)
         }
 
     url = "http://172.19.82.198:5050/get_query_answer"
     resp_json = requests.post(url, json={"question":question}).json()
     return {
-        "answer": resp_json.get("answer")
+        "answer": _post_process(resp_json.get("answer"))
     }
