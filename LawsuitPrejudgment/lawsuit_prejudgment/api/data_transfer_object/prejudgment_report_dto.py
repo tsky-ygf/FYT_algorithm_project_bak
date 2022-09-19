@@ -46,6 +46,14 @@ class CivilReportDTO:
             for item in self.response_dict["result"]["report"]
         ]
 
+        # 添加裁判规则的报告内容
+        if self.response_dict["result"]["judging_rule"]:
+            report.append([{
+                "type": "TYPE_LIST_OF_TEXT",
+                "title": "裁判规则",
+                "content": [item["judging_rule"] for item in self.response_dict["result"]["judging_rule"]]
+            }])
+
         # 删除证据为空的内容
         for claim_report in report:
             if None in claim_report:
