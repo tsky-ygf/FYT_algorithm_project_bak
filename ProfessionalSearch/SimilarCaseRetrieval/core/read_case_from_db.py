@@ -88,31 +88,32 @@ if __name__ == "__main__":
                     # {"match_phrase": {"faYuan_name": "中级"}},
                     # {"match_phrase": {"jfType": "合同纠纷"}},
                     # {"match_phrase": {"event_type": "裁定书"}},
-                    {"match": {"faYuan_name": {"query": "中级",
+                    {"match": {"faYuan_name": {"query": "最高",
                                               # "operator": "and"
                                                "boost": 3
                                               }}},
-                    {"match_phrase": {"jfType": {"query": "合同纠纷",
-                                          "boost": 3
-                                              # "operator": "and"
-                                              }}},
+                    # {"match_phrase": {"jfType": {"query": "合同纠纷",
+                    #                       "boost": 3
+                    #                           # "operator": "and"
+                    #                           }}},
 
-                    {"match": {"event_type": {"query": "裁定书",
+                    {"match_phrase": {"event_type": {"query": "裁定",
                                               "boost": 3
                                            # "operator": "and"
                                            }}},
-                    {"match": {"event_num": {"query": "青",
-                                           "boost": 5,
-                                           # "operator": "and"
-                                           }}},
-                    {"match": {"content": {"query": "买卖",
+                    {"match_phrase": {"table_name": {"query": "judgment_minshi_data", "boost": 3}}},
+                    # {"match": {"event_num": {"query": "青",
+                    #                        "boost": 5,
+                    #                        # "operator": "and"
+                    #                        }}},
+                    {"match": {"content": {"query": "广东省",
                                            "boost": 5,
                                             # "operator": "and"
                                       }}},
-                    {"match": {"content": {"query": "契约",
-                                           "boost": 5,
-                                           # "operator": "and"
-                                           }}},
+                    # {"match": {"content": {"query": "契约",
+                    #                        "boost": 5,
+                    #                        # "operator": "and"
+                    #                        }}},
                 ],
             }
         }

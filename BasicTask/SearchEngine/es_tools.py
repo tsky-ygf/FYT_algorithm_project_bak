@@ -34,7 +34,7 @@ class BaseESTool:
         self.debug = debug
         self.use_big_data = use_big_data
 
-    def get_query(self, table_name):
+    def get_query(self, table_name, *args, **kwargs):
         if self.debug:
             query = "select * from {} limit 1000".format(table_name)
         else:
@@ -43,7 +43,7 @@ class BaseESTool:
         return query
 
     # 从数据库中获取数据
-    def get_df_data_from_db(self, table_name):
+    def get_df_data_from_db(self, table_name, *args, **kwargs):
         query = self.get_query(table_name)
 
         if self.use_big_data:
@@ -95,7 +95,8 @@ class BaseESTool:
         es = Elasticsearch(hosts=self.es_host)
         res = es.delete_by_query(index=self.index_name, body=query_body)
         print(res)
-
+    # TODO 批量插入
+    # TODO 批量更新
     def __call__(self):
         self.es_init()
 

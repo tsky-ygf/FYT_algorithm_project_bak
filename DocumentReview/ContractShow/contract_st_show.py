@@ -130,7 +130,7 @@ if correct:
                 error_list.append(error_text)
                 # for
         res_dict = {"原始文本": origin_text_list, "纠错后的文本": correct_text_list, "错别字": error_list}
-        print(res_dict)
+        # print(res_dict)
 
         my_df = pd.DataFrame.from_dict(res_dict)
         st.table(my_df)
@@ -149,6 +149,7 @@ if run:
     # st.write(acknowledgement.data)
     origin_text = acknowledgement.data
     origin_text = list(origin_text)
+    length_origin_text = len(origin_text)
 
     for key, value in acknowledgement.review_result.items():
         # st.write(key, value)
@@ -186,20 +187,23 @@ if run:
                 st.markdown("end: {}".format(value['end']))
                 starts = str(value['start']).split('#')
                 starts = list(filter(None, starts))
-                starts = list(map(lambda x:int(x),starts))
+                starts = list(map(lambda x: int(x), starts))
                 ends = str(value['end']).split('#')
                 ends = list(filter(None, ends))
-                ends = list(map(lambda x:int(x), ends))
-                if dang!=0:
+                ends = list(map(lambda x: int(x), ends))
+                if dang != 0:
                     for start, end in zip(starts, ends):
                         for ind in range(start, end):
                             if isinstance(origin_text[ind], str):
-                                origin_text[ind] =  (str(origin_text[ind]),dang)
+                                origin_text[ind] = (str(origin_text[ind]), dang)
+                            # st.write(origin_text[ind])
         except Exception as e:
+            print('-'*50+'error!')
             print(e)
             st.write("这个审核点小朱正在赶制，客官请稍等。。。。可爱")
     for i in range(len(origin_text)):
         if not isinstance(origin_text[i], str):
-            origin_text[i] = (str(origin_text[i][0]),'' ,str(origin_text[i][1]))
+            origin_text[i] = (str(origin_text[i][0]), '', str(origin_text[i][1]))
     annotated_text(*origin_text)
-
+    st.write('-'*100)
+    st.text(acknowledgement.data)

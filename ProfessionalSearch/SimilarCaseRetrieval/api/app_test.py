@@ -12,8 +12,8 @@ def req_conditions(url_filter_conditions):
 @print_run_time
 def req_case(url_search_case, input_json):
     r = requests.post(url_search_case, json=input_json) #
-    # res = r.json()
-    print(r)
+    res = r.json()
+    print(res)
     pass
 
 @print_run_time
@@ -25,14 +25,14 @@ def req_law_document(url_law_document, input_json_doc):
 
 if __name__=='__main__':
     # url_filter_conditions = 'http://172.19.82.199:8156/get_filter_conditions_of_case'
-    # url_search_case = 'http://172.19.82.199:8156/search_cases'
-    url_law_document = 'http://172.19.82.199:8156/get_law_document'
-    query = "买卖 契约"
+    url_search_case = 'http://172.19.82.199:8160/search_cases'
+    # url_law_document = 'http://101.69.229.138:7145/get_law_document'
+    query = ""
     filter_conditions = {
-        'type_of_case': ['合同纠纷'],
-        'court_level': ['中级'],
+        'type_of_case': ['民事'],
+        'court_level': ['最高'],
         'type_of_document': ['裁定书'],
-        'region': ['青海省'],
+        'region': ['广东省'],
         # 'size': 10,
     }
     input_json = {
@@ -41,8 +41,8 @@ if __name__=='__main__':
         "query": query
         , "filter_conditions": filter_conditions  # 预测诉求时，目前输入参数无效， 预测情形时需要输入
     }
-    input_json_doc = {"doc_id": "7bfd4c29-ab17-4a61-a905-a9b2017ef685"}
+    # input_json_doc = {"doc_id": "66ed0e28-7d94-423a-8583-aae301134b1e"}
     # req_conditions(url_filter_conditions)
-    # req_case(url_search_case, input_json)
-    req_law_document(url_law_document, input_json_doc)
+    req_case(url_search_case, input_json)
+    # req_law_document(url_law_document, input_json_doc)
     # req_situa(url_situation, input_json)
