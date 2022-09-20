@@ -108,7 +108,7 @@ def get_claim_list_by_problem_id():
     return json.dumps({
         "success": True,
         "error_msg": "",
-        "value": [{"id": idx, "claim": claim, "is_recommended": True if idx % 3 == 1 else False} for idx, claim in enumerate(claim_list)]
+        "value": [{"id": idx, "claim": claim, "is_recommended": False} for idx, claim in enumerate(claim_list)]
     }, ensure_ascii=False)
 
 
