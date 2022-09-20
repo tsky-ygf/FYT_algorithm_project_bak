@@ -45,10 +45,10 @@ class BasicAcknowledgement:
         self.review_result = self.init_review_result()
         self.data_list = self.read_origin_content(content, mode)
         data = '\n'.join(self.data_list)
-        data = data.replace('⾄', '至').replace('中华⼈民', '中华人民').replace(' ','').replace(u'\xa0','')
+        data = data.replace('⾄', '至').replace('中华⼈民', '中华人民').replace(' ', '').replace(u'\xa0', '')
         self.data = re.sub("[＿_]+", "", data)
         extraction_res = self.check_data_func()
-        print('where here! '*100)
+        print('where here! ' * 100)
         self.usr = usr
         self.rule_judge(extraction_res[0])
         self.review_result = {key: value for key, value in self.review_result.items() if value != {}}
@@ -150,9 +150,14 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
                     res_dict["法律建议"] = row["B pos legal advice"]
                 if "身份证校验" == row["pos rule"]:
                     rule_func.check_id_card(row, extraction_con, res_dict)
+
+                elif '一次性付款条款审核' == row['pos rule']:
+                    rule_func.check_once_pay(row,extraction_con,res_dict)
+                elif '房屋租赁押金审核' in row['pos rule']:
+                    rule_func.check_deposit(row, extraction_res, res_dict)
                 # TODO
-                elif "预付款审核" == row['pos rule']:
-                    rule_func.check_prepayments(row, extraction_con, res_dict)
+                # elif "预付款审核" == row['pos rule']:
+                #     rule_func.check_prepayments(row, extraction_con, res_dict)
                 elif '产品名称审核' == row['pos rule']:
                     rule_func.check_product_name(row, extraction_con, res_dict)
                 elif '试用期期限审核' == row['pos rule']:
@@ -181,14 +186,16 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
                 elif "日期内部关联" == row["pos rule"]:
                     rule_func.check_date_relation(row, extraction_con, res_dict)
                 elif "日期外部关联【还款日期-借款日期】" == row["pos rule"]:
-                    # self.logger.debug(extraction_res["还款日期"][0]["text"])
-                    # self.logger.debug(extraction_res["借款日期"][0]["text"])
                     try:
-                        rule_func.check_date_outside(row, extraction_con, res_dict,
-                                                     extraction_res["借款日期"][0]["text"],
-                                                     extraction_res["还款日期"][0]["text"])
+                        if not '借款日期' in extraction_res or '还款日期' not in extraction_res:
+                            res_dict['审核结果'] = '不通过'
+                            res_dict['法律建议'] = row['jiaoyan error advice']
+                        else:
+                            rule_func.check_date_outside(row, extraction_con, res_dict,
+                                                         extraction_res["借款日期"][0]["text"],
+                                                         extraction_res["还款日期"][0]["text"])
                     except Exception as e:
-                        self.logger.error('-'*50+'error!')
+                        self.logger.error('-' * 50 + 'error!')
                         self.logger.error(e)
                         self.logger.error(extraction_res)
                 elif "日期外部关房屋租赁期限】" == row["pos rule"]:
@@ -222,6 +229,8 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
                     res_dict["内容"] = extraction_con[0]['text']
                     res_dict["start"] = extraction_con[0]['start']
                     res_dict["end"] = extraction_con[0]['end']
+                    res_dict['风险等级'] = row['risk level']
+                    res_dict["风险点"] = row["risk statement"]
 
                 else:
                     res_dict["审核结果"] = "通过"
@@ -241,13 +250,14 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
                             res_dict["end"] = str(con['end']) + '#'
 
                 # model cannot recognize
-                if ('甲方' == row['schema'] or '甲方联系方式' == row['schema'] or '甲方地址' == row['schema']) and len(
-                        extraction_con) > 1:
+                if ('甲方' == row['schema'] or '甲方联系方式' == row['schema'] or '甲方地址' == row['schema']
+                    or '甲方身份证号/统一社会信用代码' == row['schema']) and len(
+                    extraction_con) > 1:
                     res_dict["内容"] = extraction_con[0]['text']
                     res_dict["start"] = str(extraction_con[0]['start'])
                     res_dict["end"] = str(extraction_con[0]['end'])
                 elif ('乙方' == row['schema'] or '乙方联系方式' == row['schema'] or '乙方地址' == row[
-                    'schema']) and len(extraction_con) > 1:
+                    'schema'] or '乙方身份证号/统一社会信用代码' == row['schema']) and len(extraction_con) > 1:
                     res_dict["内容"] = extraction_con[1]['text']
                     res_dict["start"] = str(extraction_con[1]['start'])
                     res_dict["end"] = str(extraction_con[1]['end'])
@@ -260,6 +270,8 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
                     res_dict["内容"] = r
                 else:
                     res_dict["内容"] = row['schema']
+                if r in self.data:
+                    self.add_start_end(r, res_dict)
 
             elif row['neg rule'] == "未识别，不作审核" or row['neg rule'] == "未识别，不做审核":
                 res_dict = {}
@@ -291,6 +303,14 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
 
             self.review_result[row['schema']].update(res_dict)
 
+    def add_start_end(self, content, res_dict):
+        if content in self.data:
+            index_r = self.data.index(content)
+            start_t = index_r
+            end_t = index_r + len(content)
+            res_dict['start'] = start_t
+            res_dict['end'] = end_t
+
     def rule_judge2(self, *args, **kwargs):
         pass
 
@@ -298,7 +318,7 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
 if __name__ == '__main__':
     import time
 
-    contract_type = "baomi"
+    contract_type = "fangwuzulin"
 
     os.environ['CUDA_VISIBLE_DEVICES'] = "1"
     acknowledgement = BasicUIEAcknowledgement(config_path="DocumentReview/Config/{}.csv".format(contract_type),
@@ -310,7 +330,7 @@ if __name__ == '__main__':
     print("## First Time ##")
     localtime = time.time()
 
-    acknowledgement.review_main(content="data/DocData/baomi/baomi3.docx", mode="docx", usr="Part B")
+    acknowledgement.review_main(content="data/DocData/fangwuzulin/fwzl1.docx", mode="docx", usr="Part B")
     pprint(acknowledgement.review_result, sort_dicts=False)
     print('use time: {}'.format(time.time() - localtime))
 

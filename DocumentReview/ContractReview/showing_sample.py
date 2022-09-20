@@ -31,7 +31,6 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
 
     def rule_judge2(self, extraction_res):
         self.logger.debug("res: {}".format(extraction_res))
-        # self.data = self.data.replace(' ', '')
         for index, row in self.config.iterrows():
             res_dict = {}
 
@@ -45,6 +44,7 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
 
                 if "身份证校验" == row["pos rule"]:
                     rule_func.check_id_card(row, extraction_con, res_dict)
+
 
                 # TODO
                 # elif "预付款审核" == row['pos rule']:
@@ -162,11 +162,10 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
                 else:
                     res_dict["内容"] = row['schema']
                 if r in self.data:
-                    self.add_start_end(r,res_dict)
+                    self.add_start_end(r, res_dict)
 
             elif row['neg rule'] == "未识别，不作审核" or row['neg rule'] == "未识别，不做审核":
                 res_dict = {}
-
             else:
                 res_dict["审核结果"] = "不通过"
                 res_dict["内容"] = "没有该项目内容"
@@ -1204,7 +1203,7 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
                         res_dict['法律建议'] = '开户名称缺失或约定不明确，建议补充完整。'
                         res_dict['审核结果'] = '不通过'
             elif 'jietiao' in self.model_path:
-                # if ''
+
                 pass
 
             self.review_result[row['schema']].update(res_dict)
@@ -1481,7 +1480,7 @@ if __name__ == '__main__':
 
     contract_type = "fangwuzulin"
 
-    os.environ['CUDA_VISIBLE_DEVICES'] = "2"
+    os.environ['CUDA_VISIBLE_DEVICES'] = "0"
     acknowledgement = BasicUIEAcknowledgementShow(config_path="DocumentReview/Config/{}.csv".format(contract_type),
                                                   log_level="INFO",
                                                   # model_path="model/uie_model/new/{}/model_best/".format(contract_type),
@@ -1491,6 +1490,6 @@ if __name__ == '__main__':
     print("## First Time ##")
     localtime = time.time()
 
-    acknowledgement.review_main(content="data/DocData/fangwuzulin/fwzl3.docx", mode="docx", usr="Part A")
+    acknowledgement.review_main(content="data/DocData/fangwuzulin/fwzl1.docx", mode="docx", usr="Part A")
     pprint(acknowledgement.review_result, sort_dicts=False)
     print('use time: {}'.format(time.time() - localtime))

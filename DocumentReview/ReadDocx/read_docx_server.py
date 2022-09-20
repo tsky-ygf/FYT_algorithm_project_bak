@@ -13,7 +13,7 @@ from docx import Document
 from flask import Flask, flash, request, redirect, url_for
 from werkzeug.utils import secure_filename
 
-UPLOAD_FOLDER = '/home/fyt/data/uploads/'
+UPLOAD_FOLDER = 'data/uploads/'
 ALLOWED_EXTENSIONS = {'txt', 'docx'}
 
 app = Flask(__name__)
