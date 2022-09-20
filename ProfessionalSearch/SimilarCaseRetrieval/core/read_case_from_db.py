@@ -88,36 +88,86 @@ if __name__ == "__main__":
                     # {"match_phrase": {"faYuan_name": "中级"}},
                     # {"match_phrase": {"jfType": "合同纠纷"}},
                     # {"match_phrase": {"event_type": "裁定书"}},
-                    {"match": {"faYuan_name": {"query": "最高",
-                                              # "operator": "and"
-                                               "boost": 3
-                                              }}},
+                    {
+                        "match": {
+                            "faYuan_name": {
+                                "query": "最高",
+                                # "operator": "and"
+                                "boost": 3,
+                            }
+                        }
+                    },
                     # {"match_phrase": {"jfType": {"query": "合同纠纷",
                     #                       "boost": 3
                     #                           # "operator": "and"
                     #                           }}},
-
-                    {"match_phrase": {"event_type": {"query": "裁定",
-                                              "boost": 3
-                                           # "operator": "and"
-                                           }}},
-                    {"match_phrase": {"table_name": {"query": "judgment_minshi_data", "boost": 3}}},
+                    {
+                        "match_phrase": {
+                            "event_type": {
+                                "query": "裁定",
+                                "boost": 3
+                                # "operator": "and"
+                            }
+                        }
+                    },
+                    {
+                        "match_phrase": {
+                            "table_name": {"query": "judgment_minshi_data", "boost": 3}
+                        }
+                    },
                     # {"match": {"event_num": {"query": "青",
                     #                        "boost": 5,
                     #                        # "operator": "and"
                     #                        }}},
-                    {"match": {"content": {"query": "广东省",
-                                           "boost": 5,
-                                            # "operator": "and"
-                                      }}},
+                    {
+                        "match": {
+                            "content": {
+                                "query": "广东省",
+                                "boost": 5,
+                                # "operator": "and"
+                            }
+                        }
+                    },
                     # {"match": {"content": {"query": "契约",
                     #                        "boost": 5,
                     #                        # "operator": "and"
                     #                        }}},
                 ],
             }
-        }
+        },
     }
+
+    query_dict = {
+        # "from": 1,
+        # "size": 100,
+        "query": {
+            "bool": {
+                "must": [
+                    # {"match_phrase": {"faYuan_name": {"query": "最高", "boost": 3}}},
+                    # {
+                    #     "match_phrase": {
+                    #         "table_name": {"query": "judgment_zhixing_data", "boost": 3}
+                    #     }
+                    # },
+                    # {"match_phrase": {"event_type": {"query": "执行裁定书", "boost": 3}}}, a8fabf8511a90eeaddcca1f804c7da25
+                    {"match_phrase": {"uq_id": {"query": "a8fabf8511a90eeaddcca1f804c7da25", "boost": 10}}},
+                ]
+            }
+        },
+    }
+
+    # query_dict = {
+    #     "from": 1,
+    #     "size": 10,
+    #     "query": {
+    #         "match_all": {}
+    #         },
+    #      "script_fields": {
+    #          "content": {
+    #              "source":"doc['content'].value.substring(0,'）').contain('广东')"
+    #          }
+    #      }
+    #     }
 
     res_df = search_data_from_es(query_dict)
     # res_df = pd.DataFrame(columns=[''])
