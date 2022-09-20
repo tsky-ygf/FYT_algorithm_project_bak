@@ -30,7 +30,7 @@ def _get_law_table_name(law_type):
     mapping = {
         '法律': 'flfg_result_falv',
         '行政法规': 'flfg_result_xzfg',
-        # '监察法规': 2,
+        '监察法规': 'flfg_result_jcfg',
         '司法解释': 'flfg_result_sfjs',
         '宪法': 'flfg_result_xf',
         '地方性法规': 'flfg_result_dfxfg'

@@ -17,5 +17,9 @@ input0 = ['我是一个中国人', '我是一个美国人']
 input_ids = tokenizers(input0, return_tensors="pt", padding=True, truncation=True)
 print(input_ids)
 output = model(**input_ids)
-print(output)
+output = output.pooler_output
+# print(output)
 # print(output.pooler_output.shape)
+# output = model.encoder(**input_ids)
+print(output.shape)
+print(output)
