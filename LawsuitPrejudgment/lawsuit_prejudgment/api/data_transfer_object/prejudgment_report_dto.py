@@ -7,6 +7,12 @@
 """
 
 
+def _reorder_claims(report):
+    """调整诉求报告的顺序：如果诉求A有前置诉求P，将P的报告顺序放在A后。即先展示诉求、再展示前置诉求。"""
+    # 直接反序，是最简便的方式。后续发现不妥，应调整相应的实现。
+    return list(reversed(report))
+
+
 class CivilReportDTO:
     def __init__(self, response_dict):
         self.response_dict = response_dict
@@ -45,6 +51,9 @@ class CivilReportDTO:
             ]
             for item in self.response_dict["result"]["report"]
         ]
+
+        # 调整诉求报告的顺序
+        report = _reorder_claims(report)
 
         # 添加裁判规则的报告内容
         if self.response_dict["result"]["judging_rule"]:
