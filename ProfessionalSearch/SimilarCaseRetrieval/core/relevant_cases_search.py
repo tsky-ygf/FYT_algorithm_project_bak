@@ -66,10 +66,8 @@ def get_case_search_result(
     # es查询json
     query_list = []
     bool_value = {}
-    if len(text_list) > 0 and text_list[0] != "":
+    if len(text_list) > 0:
         for one_text in text_list:
-            if one_text == "":
-                continue
             query_list.append(
                             {"match": {"content": {"query": one_text, "boost": 5}}}
             )
@@ -100,8 +98,12 @@ def get_case_search_result(
     elif len(type_case_list) > 0:
         if type_case_list[0] == "民事":
             type_case = "judgment_minshi_data"
-        else:
+        elif type_case_list[0] == "刑事":
             type_case = "judgment_xingshi_data"
+        elif type_case_list[0] == "执行":
+            type_case = "judgment_zhixing_data"
+        elif type_case_list[0] == "行政":
+            type_case = "judgment_xingzheng_data"
         query_list.append(
             {"match_phrase": {"table_name": {"query": type_case, "boost": 3}}}
         )

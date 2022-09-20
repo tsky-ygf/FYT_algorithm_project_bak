@@ -74,10 +74,29 @@ class BaseESTool:
             data_ori = row.to_dict()
             yield {"_index": self.index_name, "_type": "_doc", "_source": data_ori}
 
+    def handle_es_update(self, df_data, *args, **kwargs):
+        for index, row in df_data.iterrows():
+            data_ori = row.to_dict()
+            yield {"_op_type": "update", "_index": self.index_name, "_id": row['uq_id'], "_type": "_doc", "doc": data_ori}
+
+    def handle_es_create(self, df_data, *args, **kwargs):
+        for index, row in df_data.iterrows():
+            data_ori = row.to_dict()
+            yield {"_op_type": "create", "_index": self.index_name, "_id": row['uq_id'], "_type": "_doc", "_source": data_ori}
+
+    def update_data_to_es(self, *args, **kwargs):
+        es = Elasticsearch(hosts=self.es_host)
+        # 更新数据
+        helpers.bulk(es, self.handle_es_update(*args, **kwargs))
+
+    def create_data_to_es(self, *args, **kwargs):
+        es = Elasticsearch(hosts=self.es_host)
+        # 创建数据，有则跳过，无则插入
+        helpers.bulk(es, self.handle_es_create(*args, **kwargs))
     # 插入数据到es
     def insert_data_to_es(self, *args, **kwargs):
         es = Elasticsearch(hosts=self.es_host)
-        # 插入数据
+        # 插入数据，有则删除，无则插入
         helpers.bulk(es, self.handle_es(*args, **kwargs))
 
 
@@ -95,8 +114,9 @@ class BaseESTool:
         es = Elasticsearch(hosts=self.es_host)
         res = es.delete_by_query(index=self.index_name, body=query_body)
         print(res)
-    # TODO 批量插入
-    # TODO 批量更新
+    # TODO 多线程插入
+    # TODO 多线程更新
+    # TODO 多线程删除
     def __call__(self):
         self.es_init()
 
