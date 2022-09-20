@@ -48,3 +48,6 @@ gevent
 fastapi
 pydantic
 uvicorn
+Werkzeug
+addressparser
+farm-haystack
