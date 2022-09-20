@@ -114,9 +114,9 @@ class BaseESTool:
         es = Elasticsearch(hosts=self.es_host)
         res = es.delete_by_query(index=self.index_name, body=query_body)
         print(res)
-    # TODO 批量插入
-    # TODO 批量更新
-    # TODO 批量删除
+    # TODO 多线程插入
+    # TODO 多线程更新
+    # TODO 多线程删除
     def __call__(self):
         self.es_init()
 
