@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2022/09/08 15:22
 # @Author  : Czq
-# @File    : main.py
+# @File    : run_qa.py
 # @Software: PyCharm
 import os
 from transformers import WEIGHTS_NAME, BertConfig,get_linear_schedule_with_warmup,AdamW, BertTokenizer
@@ -13,7 +13,6 @@ import torch
 import argparse
 from pprint import pprint
 import numpy as np
-from tqdm import tqdm
 from torch.utils.data import DataLoader
 
 from DocumentReview.PointerBert.utils import load_data, set_seed, ReaderDataset, batchify, read_config_to_label, \
@@ -133,6 +132,9 @@ def main(args):
         """    y_true = torch.cat([y_true, starts])
             y_true = torch.cat([y_true, ends])
 
+            start_prob, end_prob = model(encoded_dicts)
+            y_true = torch.cat([y_true, starts])
+            y_true = torch.cat([y_true, ends])
             thred = torch.FloatTensor([0.5]).to(args.device)
             start_pred = start_prob > thred
             end_pred = end_prob > thred
@@ -185,6 +187,7 @@ def main(args):
         # print(class_info['name'])
         f1 = score['f1']
         print("epoch:", e, "  p: {0}, r: {1}, f1: {2}".format(score['acc'], score['recall'], score['f1']))
+
 
         if f1 > best_f1:
             print("f1 score increased  {0}==>{1}".format(best_f1, f1))

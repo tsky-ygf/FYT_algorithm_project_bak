@@ -27,9 +27,9 @@ class TrainLawsCls(BaseTrainTool):
 
     def init_dataset(self):
         train_dataset = LawsAnyouClsDataset(self.tokenizer,
-                                        self.config["train_data_path"],)
+                                            self.config["train_data_path"], )
         valid_dataset = LawsAnyouClsDataset(self.tokenizer,
-                                        self.config["dev_data_path"],)
+                                            self.config["dev_data_path"], )
         return train_dataset, valid_dataset
 
     def cal_loss(self, batch):

@@ -5,12 +5,11 @@
 # @Site    : 
 # @File    : infer_tool.py
 # @Software: PyCharm
-import os
 import torch
 from tqdm.auto import tqdm
 
 from Utils.logger import get_module_logger
-from Utils.parse_file import parse_config_file
+from Tools.parse_argument import parse_config_file
 from torch.utils import data
 
 from transformers import default_data_collator

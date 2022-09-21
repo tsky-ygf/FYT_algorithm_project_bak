@@ -5,6 +5,7 @@
 @Time    : 3/9/2022 12:12 
 @Desc    : None
 """
+import pandas as pd
 import requests
 
 from LawsuitPrejudgment.lawsuit_prejudgment.constants import CIVIL_SIMILAR_CASE_ID_PREFIX
@@ -141,6 +142,7 @@ def get_civil_law_documents_by_id_list(id_list: List[str], table_name=None) -> L
 
 
 class CivilSimilarCase:
+    """ 算法匹配的民事相似案例 """
     def __init__(self, fact, problem, claim_list, problem_id):
         self.fact = fact
         self.problem = problem
@@ -178,3 +180,42 @@ class CivilSimilarCase:
             }
             for item in law_documents
         ]
+
+
+class ManuallySelectedCivilSimilarCase:
+    """ 人工精选的民事相似案例 """
+    def __init__(self, problem, claim, situation):
+        self.problem = str(problem)
+        self.claim = str(claim)
+        self.situation = str(situation)
+
+    @staticmethod
+    def _get_title(content):
+        index = str(content).find("民事判决书")
+        if -1 == index:
+            return ""
+        return str(content)[:index + len("民事判决书")]
+
+    def _is_valid_row(self, row):
+        return row["纠纷"] == self.problem and row["诉求"] == self.claim and row["情形"] == self.situation and str(row["doc_id"]) != 'nan'
+
+    def get_similar_cases(self):
+        try:
+            df = pd.read_csv("data/LawsuitPrejudgment/manually_selected_cases/" + self.problem + ".csv", encoding="utf-8")
+        except Exception:
+            return []
+
+        for idx, row in df.iterrows():
+            if self._is_valid_row(row):
+                return [
+                    {
+                        "doc_id": "judgment_minshi_data_SEP_" + str(row["doc_id"]),
+                        "similar_rate": 1.0,
+                        "title": self._get_title(row["content"]),
+                        "court": row["court"],
+                        "judge_date": row["judge_date"],
+                        "case_number": row["case_number"],
+                        "tag": "",
+                        "is_guiding_case": True
+                    }
+                ]

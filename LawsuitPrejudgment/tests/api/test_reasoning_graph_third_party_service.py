@@ -66,13 +66,13 @@ def test_should_ask_next_question_when_reasoning_graph_result():
 def test_show_have_report_when_reasoning_graph_result():
     url = "http://101.69.229.138:8100/reasoning_graph_result"
     body = {
-        "problem": "婚姻家庭",
-        "claim_list": ["请求离婚"],
-        "fact": "男女双方自愿/不自愿（不自愿的原因）登记结婚，婚后育有x子/女，现 x岁， 因xx原因离婚。婚姻/同居期间，有存款x元、房屋x处、车子x辆、债务x元。（双方是否对子女、财产、债务等达成协议或已有法院判决，协议或判决内容，双方对协议或判决的履行情况）。",
+        "problem": "土地承包",
+        "claim_list": ["返还土地或钱款"],
+        "fact": "111111111111111111111111111111",
         "question_answers": {
-            "共同生活时间是否很短？:是;否": "是"
+            "是否存在以下情形？:他人侵占土地;对方没有返还土地;为了履行合同提前支付钱款;以上都没有": "他人侵占土地"
         },
-        "factor_sentence_list": [["男女双方自愿/不自愿（不自愿的原因）登记结婚", "双方自愿离婚", -1, ""], ["男女双方自愿/不自愿（不自愿的原因）登记结婚", "双方非自愿结婚", 1, ""], ["男女双方自愿/不自愿（不自愿的原因）登记结婚，婚后育有x子/女，现 x岁， 因xx原因离婚", "一方重婚", -1, ""]]
+        "factor_sentence_list": []
     }
     resp_json = requests.post(url, json=body).json()
 

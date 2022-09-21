@@ -14,7 +14,6 @@ from BasicTask.NER.BertNer.model_ner_dataset import ClueNerSpanDataset, ClueNerC
 
 from metrics import SpanEntityScore
 
-
 import os
 import random
 import torch
@@ -68,10 +67,13 @@ class TrainLawsNER(BaseTrainTool):
         return self.bert_dataset.data_collator(batch)
 
     def init_dataset(self):
-        train_dataset = self.bert_dataset(data_dir=self.config["train_data_dir"], dataset_name=self.config["dataset_name"],  tokenizer=self.tokenizer, mode="train",
+        train_dataset = self.bert_dataset(data_dir=self.config["train_data_dir"],
+                                          dataset_name=self.config["dataset_name"], tokenizer=self.tokenizer,
+                                          mode="train",
                                           max_length=self.config["max_length"])
 
-        dev_dataset = self.bert_dataset(data_dir=self.config["dev_data_dir"], dataset_name=self.config["dataset_name"], tokenizer=self.tokenizer, mode="dev",
+        dev_dataset = self.bert_dataset(data_dir=self.config["dev_data_dir"], dataset_name=self.config["dataset_name"],
+                                        tokenizer=self.tokenizer, mode="dev",
                                         max_length=self.config["max_length"])
 
         return train_dataset, dev_dataset
@@ -85,7 +87,7 @@ class TrainLawsNER(BaseTrainTool):
 
         outputs = self.model(**inputs)
 
-        weight = self.model.start_fc.dense.weight[::,::]
+        weight = self.model.start_fc.dense.weight[::, ::]
 
         loss = outputs[0]
         # 记录结果
@@ -95,7 +97,7 @@ class TrainLawsNER(BaseTrainTool):
                 R = self.bert_extract_item(outputs[1], outputs[2], i)
                 T = self.trueSubject(batch, i)
                 self.metric.update(true_subject=T, pred_subject=R)
-            if (self.train_batch_num % (math.ceil(len(self.train_dataset)/self.config["train_batch_size"]))) == 0:
+            if (self.train_batch_num % (math.ceil(len(self.train_dataset) / self.config["train_batch_size"]))) == 0:
                 print(weight)
                 print("train_batch_num:" + str(self.train_batch_num))
                 print(self.metric.result())
@@ -107,7 +109,7 @@ class TrainLawsNER(BaseTrainTool):
                 R = self.bert_extract_item(outputs[1], outputs[2], i)
                 T = self.trueSubject(batch, i)
                 self.metric.update(true_subject=T, pred_subject=R)
-            if (self.eval_batch_num % (math.ceil(len(self.eval_dataset)/self.config["eval_batch_size"]))) == 0:
+            if (self.eval_batch_num % (math.ceil(len(self.eval_dataset) / self.config["eval_batch_size"]))) == 0:
                 print("eval_batch_num:" + str(self.eval_batch_num))
                 print(self.metric.result())
                 self.metric.reset()
@@ -117,9 +119,6 @@ class TrainLawsNER(BaseTrainTool):
             #         R = self.bert_extract_item(outputs[1], outputs[2], i)
             #         T = self.trueSubject(batch, i)
             #         self.metric.update(true_subject=T, pred_subject=R)
-
-
-
 
         return loss
 
@@ -165,11 +164,13 @@ class TrainLawsNER(BaseTrainTool):
         #             T.append((type_sec, start_index, end_index))
         return T
 
+
 class TrainSpanForNerClue(TrainLawsNER):
     def __init__(self, config_path):
         model_name = "bert_span"
         super(TrainSpanForNerClue, self).__init__(config_path=config_path, model_name=model_name)
         # self.seed_everything()
+
     def init_optimizer(self):
         self.logger.info("init optimizer of bert span for ner")
         no_decay = ["bias", "LayerNorm.weight"]
@@ -232,12 +233,14 @@ class TrainSpanForNerClue(TrainLawsNER):
         # some cudnn methods can be random even after fixing the seed
         # unless you tell it to be deterministic
         torch.backends.cudnn.deterministic = True
+
 
 class TrainSpanForNerLoan(TrainLawsNER):
     def __init__(self, config_path):
         model_name = "bert_span_loan"
         super(TrainSpanForNerLoan, self).__init__(config_path=config_path, model_name=model_name)
         # self.seed_everything()
+
     def init_optimizer(self):
         self.logger.info("init optimizer of bert span for ner")
         no_decay = ["bias", "LayerNorm.weight"]
@@ -300,6 +303,7 @@ class TrainSpanForNerLoan(TrainLawsNER):
         # some cudnn methods can be random even after fixing the seed
         # unless you tell it to be deterministic
         torch.backends.cudnn.deterministic = True
+
 
 class TrainCrfForNerClue(TrainLawsNER):
     def __init__(self, config_path):
@@ -345,6 +349,5 @@ if __name__ == '__main__':
     TraSpan.train_main()
     print(TraSpan.metric.result())
     # TrainSpanForNer(config_path="huangyulin/project/fyt/LawEntityExtraction/BertNer/Config_bak/base_ner_config.yaml").train_main()
-
 
     # TrainCrfForNer(config_path="huangyulin/project/fyt/LawEntityExtraction/BertNer/Config_bak/base_ner_config.yaml").train_main()

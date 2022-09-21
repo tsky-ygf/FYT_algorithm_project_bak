@@ -326,6 +326,7 @@ def _predict_by_factor(problem, claim_list, fact, question_answers, factor_sente
     result_dict['result'] = report_dict  # 评估报告，包括评估理由、证据模块、法律建议、支持与否
 
     result_dict['debug_info'] = debug_info  # 记录中间信息，方便定位问题
+    result_dict['suqiu_tree'] = suqiu_tree  # 记录了各logic_problem_suqiu的LogicTree，可以返回情形等匹配信息。
     return result_dict
 
 
