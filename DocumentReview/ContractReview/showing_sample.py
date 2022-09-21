@@ -1478,7 +1478,7 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
 if __name__ == '__main__':
     import time
 
-    contract_type = "fangwuzulin"
+    contract_type = "jietiao"
 
     os.environ['CUDA_VISIBLE_DEVICES'] = "0"
     acknowledgement = BasicUIEAcknowledgementShow(config_path="DocumentReview/Config/{}.csv".format(contract_type),
@@ -1490,6 +1490,6 @@ if __name__ == '__main__':
     print("## First Time ##")
     localtime = time.time()
 
-    acknowledgement.review_main(content="data/DocData/fangwuzulin/fwzl1.docx", mode="docx", usr="Part A")
+    acknowledgement.review_main(content="data/DocData/jietiao/借条合同示例.docx", mode="docx", usr="Part A")
     pprint(acknowledgement.review_result, sort_dicts=False)
     print('use time: {}'.format(time.time() - localtime))
