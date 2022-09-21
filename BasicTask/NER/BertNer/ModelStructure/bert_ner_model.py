@@ -117,6 +117,7 @@ class BertSpanForNer(BertPreTrainedModel):
 
     def forward(self, input_ids, token_type_ids=None, attention_mask=None, start_positions=None, end_positions=None):
         outputs = self.bert(input_ids=input_ids, attention_mask=attention_mask, token_type_ids=token_type_ids)
+        # outputs = self.bert(**input_ids)
         sequence_output = outputs[0]
         sequence_output = self.dropout(sequence_output)
         start_logits = self.start_fc(sequence_output)
@@ -160,3 +161,5 @@ class BertSpanForNer(BertPreTrainedModel):
             total_loss = (start_loss + end_loss) / 2
             outputs = (total_loss,) + outputs
         return outputs
+
+

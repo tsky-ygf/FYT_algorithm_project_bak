@@ -5,17 +5,19 @@
 # @File    : run_qa.py
 # @Software: PyCharm
 import os
+from transformers import WEIGHTS_NAME, BertConfig,get_linear_schedule_with_warmup,AdamW, BertTokenizer
+from BasicTask.NER.BertNer.metrics import SpanEntityScore
 
+os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 import torch
 import argparse
 from pprint import pprint
 import numpy as np
 from torch.utils.data import DataLoader
 
-from DocumentReview.PointerBert.utils import load_data, set_seed, ReaderDataset, batchify, read_config_to_label
-from BasicTask.NER.BertNer.ModelStructure.bert_ner_model import PointerNERBERT
-
-os.environ['CUDA_VISIBLE_DEVICES'] = '0'
+from DocumentReview.PointerBert.utils import load_data, set_seed, ReaderDataset, batchify, read_config_to_label, \
+    evaluate_index, batchify_cluener, evaluate_entity_wo_category, bert_extract_item
+from DocumentReview.PointerBert.model_NER import PointerNERBERT, BertSpanForNer
 
 
 def train(args, train_loader, model, optimizer):
@@ -25,15 +27,21 @@ def train(args, train_loader, model, optimizer):
     for i, samples in enumerate(train_loader):
         optimizer.zero_grad()
         encoded_dicts, starts, ends, labels = samples[0], samples[1], samples[2], samples[3]
-        start_prob, end_prob = model(encoded_dicts)
-        start_loss = torch.nn.functional.binary_cross_entropy(input=start_prob, target=starts, reduction="sum")
-        end_loss = torch.nn.functional.binary_cross_entropy(input=end_prob, target=ends, reduction="sum")
-        loss = start_loss + end_loss
+        outputs = model(encoded_dicts['input_ids'], token_type_ids=encoded_dicts['token_type_ids'],
+                        attention_mask=encoded_dicts['attention_mask'],
+                        start_positions=starts, end_positions=ends)
+        loss = outputs[0]
+        loss.backward()
+        # start_prob, end_prob = model(encoded_dicts)
+        # start_loss = torch.nn.functional.binary_cross_entropy(input=start_prob, target=starts, reduction="sum")
+        # end_loss = torch.nn.functional.binary_cross_entropy(input=end_prob, target=ends, reduction="sum")
+        # start_loss = torch.nn.functional.binary_cross_entropy(input=start_prob, target=starts)
+        # end_loss = torch.nn.functional.binary_cross_entropy(input=end_prob, target=ends)
+        # loss = start_loss + end_loss
 
         total_loss += loss.item()
         num_samples += len(samples)
 
-        loss.backward()
         optimizer.step()
         if i % args.logging_steps == 0:
             print("loss: ", total_loss / num_samples)
@@ -41,26 +49,58 @@ def train(args, train_loader, model, optimizer):
 
 
 def main(args):
-    labels = read_config_to_label(args)
-    args.labels = labels
+    # labels = read_config_to_label(args)
+    labels2id = ['address', 'book', 'company', 'game', 'government', 'movie', 'name', 'organization', 'position',
+                 'scene']
+    args.labels = labels2id
+
+    config_class, model_class, tokenizer_class = BertConfig, BertSpanForNer, BertTokenizer
+    config = config_class.from_pretrained(args.model, num_labels=len(labels2id))
+    config.loss_type = 'lsr'
+    config.soft_label = True
+
     train_data = load_data(args.train_path)
     dev_data = load_data(args.dev_path)
 
     set_seed(args.seed)
 
-    model = PointerNERBERT(args).to(args.device)
-    # ======================
-    # state = torch.load("ContractNER/model_src/PointerBert/pBert0920_bs1.pt")
+    # model = PointerNERBERT(args).to(args.device)
+    model = BertSpanForNer(config).to(args.device)
+    # ===============================================================================
+    # state = torch.load("DocumentReview/PointerBert/model_src/pBert0921_cluener.pt")
     # model.load_state_dict(state['model_state'])
-    # ======================
-    optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate)
+    # ===============================================================================
 
+    no_decay = ["bias", "LayerNorm.weight"]
+    bert_parameters = model.bert.named_parameters()
+    start_parameters = model.start_fc.named_parameters()
+    end_parameters = model.end_fc.named_parameters()
+    optimizer_grouped_parameters = [
+        {"params": [p for n, p in bert_parameters if not any(nd in n for nd in no_decay)],
+         "weight_decay": args.weight_decay, 'lr': args.learning_rate},
+        {"params": [p for n, p in bert_parameters if any(nd in n for nd in no_decay)], "weight_decay": 0.0
+            , 'lr': args.learning_rate},
+
+        {"params": [p for n, p in start_parameters if not any(nd in n for nd in no_decay)],
+         "weight_decay": args.weight_decay, 'lr': 0.001},
+        {"params": [p for n, p in start_parameters if any(nd in n for nd in no_decay)], "weight_decay": 0.0
+            , 'lr': 0.001},
+
+        {"params": [p for n, p in end_parameters if not any(nd in n for nd in no_decay)],
+         "weight_decay": args.weight_decay, 'lr': 0.001},
+        {"params": [p for n, p in end_parameters if any(nd in n for nd in no_decay)], "weight_decay": 0.0
+            , 'lr': 0.001},
+    ]
+    # optimizer = torch.optim.Adam(optimizer_grouped_parameters, lr=args.learning_rate)
+    optimizer = AdamW(optimizer_grouped_parameters, lr=args.learning_rate, eps=args.adam_epsilon)
+
+    print("numbers train", len(train_data))
     train_dataset = ReaderDataset(train_data)
-    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, collate_fn=batchify)
+    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, collate_fn=batchify_cluener)
 
     dev_dataset = ReaderDataset(dev_data)
-    dev_loader = DataLoader(dev_dataset, batch_size=args.batch_size, shuffle=False, collate_fn=batchify)
-
+    dev_loader = DataLoader(dev_dataset, batch_size=args.batch_size, shuffle=False, collate_fn=batchify_cluener)
+    model.zero_grad()
     best_f1 = 0
     for e in range(args.num_epochs):
         # train
@@ -72,8 +112,26 @@ def main(args):
         print('-' * 50 + 'evaluating' + '-' * 50)
         y_true = torch.FloatTensor([]).to(args.device)
         y_pred = torch.FloatTensor([]).to(args.device)
+        entities = []
+        true_entities = []
+        metric = SpanEntityScore()
         for i, samples in enumerate(dev_loader):
             encoded_dicts, starts, ends, labels = samples[0], samples[1], samples[2], samples[3]
+            sentences = samples[4]
+            # start_prob, end_prob = model(encoded_dicts)
+            outputs = model(encoded_dicts['input_ids'], token_type_ids=encoded_dicts['token_type_ids'],
+                                         attention_mask=encoded_dicts['attention_mask'],
+                                         start_positions=starts, end_positions=ends)
+            _, start_logits, end_logits = outputs[:3]
+            R = bert_extract_item(start_logits, end_logits)
+            T = labels
+            metric.update(true_subject=T, pred_subject=R)
+            if R!=[]:
+                print(R)
+
+        """    y_true = torch.cat([y_true, starts])
+            y_true = torch.cat([y_true, ends])
+
             start_prob, end_prob = model(encoded_dicts)
             y_true = torch.cat([y_true, starts])
             y_true = torch.cat([y_true, ends])
@@ -83,30 +141,60 @@ def main(args):
             y_pred = torch.cat([y_pred, start_pred])
             y_pred = torch.cat([y_pred, end_pred])
 
-        # calculate p r f1
-        y_pred = y_pred.view(-1)
-        y_true = y_true.view(-1)
-        y_pred = y_pred.cpu().numpy()
-        y_true = y_true.cpu().numpy()
-        print("numbers of Correct prediction ", np.sum(y_pred))
-        # print("numbers of Correct prediction ", np.sum(y_true))   # 418
-        TP = np.sum(np.logical_and(np.equal(y_true, 1), np.equal(y_pred, 1)))
-        FP = np.sum(np.logical_and(np.equal(y_true, 0), np.equal(y_pred, 1)))
-        FN = np.sum(np.logical_and(np.equal(y_true, 1), np.equal(y_pred, 0)))
-        TN = np.sum(np.logical_and(np.equal(y_true, 0), np.equal(y_pred, 0)))
-        precision = TP / (TP + FP) if (TP + FP) != 0 else 0
-        recall = TP / (TP + FN) if (TP + FN) != 0 else 0
-        f1 = 2 * precision * recall / (precision + recall) if precision + recall != 0 else 0
-        print("epoch:", e, "  p: {0}, r: {1}, f1: {2}".format(precision, recall, f1))
+            start_pred = start_pred.transpose(2, 1)
+            end_pred = end_pred.transpose(2, 1)
+
+            for bi in range(len(start_pred)):
+                sentence = sentences[bi]
+                for li in range(len(start_pred[bi])):
+                    start_seq = start_pred[bi][li]
+                    end_seq = end_pred[bi][li]
+                    start_index = []
+                    end_index = []
+                    if True in start_seq:
+                        for start_ind in range(len(start_seq)):
+                            if start_seq[start_ind]:
+                                start_index.append(start_ind)
+                                # print("label:", args.labels[li], "start:", start_ind)
+                    if True in end_seq:
+                        for end_ind in range(len(end_seq)):
+                            if end_seq[end_ind]:
+                                end_index.append(end_ind)
+                                # print("label:", args.labels[li], "end:", end_ind)
+                    if len(start_index) == len(end_index):
+                        for start_ind, end_ind in zip(start_index, end_index):
+                            entities.append([labels2id[li], sentence[start_ind:end_ind+1]])
+                            true_entities.append([labels[bi][0], labels[bi][1]])
+                    else:
+                        min_len = min(len(start_index), len(end_index))
+                        for mi in range(min_len):
+                            entities.append([labels2id[li], sentence[start_index[mi]:end_index[mi]+1]])
+                            true_entities.append([labels[bi][0], labels[bi][1]])
+
+        # print('entities: ', entities)
+        # print('true_entities: ', true_entities)
+
+        # precision, recall, f1 = evaluate_entity_wo_category(true_entities, entities)
+        cir = SpanEntityScore()
+        cir.update(true_entities, entities)
+        score, class_info = cir.result()
+        # print(class_info['name'])
+        print("epoch:", e, "  p: {0}, r: {1}, f1: {2}".format(score['acc'], score['recall'], score['f1']))
+
+        precision, recall, f1 = evaluate_index(y_pred, y_true)
+        print("epoch:", e, "  p: {0}, r: {1}, f1: {2}".format(precision, recall, f1))"""
+        score, class_info = metric.result()
+        # print(class_info['name'])
+        f1 = score['f1']
+        print("epoch:", e, "  p: {0}, r: {1}, f1: {2}".format(score['acc'], score['recall'], score['f1']))
+
+
         if f1 > best_f1:
             print("f1 score increased  {0}==>{1}".format(best_f1, f1))
             best_f1 = f1
             PATH = args.model_save_path
-            state = {}
+            state = {'model_state': model.state_dict(), 'e': e, 'optimizer': optimizer.state_dict()}
             # TODO model cpu？
-            state['model_state'] = model.state_dict()
-            state['e'] = e
-            state['optimizer'] = optimizer.state_dict(),
             torch.save(state, PATH)
             # 加载
             # PATH = './model.pth'  # 定义模型保存路径
@@ -116,6 +204,7 @@ def main(args):
 
         if args.is_inference:
             entities = []
+            true_entities = []
             for i, samples in enumerate(dev_loader):
                 encoded_dicts, starts, ends, labels = samples[0], samples[1], samples[2], samples[3]
                 sentences = samples[4]
@@ -166,8 +255,14 @@ def main(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--is_inference", default=True, type=bool)
-    parser.add_argument("--model_save_path", default='DocumentReview/PointerBert/model_src/pBert0920.pt')
+    parser.add_argument("--adam_epsilon", default=1e-8, type=float,
+                        help="Epsilon for Adam optimizer.")
+    parser.add_argument("--weight_decay", default=0.01, type=float,
+                        help="Weight decay if we apply some.")
+    parser.add_argument("--local_rank", type=int, default=-1, help="For distributed training: local_rank")
+    parser.add_argument("--do_train", default=True, type=bool)
+    parser.add_argument("--is_inference", default=False, type=bool)
+    parser.add_argument("--model_save_path", default='DocumentReview/PointerBert/model_src/BertSpanForNer_0921.pt')
     parser.add_argument("--batch_size", default=16, type=int, help="Batch size per GPU/CPU for training.")
     parser.add_argument("--learning_rate", default=1e-5, type=float, help="The initial learning rate for Adam.")
     parser.add_argument("--train_path", default=None, type=str, help="The path of train set.")
@@ -192,10 +287,16 @@ if __name__ == '__main__':
     parser.add_argument("--init_from_ckpt", default=None, type=str,
                         help="The path of model parameters for initialization.")
 
+
     args = parser.parse_args()
-    args.train_path = 'data/data_src/new/train.txt'
-    args.dev_path = 'data/data_src/new/dev.txt'
+    # args.train_path = 'data/data_src/new/train.txt'
+    # args.dev_path = 'data/data_src/new/dev.txt'
+    args.train_path = 'data/cluener/train.json'
+    args.dev_path = 'data/cluener/dev.json'
     args.model = 'model/language_model/chinese-roberta-wwm-ext'
     pprint(args)
 
     main(args)
+
+    """nohup python -u DocumentReview/PointerBert/main.py --model "model/language_model/chinese-roberta-wwm-ext" \
+> log/PointerBert/cluener_0921.log 2>&1 &"""
