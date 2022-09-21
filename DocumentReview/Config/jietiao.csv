@@ -1,4 +1,4 @@
-﻿schema,pos rule,pos keywords,A pos legal advice,B pos legal advice,neg rule,neg keywords,neg legal advice,risk level,legal basis,risk statement,jiaoyan error advice,user show name,classify
+schema,pos rule,pos keywords,A pos legal advice,B pos legal advice,neg rule,neg keywords,neg legal advice,risk level,legal basis,risk statement,jiaoyan error advice,user show name,classify
 标题,识别,借据|借条,,,识别,欠条,标题建议写明“借条”、“借据”等字样。,低,"【《中华人民共和国民法典》第六百六十七条】借款合同是借款人向贷款人借款,到期返还借款并支付利息的合同。",,,标题审核,标题审核
 借款人,识别,乙方,,,未识别,,借款人姓名缺失，建议补充完整。,中,【《最高人民法院关于审理民间借贷案件适用法律若干问题的规定》第一条】　本规定所称的民间借贷，是指自然人、法人和非法人组织之间进行资金融通的行为。,,,主体审核,主体信息审核
 借款人身份证号码,身份证号校验,,,,未识别,,借款人身份证号缺失，建议补充完整。,中,,,借款人身份证号码错误，建议核实。,主体身份审核,主体信息审核

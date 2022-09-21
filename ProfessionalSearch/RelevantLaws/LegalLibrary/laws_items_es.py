@@ -7,7 +7,13 @@
 # @Software: PyCharm
 import re
 import json
-from BasicTask.SearchEngine.es_tools import BaseESTool
+
+import pandas as pd
+from elasticsearch import Elasticsearch
+
+from BasicTask.SearchEngine.es_tools import BaseESTool, helpers
+import connectorx as cx
+from loguru import logger
 
 case_es_tools = {
     "host": "172.19.82.227",
@@ -20,6 +26,7 @@ case_es_tools = {
         "flfg_result_sfjs",
         "flfg_result_xf",
         "flfg_result_xzfg",
+        "flfg_result_jcfg",
     ],
     "index_name": "flfg",
     "debug": False,
@@ -56,6 +63,37 @@ class LawItemsESTool(BaseESTool):
         nwe_s = cop.sub("", old_s)  # 将old_s中匹配到的字符替换成空s字符
         return nwe_s
 
+    def get_query(self, table_name, start, end):
+        if self.debug:
+            query = "select * from {} limit 1000".format(table_name)
+        else:
+            query = "select id,isValid,resultChapter,resultClause,resultSection,title,md5Clause,source,prov from {}".format(table_name)
+
+        return query
+
+    def get_df_data_from_db(self, table_name, start, end):
+        print("sql查询开始")
+        query = self.get_query(table_name, start, end)
+
+        if self.use_big_data:
+            return_type = "dask"
+        else:
+            return_type = "pandas"
+        res_df = cx.read_sql(self.mysql_url,
+                             query=query,
+                             return_type=return_type,
+                             partition_num=10)
+        print("sql查询完成")
+        return res_df
+
+    def __call__(self):
+        self.es_init()
+        for table_name in self.table_list:
+            df_data = self.get_df_data_from_db(table_name, 0, 0)
+            self.insert_data_to_es(df_data)
+            logger.info("insert data to es success from {}".format(table_name))
+
+
     def handle_es(self, df_data):
         # 构造迭代器
         for index, row in df_data.iterrows():
@@ -80,7 +118,7 @@ class LawItemsESTool(BaseESTool):
                 data_body["title_weight"] += self.minshi_item[title]
             if title in self.xingshi_item:
                 data_body["title_weight"] += self.xingshi_item[title]
-            yield {"_index": self.index_name, "_type": "_doc", "_id": row['id'], "_source": data_body}
+            yield {"_index": self.index_name, "_type": "_doc", "_id": row['md5Clause'], "_source": data_body}
 
 
 if __name__ == '__main__':

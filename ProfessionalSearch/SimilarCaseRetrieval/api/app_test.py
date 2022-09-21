@@ -29,10 +29,10 @@ if __name__=='__main__':
     # url_law_document = 'http://101.69.229.138:7145/get_law_document'
     query = ""
     filter_conditions = {
-        'type_of_case': ['民事'],
+        'type_of_case': ['执行'],
         'court_level': ['最高'],
         'type_of_document': ['裁定书'],
-        'region': ['广东省'],
+        'region': ['山东省'],
         # 'size': 10,
     }
     input_json = {

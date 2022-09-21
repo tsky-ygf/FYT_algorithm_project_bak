@@ -1,0 +1,119 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# @Time    : 2022/09/09 15:52
+# @Author  : Czq
+# @File    : model_NER.py
+# @Software: PyCharm
+import torch
+import torch.nn as nn
+from torch.nn import CrossEntropyLoss
+import torch.nn.functional as F
+from transformers import BertModel, BertPreTrainedModel
+
+
+class PointerNERBERT(nn.Module):
+    def __init__(self, args):
+        super(PointerNERBERT, self).__init__()
+
+        self.bert = BertModel.from_pretrained(args.model)
+        # self.bert = BertModel(args.bert_config)
+        self.num_labels = len(args.labels)
+        self.linear_hidden = nn.Linear(args.bert_emb_size, args.hidden_size)
+        self.linear_start = nn.Linear(args.hidden_size, self.num_labels)
+        self.linear_end = nn.Linear(args.hidden_size, self.num_labels)
+        self.sigmoid = nn.Sigmoid()
+        self.gelu = nn.GELU()
+
+    def forward(self, inputs):
+        bert_emb = self.bert(**inputs)
+        bert_out, bert_pool = bert_emb[0], bert_emb[1]
+
+        hidden = self.linear_hidden(bert_out)
+        start_logits = self.linear_start(self.gelu(hidden))
+        end_logits = self.linear_end(self.gelu(hidden))
+        # delete cls and sep
+        start_logits = start_logits[:, 1:-1]
+        end_logits = end_logits[:, 1:-1]
+        start_prob = self.sigmoid(start_logits)
+        end_prob = self.sigmoid(end_logits)
+        return start_prob, end_prob
+
+
+class BertSoftmaxForNer(BertPreTrainedModel):
+    def __init(self, config):
+        super(BertPreTrainedModel, self).__init__(config)
+        self.num_labels = config.num_labels
+        self.bert = BertModel(config)
+        self.dropout = nn.Dropout(config.hidden_dropout_prob)
+        self.classifier = nn.Linear(config.hidden_size, config.num_labels)
+        self.loss_type = config.loss_type
+        self.init_weights()
+
+    def forward(self, input_ids, attention_mask=None, token_type_ids=None, labels=None):
+        outputs = self.bert(input_ids=input_ids, attention_mask=attention_mask, token_type_ids=token_type_ids)
+        sequence_output = outputs[0]
+        sequence_output = self.dropout(sequence_output)
+        logits = self.classifier(sequence_output)
+        outputs = (logits,) + outputs[2:]  # add hidden states and attention if they are here
+
+        if labels is not None:
+            assert self.loss_type in ['lsr', 'focal', 'ce']
+            if self.loss_type == 'lsr':
+                loss_fct = LabelSmoothingCrossEntropy(ignore_index=0)
+            elif self.loss_type == 'focal':
+                loss_fct = FocalLoss(ignore_index=0)
+            else:
+                loss_fct = CrossEntropyLoss(ignore_index=0)
+            # Only keep active parts of the loss
+            if attention_mask is not None:
+                active_loss = attention_mask.view(-1) == 1
+                active_logits = logits.view(-1, self.num_labels)[active_loss]
+                active_labels = labels.view(-1)[active_loss]
+                loss = loss_fct(active_logits, active_labels)
+            else:
+                loss = loss_fct(logits.view(-1, self.num_labels), labels.view(-1))
+            outputs = (loss,) + outputs
+        return outputs  # (loss), scores, (hidden_states), (attentions)
+
+
+class LabelSmoothingCrossEntropy(nn.Module):
+    def __init__(self, eps=0.1, reduction='mean', ignore_index=-100):
+        super(LabelSmoothingCrossEntropy, self).__init__()
+        self.eps = eps
+        self.reduction = reduction
+        self.ignore_index = ignore_index
+
+    def forward(self, output, target):
+        c = output.size()[-1]
+        log_preds = F.log_softmax(output, dim=-1)
+
+        if self.reduction == 'sum':
+            loss = -log_preds.sum()
+        else:
+            loss = -log_preds.sum(dim=-1)
+            if self.reduction == 'mean':
+                loss = loss.mean()
+
+        return loss * self.eps / c + (1 - self.eps) * F.nll_loss(log_preds, target, reduction=self.reduction,
+                                                                 ignore_index=self.ignore_index)
+
+
+# Multi-class Focal loss implementation
+class FocalLoss(nn.Module):
+    def __init__(self, gamma=2, weight=None, ignore_index=-100):
+        super(FocalLoss, self).__init__()
+        self.gamma = gamma
+        self.weight = weight
+        self.ignore_index = ignore_index
+
+    def forward(self, input, target):
+        """
+        :param input: [N, C]
+        :param target: [N, ]
+        :return:
+        """
+        logpt = F.log_softmax(input, dim=1)
+        pt = torch.exp(logpt)
+        logpt = (1 - pt) ** self.gamma * logpt
+        loss = F.nll_loss(logpt, target, weight=self.weight, ignore_index=self.ignore_index, reduction='sum')
+        return loss

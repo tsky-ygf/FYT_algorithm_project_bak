@@ -17,6 +17,7 @@ def get_span_labels():
     return ["O", "address", "book", "company", 'game', 'government', 'movie', 'name', 'organization', 'position',
             'scene']
 
+
 def get_crf_labels():
     """See base class."""
     return ["X", "B-address", "B-book", "B-company", 'B-game', 'B-government', 'B-movie', 'B-name',
@@ -25,7 +26,8 @@ def get_crf_labels():
             'I-organization', 'I-position', 'I-scene',
             "S-address", "S-book", "S-company", 'S-game', 'S-government', 'S-movie',
             'S-name', 'S-organization', 'S-position',
-            'S-scene', 'O',"[START]", "[END]"]
+            'S-scene', 'O', "[START]", "[END]"]
+
 
 def get_span_loan_labels():
     """See loan_dis class."""
@@ -37,11 +39,13 @@ def get_span_loan_labels():
             labels.append(line.strip())
     return labels
 
+
 get_label_list = {
     "span_labels": get_span_labels,
-    'crf_labels':get_crf_labels,
-    'loan_labels':get_span_loan_labels
+    'crf_labels': get_crf_labels,
+    'loan_labels': get_span_loan_labels
 }
+
 
 class ClueNerProcessor(DataProcessor):
     def get_train_examples(self, data_dir):
@@ -96,6 +100,7 @@ class ClueNerProcessor(DataProcessor):
                 # print(lines)
         # print(lines)
         return lines
+
 
 class LoanNerProcessor(DataProcessor):
     def get_train_examples(self, data_dir):
@@ -168,7 +173,8 @@ class LoanNerProcessor(DataProcessor):
         with open(input_file, 'r', encoding='utf-8') as f:
             for item in f:
                 item = json.loads(item.strip())
-                if not item['content'].strip() or not item['mention'].strip() or not item['situation'].strip() or not item['startposition'].strip() or not item['endpostion'].strip():
+                if not item['content'].strip() or not item['mention'].strip() or not item['situation'].strip() or not \
+                item['startposition'].strip() or not item['endpostion'].strip():
                     continue
                 text = item['content']
 
@@ -180,7 +186,8 @@ class LoanNerProcessor(DataProcessor):
                             if int(item['startposition']) >= 511 or int(item['endpostion']) >= 511:
                                 break
                             # print([item['situation'], int(item['startposition']) + label_last[2], int(item['endpostion']) + label_last[2]]+["inner:"])
-                            line['labels'].append([item['situation'], int(item['startposition']) , int(item['endpostion'])])
+                            line['labels'].append(
+                                [item['situation'], int(item['startposition']), int(item['endpostion'])])
                 else:
                     if int(item['startposition']) >= 511 or int(item['endpostion']) >= 511:
                         continue
@@ -196,8 +203,9 @@ class LoanNerProcessor(DataProcessor):
 
 ner_processors = {
     "Loanner": LoanNerProcessor,
-    'cluener':ClueNerProcessor
+    'cluener': ClueNerProcessor
 }
+
 
 class NerDataset(Dataset):
     def __init__(self, data_dir, dataset_name, tokenizer, mode, max_length=128, label_list=None):
@@ -234,6 +242,7 @@ class NerDataset(Dataset):
 
 class ClueNerSpanDataset(NerDataset):
     label_list = get_span_labels()
+
     def __init__(self, data_dir, dataset_name, tokenizer, mode, max_length=128):
         # self.label_list = get_span_labels()
         super().__init__(data_dir, dataset_name, tokenizer, mode, max_length, self.label_list)
@@ -286,9 +295,11 @@ class ClueNerSpanDataset(NerDataset):
 
     def get_label_list(self):
         return self.label_list
+
 
 class LoanNerSpanDataset(NerDataset):
     label_list = get_span_loan_labels()
+
     def __init__(self, data_dir, dataset_name, tokenizer, mode, max_length=128):
         # self.label_list = get_span_labels()
         super().__init__(data_dir, dataset_name, tokenizer, mode, max_length, self.label_list)
@@ -342,8 +353,10 @@ class LoanNerSpanDataset(NerDataset):
     def get_label_list(self):
         return self.label_list
 
+
 class ClueNerCRFDataset(NerDataset):
     label_list = get_crf_labels()
+
     def __init__(self, data_dir, tokenizer, mode, max_length=128):
         # self.label_list = get_crf_labels()
         super().__init__(data_dir, tokenizer, mode, max_length, self.label_list)
@@ -387,7 +400,7 @@ class ClueNerCRFDataset(NerDataset):
         if self.mode == "test":
             return input_ids, attention_mask, token_type_ids, label_ids
         else:
-            label_ids  = torch.tensor(label_ids).long().squeeze(0)
+            label_ids = torch.tensor(label_ids).long().squeeze(0)
             return input_ids, attention_mask, token_type_ids, label_ids
 
     @staticmethod
