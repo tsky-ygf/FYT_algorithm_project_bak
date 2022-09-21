@@ -74,8 +74,15 @@ class FGM:
 
 
 class BaseTrainTool:
-    def __init__(self, config, create_examples_func=None):
-        self.config = parse_config_file(config)
+    def __init__(self, config_path, data_func=None):
+        """
+
+        :param config_path: config file path
+        :param data_func: data function
+        """
+        self.config = parse_config_file(config_path)
+        self.create_examples = data_func
+
         self.log_args = LogArguments(**self.config["LogArguments"])
         self.model_args = ModelArguments(**self.config["ModelArguments"])
         self.train_args = TrainingArguments(**self.config["TrainingArguments"])
@@ -106,7 +113,6 @@ class BaseTrainTool:
         self.optimizer = self.init_optimizer()
         self.lr_scheduler = self.init_lr_scheduler()
 
-        self.create_examples = create_examples_func
         # Prepare everything with our `accelerator`.
         self.model, self.optimizer, self.train_dataloader, self.eval_dataloader, self.lr_scheduler = \
             self.accelerator.prepare(self.model, self.optimizer, self.train_dataloader, self.eval_dataloader,
@@ -116,7 +122,6 @@ class BaseTrainTool:
             self.fgm = FGM(self.model, emb_name=self.train_args.adv_name, epsilon=self.train_args.adv_epsilon)
 
         self.completed_steps = 0
-        exit()
 
     # 目前都是使用默认参数
     def init_accelerator(self):

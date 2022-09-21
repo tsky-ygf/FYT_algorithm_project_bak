@@ -12,8 +12,8 @@ TrainingArguments:
     fp16: True
 
 ModelArguments:
-  model_name_or_path: "model/language_model/lawformer"
-  tokenizer_name: "model/language_model/chinese-roberta-wwm-ext/"
+  model_name_or_path: "model/language_model/bert-base-chinese"
+#  tokenizer_name: "model/language_model/chinese-roberta-wwm-ext/"
   max_length: 512
 
 DataTrainingArguments:

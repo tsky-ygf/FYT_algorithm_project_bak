@@ -9,19 +9,21 @@
 from Tools.train_tool import BaseTrainTool
 from transformers import AutoConfig, AutoTokenizer, AutoModelForQuestionAnswering
 
+
 # from Tools.data_pipeline import InputExample
 
 
 # os.environ['CUDA_VISIBLE_DEVICES'] = '0'
-def create_examples(data_path):
+def create_examples(data_path=""):
     examples = []
     # examples.append(InputExample(guid=guid, text=text, label=[y_onehot]))
     return examples
 
 
 class TrainExtractQA(BaseTrainTool):
-    def __init__(self, config, create_examples_func):
-        super(TrainExtractQA, self).__init__(config=config, create_examples_func=create_examples_func)
+    def __init__(self, config_path, data_func):
+        super(TrainExtractQA, self).__init__(config_path=config_path, data_func=data_func)
+        exit()
 
     # self.create_examples = self
 
@@ -30,7 +32,7 @@ class TrainExtractQA(BaseTrainTool):
         # model = MultiLabelClsModel(self.config)
         model_config = AutoConfig.from_pretrained(self.model_args.config_name)
         model = AutoModelForQuestionAnswering.from_pretrained(
-            self.config.model_name_or_path,
+            self.model_args.model_name_or_path,
             config=model_config,
         )
         # self.logger.debug(model)
@@ -41,7 +43,7 @@ class TrainExtractQA(BaseTrainTool):
         return tokenizer, model
 
     def cal_loss(self, batch):
-        pass
+        self.logger.debug(batch)
     # self.logger.debug(batch)
     # labels = batch['labels']
     # input_data = {'input_ids': batch['input_ids'],
@@ -54,5 +56,5 @@ class TrainExtractQA(BaseTrainTool):
 
 
 if __name__ == '__main__':
-    TrainExtractQA(config="BasicTask/QA/Extractive-QA/base_qa.yaml",
-                   create_examples_func=create_examples).run()
+    TrainExtractQA(config_path="BasicTask/QA/Extractive-QA/base_qa.yaml",
+                   data_func=create_examples).run()
