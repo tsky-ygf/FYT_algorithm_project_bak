@@ -149,17 +149,19 @@ class LogicTree(object):
         claim = str(name).split("_")[1]
         tree = LogicTree(self.problem, claim, self.debug)
 
-        suqiu_factor = self.context["suqiu_factor"]
-        factor_sentence_list = self.context["factor_sentence_list"]
-        question_answers = self.context["question_answers"]
-        # 将特征结果加入
-        for factor, flag in suqiu_factor.items():  # 特征默认值
-            tree.add_match_result(factor, flag, None)
-        for factor, sentence in factor_sentence_list.items():  # 用户输入的特征
-            sentence_matched, flag = sentence
-            tree.add_match_result(factor, flag, sentence_matched)
-        for question, answers in question_answers.items():  # 问答的输入特征
-            factors = tree.add_question_result(question, answers.split(';'))
+        if self.context:
+            suqiu_factor = self.context["suqiu_factor"]
+            factor_sentence_list = self.context["factor_sentence_list"]
+            question_answers = self.context["question_answers"]
+            # 将特征结果加入
+            for factor, flag in suqiu_factor.items():  # 特征默认值
+                tree.add_match_result(factor, flag, None)
+            for factor, sentence in factor_sentence_list.items():  # 用户输入的特征
+                sentence_matched, flag = sentence
+                tree.add_match_result(factor, flag, sentence_matched)
+            for question, answers in question_answers.items():  # 问答的输入特征
+                factors = tree.add_question_result(question, answers.split(';'))
+
         next_question = tree.get_next_question()
         if next_question is not None:
             return next_question
@@ -800,7 +802,27 @@ class LogicTree(object):
     def next_question_is_candidate_question(self):
         return self.return_candidate_question_flag
 
+    def get_situation(self):
+        """
+        提供给外部调用，用来获取匹配到的情形。进而可以根据情形，获取相应的法条、案例等内容。没有匹配到情形，返回None。
+        函数实现：根据self.get_logic_result()返回的reason，去xmind中对比，找到相应路径的情形。只是找到情形的一种方式，可以替换为其他的实现。
+        """
+        if not self.logic_result:
+            return None
+
+        _, reason, _, _, _ = self.get_logic_result()
+        reason = str(reason).replace("\n","")
+        reason_in_result = text_underline(reason if "-->" not in reason else reason.split("-->")[1])
+        for path in self.paths:
+            reason_in_this_path = text_underline(str(path[0].father.name).replace("\n",""))
+            if reason_in_result == reason_in_this_path:
+                return path[0].father.father.father.name
+        return None
+
 
 if __name__ == '__main__':
-    tree = LogicTree('借贷纠纷', '确认合同有效')
-    tree.export_paths()
+    tree = LogicTree('土地承包', '返还土地或钱款')
+    tree._set_factor_flag("侵占土地", 1, None)
+    tree.get_next_question()
+    print("#########print situation############")
+    print(tree.get_situation())

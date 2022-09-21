@@ -19,10 +19,9 @@ app = Flask(__name__)
 @app.route('/get_law_document', methods=["get"])
 def get_law_document():
     doc_id = str(request.args.get("doc_id"))
-    print(doc_id)
+    original_doc_id = doc_id
     if doc_id.startswith(CIVIL_SIMILAR_CASE_ID_PREFIX):
         doc_id = doc_id[len(CIVIL_SIMILAR_CASE_ID_PREFIX):]
-        print(doc_id)
         law_documents = civil_similar_case.get_civil_law_documents_by_id_list([doc_id])
         if law_documents:
             result = {
@@ -38,8 +37,10 @@ def get_law_document():
         else:
             result = service.get_civil_law_document(doc_id)
 
-    print("doc_id", doc_id)
-    print("result", result)
+    # 为配合APP的收藏功能，将result的doc_id置为分隔符+数据库中相应的id。也就是入参的doc_id。
+    if result:
+        result["doc_id"] = original_doc_id
+
     return response_successful_result(result)
 
 
