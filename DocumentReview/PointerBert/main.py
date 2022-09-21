@@ -2,24 +2,24 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2022/09/08 15:22
 # @Author  : Czq
-# @File    : main.py
+# @File    : run_qa.py
 # @Software: PyCharm
 import os
 
-os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 import torch
 import argparse
 from pprint import pprint
 import numpy as np
-from tqdm import tqdm
 from torch.utils.data import DataLoader
 
 from DocumentReview.PointerBert.utils import load_data, set_seed, ReaderDataset, batchify, read_config_to_label
 from BasicTask.NER.BertNer.ModelStructure.bert_ner_model import PointerNERBERT
 
+os.environ['CUDA_VISIBLE_DEVICES'] = '0'
+
 
 def train(args, train_loader, model, optimizer):
-    print('-'*50+'training'+'-'*50)
+    print('-' * 50 + 'training' + '-' * 50)
     total_loss = 0
     num_samples = 0
     for i, samples in enumerate(train_loader):
@@ -75,14 +75,13 @@ def main(args):
         for i, samples in enumerate(dev_loader):
             encoded_dicts, starts, ends, labels = samples[0], samples[1], samples[2], samples[3]
             start_prob, end_prob = model(encoded_dicts)
-            y_true = torch.cat([y_true,starts])
-            y_true = torch.cat([y_true,ends])
+            y_true = torch.cat([y_true, starts])
+            y_true = torch.cat([y_true, ends])
             thred = torch.FloatTensor([0.5]).to(args.device)
-            start_pred = start_prob>thred
-            end_pred = end_prob>thred
-            y_pred = torch.cat([y_pred,start_pred])
-            y_pred = torch.cat([y_pred,end_pred])
-
+            start_pred = start_prob > thred
+            end_pred = end_prob > thred
+            y_pred = torch.cat([y_pred, start_pred])
+            y_pred = torch.cat([y_pred, end_pred])
 
         # calculate p r f1
         y_pred = y_pred.view(-1)
@@ -91,16 +90,16 @@ def main(args):
         y_true = y_true.cpu().numpy()
         print("numbers of Correct prediction ", np.sum(y_pred))
         # print("numbers of Correct prediction ", np.sum(y_true))   # 418
-        TP = np.sum(np.logical_and(np.equal(y_true,1),np.equal(y_pred,1)))
-        FP = np.sum(np.logical_and(np.equal(y_true,0),np.equal(y_pred,1)))
+        TP = np.sum(np.logical_and(np.equal(y_true, 1), np.equal(y_pred, 1)))
+        FP = np.sum(np.logical_and(np.equal(y_true, 0), np.equal(y_pred, 1)))
         FN = np.sum(np.logical_and(np.equal(y_true, 1), np.equal(y_pred, 0)))
         TN = np.sum(np.logical_and(np.equal(y_true, 0), np.equal(y_pred, 0)))
-        precision = TP/(TP+FP) if (TP+FP)!=0 else 0
-        recall = TP/(TP+FN) if (TP+FN)!=0 else 0
-        f1 = 2*precision*recall/(precision+recall) if precision+recall !=0 else 0
-        print("epoch:", e, "  p: {0}, r: {1}, f1: {2}".format(precision,recall,f1))
-        if f1>best_f1:
-            print("f1 score increased  {0}==>{1}".format(best_f1,f1))
+        precision = TP / (TP + FP) if (TP + FP) != 0 else 0
+        recall = TP / (TP + FN) if (TP + FN) != 0 else 0
+        f1 = 2 * precision * recall / (precision + recall) if precision + recall != 0 else 0
+        print("epoch:", e, "  p: {0}, r: {1}, f1: {2}".format(precision, recall, f1))
+        if f1 > best_f1:
+            print("f1 score increased  {0}==>{1}".format(best_f1, f1))
             best_f1 = f1
             PATH = args.model_save_path
             state = {}
@@ -158,9 +157,10 @@ def main(args):
                         else:
                             min_len = min(len(start_index), len(end_index))
                             for mi in range(min_len):
-                                entities.append({'start': start_index[mi] + index_bias, 'end': end_index[mi] + index_bias,
-                                                 'entity': sentence[start_index[mi]:end_index[mi]]})
-            print("entities",entities)
+                                entities.append(
+                                    {'start': start_index[mi] + index_bias, 'end': end_index[mi] + index_bias,
+                                     'entity': sentence[start_index[mi]:end_index[mi]]})
+            print("entities", entities)
 
 
 if __name__ == '__main__':

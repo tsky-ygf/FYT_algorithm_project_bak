@@ -14,7 +14,7 @@ class SpanEntityScore:
     rights: List[Any]
     founds: List[Any]
 
-    def __init__(self, id2label = None):
+    def __init__(self, id2label=None):
         self.id2label = id2label
         self.reset()
 
