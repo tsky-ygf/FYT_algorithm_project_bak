@@ -136,4 +136,8 @@ data/
 model/
 log/
 
+data
+model
+log
+
 LawsuitPrejudgment/Administrative/result_show/*.json
