@@ -10,6 +10,7 @@ import json
 from pathlib import Path
 import matplotlib.pyplot as plt
 
+
 def load_json(file_path):
     """
     加载json文件
@@ -21,6 +22,7 @@ def load_json(file_path):
     with open(str(file_path), 'r') as f:
         data = json.load(f)
     return data
+
 
 def save_json(data, file_path):
     """
@@ -35,6 +37,7 @@ def save_json(data, file_path):
     #     data = json.dumps(data)
     with open(str(file_path), 'w') as f:
         json.dump(data, f)
+
 
 class TrainingMonitor:
     paths: dict
@@ -52,7 +55,7 @@ class TrainingMonitor:
         self.add_test = add_test
         self.json_path = file_dir / (arch + "_training_monitor.json")
 
-    def reset(self,start_at):
+    def reset(self, start_at):
         if start_at > 0:
             if self.json_path is not None:
                 if self.json_path.exists():
@@ -71,7 +74,7 @@ class TrainingMonitor:
 
         # 写入文件
         if self.json_path is not None:
-            save_json(data = self.H,file_path=self.json_path)
+            save_json(data=self.H, file_path=self.json_path)
 
         # 保存train图像
         if len(self.H["loss"]) == 1:

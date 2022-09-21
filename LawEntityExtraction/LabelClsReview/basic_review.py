@@ -1,17 +1,14 @@
-import re
 import uuid
 
-import numpy as np
 import torch
-import torch.nn.functional as F
 
 import pandas as pd
 from collections import OrderedDict
-from Utils.parse_file import parse_config_file
+from Tools.parse_argument import parse_config_file
 from Utils import Logger
 from DocumentReview.ParseFile.parse_word import read_docx_file
 
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
+from transformers import AutoTokenizer
 from onnxruntime import InferenceSession
 
 class BasicSituation:

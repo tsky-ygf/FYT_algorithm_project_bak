@@ -16,8 +16,14 @@ import torch.utils.data as data
 from transformers import get_scheduler, default_data_collator
 
 from accelerate import Accelerator
-from Utils.logger import get_module_logger
-from Utils.parse_file import parse_config_file
+from Utils.logger import get_logger
+from Tools.parse_argument import parse_config_file
+from Tools.parse_argument import (
+    LogArguments,
+    TrainingArguments,
+    DataTrainingArguments,
+    ModelArguments
+)
 
 from torch.utils.tensorboard import SummaryWriter
 
@@ -68,13 +74,21 @@ class FGM:
 
 
 class BaseTrainTool:
-    def __init__(self, config, create_examples=None):
+    def __init__(self, config, create_examples_func=None):
         self.config = parse_config_file(config)
-        self.logger = get_module_logger(module_name="Train", level="DEBUG" if self.config["is_debug"] else "INFO")
+        self.log_args = LogArguments(**self.config["LogArguments"])
+        self.model_args = ModelArguments(**self.config["ModelArguments"])
+        self.train_args = TrainingArguments(**self.config["TrainingArguments"])
+        self.data_train_args = DataTrainingArguments(**self.config["DataTrainingArguments"])
 
-        if "log_path" in self.config and os.path.exists(self.config["log_path"]):
-            shutil.rmtree(self.config["log_path"])
-            self.writer = SummaryWriter(log_dir=self.config["log_path"])
+        self.logger = get_logger(level=self.log_args.log_level, logger_file=self.log_args.log_file)
+
+        self.logger.info(self.config)
+        # exit()
+
+        if self.log_args.log_file is not None and os.path.exists(self.log_args.log_file):
+            shutil.rmtree(self.log_args.log_file)
+            self.writer = SummaryWriter(log_dir=self.log_args.log_file)
 
         self.accelerator = self.init_accelerator()
 
@@ -84,30 +98,31 @@ class BaseTrainTool:
         self.train_dataloader, self.eval_dataloader = self.init_dataloader()
 
         self.num_update_steps_per_epoch = math.ceil(
-            len(self.train_dataloader) / self.config["gradient_accumulation_steps"])
-        self.config["max_train_steps"] = self.config["num_train_epochs"] * self.num_update_steps_per_epoch
-        self.process_bar = tqdm(range(self.config["max_train_steps"]),
+            len(self.train_dataloader) / self.train_args.gradient_accumulation_steps)
+        self.train_args.max_train_steps = self.train_args.num_train_epochs * self.num_update_steps_per_epoch
+        self.process_bar = tqdm(range(self.train_args.max_train_steps),
                                 disable=not self.accelerator.is_local_main_process)
 
         self.optimizer = self.init_optimizer()
         self.lr_scheduler = self.init_lr_scheduler()
 
-        self.create_examples = create_examples
+        self.create_examples = create_examples_func
         # Prepare everything with our `accelerator`.
         self.model, self.optimizer, self.train_dataloader, self.eval_dataloader, self.lr_scheduler = \
             self.accelerator.prepare(self.model, self.optimizer, self.train_dataloader, self.eval_dataloader,
                                      self.lr_scheduler)
 
-        if "do_adv" in self.config and self.config["do_adv"]:
-            self.fgm = FGM(self.model, emb_name=self.config["adv_name"], epsilon=self.config["adv_epsilon"])
+        if self.train_args.do_adv:
+            self.fgm = FGM(self.model, emb_name=self.train_args.adv_name, epsilon=self.train_args.adv_epsilon)
 
         self.completed_steps = 0
+        exit()
 
     # 目前都是使用默认参数
     def init_accelerator(self):
-        if 'accelerator_params' in self.config:
-            self.logger.info(self.config['accelerator_params'])
-            accelerator = Accelerator(**self.config['accelerator_params'])
+        if self.train_args.accelerator_params:
+            self.logger.info(self.train_args.accelerator_params)
+            accelerator = Accelerator(**self.train_args.accelerator_params)
         else:
             self.logger.info("Use accelerator default parameters")
             accelerator = Accelerator()
@@ -117,22 +132,24 @@ class BaseTrainTool:
         raise NotImplemented
 
     def init_dataset(self, *args, **kwargs):
-        data_dir_dict = {'train': self.config['train_data_path'],
-                         'dev': self.config['dev_data_path'],
-                         'test': self.config['test_data_path']}
+        data_dir_dict = {'train': self.data_train_args.train_data_path,
+                         'dev': self.data_train_args.dev_data_path,
+                         'test': self.data_train_args.test_data_path}
 
         train_dataset = BaseDataset(data_dir_dict,
                                     tokenizer=self.tokenizer,
                                     mode='train',
-                                    max_length=self.config['max_len'],
+                                    max_length=self.model_args.max_length,
                                     create_examples=self.create_examples,
-                                    is_debug=self.config['is_debug'])
+                                    is_debug=self.log_args.is_debug)
+
         eval_dataset = BaseDataset(data_dir_dict,
                                    tokenizer=self.tokenizer,
                                    mode='dev',
-                                   max_length=128,
+                                   max_length=self.model_args.max_length,
                                    create_examples=self.create_examples,
-                                   is_debug=self.config['is_debug'])
+                                   is_debug=self.log_args.is_debug)
+
         return train_dataset, eval_dataset
 
     def data_collator(self, *args, **kwargs):
@@ -143,13 +160,13 @@ class BaseTrainTool:
         train_dataloader = data.DataLoader(
             dataset=self.train_dataset, shuffle=True,
             collate_fn=self.data_collator,
-            batch_size=self.config["train_batch_size"],
+            batch_size=self.train_args.train_batch_size,
         )
 
         eval_dataloader = data.DataLoader(
             dataset=self.eval_dataset,
             collate_fn=self.data_collator,
-            batch_size=self.config["eval_batch_size"])
+            batch_size=self.train_args.eval_batch_size)
 
         return train_dataloader, eval_dataloader
 
@@ -160,29 +177,29 @@ class BaseTrainTool:
         optimizer_grouped_parameters = [
             {
                 "params": [p for n, p in self.model.named_parameters() if not any(nd in n for nd in no_decay)],
-                "weight_decay": self.config["weight_decay"],
+                "weight_decay": self.train_args.weight_decay,
             },
             {
                 "params": [p for n, p in self.model.named_parameters() if any(nd in n for nd in no_decay)],
                 "weight_decay": 0.0,
             },
         ]
-        optimizer = torch.optim.AdamW(optimizer_grouped_parameters, lr=self.config["learning_rate"])
+        optimizer = torch.optim.AdamW(optimizer_grouped_parameters, lr=self.train_args.learning_rate)
 
         return optimizer
 
     def init_lr_scheduler(self):
-        if "num_warmup_steps" in self.config:
-            num_warmup_steps = self.config["num_warmup_steps"]
-        elif "warmup_ratio" in self.config:
-            num_warmup_steps = int(self.config["max_train_steps"] * self.config["warmup_ratio"])
+        if self.train_args.num_warmup_steps is not None:
+            num_warmup_steps = self.train_args.num_warmup_steps
+        elif self.train_args.warmup_ratio is not None:
+            num_warmup_steps = int(self.train_args.max_train_steps * self.train_args.warmup_ratio)
         else:
             num_warmup_steps = 0
         lr_scheduler = get_scheduler(
-            name=self.config["lr_scheduler_type"],
+            name=self.train_args.lr_scheduler_type,
             optimizer=self.optimizer,
             num_warmup_steps=num_warmup_steps,
-            num_training_steps=self.config["max_train_steps"],
+            num_training_steps=self.train_args.max_train_steps,
         )
         return lr_scheduler
 
@@ -196,7 +213,7 @@ class BaseTrainTool:
             self.model.train()
             loss = self.cal_loss(batch)
 
-            loss = loss / self.config["gradient_accumulation_steps"]
+            loss /= self.train_args.gradient_accumulation_steps
             # self.accelerator.backward(loss, retain_graph=False)
             self.accelerator.backward(loss)
 
@@ -269,23 +286,19 @@ class BaseTrainTool:
         best_eval_loss = float("inf")
         patience = 0
 
-        if "output_dir" not in self.config:
-            # self.logger.error("=========== no model save path ================")
-            raise Exception("==========no model save path============")
-
-        if not os.path.exists(self.config["output_dir"]):
-            os.makedirs(self.config["output_dir"])
+        if not os.path.exists(self.data_train_args.output_dir):
+            os.makedirs(self.data_train_args.output_dir)
         else:
-            shutil.rmtree(self.config["output_dir"])
-            os.makedirs(self.config["output_dir"])
+            shutil.rmtree(self.data_train_args.output_dir)
+            os.makedirs(self.data_train_args.output_dir)
 
-        for epoch in range(self.config["num_train_epochs"]):
+        for epoch in range(self.train_args.num_train_epochs):
             # self.logger.info("epoch:{}=====patience:{}".format(epoch, patience))
-            if patience > self.config["early_stop_patience"]:
+            if patience > self.train_args.early_stopping_patience:
                 break
             self.train_epoch(epoch)
             torch.cuda.empty_cache()
-            if epoch % self.config["eval_every_number_of_epoch"] == 0:  # and epoch > 0:
+            if epoch % self.train_args.early_stopping_patience == 0:  # and epoch > 0:
                 # torch.cuda.empty_cache()
                 eval_loss = self.eval_epoch()
                 self.logger.info("epoch:{}======>eval_loss: {}".format(epoch, eval_loss))
@@ -296,10 +309,9 @@ class BaseTrainTool:
                     # self.save_model(
                     #     model_path=self.config["output_dir"] + "/epoch_{}_score_{}/".format(epoch, eval_loss))
                     torch.save(self.model.state_dict(),
-                               self.config["output_dir"] + "/epoch_{}_score_{:.4f}.bin".format(epoch, eval_loss))
+                               self.data_train_args.output_dir + "/epoch_{}_score_{:.4f}.bin".format(epoch, eval_loss))
                     best_eval_loss = eval_loss
                     patience = 0
-                    self.save_model(model_path=self.config["output_dir"] + "/final")
+                    self.save_model(model_path=self.data_train_args.output_dir + "/final")
                 else:
                     patience += 1
-

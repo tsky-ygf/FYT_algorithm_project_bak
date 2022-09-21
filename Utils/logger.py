@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2022/3/25 14:19
 # @Author  : Adolf
-# @Site    : 
+# @Site    :
 # @File    : logger.py
 # @Software: PyCharm
 import contextlib
@@ -10,44 +10,27 @@ import functools
 import logging
 import time
 import threading
+
 # from typing import List
 
 import uuid
 import colorlog
+
+import sys
+import loguru
 
 # from colorama import Fore
 
 # loggers = {}
 
 log_config = {
-    'DEBUG': {
-        'level': 10,
-        'color': 'purple'
-    },
-    'INFO': {
-        'level': 20,
-        'color': 'green'
-    },
-    'TRAIN': {
-        'level': 21,
-        'color': 'cyan'
-    },
-    'EVAL': {
-        'level': 22,
-        'color': 'blue'
-    },
-    'WARNING': {
-        'level': 30,
-        'color': 'yellow'
-    },
-    'ERROR': {
-        'level': 40,
-        'color': 'red'
-    },
-    'CRITICAL': {
-        'level': 50,
-        'color': 'bold_red'
-    }
+    "DEBUG": {"level": 10, "color": "purple"},
+    "INFO": {"level": 20, "color": "green"},
+    "TRAIN": {"level": 21, "color": "cyan"},
+    "EVAL": {"level": 22, "color": "blue"},
+    "WARNING": {"level": 30, "color": "yellow"},
+    "ERROR": {"level": 40, "color": "red"},
+    "CRITICAL": {"level": 50, "color": "bold_red"},
 }
 
 
@@ -58,8 +41,8 @@ class Logger(object):
         name(str) : Logger name, default is 'FYTProject'
     """
 
-    def __init__(self, name: str = None, level: str = 'INFO'):
-        name = 'FYTProject-{}'.format(uuid.uuid1()) if not name else name
+    def __init__(self, name: str = None, level: str = "INFO"):
+        name = "FYTProject-{}".format(uuid.uuid1()) if not name else name
         self.logger = logging.getLogger(name)
         # self.logger.propagate = False
 
@@ -71,19 +54,16 @@ class Logger(object):
         # self.logger.handlers.clear()
 
         for key, conf in log_config.items():
-            logging.addLevelName(conf['level'], key)
-            self.__dict__[key] = functools.partial(self.__call__, conf['level'])
-            self.__dict__[key.lower()] = functools.partial(self.__call__,
-                                                           conf['level'])
+            logging.addLevelName(conf["level"], key)
+            self.__dict__[key] = functools.partial(self.__call__, conf["level"])
+            self.__dict__[key.lower()] = functools.partial(self.__call__, conf["level"])
 
         self.format = colorlog.ColoredFormatter(
-            '\n%(log_color)s[%(asctime)-12s] [%(levelname)4s][%(filename)s -> %(funcName)s line:%(lineno)d]%(reset)s \n'
-            '%(message)s',
-            datefmt='%Y-%m-%d  %H:%M:%S',
-            log_colors={
-                key: conf['color']
-                for key, conf in log_config.items()
-            })
+            "\n%(log_color)s[%(asctime)-12s] [%(levelname)4s][%(filename)s -> %(funcName)s line:%(lineno)d]%(reset)s \n"
+            "%(message)s",
+            datefmt="%Y-%m-%d  %H:%M:%S",
+            log_colors={key: conf["color"] for key, conf in log_config.items()},
+        )
 
         if not self.logger.handlers:
             self.handler = logging.StreamHandler()
@@ -138,11 +118,11 @@ class Logger(object):
 
         def _printer():
             index = 0
-            flags = ['\\', '|', '/', '-']
+            flags = ["\\", "|", "/", "-"]
             while not end:
                 flag = flags[index % len(flags)]
-                with self.use_terminator('\r'):
-                    self.info('{}: {}'.format(msg, flag))
+                with self.use_terminator("\r"):
+                    self.info("{}: {}".format(msg, flag))
                 time.sleep(interval)
                 index += 1
 
@@ -155,11 +135,11 @@ class Logger(object):
 # logger = Logger()
 
 log_colors_config = {
-    'DEBUG': 'white',  # cyan white
-    'INFO': 'green',
-    'WARNING': 'yellow',
-    'ERROR': 'red',
-    'CRITICAL': 'bold_red',
+    "DEBUG": "white",  # cyan white
+    "INFO": "green",
+    "WARNING": "yellow",
+    "ERROR": "red",
+    "CRITICAL": "bold_red",
 }
 
 
@@ -181,7 +161,9 @@ def get_module_logger(module_name, level="INFO", console=True, logger_file=None)
         console_handler = logging.StreamHandler()
     # 输出到文件
     if logger_file is not None:
-        file_handler = logging.FileHandler(filename=logger_file, mode='a', encoding='utf8')
+        file_handler = logging.FileHandler(
+            filename=logger_file, mode="a", encoding="utf8"
+        )
 
     if level.upper() == "INFO":
         logger.setLevel(logging.INFO)
@@ -210,13 +192,14 @@ def get_module_logger(module_name, level="INFO", console=True, logger_file=None)
 
     # 日志输出格式
     file_formatter = logging.Formatter(
-        fmt='[%(asctime)s.%(msecs)03d] %(filename)s -> %(funcName)s line:%(lineno)d [%(levelname)s] : %(message)s',
-        datefmt='%Y-%m-%d  %H:%M:%S'
+        fmt="[%(asctime)s.%(msecs)03d] %(filename)s -> %(funcName)s line:%(lineno)d [%(levelname)s]:\n %(message)s",
+        datefmt="%Y-%m-%d  %H:%M:%S",
     )
     console_formatter = colorlog.ColoredFormatter(
-        fmt='%(log_color)s[%(asctime)s.%(msecs)03d] %(filename)s -> %(funcName)s line:%(lineno)d [%(levelname)s] : %(message)s',
-        datefmt='%Y-%m-%d  %H:%M:%S',
-        log_colors=log_colors_config
+        fmt="%(log_color)s[%(asctime)s.%(msecs)03d] %(filename)s -> %(funcName)s line:%(lineno)d "
+            "[%(levelname)s]:\n %(message)s",
+        datefmt="%Y-%m-%d  %H:%M:%S",
+        log_colors=log_colors_config,
     )
     if console:
         console_handler.setFormatter(console_formatter)
@@ -237,11 +220,27 @@ def get_module_logger(module_name, level="INFO", console=True, logger_file=None)
     return logger
 
 
+def get_logger(level="INFO", console=True, logger_file=None):
+    logger = loguru.logger
+    logger.remove()
+
+    if console:
+        logger.add(sys.stderr, level=level.upper())
+
+    if logger_file is not None:
+        logger.add(logger_file, enqueue=True)  # 添加一个文件输出的内容
+
+    return logger
+
+
 # 计算函数执行时间
 def print_run_time(func):
     def wrapper(*args, **kw):
         local_time = time.time()
         func(*args, **kw)
-        print('current Function [%s] run time is %.2f s' % (func.__name__, time.time() - local_time))
+        print(
+            "current Function [%s] run time is %.2f s"
+            % (func.__name__, time.time() - local_time)
+        )
 
     return wrapper
