@@ -111,8 +111,6 @@ class TrainExtractQA(BaseTrainTool):
                                              data_func=create_squad_examples,
                                              prepare_input=prepare_input_for_squad)
 
-    # self.create_examples = self
-
     def init_model(self):
         tokenizer = AutoTokenizer.from_pretrained(self.model_args.tokenizer_name)
         # model = MultiLabelClsModel(self.config)
@@ -121,24 +119,8 @@ class TrainExtractQA(BaseTrainTool):
             self.model_args.model_name_or_path,
             config=model_config,
         )
-        # self.logger.debug(model)
-
-        # for param in model.longformer.parameters():
-        #     param.requires_grad = False
 
         return tokenizer, model
-
-    # def cal_loss(self, batch):
-    #     self.logger.debug(batch)
-    # self.logger.debug(batch)
-    # labels = batch['labels']
-    # input_data = {'input_ids': batch['input_ids'],
-    #               'atention_mask': batch['attention_mask'],
-    #               'token_type_ids': batch['token_type_ids']}
-    # pred = self.model(batch['input_ids'].squeeze())
-    # loss = self.criterion(torch.sigmoid(pred.logits), labels.squeeze())
-    # self.logger.debug(loss)
-    # return loss
 
 
 if __name__ == '__main__':
