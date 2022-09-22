@@ -74,7 +74,7 @@ class FGM:
 
 
 class BaseTrainTool:
-    def __init__(self, config_path, data_func=None):
+    def __init__(self, config_path, data_func=None, prepare_input=None):
         """
 
         :param config_path: config file path
@@ -82,6 +82,7 @@ class BaseTrainTool:
         """
         self.config = parse_config_file(config_path)
         self.create_examples = data_func
+        self.prepare_input = prepare_input
 
         self.log_args = LogArguments(**self.config["LogArguments"])
         self.model_args = ModelArguments(**self.config["ModelArguments"])
@@ -146,14 +147,16 @@ class BaseTrainTool:
                                     mode='train',
                                     max_length=self.model_args.max_length,
                                     create_examples=self.create_examples,
-                                    is_debug=self.log_args.is_debug)
+                                    is_debug=self.log_args.is_debug,
+                                    prepare_input=self.prepare_input)
 
         eval_dataset = BaseDataset(data_dir_dict,
                                    tokenizer=self.tokenizer,
                                    mode='dev',
                                    max_length=self.model_args.max_length,
                                    create_examples=self.create_examples,
-                                   is_debug=self.log_args.is_debug)
+                                   is_debug=self.log_args.is_debug,
+                                   prepare_input=self.prepare_input)
 
         return train_dataset, eval_dataset
 
@@ -208,8 +211,10 @@ class BaseTrainTool:
         )
         return lr_scheduler
 
-    def cal_loss(self, *args, **kwargs):
-        raise NotImplementedError
+    def cal_loss(self, batch, **kwargs):
+        outputs = self.model(**batch)
+        loss = outputs.loss
+        return loss
 
     def train_epoch(self, epoch):
 

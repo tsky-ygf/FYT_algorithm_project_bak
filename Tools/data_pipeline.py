@@ -9,15 +9,32 @@ import json
 import copy
 
 import torch.utils.data as data
+from typing import Union, List
 
 
 class InputExample:
-    """A single training/test example for token classification."""
+    """
+    Structure for one input example with texts, the label and a unique id
+    """
 
-    def __init__(self, guid, text, label):
+    def __init__(self, guid: str = '', texts: List[str] = None, label: Union[int, float] = 0):
+        """
+        Creates one InputExample with the given texts, guid and label
+
+
+        :param guid
+            id for the example
+        :param texts
+            the texts for the example.
+        :param label
+            the label for the example
+        """
         self.guid = guid
-        self.text = text
+        self.texts = texts
         self.label = label
+
+    def __str__(self):
+        return "<InputExample> label: {}, texts: {}".format(str(self.label), "; ".join(self.texts))
 
     def __repr__(self):
         return str(self.to_json_string())
@@ -63,7 +80,7 @@ class DataProcessor:
             guid = "%s-%s" % (set_type, i)
             text = line['text']
             label = line['label']
-            examples.append(InputExample(guid=guid, text=text, label=label))
+            examples.append(InputExample(guid=guid, texts=[text], label=label))
         return examples
 
     # @staticmethod
@@ -72,7 +89,15 @@ class DataProcessor:
 
 
 class BaseDataset(data.Dataset):
-    def __init__(self, data_dir_dict, tokenizer, mode, max_length=128, create_examples=None, is_debug=False):
+    def __init__(self,
+                 data_dir_dict,
+                 tokenizer,
+                 mode,
+                 max_length=128,
+                 create_examples=None,
+                 is_debug=False,
+                 prepare_input=None):
+
         self.processor = DataProcessor(create_examples=create_examples)
         self.mode = mode
 
@@ -89,21 +114,26 @@ class BaseDataset(data.Dataset):
         if is_debug:
             self.examples = self.examples[:100]
 
+        if prepare_input is not None:
+            self.prepare_input = prepare_input
+        else:
+            self.prepare_input = self.base_prepare_input
+
     def __len__(self):
         return len(self.examples)
 
     def __getitem__(self, item):
-        inputs = self.prepare_input(self.examples[item], self.tokenizer, max_len=self.max_length)
+        inputs = self.prepare_input(self.examples[item], self.tokenizer, max_length=self.max_length)
         return inputs
 
     @staticmethod
-    def prepare_input(example, tokenizer, max_len=512):
-        text = example.text
+    def base_prepare_input(example, tokenizer, max_length=512):
+        text = example.texts[0]
         label = example.label
 
         inputs = tokenizer(text,
                            add_special_tokens=True,
-                           max_length=max_len,
+                           max_length=max_length,
                            padding="max_length",
                            truncation=True,
                            return_offsets_mapping=False,
