@@ -5,10 +5,10 @@
 # @File    : run_qa.py
 # @Software: PyCharm
 import os
-# from transformers import WEIGHTS_NAME, BertConfig,get_linear_schedule_with_warmup,AdamW, BertTokenizer
+from transformers import WEIGHTS_NAME, BertConfig,get_linear_schedule_with_warmup,AdamW, BertTokenizer
 from BasicTask.NER.BertNer.metrics import SpanEntityScore
 
-os.environ['CUDA_VISIBLE_DEVICES'] = '1'
+os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 import torch
 import argparse
 from pprint import pprint
@@ -25,11 +25,14 @@ def train(args, train_loader, model, optimizer):
     print('-' * 50 + 'training' + '-' * 50)
     total_loss = 0
     num_samples = 0
-    entities = []
     for i, samples in enumerate(train_loader):
         optimizer.zero_grad()
         encoded_dicts, starts, ends, labels = samples[0], samples[1], samples[2], samples[3]
-        sentences = samples[4]
+        # outputs = model(encoded_dicts['input_ids'], token_type_ids=encoded_dicts['token_type_ids'],
+        #                 attention_mask=encoded_dicts['attention_mask'],
+        #                 start_positions=starts, end_positions=ends)
+        # loss = outputs[0]
+        # loss.backward()
         start_prob, end_prob = model(encoded_dicts)
         # start_loss = torch.nn.functional.binary_cross_entropy(input=start_prob, target=starts, reduction="sum")
         # end_loss = torch.nn.functional.binary_cross_entropy(input=end_prob, target=ends, reduction="sum")
@@ -37,7 +40,6 @@ def train(args, train_loader, model, optimizer):
         end_loss = torch.nn.functional.binary_cross_entropy(input=end_prob, target=ends)
         loss = start_loss + end_loss
         loss.backward()
-
         total_loss += loss.item()
         num_samples += len(samples)
 
@@ -48,10 +50,10 @@ def train(args, train_loader, model, optimizer):
 
 
 def main(args):
-    labels = read_config_to_label(args)
-    # labels2id = ['address', 'book', 'company', 'game', 'government', 'movie', 'name', 'organization', 'position',
-    #              'scene']
-    args.labels = labels
+    # labels = read_config_to_label(args)
+    labels2id = ['address', 'book', 'company', 'game', 'government', 'movie', 'name', 'organization', 'position',
+                 'scene']
+    args.labels = labels2id
 
     # config_class, model_class, tokenizer_class = BertConfig, BertSpanForNer, BertTokenizer
     # config = config_class.from_pretrained(args.model, num_labels=len(labels2id))
@@ -70,15 +72,35 @@ def main(args):
     # model.load_state_dict(state['model_state'])
     # ===============================================================================
 
+    # no_decay = ["bias", "LayerNorm.weight"]
+    # bert_parameters = model.bert.named_parameters()
+    # start_parameters = model.start_fc.named_parameters()
+    # end_parameters = model.end_fc.named_parameters()
+    # optimizer_grouped_parameters = [
+    #     {"params": [p for n, p in bert_parameters if not any(nd in n for nd in no_decay)],
+    #      "weight_decay": args.weight_decay, 'lr': args.learning_rate},
+    #     {"params": [p for n, p in bert_parameters if any(nd in n for nd in no_decay)], "weight_decay": 0.0
+    #         , 'lr': args.learning_rate},
+    #
+    #     {"params": [p for n, p in start_parameters if not any(nd in n for nd in no_decay)],
+    #      "weight_decay": args.weight_decay, 'lr': 0.001},
+    #     {"params": [p for n, p in start_parameters if any(nd in n for nd in no_decay)], "weight_decay": 0.0
+    #         , 'lr': 0.001},
+    #
+    #     {"params": [p for n, p in end_parameters if not any(nd in n for nd in no_decay)],
+    #      "weight_decay": args.weight_decay, 'lr': 0.001},
+    #     {"params": [p for n, p in end_parameters if any(nd in n for nd in no_decay)], "weight_decay": 0.0
+    #         , 'lr': 0.001},
+    # ]
     # optimizer = AdamW(optimizer_grouped_parameters, lr=args.learning_rate, eps=args.adam_epsilon)
     optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate)
     # optimizer = torch.optim.SparseAdam(model.parameters(), lr=args.learning_rate)
     print("numbers train", len(train_data))
     train_dataset = ReaderDataset(train_data)
-    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, collate_fn=batchify)
+    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, collate_fn=batchify_cluener)
 
     dev_dataset = ReaderDataset(dev_data)
-    dev_loader = DataLoader(dev_dataset, batch_size=args.batch_size, shuffle=False, collate_fn=batchify)
+    dev_loader = DataLoader(dev_dataset, batch_size=args.batch_size, shuffle=False, collate_fn=batchify_cluener)
     # model.zero_grad()
     best_f1 = 0
     for e in range(args.num_epochs):
@@ -93,16 +115,31 @@ def main(args):
         y_pred = torch.FloatTensor([]).to(args.device)
         entities = []
         true_entities = []
-
+        # metric = SpanEntityScore()
         for i, samples in enumerate(tqdm(dev_loader)):
 
             encoded_dicts, starts, ends, labels = samples[0], samples[1], samples[2], samples[3]
             sentences = samples[4]
+            # start_prob, end_prob = model(encoded_dicts)
+            # outputs = model(encoded_dicts['input_ids'], token_type_ids=encoded_dicts['token_type_ids'],
+            #                              attention_mask=encoded_dicts['attention_mask'],
+            #                              start_positions=starts, end_positions=ends)
+            # _, start_logits, end_logits = outputs[:3]
+            # R = bert_extract_item(start_logits, end_logits)
+            # T = labels
+            # metric.update(true_subject=T, pred_subject=R)
+            # if R!=[]:
+            #     print(R)
 
             start_prob, end_prob = model(encoded_dicts)
+            # y_true = torch.cat([y_true, starts])
+            # y_true = torch.cat([y_true, ends])
             thred = torch.FloatTensor([0.5]).to(args.device)
             start_pred = start_prob > thred
             end_pred = end_prob > thred
+            # y_pred = torch.cat([y_pred, start_pred])
+            # y_pred = torch.cat([y_pred, end_pred])
+
             start_pred = start_pred.transpose(2, 1)
             end_pred = end_pred.transpose(2, 1)
 
@@ -125,19 +162,18 @@ def main(args):
                             # print("label:", args.labels[li], "end:", end_ind)
                     if len(start_index) == len(end_index):
                         for start_ind, end_ind in zip(start_index, end_index):
-                            entities.append([args.labels[li], sentence[start_ind:end_ind]])
+                            entities.append([labels2id[li], sentence[start_ind:end_ind+1]])
                             # true_entities.append([labels[bi][0], sentence[labels[bi][1]:labels[bi][2]+1]])
                     else:
                         min_len = min(len(start_index), len(end_index))
                         for mi in range(min_len):
-                            entities.append([args.labels[li], sentence[start_index[mi]:end_index[mi]]])
+                            entities.append([labels2id[li], sentence[start_index[mi]:end_index[mi]+1]])
             true_entities.extend(labels)
 
-        print('pred entities: ', len(entities))
-        if len(entities)>0:
-            print(entities[0])
+        print('entities: ', len(entities))
+        # print(entities[0])
         print('true_entities: ', len(true_entities))
-        print(true_entities[0])
+        # print(true_entities[0])
         # precision, recall, f1 = evaluate_entity_wo_category(true_entities, entities)
         cir = SpanEntityScore()
         cir.update(true_entities, entities)
@@ -227,7 +263,7 @@ if __name__ == '__main__':
     parser.add_argument("--do_train", default=True, type=bool)
     parser.add_argument("--is_inference", default=False, type=bool)
     parser.add_argument("--model_save_path", default='DocumentReview/PointerBert/model_src/PBert0922_cluener.pt')
-    parser.add_argument("--batch_size", default=1, type=int, help="Batch size per GPU/CPU for training.")
+    parser.add_argument("--batch_size", default=16, type=int, help="Batch size per GPU/CPU for training.")
     parser.add_argument("--learning_rate", default=1e-5, type=float, help="The initial learning rate for Adam.")
     parser.add_argument("--train_path", default=None, type=str, help="The path of train set.")
     parser.add_argument("--dev_path", default=None, type=str, help="The path of dev set.")
@@ -253,11 +289,11 @@ if __name__ == '__main__':
 
 
     args = parser.parse_args()
-    args.train_path = 'data/data_src/new/train_100.json'
-    args.dev_path = 'data/data_src/new/dev_100.json'
-    # args.train_path = 'data/cluener/train.json'
-    # args.dev_path = 'data/cluener/dev.json'
-    args.model = 'model/language_model/chinese-roberta-wwm-ext'
+    # args.train_path = 'data/data_src/new/train.txt'
+    # args.dev_path = 'data/data_src/new/dev.txt'
+    args.train_path = 'data/cluener/train.json'
+    args.dev_path = 'data/cluener/dev.json'
+    args.model = 'model/language_model/bert-base-chinese'
     pprint(args)
 
     main(args)

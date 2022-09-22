@@ -14,6 +14,7 @@ from torch.utils.data import Dataset
 from transformers import BertTokenizer
 
 tokenizer = BertTokenizer.from_pretrained('model/language_model/chinese-roberta-wwm-ext')
+# tokenizer = BertTokenizer.from_pretrained('model/language_model/bert-base-chinese')
 
 
 def read_config(config_path):
@@ -81,7 +82,6 @@ def batchify_cluener(batch):
     input_ids = []
     attention_mask = []
     token_type_ids = []
-    window_length = 510  # add 101 102 to 512
     start_seqs = []
     end_seqs = []
     for b in batch:
@@ -105,7 +105,8 @@ def batchify_cluener(batch):
         for label, res in res_dict.items():
             for entity, position in res.items():
                 # labels.append([label, entity, position[0]])
-                labels.append([label, position[0][0], position[0][1]])
+                labels.append([label, entity])
+                # labels.append([label, position[0][0], position[0][1]])
                 label_index = labels2id.index(label)
                 start, end = position[0][0], position[0][1]
                 start_seq[label_index][start] = 1
@@ -118,13 +119,14 @@ def batchify_cluener(batch):
         'attention_mask': torch.LongTensor(attention_mask).to('cuda'),
         'token_type_ids': torch.LongTensor(token_type_ids).to('cuda')
     }
-    start_seqs = torch.tensor(start_seqs, dtype=torch.int64).transpose(1, 2).to('cuda')
-    end_seqs = torch.tensor(end_seqs, dtype=torch.int64).transpose(1, 2).to('cuda')
+    start_seqs = torch.tensor(start_seqs, dtype=torch.float).transpose(1, 2).to('cuda')
+    end_seqs = torch.tensor(end_seqs, dtype=torch.float).transpose(1, 2).to('cuda')
     assert len(input_ids) == len(start_seqs), [len(input_ids), len(start_seqs)]
     return encoded_dict, start_seqs, end_seqs, labels, sentences
 
 
 def batchify(batch):
+    # 在doccano_data_preprocess中，已经做过最大长度截断了。
     sentences = []
     labels = []
     input_ids = []
@@ -135,94 +137,38 @@ def batchify(batch):
     end_seqs = []
 
     for b in batch:
-        content_raw = b['content']
-        label = b['prompt']
-        res_list = b['result_list']
+        text = b['text']
+        res_list = b['entities']
+        # labels_batch = []
         # negative ratio 生成的负例
+        start_seq = [[0] * window_length for _ in range(len(labels2id))]
+        end_seq = [[0] * window_length for _ in range(len(labels2id))]
+        sentences.append(text)
         if not res_list:
-            content = content_raw[:window_length]
-            start_seq = [[0] * window_length for _ in range(len(labels2id))]
-            end_seq = [[0] * window_length for _ in range(len(labels2id))]
             start_seqs.append(start_seq)
             end_seqs.append(end_seq)
-            labels.append(label)
-            sentences.append(content)
+            # labels_batch.append([None, None, None, None])
         else:
-            pass
-
-        # else:
-        #     # 如果 result_list 数量大于1：
-        #     #       1. 如果多个result_list能在一个window中， 实体的最外边界往左右扩充至window
-        #     #       2. 如果多个result_list不能在一个window中， 则视作多条样本
-        #     # TODO: if length of res_list are more than one
-        #     # assert len(res_list) == 1, ['length of result_list is larger than 1', b]
-        #     starts_tmp = []
-        #     ends_tmp = []
-        #     for i_res in range(len(res_list)):
-        #         start, end = res_list[i_res]['start'], res_list[i_res]['end']
-        #         starts_tmp.append(start)
-        #         ends_tmp.append(end)
-        #     start_range = min(starts_tmp + ends_tmp)
-        #     end_range = max(starts_tmp + ends_tmp)
-        #     diff = end_range - start_range
-        #     # 如果最大范围小于window大小
-        #     if diff < 510:
-        #         window_length_single = (window_length - diff) // 2
-        #         left = start_range - window_length_single if start_range - window_length_single >= 0 else 0
-        #         right = end_range + window_length_single if end_range + window_length_single < len(
-        #             content_raw) else len(content_raw)
-        #         content = content_raw[left:right]
-        #         start_seq = [[0] * window_length for _ in range(len(labels2id))]
-        #         end_seq = [[0] * window_length for _ in range(len(labels2id))]
-        #         for i_res in range(len(res_list)):
-        #             start, end = res_list[i_res]['start'], res_list[i_res]['end']
-        #             start_new = start - left
-        #             end_new = end - left
-        #
-        #             label_index = labels2id.index(label)
-        #             start_seq[label_index][start_new] = 1
-        #             end_seq[label_index][end_new] = 1
-        #         start_seqs.append(start_seq)
-        #         end_seqs.append(end_seq)
-        #         labels.append(label)
-        #         sentences.append(content)
-        #
-        #     else:
-        #         for i_res in range(len(res_list)):
-        #             start, end = res_list[i_res]['start'], res_list[i_res]['end']
-        #             diff = end - start
-        #             window_length_single = (window_length - diff) // 2
-        #             left = start - window_length_single if start - window_length_single >= 0 else 0
-        #             right = end + window_length_single if end + window_length_single < len(content_raw) else len(
-        #                 content_raw)
-        #             start = start - left
-        #             end = end - left
-        #             content = content_raw[left:right]
-        #             assert content[start:end] == res_list[i_res]['text']
-        #             # 所有的标签都需要start和end
-        #             start_seq = [[0] * window_length for _ in range(len(labels2id))]
-        #             label_index = labels2id.index(label)
-        #             start_seq[label_index][start] = 1
-        #             end_seq = [[0] * window_length for _ in range(len(labels2id))]
-        #             end_seq[label_index][end] = 1
-        #             start_seqs.append(start_seq)
-        #             end_seqs.append(end_seq)
-        #             labels.append(label)
-        #             sentences.append(content)
-
-        # enco_dict = tokenizer.encode_plus(list(content), padding='max_length', add_special_tokens=True, max_length=510,
-        #                                   return_tensors='pt', truncation=True)
-        # input_id = enco_dict['input_ids'].squeeze()
-        # atten_mask = enco_dict['attention_mask'].squeeze()
-        # token_type_id = enco_dict['token_type_ids'].squeeze()
-        # if len(input_id) != len(content)+2:
-    for senten in sentences:
-        input_i = [101] + tokenizer.convert_tokens_to_ids(list(senten)) + [102]
+            for res in res_list:
+                label = res['label']
+                start = res['start_offset']
+                end = res['end_offset']
+                entity_text = text[start:end]
+                label_id = labels2id.index(label)
+                start_seq[label_id][start] = 1
+                end_seq[label_id][end] = 1
+                # labels_batch.append([label, entity_text, start, end])
+                # labels_batch.append([label, entity_text])
+                labels.append([label, entity_text])
+            start_seqs.append(start_seq)
+            end_seqs.append(end_seq)
+        # labels.append(labels_batch)
+        input_i = [101] + tokenizer.convert_tokens_to_ids(list(text)) + [102]
         input_id = input_i.copy() + [0] * (512 - len(input_i))
         atten_mask = [1] * len(input_id) + [0] * (512 - len(input_id))
         token_type_id = [0] * 512
-
         assert len(input_id) == 512, len(input_id)
+
         input_ids.append(input_id)
         attention_mask.append(atten_mask)
         token_type_ids.append(token_type_id)
@@ -232,6 +178,7 @@ def batchify(batch):
         'attention_mask': torch.LongTensor(attention_mask).to('cuda'),
         'token_type_ids': torch.LongTensor(token_type_ids).to('cuda')
     }
+
     start_seqs = torch.FloatTensor(start_seqs).transpose(1, 2).to('cuda')
     end_seqs = torch.FloatTensor(end_seqs).transpose(1, 2).to('cuda')
     assert len(input_ids) == len(start_seqs), [len(input_ids), len(start_seqs)]
@@ -270,6 +217,7 @@ def evaluate_index(y_pred, y_true):
     f1 = 2 * precision * recall / (precision + recall) if precision + recall != 0 else 0
     return precision, recall, f1
 
+
 def bert_extract_item(start_logits, end_logits):
     S = []
     start_pred = torch.argmax(start_logits, -1).cpu().numpy()[0]
@@ -286,17 +234,16 @@ def bert_extract_item(start_logits, end_logits):
 
 if __name__ == "__main__":
     # file = 'data/cluener/dev.json'
-    # maxlen = 0
-    # with open(file, 'r', encoding='utf-8') as f:
-    #     for line in f.readlines():
-    #         j = json.loads(line.strip())
-    #         text = j['text']
-    #         if len(text) > maxlen:
-    #             maxlen = len(text)
-    # print(maxlen)
-    t = torch.rand([2,3,4])
-    r = t>0.5
-    print(r)
+    # maxlen = 0 # 52
+    # new maxlength of entity  263
+    d = []
+    c = 0
+    with open('data/data_src/new/dev_100.json', 'r', encoding='utf-8') as f:
+        for line in f.readlines():
+            line = json.loads(line.strip())
+            c += len(line['entities'])
+    print(c)
+
     pass
 else:
     # labels2id = read_config_to_label(None)

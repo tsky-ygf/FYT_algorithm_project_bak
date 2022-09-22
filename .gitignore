@@ -141,3 +141,5 @@ model
 log
 
 LawsuitPrejudgment/Administrative/result_show/*.json
+
+DocumentReview/PointerBert/model_src/*.pt
