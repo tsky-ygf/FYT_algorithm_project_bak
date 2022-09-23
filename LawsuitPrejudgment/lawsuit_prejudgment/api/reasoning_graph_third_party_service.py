@@ -104,12 +104,24 @@ def get_template_by_problem_id():
 @app.route('/get_claim_list_by_problem_id', methods=["get", "post"])
 def get_claim_list_by_problem_id():
     req_data = _request_parse(request)
+
+    # 从诉求配置，获取诉求列表
     mapped_problem = _get_mapped_problem(req_data.get("problem_id"))
     claim_list = user_ps.get(str(mapped_problem), [])
+
+    # 从纠纷展示配置，获取诉求列表
+    displayed_problem_name = _get_problem(req_data.get("problem_id"))
+    df = pd.read_csv("LawsuitPrejudgment/lawsuit_prejudgment/core/纠纷展示配置.csv", encoding="utf-8")
+    df = df["对应诉求"].groupby(df["纠纷展示名称"], sort=False).agg(lambda x: list(x))
+    displayed_claim_list = df[displayed_problem_name] if displayed_problem_name in df else claim_list
+
+    # 移除诉求配置中没有的诉求，以免问答产生异常
+    displayed_claim_list = [item for item in displayed_claim_list if item in claim_list]
+
     return json.dumps({
         "success": True,
         "error_msg": "",
-        "value": [{"id": idx, "claim": claim, "is_recommended": False} for idx, claim in enumerate(claim_list)]
+        "value": [{"id": idx, "claim": claim, "is_recommended": False} for idx, claim in enumerate(displayed_claim_list)]
     }, ensure_ascii=False)
 
 
