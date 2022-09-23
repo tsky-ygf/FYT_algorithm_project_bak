@@ -196,6 +196,10 @@ class ManuallySelectedCivilSimilarCase:
             return ""
         return str(content)[:index + len("民事判决书")]
 
+    @staticmethod
+    def _ignore_nan(string_value):
+        return "" if str(string_value).lower() == "nan" else str(string_value)
+
     def _is_valid_row(self, row):
         return row["纠纷"] == self.problem and row["诉求"] == self.claim and row["情形"] == self.situation and str(row["doc_id"]) != 'nan'
 
@@ -212,9 +216,9 @@ class ManuallySelectedCivilSimilarCase:
                         "doc_id": "judgment_minshi_data_SEP_" + str(row["doc_id"]),
                         "similar_rate": 1.0,
                         "title": self._get_title(row["content"]),
-                        "court": row["court"],
-                        "judge_date": row["judge_date"],
-                        "case_number": row["case_number"],
+                        "court": self._ignore_nan(row["court"]),
+                        "judge_date": self._ignore_nan(row["judge_date"]),
+                        "case_number": self._ignore_nan(row["case_number"]),
                         "tag": "",
                         "is_guiding_case": True
                     }
