@@ -11,7 +11,7 @@ from ProfessionalSearch.RelevantLaws.api.constants import SEPERATOR_BETWEEN_LAW_
 
 
 def get_filter_conditions():
-    url = "http://172.19.82.199:8160/get_filter_conditions_of_law"
+    url = "http://172.19.82.199:8161/get_filter_conditions_of_law"
     resp_json = requests.get(url).json()
 
     print(resp_json)
@@ -26,7 +26,7 @@ def get_filter_conditions():
 
 def search_laws():
     url = "http://101.69.229.138:8135/search_laws"
-    url = "http://172.19.82.199:8160/search_laws"
+    url = "http://172.19.82.199:8161/search_laws"
     body = {
         "query": "",
         "filter_conditions": {

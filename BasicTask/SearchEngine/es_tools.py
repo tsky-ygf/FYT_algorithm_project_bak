@@ -164,7 +164,7 @@ class BaseESTool:
         self, thread_count=5, chunk_size=500, *args, **kwargs
     ):
         es = Elasticsearch(hosts=self.es_host)
-        # 插入数据，有则删除，无则插入
+        # 更新数据
         for success, info in helpers.parallel_bulk(
             es,
             self.update_es_parall(*args, **kwargs),
