@@ -223,3 +223,5 @@ class ManuallySelectedCivilSimilarCase:
                         "is_guiding_case": True
                     }
                 ]
+
+        return []
