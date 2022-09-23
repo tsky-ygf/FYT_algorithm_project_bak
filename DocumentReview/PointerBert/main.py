@@ -67,6 +67,7 @@ def main(args):
     # model = BertSpanForNer(config).to(args.device)
     # ===============================================================================
     # state = torch.load("DocumentReview/PointerBert/model_src/pBert0921_cluener.pt")
+    # torch.load(map_location="cpu")
     # model.load_state_dict(state['model_state'])
     # ===============================================================================
 
@@ -94,7 +95,7 @@ def main(args):
         entities = []
         true_entities = []
 
-        for i, samples in enumerate(tqdm(dev_loader)):
+        for i, samples in enumerate(dev_loader):
 
             encoded_dicts, starts, ends, labels = samples[0], samples[1], samples[2], samples[3]
             sentences = samples[4]
@@ -145,7 +146,7 @@ def main(args):
         score, class_info = cir.result()
         f1 = score['f1']
         print("epoch:", e, "  p: {0}, r: {1}, f1: {2}".format(score['acc'], score['recall'], score['f1']))
-
+        print(class_info)
         # ev = evaluate_index(y_pred, y_true)
         # print("epoch:", e, "  p: {0}, r: {1}, f1: {2}".format(ev[0], ev[1], ev[2]))
         # score, class_info = metric.result()
@@ -162,7 +163,7 @@ def main(args):
             torch.save(state, PATH)
             # 加载
             # PATH = './model.pth'  # 定义模型保存路径
-            # state = torch.load(PATH)
+            # state = torch.load(PATH, map_location="cpu")
             # model.load_state_dict(state['model_state'])
             # optimizer.load_state_dict(state['optimizer'])
 
@@ -226,7 +227,7 @@ if __name__ == '__main__':
     parser.add_argument("--local_rank", type=int, default=-1, help="For distributed training: local_rank")
     parser.add_argument("--do_train", default=True, type=bool)
     parser.add_argument("--is_inference", default=False, type=bool)
-    parser.add_argument("--model_save_path", default='DocumentReview/PointerBert/model_src/PBert0922_cluener.pt')
+    parser.add_argument("--model_save_path", default='DocumentReview/PointerBert/model_src/PBert0923_old.pt')
     parser.add_argument("--batch_size", default=1, type=int, help="Batch size per GPU/CPU for training.")
     parser.add_argument("--learning_rate", default=1e-5, type=float, help="The initial learning rate for Adam.")
     parser.add_argument("--train_path", default=None, type=str, help="The path of train set.")
@@ -253,8 +254,8 @@ if __name__ == '__main__':
 
 
     args = parser.parse_args()
-    args.train_path = 'data/data_src/new/train_100.json'
-    args.dev_path = 'data/data_src/new/dev_100.json'
+    args.train_path = 'data/data_src/old/train_split.json'
+    args.dev_path = 'data/data_src/old/dev_split.json'
     # args.train_path = 'data/cluener/train.json'
     # args.dev_path = 'data/cluener/dev.json'
     args.model = 'model/language_model/chinese-roberta-wwm-ext'
@@ -262,5 +263,4 @@ if __name__ == '__main__':
 
     main(args)
 
-    """nohup python -u DocumentReview/PointerBert/main.py --model "model/language_model/chinese-roberta-wwm-ext" \
-> log/PointerBert/cluener_0921.log 2>&1 &"""
+    """nohup python -u DocumentReview/PointerBert/main.py > log/PointerBert/pBert_old_0923.log 2>&1 &"""

@@ -236,16 +236,29 @@ if __name__ == "__main__":
     # file = 'data/cluener/dev.json'
     # maxlen = 0 # 52
     # new maxlength of entity  263
-    d = []
-    c = 0
-    with open('data/data_src/new/dev_100.json', 'r', encoding='utf-8') as f:
-        for line in f.readlines():
-            line = json.loads(line.strip())
-            c += len(line['entities'])
-    print(c)
-
+    # d = []
+    # c = 0
+    # with open('data/data_src/new/dev_100.json', 'r', encoding='utf-8') as f:
+    #     for line in f.readlines():
+    #         line = json.loads(line.strip())
+    #         c += len(line['entities'])
+    # print(c)
+    # file = 'data/data_src/config.csv'
+    # data = pd.read_csv(file)
+    # data = data.values
+    # j = dict()
+    # for i in range(len(data)):
+    #     # print(data[i][0])
+    #     j[data[i][0]] = i
+    # print(j)
+    # print(len(j))
+    # with open('data/data_src/ent2id.json', 'w', encoding='utf-8') as f:
+    #     f.write(json.dumps(j,ensure_ascii=False)+"\n")
+    pprint({'争议解决': {'acc': 0.4783, 'recall': 0.2472, 'f1': 0.3259}, '未尽事宜': {'acc': 1.0, 'recall': 0.0109, 'f1': 0.0215}, '合同生效': {'acc': 0.5889, 'recall': 0.3841, 'f1': 0.4649}, '签字和盖章': {'acc': 0.3077, 'recall': 0.1333, 'f1': 0.186}, '签订日期': {'acc': 0.7836, 'recall': 0.6325, 'f1': 0.7}, '标题': {'acc': 0.6807, 'recall': 0.6807, 'f1': 0.6807}, '甲方': {'acc': 0.9308, 'recall': 0.6016, 'f1': 0.7309}, '甲方地址': {'acc': 0.931, 'recall': 0.6923, 'f1': 0.7941}, '甲方联系方式': {'acc': 0.9216, 'recall': 0.8704, 'f1': 0.8952}, '乙方': {'acc': 0.9044, 'recall': 0.519, 'f1': 0.6595}, '乙方地址': {'acc': 0.8378, 'recall': 0.7561, 'f1': 0.7949}, '乙方联系方式': {'acc': 0.814, 'recall': 0.6364, 'f1': 0.7143}, '附件': {'acc': 1.0, 'recall': 0.0145, 'f1': 0.0286}, '鉴于条款': {'acc': 0.4167, 'recall': 0.2899, 'f1': 0.3419}, '乙方法定代表人/授权代表': {'acc': 1.0, 'recall': 0.1373, 'f1': 0.2414}, '甲方身份证号/统一社会信用代码': {'acc': 0.6667, 'recall': 0.1905, 'f1': 0.2963}, '乙方身份证号/统一社会信用代码': {'acc': 0.4667, 'recall': 0.35, 'f1': 0.4}, '金额': {'acc': 0.3958, 'recall': 0.3725, 'f1': 0.3838}, '签订地点': {'acc': 0, 'recall': 0.0, 'f1': 0.0}})
     pass
+
+
 else:
-    # labels2id = read_config_to_label(None)
-    labels2id = ['address', 'book', 'company', 'game', 'government', 'movie', 'name', 'organization', 'position',
-                 'scene']
+    labels2id = read_config_to_label(None)
+    # labels2id = ['address', 'book', 'company', 'game', 'government', 'movie', 'name', 'organization', 'position',
+    #              'scene']
