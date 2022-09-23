@@ -94,6 +94,7 @@ def main(args):
     # ]
     # optimizer = AdamW(optimizer_grouped_parameters, lr=args.learning_rate, eps=args.adam_epsilon)
     optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate)
+    # optimizer = torch.optim.SGD(model.parameters(), lr=args.learning_rate)
     # optimizer = torch.optim.SparseAdam(model.parameters(), lr=args.learning_rate)
     print("numbers train", len(train_data))
     train_dataset = ReaderDataset(train_data)
