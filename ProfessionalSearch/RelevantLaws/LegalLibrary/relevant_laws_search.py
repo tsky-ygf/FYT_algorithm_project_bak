@@ -67,6 +67,7 @@ def get_law_search_result(
                 }
             )
     if (
+        legal_list and
         legal_list[0] == "地方性法规"
         and scope_of_use
         and scope_of_use[0] != ""
