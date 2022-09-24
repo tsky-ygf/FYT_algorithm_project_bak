@@ -12,105 +12,13 @@ from transformers import AutoConfig, AutoTokenizer, AutoModelForQuestionAnswerin
 
 from Tools.data_pipeline import InputExample
 
+import numpy as np
+import os
 
-# os.environ['CUDA_VISIBLE_DEVICES'] = '0'
-def create_squad_examples(data_path, *args, **kwargs):
-    with open(data_path, 'r') as f:
-        content = json.load(f)
-    content = content["data"]
-    examples = []
-    for i, line in enumerate(content):
-        for one_paragraph in line["paragraphs"]:
-            for qas in one_paragraph["qas"]:
-                examples.append(InputExample(guid=qas["id"], texts=[qas["question"], one_paragraph["context"]],
-                                             label=qas["answers"]))
-    return examples
-
-
-def prepare_input_for_squad(example, tokenizer, max_length, *args, **kwargs):
-    doc_stride = 128
-    pad_on_right = tokenizer.padding_side == "right"
-    # 既要对examples进行truncation（截断）和padding（补全）还要还要保留所有信息，所以要用的切片的方法。
-    # 每一个一个超长文本example会被切片成多个输入，相邻两个输入之间会有交集。
-    tokenized_examples = tokenizer(
-        example.texts[0 if pad_on_right else 1],
-        example.texts[1 if pad_on_right else 0],
-        truncation="only_second" if pad_on_right else "only_first",
-        max_length=max_length,
-        stride=doc_stride,
-        return_overflowing_tokens=True,
-        return_offsets_mapping=True,
-        padding="max_length",
-    )
-    # print(example)
-    # 我们使用overflow_to_sample_mapping参数来映射切片片ID到原始ID。
-    # 比如有2个example被切成4片，那么对应是[0, 0, 1, 1]，前两片对应原来的第一个example。
-    sample_mapping = tokenized_examples.pop("overflow_to_sample_mapping")
-    # offset_mapping也对应4片
-    # offset_mapping参数帮助我们映射到原始输入，由于答案标注在原始输入上，所以有助于我们找到答案的起始和结束位置。
-    offset_mapping = tokenized_examples.pop("offset_mapping")
-
-    # 重新标注数据
-    tokenized_examples["start_positions"] = []
-    tokenized_examples["end_positions"] = []
-
-    for i, offsets in enumerate(offset_mapping):
-        # 对每一片进行处理
-        # 将无答案的样本标注到CLS上
-        input_ids = tokenized_examples["input_ids"][i]
-        cls_index = input_ids.index(tokenizer.cls_token_id)
-
-        # 区分question和context
-        sequence_ids = tokenized_examples.sequence_ids(i)
-
-        # 拿到原始的example 下标.
-        sample_index = sample_mapping[i]
-        answers = example.label[sample_index]
-        # 如果没有答案，则使用CLS所在的位置为答案.
-        # if len(answers["answer_start"]) == 0:
-        if len(answers) == 0:
-            tokenized_examples["start_positions"].append(cls_index)
-            tokenized_examples["end_positions"].append(cls_index)
-        else:
-            # 答案的character级别Start/end位置.
-            start_char = answers["answer_start"]
-            end_char = start_char + len(answers["text"])
-
-            # 找到token级别的index start.
-            token_start_index = 0
-            while sequence_ids[token_start_index] != (1 if pad_on_right else 0):
-                token_start_index += 1
-
-            # 找到token级别的index end.
-            token_end_index = len(input_ids) - 1
-            while sequence_ids[token_end_index] != (1 if pad_on_right else 0):
-                token_end_index -= 1
-
-            # 检测答案是否超出文本长度，超出的话也适用CLS index作为标注.
-            if not (offsets[token_start_index][0] <= start_char and offsets[token_end_index][1] >= end_char):
-                tokenized_examples["start_positions"].append(cls_index)
-                tokenized_examples["end_positions"].append(cls_index)
-            else:
-                # 如果不超出则找到答案token的start和end位置。.
-                # Note: we could go after the last offset if the answer is the last word (edge case).
-                while token_start_index < len(offsets) and offsets[token_start_index][0] <= start_char:
-                    token_start_index += 1
-                tokenized_examples["start_positions"].append(token_start_index - 1)
-                while offsets[token_end_index][1] >= end_char:
-                    token_end_index -= 1
-                tokenized_examples["end_positions"].append(token_end_index + 1)
-
-    # print(tokenized_examples)
-    # exit()
-    return tokenized_examples
+os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 
 
 class TrainExtractQA(BaseTrainTool):
-    def __init__(self, config_path):
-        super(TrainExtractQA, self).__init__(config_path=config_path,
-                                             data_func=create_squad_examples,
-                                             prepare_input=prepare_input_for_squad)
-
     def init_model(self):
         tokenizer = AutoTokenizer.from_pretrained(self.model_args.tokenizer_name)
         # model = MultiLabelClsModel(self.config)
@@ -119,8 +27,119 @@ class TrainExtractQA(BaseTrainTool):
             self.model_args.model_name_or_path,
             config=model_config,
         )
-
         return tokenizer, model
+
+    def create_examples(self, data_path, mode="train"):
+        self.logger.info("Creating {} examples".format(mode))
+        self.logger.info("Creating examples from {} ".format(data_path))
+
+        with open(data_path, 'r') as f:
+            content = json.load(f)
+        content = content["data"]
+        examples = []
+        for i, line in enumerate(content):
+            for one_paragraph in line["paragraphs"]:
+                for qas in one_paragraph["qas"]:
+                    text = [ans['text'] for ans in qas['answers']]
+                    answer_start = [ans['answer_start'] for ans in qas['answers']]
+                    label = {'text': text, 'answer_start': answer_start}
+                    examples.append(
+                        InputExample(guid=qas["id"], texts=[qas["question"], one_paragraph["context"]], label=label))
+        return examples
+
+    def prepare_input(self, example, mode="train"):
+        doc_stride = 32
+        pad_on_right = self.tokenizer.padding_side == "right"
+        # 既要对examples进行truncation（截断）和padding（补全）还要还要保留所有信息，所以要用的切片的方法。
+        # 每一个一个超长文本example会被切片成多个输入，相邻两个输入之间会有交集。
+        tokenized_examples = self.tokenizer(
+            example.texts[0 if pad_on_right else 1],
+            example.texts[1 if pad_on_right else 0],
+            truncation="only_second" if pad_on_right else "only_first",
+            # max_length=self.data_train_args.max_length,
+            max_length=128,
+            stride=doc_stride,
+            return_overflowing_tokens=True,
+            return_offsets_mapping=True,
+            padding="max_length",
+        )
+        # 我们使用overflow_to_sample_mapping参数来映射切片片ID到原始ID。
+        # 比如有2个example被切成4片，那么对应是[0, 0, 1, 1]，前两片对应原来的第一个example。
+        # sample_mapping = tokenized_examples.pop("overflow_to_sample_mapping")
+        tokenized_examples.pop("overflow_to_sample_mapping")
+        # offset_mapping也对应4片
+        # offset_mapping参数帮助我们映射到原始输入，由于答案标注在原始输入上，所以有助于我们找到答案的起始和结束位置。
+        # if mode == "train":
+        offset_mapping = tokenized_examples.pop("offset_mapping")
+        # else:
+        #     offset_mapping = tokenized_examples["offset_mapping"]
+
+        # 重新标注数据
+        tokenized_examples["start_positions"] = []
+        tokenized_examples["end_positions"] = []
+
+        for i, offset in enumerate(offset_mapping):
+            # sample_idx = sample_mapping[i]
+            answer = example.label
+            start_char = answer["answer_start"][0]
+            end_char = answer["answer_start"][0] + len(answer["text"][0])
+            sequence_ids = tokenized_examples.sequence_ids(i)
+
+            # Find the start and end of the context
+            idx = 0
+            while sequence_ids[idx] != 1:
+                idx += 1
+            context_start = idx
+            while sequence_ids[idx] == 1:
+                idx += 1
+            context_end = idx - 1
+
+            # If the answer is not fully inside the context, label is (0, 0)
+            if offset[context_start][0] > start_char or offset[context_end][1] < end_char:
+                tokenized_examples["start_positions"].append(0)
+                tokenized_examples["end_positions"].append(0)
+            else:
+                # Otherwise it's the start and end token positions
+                idx = context_start
+                while idx <= context_end and offset[idx][0] <= start_char:
+                    idx += 1
+                tokenized_examples["start_positions"].append(idx - 1)
+
+                idx = context_end
+                while idx >= context_start and offset[idx][1] >= end_char:
+                    idx -= 1
+                tokenized_examples["end_positions"].append(idx + 1)
+
+        return tokenized_examples
+
+    def post_process_function(self, batch, output):
+        n_best_size = 20
+        max_answer_length = 30
+
+        start_logits = output.start_logits[0].cpu().numpy()
+        end_logits = output.end_logits[0].cpu().numpy()
+        # 收集最佳的start和end logits的位置:
+        start_indexes = np.argsort(start_logits)[-1: -n_best_size - 1: -1].tolist()
+        end_indexes = np.argsort(end_logits)[-1: -n_best_size - 1: -1].tolist()
+
+        valid_answers = []
+        for start_index in start_indexes:
+            for end_index in end_indexes:
+                if start_index <= end_index:  # 如果start小雨end，那么合理的
+                    valid_answers.append(
+                        {
+                            "score": start_logits[start_index] + end_logits[end_index],
+                            "pred_s_d": [start_index, end_index]  # 后续需要根据token的下标将答案找出来
+                        }
+                    )
+
+        true_start_logits = batch["start_positions"][0].cpu().numpy()
+        true_end_logits = batch["end_positions"][0].cpu().numpy()
+
+        # # context = datasets["validation"][0]["context"]
+        #
+
+        exit()
 
 
 if __name__ == '__main__':

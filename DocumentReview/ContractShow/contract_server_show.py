@@ -43,8 +43,8 @@ for contract_type in contract_type_list:
     config_path = "DocumentReview/Config/{}.csv".format(contract_type)
     model_path = "model/uie_model/export_cpu/{}/inference".format(contract_type)
     acknowledgement_dict[contract_type] = BasicUIEAcknowledgementShow(config_path=config_path,
-                                                                  model_path=model_path,
-                                                                  device="cpu")
+                                                                      model_path=model_path,
+                                                                      device="cpu")
 time_cost = time.time() - start_time
 print("time_cost:{}".format(time_cost))
 
@@ -100,7 +100,7 @@ def get_contract_review_result():
                     "risk_level": review_result.get("风险等级", ""),
                     "risk_point": review_result.get("风险点", "")
                 })
-            body = {"success": True, "error_msg": "", "result": result,'origin_data':origin_data}
+            body = {"success": True, "error_msg": "", "result": result, 'origin_data': origin_data}
             return json.dumps(body, ensure_ascii=False)
         else:
             return json.dumps({"error_msg": "no data", "status": 1}, ensure_ascii=False)

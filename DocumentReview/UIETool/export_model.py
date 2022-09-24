@@ -12,48 +12,41 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import argparse
 import os
 
 import paddle
 
-from DocumentReview.UIETool.model import UIE
+from model import UIE
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+# yapf: disable
+parser = argparse.ArgumentParser()
+parser.add_argument("--model_path", type=str, required=True, default='./checkpoint/model_best', help="The path to model parameters to be loaded.")
+parser.add_argument("--output_path", type=str, default='./export', help="The path of model parameter in static graph to be saved.")
+args = parser.parse_args()
+# yapf: enable
 
-
-def export_model_onnx(model_path, output_path):
-    model = UIE.from_pretrained(model_path)
+if __name__ == "__main__":
+    model = UIE.from_pretrained(args.model_path)
     model.eval()
 
     # Convert to static graph with specific input description
-    model = paddle.jit.to_static(
-        model,
-        input_spec=[
-            paddle.static.InputSpec(
-                shape=[None, None], dtype="int64", name='input_ids'),
-            paddle.static.InputSpec(
-                shape=[None, None], dtype="int64", name='token_type_ids'),
-            paddle.static.InputSpec(
-                shape=[None, None], dtype="int64", name='pos_ids'),
-            paddle.static.InputSpec(
-                shape=[None, None], dtype="int64", name='att_mask'),
-        ])
+    model = paddle.jit.to_static(model,
+                                 input_spec=[
+                                     paddle.static.InputSpec(shape=[None, None],
+                                                             dtype="int64",
+                                                             name='input_ids'),
+                                     paddle.static.InputSpec(
+                                         shape=[None, None],
+                                         dtype="int64",
+                                         name='token_type_ids'),
+                                     paddle.static.InputSpec(shape=[None, None],
+                                                             dtype="int64",
+                                                             name='pos_ids'),
+                                     paddle.static.InputSpec(shape=[None, None],
+                                                             dtype="int64",
+                                                             name='att_mask'),
+                                 ])
     # Save in static graph model.
-    save_path = os.path.join(output_path, "inference")
+    save_path = os.path.join(args.output_path, "inference")
     paddle.jit.save(model, save_path)
-
-
-if __name__ == '__main__':
-    # for export_type in ['fangwuzulin', 'jiekuan', 'jietiao', 'laodong', 'laowu', 'maimai', 'caigou', 'baomi',
-    #                     'yibanzulin']:
-    #     export_model_onnx(
-    #         model_path="model/uie_model/new/{}/model_best".format(export_type),
-    #         output_path="model/uie_model/export_cpu/{}".format(export_type),
-    #     )
-    # print("Done.")
-    for export_type in ['provide_drug']:
-        export_model_onnx(
-            model_path="model/uie_model/criminal/{}/model_best".format(export_type),
-            output_path="model/uie_model/export_cpu/{}".format(export_type),
-        )
-    print("Done.")

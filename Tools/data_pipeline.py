@@ -9,7 +9,7 @@ import json
 import copy
 
 import torch.utils.data as data
-from typing import Union, List
+from typing import Union, List, Dict
 
 
 class InputExample:
@@ -17,7 +17,7 @@ class InputExample:
     Structure for one input example with texts, the label and a unique id
     """
 
-    def __init__(self, guid: str = '', texts: List[str] = None, label: Union[int, float] = 0):
+    def __init__(self, guid: str = '', texts: List[str] = None, label: Union[int, float, Dict] = 0):
         """
         Creates one InputExample with the given texts, guid and label
 
@@ -91,9 +91,9 @@ class DataProcessor:
 class BaseDataset(data.Dataset):
     def __init__(self,
                  data_dir_dict,
-                 tokenizer,
+                 # tokenizer,
                  mode,
-                 max_length=128,
+                 # max_length=128,
                  create_examples=None,
                  is_debug=False,
                  prepare_input=None):
@@ -109,35 +109,37 @@ class BaseDataset(data.Dataset):
             self.examples = self.processor.get_test_examples(data_dir_dict['test'])
         else:
             raise ValueError("Invalid mode: %s" % mode)
-        self.tokenizer = tokenizer
-        self.max_length = max_length
+        # self.tokenizer = tokenizer
+        # self.max_length = max_length
         if is_debug:
             self.examples = self.examples[:100]
 
-        if prepare_input is not None:
-            self.prepare_input = prepare_input
-        else:
-            self.prepare_input = self.base_prepare_input
+        # if prepare_input is not None:
+        self.mode = mode
+        self.prepare_input = prepare_input
+        # else:
+        # self.prepare_input = self.base_prepare_input
 
     def __len__(self):
         return len(self.examples)
 
     def __getitem__(self, item):
-        inputs = self.prepare_input(self.examples[item], self.tokenizer, max_length=self.max_length)
+        # inputs = self.prepare_input(self.examples[item], self.tokenizer, max_length=self.max_length)
+        inputs = self.prepare_input(self.examples[item], self.mode)
         return inputs
 
-    @staticmethod
-    def base_prepare_input(example, tokenizer, max_length=512):
-        text = example.texts[0]
-        label = example.label
-
-        inputs = tokenizer(text,
-                           add_special_tokens=True,
-                           max_length=max_length,
-                           padding="max_length",
-                           truncation=True,
-                           return_offsets_mapping=False,
-                           return_tensors="pt")
-        inputs['label'] = label
-
-        return inputs
+    # @staticmethod
+    # def base_prepare_input(example, tokenizer, max_length=512):
+    #     text = example.texts[0]
+    #     label = example.label
+    #
+    #     inputs = tokenizer(text,
+    #                        add_special_tokens=True,
+    #                        max_length=max_length,
+    #                        padding="max_length",
+    #                        truncation=True,
+    #                        return_offsets_mapping=False,
+    #                        return_tensors="pt")
+    #     inputs['label'] = label
+    #
+    #     return inputs
