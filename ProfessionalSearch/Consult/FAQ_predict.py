@@ -42,9 +42,10 @@ class FAQPredict:
         meta = return_prediction.meta
         query = meta["query"]
         answer = meta["answer"]
-        source = meta["source"]
+        # source = meta["source"]
         logger.info(f"text:{text}")
-        logger.debug(f"query:{query}, answer:{answer}, source:{source}, score:{score}")
+        logger.debug(f"query:{query},answer:{answer},score:{score}")
+        # logger.debug(f"query:{query}, answer:{answer}, source:{source}, score:{score}")
 
         return answer
 

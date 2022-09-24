@@ -1,3 +1,4 @@
+# coding=utf-8
 # Copyright (c) 2022 PaddlePaddle Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -92,11 +93,24 @@ def do_convert():
     else:
         if args.is_shuffle:
             indexes = np.random.permutation(len(raw_examples))
+            index_list = indexes.tolist()
             raw_examples = [raw_examples[i] for i in indexes]
 
         i1, i2, _ = args.splits
         p1 = int(len(raw_examples) * i1)
         p2 = int(len(raw_examples) * (i1 + i2))
+
+        train_ids = index_list[:p1]
+        dev_ids = index_list[p1:p2]
+        test_ids = index_list[p2:]
+
+        with open(os.path.join(args.save_dir, "sample_index.json"), "w") as fp:
+            maps = {
+                "train_ids": train_ids,
+                "dev_ids": dev_ids,
+                "test_ids": test_ids
+            }
+            fp.write(json.dumps(maps))
 
         if args.task_type == "ext":
             train_examples = _create_ext_examples(raw_examples[:p1],
@@ -138,24 +152,16 @@ if __name__ == "__main__":
     # yapf: disable
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--doccano_file", default="./data/doccano.json", type=str,
-                        help="The doccano file exported from doccano platform.")
+    parser.add_argument("--doccano_file", default="./data/doccano.json", type=str, help="The doccano file exported from doccano platform.")
     parser.add_argument("--save_dir", default="./data", type=str, help="The path of data that you wanna save.")
-    parser.add_argument("--negative_ratio", default=5, type=int,
-                        help="Used only for the extraction task, the ratio of positive and negative samples, number of negtive samples = negative_ratio * number of positive samples")
-    parser.add_argument("--splits", default=[0.8, 0.1, 0.1], type=float, nargs="*",
-                        help="The ratio of samples in datasets. [0.6, 0.2, 0.2] means 60% samples used for training, 20% for evaluation and 20% for test.")
-    parser.add_argument("--task_type", choices=['ext', 'cls'], default="ext", type=str,
-                        help="Select task type, ext for the extraction task and cls for the classification task, defaults to ext.")
-    parser.add_argument("--options", default=["正向", "负向"], type=str, nargs="+",
-                        help="Used only for the classification task, the options for classification")
-    parser.add_argument("--prompt_prefix", default="情感倾向", type=str,
-                        help="Used only for the classification task, the prompt prefix for classification")
-    parser.add_argument("--is_shuffle", default=True, type=bool,
-                        help="Whether to shuffle the labeled dataset, defaults to True.")
+    parser.add_argument("--negative_ratio", default=5, type=int, help="Used only for the extraction task, the ratio of positive and negative samples, number of negtive samples = negative_ratio * number of positive samples")
+    parser.add_argument("--splits", default=[0.8, 0.1, 0.1], type=float, nargs="*", help="The ratio of samples in datasets. [0.6, 0.2, 0.2] means 60% samples used for training, 20% for evaluation and 20% for test.")
+    parser.add_argument("--task_type", choices=['ext', 'cls'], default="ext", type=str, help="Select task type, ext for the extraction task and cls for the classification task, defaults to ext.")
+    parser.add_argument("--options", default=["正向", "负向"], type=str, nargs="+", help="Used only for the classification task, the options for classification")
+    parser.add_argument("--prompt_prefix", default="情感倾向", type=str, help="Used only for the classification task, the prompt prefix for classification")
+    parser.add_argument("--is_shuffle", default=True, type=bool, help="Whether to shuffle the labeled dataset, defaults to True.")
     parser.add_argument("--seed", type=int, default=1000, help="Random seed for initialization")
-    parser.add_argument("--separator", type=str, default='##',
-                        help="Used only for entity/aspect-level classification task, separator for entity label and classification label")
+    parser.add_argument("--separator", type=str, default='##', help="Used only for entity/aspect-level classification task, separator for entity label and classification label")
 
     args = parser.parse_args()
     # yapf: enable

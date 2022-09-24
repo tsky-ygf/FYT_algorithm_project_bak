@@ -81,9 +81,6 @@ class ModelArguments:
     feature_dim: Optional[int] = field(
         default=128, metadata={"help": "Feature dim."})
 
-    max_length: Optional[int] = field(
-        default=128, metadata={"help": "Max length."})
-
     def __post_init__(self):
         if self.config_name is None:
             self.config_name = self.model_name_or_path
@@ -118,6 +115,9 @@ class DataTrainingArguments:
     label_mapping_path: Optional[str] = field(
         default=None,
         metadata={"help": "The label mapping file path."})
+
+    max_length: Optional[int] = field(
+        default=128, metadata={"help": "Max length."})
 
 
 @dataclass
@@ -169,6 +169,8 @@ class TrainingArguments:
     adv_epsilon: Optional[int] = field(
         default=1.0, metadata={"help": "The epsilon of the adversarial training."})
 
+    max_grad_norm: Optional[int] = field(
+        default=1.0, metadata={"help": "The max grad norm of the training."})
     # accelerator_params: Optional[Dict] = field(
     #     default_factory={"fp16": True}, metadata={"help": "The accelerator params."})
 

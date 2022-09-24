@@ -10,6 +10,7 @@ import os
 import shutil
 import torch
 import math
+import json
 from tqdm.auto import tqdm
 
 import torch.utils.data as data
@@ -27,7 +28,7 @@ from Tools.parse_argument import (
 
 from torch.utils.tensorboard import SummaryWriter
 
-from Tools.data_pipeline import BaseDataset
+from Tools.data_pipeline import BaseDataset, InputExample
 
 
 class FGM:
@@ -74,15 +75,14 @@ class FGM:
 
 
 class BaseTrainTool:
-    def __init__(self, config_path, data_func=None, prepare_input=None):
+    def __init__(self, config_path):
         """
 
         :param config_path: config file path
-        :param data_func: data function
         """
         self.config = parse_config_file(config_path)
-        self.create_examples = data_func
-        self.prepare_input = prepare_input
+        # self.create_examples = data_func
+        # self.prepare_input = prepare_input
 
         self.log_args = LogArguments(**self.config["LogArguments"])
         self.model_args = ModelArguments(**self.config["ModelArguments"])
@@ -137,23 +137,51 @@ class BaseTrainTool:
     def init_model(self, *args, **kwargs):
         raise NotImplemented
 
+    def create_examples(self, data_path, mode):
+        """Creates examples for the training and dev sets."""
+        self.logger.trace(data_path, mode)
+        with open(data_path, 'rb') as f:
+            lines = json.load(f)
+        examples = []
+        for (i, line) in enumerate(lines):
+            guid = "%s-%s" % (mode, i)
+            text = line['text']
+            label = line['label']
+            examples.append(InputExample(guid=guid, texts=[text], label=label))
+        return examples
+
+    def prepare_input(self, example, mode="train"):
+        text = example.texts[0]
+        label = example.label
+
+        inputs = self.tokenizer(text,
+                                add_special_tokens=True,
+                                max_length=self.data_train_args.max_length,
+                                padding="max_length",
+                                truncation=True,
+                                return_offsets_mapping=False,
+                                return_tensors="pt")
+        inputs['label'] = label
+
+        return inputs
+
     def init_dataset(self, *args, **kwargs):
         data_dir_dict = {'train': self.data_train_args.train_data_path,
                          'dev': self.data_train_args.dev_data_path,
                          'test': self.data_train_args.test_data_path}
 
         train_dataset = BaseDataset(data_dir_dict,
-                                    tokenizer=self.tokenizer,
+                                    # tokenizer=self.tokenizer,
                                     mode='train',
-                                    max_length=self.model_args.max_length,
+                                    # max_length=self.data_train_args.max_length,
                                     create_examples=self.create_examples,
                                     is_debug=self.log_args.is_debug,
                                     prepare_input=self.prepare_input)
 
         eval_dataset = BaseDataset(data_dir_dict,
-                                   tokenizer=self.tokenizer,
+                                   # tokenizer=self.tokenizer,
                                    mode='dev',
-                                   max_length=self.model_args.max_length,
+                                   # max_length=self.data_train_args.max_length,
                                    create_examples=self.create_examples,
                                    is_debug=self.log_args.is_debug,
                                    prepare_input=self.prepare_input)
@@ -161,7 +189,7 @@ class BaseTrainTool:
         return train_dataset, eval_dataset
 
     def data_collator(self, *args, **kwargs):
-        self.logger.debug("Use default data collator")
+        self.logger.trace("Use default data collator")
         return default_data_collator(*args, **kwargs)
 
     def init_dataloader(self):
@@ -212,9 +240,17 @@ class BaseTrainTool:
         return lr_scheduler
 
     def cal_loss(self, batch, **kwargs):
+        for key, value in batch.items():
+            batch[key] = value.squeeze()
         outputs = self.model(**batch)
         loss = outputs.loss
         return loss
+
+    def post_process_function(self, batch, outputs):
+        raise NotImplemented
+
+    def compute_metrics(self):
+        raise NotImplemented
 
     def train_epoch(self, epoch):
 
@@ -227,10 +263,10 @@ class BaseTrainTool:
             # self.accelerator.backward(loss, retain_graph=False)
             self.accelerator.backward(loss)
 
-            if "do_adv" in self.config and self.config["do_adv"]:
+            if self.train_args.do_adv:
                 self.fgm.attack()
                 loss_adv = self.cal_loss(batch)
-                loss_adv = loss_adv / self.config["gradient_accumulation_steps"]
+                loss_adv /= self.train_args.gradient_accumulation_steps
                 self.accelerator.backward(loss_adv)
                 self.fgm.restore()
 
@@ -240,9 +276,10 @@ class BaseTrainTool:
                 self.writer.add_scalar(tag="lr", scalar_value=self.optimizer.param_groups[0]["lr"],
                                        global_step=self.completed_steps)
 
-            if step % self.config["gradient_accumulation_steps"] == 0 or step == len(self.train_dataloader) - 1:
-                if hasattr(self, 'max_grad_norm'):
-                    torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.config["max_grad_norm"])
+            if step % self.train_args.gradient_accumulation_steps == 0 or step == len(self.train_dataloader) - 1:
+                # if hasattr(self, 'max_grad_norm'):
+                if self.train_args.max_grad_norm is not None:
+                    torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.train_args.max_grad_norm)
 
                 self.optimizer.step()
                 self.lr_scheduler.step()
@@ -267,7 +304,7 @@ class BaseTrainTool:
                 #         f'-->grad_value:{torch.mean(parms.grad)}'
                 #     )
 
-            if self.completed_steps >= self.config["max_train_steps"]:
+            if self.completed_steps >= self.train_args.max_train_steps:
                 return True
 
         return False
@@ -279,8 +316,15 @@ class BaseTrainTool:
         for step, batch in enumerate(self.eval_dataloader):
             self.model.eval()
             with torch.no_grad():
-                eval_loss = self.cal_loss(batch)
+                # eval_loss = self.cal_loss(batch)
+                for key, value in batch.items():
+                    batch[key] = value.squeeze()
+
+                output = self.model(**batch)
+                eval_loss = output.loss
                 eval_loss_res += eval_loss.item()
+
+                self.post_process_function(batch, output)
 
         eval_loss_res /= len(self.eval_dataloader)
         return eval_loss_res
