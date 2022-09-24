@@ -17,6 +17,7 @@ def _remove_conflicting_claims(report):
     claims = [item[0]["content"] for item in report]
     if "民间借贷还本付息" in claims and "金融借贷还本付息" in claims:
         return [item for item in report if item[0]["content"] != "民间借贷还本付息"]
+    return report
 
 
 class CivilReportDTO:
