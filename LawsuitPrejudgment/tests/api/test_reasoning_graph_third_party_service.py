@@ -66,11 +66,12 @@ def test_should_ask_next_question_when_reasoning_graph_result():
 def test_show_have_report_when_reasoning_graph_result():
     url = "http://101.69.229.138:8100/reasoning_graph_result"
     body = {
-        "problem": "土地承包",
-        "claim_list": ["返还土地或钱款"],
+        "problem": "民间借贷",
+        "claim_list": ["还本付息"],
         "fact": "111111111111111111111111111111",
         "question_answers": {
-            "是否存在以下情形？:他人侵占土地;对方没有返还土地;为了履行合同提前支付钱款;以上都没有": "他人侵占土地"
+            "借贷双方属于以下哪种情形？:个人或企业向具有放贷资质的金融机构借款;个人与个人之间借款;企业与企业之间借款;个人与企业之间借款;以上都没有": "个人或企业向具有放贷资质的金融机构借款",
+            "是否存在以下情形？:对本金偿还期限未做出约定或者约定不明确;明确约定了本金偿还期限;借款人未按约定用途使用借款;借款人提前还款;借款人死亡;借款人离婚;以上都没有": "借款人死亡"
         },
         "factor_sentence_list": []
     }

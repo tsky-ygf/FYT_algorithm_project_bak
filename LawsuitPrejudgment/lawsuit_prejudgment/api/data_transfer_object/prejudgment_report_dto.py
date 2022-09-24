@@ -13,6 +13,12 @@ def _reorder_claims(report):
     return list(reversed(report))
 
 
+def _remove_conflicting_claims(report):
+    claims = [item[0]["content"] for item in report]
+    if "民间借贷还本付息" in claims and "金融借贷还本付息" in claims:
+        return [item for item in report if item[0]["content"] != "民间借贷还本付息"]
+
+
 class CivilReportDTO:
     def __init__(self, response_dict):
         self.response_dict = response_dict
@@ -51,6 +57,9 @@ class CivilReportDTO:
             ]
             for item in self.response_dict["result"]["report"]
         ]
+
+        # 移除互斥的诉求
+        report = _remove_conflicting_claims(report)
 
         # 调整诉求报告的顺序
         report = _reorder_claims(report)
