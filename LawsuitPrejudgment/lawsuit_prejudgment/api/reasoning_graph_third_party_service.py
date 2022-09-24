@@ -311,7 +311,7 @@ def get_administrative_result():
 @app.route('/get_criminal_result', methods=["post"])
 def get_criminal_result():
     try:
-        url = "http://172.19.82.199:5080/get_criminal_result"
+        url = "http://127.0.0.1:5080/get_criminal_result"
         body = {
             "fact": request.json.get("fact", ""),
             "question_answers": request.json.get("question_answers", {}),
