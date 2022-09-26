@@ -12,7 +12,7 @@ from pypinyin import lazy_pinyin
 from ProfessionalSearch.RelevantLaws.api.constants import SEPERATOR_BETWEEN_LAW_TABLE_AND_ID
 
 abandoned_laws = pd.read_csv("data/LawsuitPrejudgment/relevant_laws/已废弃的法律.csv", usecols=["law_name"], encoding="utf-8")["law_name"].tolist()
-df_mapping = pd.read_csv("data/LawsuitPrejudgment/relevant_laws/法条新旧映射表.csv", encoding="utf-8")
+df_mapping = pd.read_csv("data/LawsuitPrejudgment/relevant_laws/模型输出法条id.csv", encoding="utf-8")
 
 
 class CivilRelevantLaw:
@@ -54,7 +54,7 @@ class CivilRelevantLaw:
 
     @staticmethod
     def _get_law_id(law_name, law_item):
-        return next((row["table_name"] + SEPERATOR_BETWEEN_LAW_TABLE_AND_ID + row["law_id"] for idx, row in df_mapping.iterrows() if str(row["new_law_name"]) == str(law_name) and str(row["new_law_item"]) == str(law_item)), None)
+        return next((row["table_name"] + SEPERATOR_BETWEEN_LAW_TABLE_AND_ID + row["law_id"] for idx, row in df_mapping.iterrows() if str(row["law_name"]) == str(law_name) and str(row["law_item"]) == str(law_item)), None)
 
     def _reformat(self, law_name_and_items):
         if not law_name_and_items:
