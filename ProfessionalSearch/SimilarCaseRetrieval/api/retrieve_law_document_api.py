@@ -34,8 +34,10 @@ def get_law_document():
         table_name, doc_id = doc_id.split("_SEP_")
         if table_name == "judgment_xingshi_data":
             result = service.get_criminal_law_document(doc_id)
-        else:
+        elif table_name == "judgment_minshi_data":
             result = service.get_civil_law_document(doc_id)
+        else:
+            result = service.get_law_document_in_db(doc_id, table_name)
 
     # 为配合APP的收藏功能，将result的doc_id置为分隔符+数据库中相应的id。也就是入参的doc_id。
     if result:
