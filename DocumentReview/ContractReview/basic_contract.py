@@ -45,7 +45,7 @@ class BasicAcknowledgement:
         self.review_result = self.init_review_result()
         self.data_list = self.read_origin_content(content, mode)
         data = '\n'.join(self.data_list)
-        data = data.replace('⾄', '至').replace('中华⼈民', '中华人民').replace(' ', '').replace(u'\xa0', '')
+        data = data.replace('⾄', '至').replace('中华⼈民', '中华人民').replace(' ', ' ').replace(u'\xa0', ' ')
         self.data = re.sub("[＿_]+", "", data)
         extraction_res = self.check_data_func()
         print('where here! ' * 100)
@@ -71,7 +71,8 @@ class BasicAcknowledgement:
         # self.logger.debug("content: {}".format(content))
 
         if mode == "text":
-            content = content.replace(" ", "").replace("\u3000", "")
+            # 数据处理统一写在文件转文字的接口中
+            # content = content.replace(" ", "").replace("\u3000", "")
             text_list = content.split("\n")
         elif mode == "docx":
             text_list = read_docx_file(docx_path=content)

@@ -17,7 +17,7 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
         self.data_list = self.read_origin_content(content, mode)
         data = '\n'.join(self.data_list)
         data = data.replace('⾄', '至').replace('中华⼈民', '中华人民') \
-            .replace(' ', '').replace(u'\xa0', '').replace('\r\n', '\n')
+            .replace(' ', ' ').replace(u'\xa0', ' ').replace('\r\n', '\n')
         self.data = re.sub("[＿_]+", "", data)
         print(os.path.dirname(os.path.abspath(__file__)))
         print('*' * 100)
@@ -1514,7 +1514,7 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
 if __name__ == '__main__':
     import time
 
-    contract_type = "jietiao"
+    contract_type = "fangwuzulin"
 
     os.environ['CUDA_VISIBLE_DEVICES'] = "0"
     acknowledgement = BasicUIEAcknowledgementShow(config_path="DocumentReview/Config/{}.csv".format(contract_type),
@@ -1526,6 +1526,6 @@ if __name__ == '__main__':
     print("## First Time ##")
     localtime = time.time()
 
-    acknowledgement.review_main(content="data/DocData/jietiao/借条合同示例.docx", mode="docx", usr="Part A")
+    acknowledgement.review_main(content="data/DocData/fangwuzulin/fw-26.docx", mode="docx", usr="Part A")
     pprint(acknowledgement.review_result, sort_dicts=False)
     print('use time: {}'.format(time.time() - localtime))
