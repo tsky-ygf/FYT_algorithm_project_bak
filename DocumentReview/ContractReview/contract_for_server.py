@@ -6,6 +6,11 @@
 # @File    : contract_for_server.py
 # @Software: PyCharm
 import json
+import os
+import re
+
+from docx import Document
+
 from DocumentReview.ContractReview.showing_sample import BasicUIEAcknowledgement
 
 CONTRACT_SERVER_DATA_PATH = "DocumentReview/Config/contract_server_data.json"
@@ -38,3 +43,32 @@ def init_model():
                                                                       device="cpu",
                                                                       logger_file='log/contract_review/model.log')
     return acknowledgement_dict
+
+
+
+def file_link_path_to_text(file_link):
+    os.system('cd data/uploads && wget ' + file_link)
+    if '.docx' in file_link:
+        data = read_docx_file(os.path.join('data/uploads', file_link))
+    elif '.txt' in file_link:
+        data = read_txt_file(os.path.join('data/uploads', file_link))
+    else:
+        data =  "invalid input"
+
+
+# 读取docx 文件
+def read_docx_file(docx_path):
+    document = Document(docx_path)
+    # tables = document.tables
+    all_paragraphs = document.paragraphs
+    return_text_list = []
+    for index, paragraph in enumerate(all_paragraphs):
+        one_text = paragraph.text.replace(" ", "").replace("\u3000", "")
+        if one_text != "":
+            return_text_list.append(one_text)
+    # print(return_text_list)
+    data = '\n'.join(return_text_list)
+    data = data.replace('⾄', '至').replace('中华⼈民', '中华人民') \
+        .replace(' ', ' ').replace(u'\xa0', ' ').replace('\r\n', '\n')
+    data = re.sub("[＿_]+", "", data)
+    return data

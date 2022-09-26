@@ -67,6 +67,17 @@ async def _get_contract_review_result(contract_input: ContractInput):
     return {"result": res}
 
 
+class FileLinkInput(BaseModel):
+    file_link: str = "https://nblh-fyt.oss-cn-hangzhou.aliyuncs.com/fyt/20220916/55712bdc-694a-438f-bcb0-1f5b66dd9bb5.docx"
+
+
+@app.post("/get_text_from_file_link_path")
+async def _file_link_path_to_text(file_link_input: FileLinkInput):
+    return {"result": file_link_path_to_text(file_link_input.file_link)}
+
+
+
+
 if __name__ == "__main__":
     # 日志设置
     uvicorn.run('OnlineServer.ContractReview.server:app', host="0.0.0.0", port=8112, reload=False, workers=1)
