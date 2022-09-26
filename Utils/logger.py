@@ -221,6 +221,13 @@ def get_module_logger(module_name, level="INFO", console=True, logger_file=None)
 
 
 def get_logger(level="INFO", console=True, logger_file=None):
+    """
+
+    :param level: 选择日志的级别，可选trace，debug，info，warning，error，critical
+    :param console: 是不进行控制台输出日志
+    :param logger_file: 日志文件路径，None则表示不输出日志到文件
+    :return:
+    """
     logger = loguru.logger
     logger.remove()
 
