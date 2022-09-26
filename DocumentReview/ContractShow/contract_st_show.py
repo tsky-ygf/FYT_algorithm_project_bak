@@ -36,7 +36,7 @@ def read_docx_file(docx_path):
     # print(return_text_list)
     data = '\n'.join(return_text_list)
     data = data.replace('⾄', '至').replace('中华⼈民', '中华人民') \
-        .replace(' ', '').replace(u'\xa0', '').replace('\r\n', '\n')
+        .replace(' ', ' ').replace(u'\xa0', ' ').replace('\r\n', '\n')
     data = re.sub("[＿_]+", "", data)
     return data
 
@@ -178,6 +178,7 @@ if run:
     resp_json = requests.post(url, json=req_data).json()
     # acknowledgement.review_main(content=text, mode="text", usr=usr)
     # pprint(acknowledgement.review_result, sort_dicts=False)
+    # st.write(resp_json)
     index = 1
 
     # st.write(acknowledgement.data)
@@ -193,7 +194,8 @@ if run:
         value['内容'] = value_en.get('review_content','')
         value['风险等级'] = value_en.get('risk_level','')
         value['风险点'] = value_en.get('risk_point','')
-        value['法律建议'] = value_en.get('legal_basis','')
+        value['法律建议'] = value_en.get('legal_advice','')
+        value['法律依据'] = value_en.get('legal_basis','')
         value['start'] = value_en.get('review_content_start','')
         value['end'] = value_en.get('review_content_end','')
 

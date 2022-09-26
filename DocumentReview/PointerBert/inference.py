@@ -31,7 +31,7 @@ def read_docx_file(docx_path):
     # print(return_text_list)
     data = '\n'.join(return_text_list)
     data = data.replace('⾄', '至').replace('中华⼈民', '中华人民') \
-        .replace(' ', '').replace(u'\xa0', '').replace('\r\n', '\n')
+        .replace(' ', ' ').replace(u'\xa0', ' ').replace('\r\n', '\n')
     data = re.sub("[＿_]+", "", data)
     return data
 

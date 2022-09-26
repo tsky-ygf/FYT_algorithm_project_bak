@@ -146,7 +146,7 @@ def main(args):
         score, class_info = cir.result()
         f1 = score['f1']
         print("epoch:", e, "  p: {0}, r: {1}, f1: {2}".format(score['acc'], score['recall'], score['f1']))
-        print(class_info)
+        pprint(class_info)
         # ev = evaluate_index(y_pred, y_true)
         # print("epoch:", e, "  p: {0}, r: {1}, f1: {2}".format(ev[0], ev[1], ev[2]))
         # score, class_info = metric.result()
@@ -227,7 +227,7 @@ if __name__ == '__main__':
     parser.add_argument("--local_rank", type=int, default=-1, help="For distributed training: local_rank")
     parser.add_argument("--do_train", default=True, type=bool)
     parser.add_argument("--is_inference", default=False, type=bool)
-    parser.add_argument("--model_save_path", default='DocumentReview/PointerBert/model_src/PBert0923_old.pt')
+    parser.add_argument("--model_save_path", default='DocumentReview/PointerBert/model_src/PBert0925_old_9schema.pt')
     parser.add_argument("--batch_size", default=1, type=int, help="Batch size per GPU/CPU for training.")
     parser.add_argument("--learning_rate", default=1e-5, type=float, help="The initial learning rate for Adam.")
     parser.add_argument("--train_path", default=None, type=str, help="The path of train set.")
@@ -262,5 +262,5 @@ if __name__ == '__main__':
     pprint(args)
 
     main(args)
-
-    """nohup python -u DocumentReview/PointerBert/main.py > log/PointerBert/pBert_old_0923.log 2>&1 &"""
+    """export PYTHONPATH=$(pwd):$PYTHONPATH"""
+    """nohup python -u DocumentReview/PointerBert/main.py > log/PointerBert/pBert_old_0925_9schema.log 2>&1 &"""
