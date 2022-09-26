@@ -5,4 +5,4 @@
 
 启动命令：
 
-`gunicorn -c OnlineServer/ContractReview/gun_conf.py OnlineServer.ContractReview.server:app`
+`nohup python -m OnlineServer.ContractReview.server &`
