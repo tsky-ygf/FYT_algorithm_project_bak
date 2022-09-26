@@ -3,7 +3,7 @@
 # @Time    : 2022/5/12 10:15
 # @Author  : Adolf
 # @Site    : 
-# @File    : gunicorn.conf.py
+# @File    : gun_conf.py.py
 # @Software: PyCharm
 # 并行工作进程数
 workers = 4

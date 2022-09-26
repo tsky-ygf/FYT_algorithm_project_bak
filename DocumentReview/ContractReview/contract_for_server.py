@@ -6,7 +6,7 @@
 # @File    : contract_for_server.py
 # @Software: PyCharm
 import json
-from DocumentReview.ContractReview.showing_sample import BasicUIEAcknowledgementShow
+from DocumentReview.ContractReview.showing_sample import BasicUIEAcknowledgement
 
 CONTRACT_SERVER_DATA_PATH = "DocumentReview/Config/contract_server_data.json"
 
@@ -33,7 +33,7 @@ def init_model():
     for contract_type in contract_type_list:
         config_path = "DocumentReview/Config/{}.csv".format(contract_type)
         model_path = "model/uie_model/export_cpu/{}/inference".format(contract_type)
-        acknowledgement_dict[contract_type] = BasicUIEAcknowledgementShow(config_path=config_path,
-                                                                          model_path=model_path,
-                                                                          device="cpu")
+        acknowledgement_dict[contract_type] = BasicUIEAcknowledgement(config_path=config_path,
+                                                                      model_path=model_path,
+                                                                      device="cpu")
     return acknowledgement_dict

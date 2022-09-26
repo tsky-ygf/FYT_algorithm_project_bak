@@ -12,7 +12,8 @@ import re
 import pandas as pd
 from collections import OrderedDict
 
-from Utils import Logger
+# from Utils import Logger
+from Utils import get_logger
 from DocumentReview.ParseFile.parse_word import read_docx_file
 
 from paddlenlp import Taskflow
@@ -26,9 +27,8 @@ from Utils.logger import print_run_time
 
 
 class BasicAcknowledgement:
-    def __init__(self, config_path, log_level='INFO', *args, **kwargs):
-        self.logger = Logger(name="ContractReview", level=log_level).logger
-        self.logger.info(self.logger.name)
+    def __init__(self, config_path, log_level='INFO', logger_file=None, *args, **kwargs):
+        self.logger = get_logger(level=log_level, console=True, logger_file=logger_file)
         self.logger.info("log level:{}".format(log_level))
         self.config = pd.read_csv(config_path)
         self.config = self.config.fillna("")
@@ -41,21 +41,33 @@ class BasicAcknowledgement:
         self.review_result = OrderedDict()
 
     @print_run_time
-    def review_main(self, content, mode, usr="Part A"):
+    def review_main(self, content, mode, usr="party_a"):
         self.review_result = self.init_review_result()
         self.data_list = self.read_origin_content(content, mode)
         data = '\n'.join(self.data_list)
         data = data.replace('⾄', '至').replace('中华⼈民', '中华人民').replace(' ', '').replace(u'\xa0', '')
         self.data = re.sub("[＿_]+", "", data)
         extraction_res = self.check_data_func()
-        print('where here! ' * 100)
         self.usr = usr
         self.rule_judge(extraction_res[0])
         self.review_result = {key: value for key, value in self.review_result.items() if value != {}}
 
-    def rule_judge2(self, *args, **kwargs):
-        # its for example show
-        raise NotImplementedError
+        return_result = []
+        for review_point, review_result in self.review_result.items():
+            return_result.append({
+                "review_point": review_point,
+                "show_name": review_result.get("show name") if review_result.get("show name") else review_point,
+                "review_result": review_result.get("审核结果", ""),
+                "review_content": review_result.get("内容", ""),
+                "review_content_start": review_result.get("start", -1),
+                "review_content_end": review_result.get("end", -1),
+                "legal_advice": review_result.get("法律建议", ""),
+                "legal_basis": review_result.get("法律依据", ""),
+                "risk_level": review_result.get("风险等级", ""),
+                "risk_point": review_result.get("风险点", "")
+            })
+
+        return return_result
 
     def init_review_result(self):
         raise NotImplementedError
@@ -93,6 +105,7 @@ class InferArgs:
     max_seq_len = 512
     batch_size = 4
     device = "cpu"
+    device_id = "-1"
     schema = []
 
 
@@ -144,7 +157,7 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
 
             if row['schema'] in extraction_res:
                 extraction_con = extraction_res[row['schema']]
-                if self.usr == "Part A":
+                if self.usr == "party_a":
                     res_dict["法律建议"] = row["A pos legal advice"]
                 else:
                     res_dict["法律建议"] = row["B pos legal advice"]
@@ -152,7 +165,7 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
                     rule_func.check_id_card(row, extraction_con, res_dict)
 
                 elif '一次性付款条款审核' == row['pos rule']:
-                    rule_func.check_once_pay(row,extraction_con,res_dict)
+                    rule_func.check_once_pay(row, extraction_con, res_dict)
                 elif '房屋租赁押金审核' in row['pos rule']:
                     rule_func.check_deposit(row, extraction_res, res_dict)
                 # TODO
@@ -310,9 +323,6 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
             end_t = index_r + len(content)
             res_dict['start'] = start_t
             res_dict['end'] = end_t
-
-    def rule_judge2(self, *args, **kwargs):
-        pass
 
 
 if __name__ == '__main__':
