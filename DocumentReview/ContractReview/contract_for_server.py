@@ -35,5 +35,6 @@ def init_model():
         model_path = "model/uie_model/export_cpu/{}/inference".format(contract_type)
         acknowledgement_dict[contract_type] = BasicUIEAcknowledgement(config_path=config_path,
                                                                       model_path=model_path,
-                                                                      device="cpu")
+                                                                      device="cpu",
+                                                                      logger_file='log/contract_review/model.log')
     return acknowledgement_dict
