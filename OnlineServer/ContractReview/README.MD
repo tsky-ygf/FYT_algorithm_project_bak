@@ -17,3 +17,8 @@
 
 ## 4. 结束服务
 kill进程: `ps -ef | grep ContractReview.server | awk {'print $2'} |xargs kill -9`
+
+## 5. 服务部署
+pass
+
+## 6. 测试页面

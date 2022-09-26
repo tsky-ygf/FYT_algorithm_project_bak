@@ -14,3 +14,6 @@
 - Tools 训练工具模块
 - Utils 工具模块
 
+### 法域通内部测试项目
+启动服务
+```streamlit run OnlineServer/show_page.py --server.port 8132```
