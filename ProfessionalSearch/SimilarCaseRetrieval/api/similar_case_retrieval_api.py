@@ -50,7 +50,7 @@ def get_filter_conditions_of_case():
                 "刑事",
                 "民事",
                 "行政",
-                "执行"   # 刑事、民事、行政、执行、其他
+                "执行"  # 刑事、民事、行政、执行、其他
             ]
         },
         # "type_of_anyou":{
@@ -109,23 +109,25 @@ def get_filter_conditions_of_case():
             "is_multiple_choice": True,
             "value": [
                 '全国',
-                '安徽省', '北京市', '重庆市', '福建省', '甘肃省', '广东省', '广西壮族自治区', '贵州省', '海南省', '河北省', '河南省', '黑龙江省',
-                '湖北省', '湖南省', '吉林省', '江苏省', '江西省', '辽宁省', '内蒙古自治区', '宁夏回族自治区', '青海省', '山东省', '山西省', '陕西省', '上海市', '四川省',
+                '安徽省', '北京市', '重庆市', '福建省', '甘肃省', '广东省', '广西壮族自治区', '贵州省', '海南省',
+                '河北省', '河南省', '黑龙江省',
+                '湖北省', '湖南省', '吉林省', '江苏省', '江西省', '辽宁省', '内蒙古自治区', '宁夏回族自治区', '青海省',
+                '山东省', '山西省', '陕西省', '上海市', '四川省',
                 '天津市', '西藏自治区', '新疆维吾尔自治区', '云南省', '浙江省'
-                    ]
+            ]
         }
     }
     return response_successful_result(filter_conditions)
 
 
-def _get_search_result(query, filter_conditions,page_num,page_size):
+def _get_search_result(query, filter_conditions, page_num, page_size):
     search_result = get_case_search_result(query,
                                            filter_conditions.get("type_of_case"),
                                            filter_conditions.get("court_level"),
                                            filter_conditions.get("type_of_document"),
                                            filter_conditions.get("region"),
-                                            page_num,
-                                            page_size)
+                                           page_num,
+                                           page_size)
     return _construct_result_format(search_result)
 
 
@@ -155,6 +157,7 @@ def search_cases():
     #     logging.info(traceback.format_exc())
     #     return json.dumps({"error_msg": "unknown error:" + repr(e), "status": 1}, ensure_ascii=False)
 
+
 @app.route('/get_law_document', methods=["get"])
 def get_law_document():
     # doc_id = request.args.get("doc_id")
@@ -180,14 +183,14 @@ def get_law_document():
 def _construct_result_format(search_result) -> List:
     result = []
     for index, row in search_result.iterrows():
-
         result.append({
-            "doc_id":  row['table_name'] +'_SEP_'+ row['uq_id'],
+            "doc_id": row['table_name'] + '_SEP_' + row['uq_id'],
             "court": row['faYuan_name'],
             "case_number": row['event_num'],
             "jfType": row['jfType'],
             "content": row['content']})
     return result
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8160, debug=True)

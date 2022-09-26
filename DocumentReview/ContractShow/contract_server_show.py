@@ -94,7 +94,7 @@ def _async_task(request_data: Dict):
 
     if usr == 'party_a':
         usr = 'Part A'
-    elif usr == 'part_b':
+    elif usr == 'party_b':
         usr = 'Part B'
     else:
         raise Exception("暂时不支持该用户立场")

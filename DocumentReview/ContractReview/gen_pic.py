@@ -158,6 +158,6 @@ def main_v2():
 
 if __name__ == "__main__":
     # create_pic(["二手车买卖居间服务合同（深圳市）"], "DocumentReview/ContractReview/test.jpg")
-    # create_pic_v2("意见书(离婚案件)", "DocumentReview/ContractReview/test.jpg")
+    create_pic_v2("申请书(申请承认和执行外国法院生效文书用))", "DocumentReview/ContractReview/test.jpg")
     # main()
-    main_v2()
+    # main_v2()

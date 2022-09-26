@@ -7,6 +7,7 @@
 # @Software: PyCharm
 # import torch
 import json
+import torch
 from Tools.train_tool import BaseTrainTool
 from transformers import AutoConfig, AutoTokenizer, AutoModelForQuestionAnswering
 
@@ -110,6 +111,8 @@ class TrainExtractQA(BaseTrainTool):
                     idx -= 1
                 tokenized_examples["end_positions"].append(idx + 1)
 
+        tokenized_examples["start_positions"] = torch.tensor(tokenized_examples["start_positions"], dtype=torch.long)
+        tokenized_examples["end_positions"] = torch.tensor(tokenized_examples["end_positions"], dtype=torch.long)
         return tokenized_examples
 
     def post_process_function(self, batch, output):
