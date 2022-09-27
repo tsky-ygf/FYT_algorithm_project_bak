@@ -20,21 +20,27 @@ tokenizer = BertTokenizer.from_pretrained('model/language_model/chinese-roberta-
 def read_config(config_path):
     config_data = pd.read_csv(config_path, encoding='utf-8', na_values=' ', keep_default_na=False)
     config_list = []
+    label2alias = dict()
+    _alias2label = dict()
+
     for line in config_data.values:
         config_list.append(line[0])
-        # alis = line[1].split('|')
-        # if alis:
-        #     config_list.extend(alis)
+        alis = line[1].split('|')
+        if alis:
+            for ali in alis:
+                if ali:
+                    _alias2label[ali] = line[0]
     config_list = list(filter(None, config_list))
-    return config_list
+    return config_list, _alias2label
 
 
 # 生成所有的通用label， 包含别称
 def read_config_to_label(args):
     config_path = 'data/data_src/config.csv'
     # 读取config，将别称也读为schema
-    config_list = read_config(config_path)
-
+    config_list, _alias2label = read_config(config_path)
+    config_list = ['乙方地址','乙方联系方式','争议解决','合同生效','标题','甲方地址','甲方联系方式',
+                   '金额','鉴于条款']
     # config_list.remove('争议解决')
     # config_list.remove('通知与送达')
     # config_list.remove('乙方解除合同')
@@ -43,7 +49,7 @@ def read_config_to_label(args):
     # config_list.remove('附件')
     # TODO: 之前有保留金额, 在生成origin.json时
     # config_list.remove('金额')
-    return config_list
+    return config_list, _alias2label
 
 
 # 加载train和dev数据
@@ -151,6 +157,8 @@ def batchify(batch):
         else:
             for res in res_list:
                 label = res['label']
+                if label not in labels2id:
+                    continue
                 start = res['start_offset']
                 end = res['end_offset']
                 entity_text = text[start:end]
@@ -259,6 +267,6 @@ if __name__ == "__main__":
 
 
 else:
-    labels2id = read_config_to_label(None)
+    labels2id, alias2label = read_config_to_label(None)
     # labels2id = ['address', 'book', 'company', 'game', 'government', 'movie', 'name', 'organization', 'position',
     #              'scene']

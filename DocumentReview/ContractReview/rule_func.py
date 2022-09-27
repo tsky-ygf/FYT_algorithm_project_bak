@@ -114,7 +114,7 @@ def check_date_outside(row, extraction_con, res_dict, loan_date, repay_date):
     # print(diff)
     # print(tmp)
 
-    res_dict["内容"] = length
+    res_dict["内容"] = extraction_con[0]['text']
     res_dict["start"] = extraction_con[0]["start"]
     res_dict["end"] = extraction_con[0]["end"]
 
