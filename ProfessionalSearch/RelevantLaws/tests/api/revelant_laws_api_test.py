@@ -26,7 +26,7 @@ def get_filter_conditions():
 
 def search_laws():
     url = "http://101.69.229.138:8135/search_laws"
-    # url = "http://172.19.82.199:8161/search_laws"
+    url = "http://172.19.82.199:8161/search_laws"
     body = {
         "query": "侵权",
         "filter_conditions": {

@@ -16,7 +16,7 @@ config.gpu_options.allow_growth = True
 sess = tf.Session(config=config)
 KTF.set_session(sess)
 
-model_file_path = "../model_files/question_answering/text_cnn_model_files/"
+model_file_path = "../../../model/bxh_search_model/question_answering/text_cnn_model_files/"
 
 
 def convs_block(data, convs=[3, 4, 5], f=256, name="conv_feat"):
@@ -281,7 +281,7 @@ class MT:
         return feature
 
 
-mt = MT(model_path="../model_files/question_answering/model_ask_type/")
+mt = MT(model_path="model/bxh_search_model/question_answering/model_ask_type/")
 text = "工资，不发，老板会坐牢吗"
 
 

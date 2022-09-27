@@ -20,8 +20,8 @@ from __future__ import print_function
 
 import csv
 import os
-import bert.modeling as modeling
-import bert.tokenization as tokenization
+import modeling as modeling
+import tokenization as tokenization
 import tensorflow as tf
 import numpy as np
 import logging

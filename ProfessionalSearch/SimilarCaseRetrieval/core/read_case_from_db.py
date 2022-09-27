@@ -14,7 +14,7 @@ def search_data_from_es(
     res_list = [hit["_source"] for hit in res["hits"]["hits"]]
     df = pd.DataFrame(res_list)
     df.fillna("", inplace=True)
-    return df
+    return df, res["hits"]["total"]["value"]
 
 def _construct_result_format(search_result):
     result = []
@@ -80,7 +80,7 @@ if __name__ == "__main__":
     }
     query_dict = {
         "from": 1,
-        "size": 10,
+        "size": 100,
         "query": {
             "bool": {
                 "must": [
@@ -139,14 +139,14 @@ if __name__ == "__main__":
 
     query_dict = {
         "from": 1,
-        "size": 10,
+        "size": 100,
         "query": {
             "bool": {
                 "must": [
-                    # {"match_phrase": {"faYuan_name": {"query": "最高", "boost": 3}}},
+                    {"match_phrase": {"content": {"query": "买卖", "boost": 3}}},
                     {
                         "match_phrase": {
-                            "table_name": {"query": "judgment_xingzheng_data"}
+                            "table_name": {"query": "judgment_zhixing_data", "boost": 3}
                         }
                     },
                     # {"match_phrase": {"event_type": {"query": "执行裁定书", "boost": 3}}}, a83de20f4b9ec9f957f7307941fb5c78
@@ -169,7 +169,7 @@ if __name__ == "__main__":
     #      }
     #     }
 
-    res_df = search_data_from_es(query_dict)
+    res_df, total_num = search_data_from_es(query_dict)
     # res_df = pd.DataFrame(columns=[''])
     # res = _construct_result_format(res_df)
     print(res_df)

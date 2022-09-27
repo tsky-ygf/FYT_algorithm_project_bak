@@ -10,12 +10,12 @@ import numpy as np
 import time
 import os
 
-from text_cnn_predict import get_feature
-from question_answering.question_answering_ask_type_predict import get_question_feature_label_prob, get_appeal_by_rules
-from question_answering.identity_problem_suqiu import predict_problem_suqiu
+from ProfessionalSearch.SimilarCaseRetrieval.core.text_cnn_predict import get_feature
+from ProfessionalSearch.SimilarCaseRetrieval.core.question_answering_ask_type_predict import get_question_feature_label_prob, get_appeal_by_rules
+from ProfessionalSearch.SimilarCaseRetrieval.core.identify_problem_suqiu import predict_problem_suqiu
 #from question_answering.run_classifier_predict_online_q2q_rank import predict_online_q2type
 
-from rank_util import pseg_txt, inc_pos, compute_sentence_embedding, load_vocab_embedding_idf, cosine_similiarity, as_num
+from ProfessionalSearch.SimilarCaseRetrieval.core.rank_util import pseg_txt, inc_pos, compute_sentence_embedding, load_vocab_embedding_idf, cosine_similiarity, as_num
 print("abc2...")
 
 ip = "192.168.1.254"
