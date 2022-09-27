@@ -5,6 +5,8 @@
 # @Site    : 
 # @File    : server.py
 # @Software: PyCharm
+import _io
+
 import uvicorn
 from fastapi import FastAPI
 from pydantic import BaseModel
@@ -68,14 +70,21 @@ async def _get_contract_review_result(contract_input: ContractInput):
 
 
 class FileLinkInput(BaseModel):
-    file_link: str = "https://nblh-fyt.oss-cn-hangzhou.aliyuncs.com/fyt/20220916/55712bdc-694a-438f-bcb0-1f5b66dd9bb5.docx"
+    file_path: str = "https://nblh-fyt.oss-cn-hangzhou.aliyuncs.com/fyt/20220916/55712bdc-694a-438f-bcb0-1f5b66dd9bb5.docx"
 
 
 @app.post("/get_text_from_file_link_path")
-async def _file_link_path_to_text(file_link_input: FileLinkInput):
-    return {"result": file_link_path_to_text(file_link_input.file_link)}
+async def _get_text_from_file_link_path(file_link_input: FileLinkInput):
+    return {"result": get_text_from_file_link_path(file_link_input.file_path)}
 
 
+class FileInput(BaseModel):
+    file: _io.BufferedReader = open('data/uploads/upload.docx','rb')
+
+
+@app.post("/get_text_from_file")
+async def _get_text_from_file(file_input: FileInput):
+    return {"return":get_text_from_file(file_input.file)}
 
 
 if __name__ == "__main__":
