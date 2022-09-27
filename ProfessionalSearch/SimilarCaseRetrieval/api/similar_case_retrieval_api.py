@@ -13,7 +13,10 @@ from LawsuitPrejudgment.lawsuit_prejudgment.core import civil_similar_case
 from Utils.http_response import response_successful_result
 from ProfessionalSearch.SimilarCaseRetrieval.core import similar_case_retrieval_service as service
 from ProfessionalSearch.SimilarCaseRetrieval.core.relevant_cases_search import get_case_search_result
+# from ProfessionalSearch.SimilarCaseRetrieval.core.narrative_similarity_predict import predict_fn as predict_fn_similar_cases
 from typing import List
+import logging
+
 
 from Utils.io import read_json_attribute_value
 
@@ -99,9 +102,12 @@ def get_filter_conditions_of_case():
             "is_multiple_choice": True,
             "value": [
                 "全部",
-                "判决",
-                "裁定",
-                "调解"
+                "判决书",
+                "裁定书",
+                "调解书",
+                # "决定书",
+                # "通知书"
+
             ]
         },
         "region": {
@@ -121,14 +127,14 @@ def get_filter_conditions_of_case():
 
 
 def _get_search_result(query, filter_conditions, page_num, page_size):
-    search_result = get_case_search_result(query,
+    search_result, total_num = get_case_search_result(query,
                                            filter_conditions.get("type_of_case"),
                                            filter_conditions.get("court_level"),
                                            filter_conditions.get("type_of_document"),
                                            filter_conditions.get("region"),
                                            page_num,
                                            page_size)
-    return _construct_result_format(search_result)
+    return _construct_result_format(search_result, total_num)
 
 
 @app.route('/search_cases', methods=["post"])
@@ -145,8 +151,12 @@ def search_cases():
         page_number = input_dict['page_number']
         page_size = input_dict['page_size']
         if query is not None and filter_conditions is not None:
-            result = _get_search_result(query, filter_conditions, page_number, page_size)
-            return response_successful_result(result, {"total_amount": len(result)})
+            result, result_total = _get_search_result(query, filter_conditions, page_number, page_size)
+            # 返回数量，若200以上，则返回200，若小于200，则返回实际number
+            if result_total >= 200:
+                return response_successful_result(result, {"total_amount": 200})
+            else:
+                return response_successful_result(result, {"total_amount": len(result)})
         else:
             return response_successful_result([], {"total_amount": len([])})
         # TODO: 实现用于分页的total_amount
@@ -180,16 +190,19 @@ def get_law_document():
         return response_successful_result(result)
 
 
-def _construct_result_format(search_result) -> List:
+def _construct_result_format(search_result, total_num):
     result = []
     for index, row in search_result.iterrows():
+        if not row['faYuan_name'] or not row['event_num']:
+            total_num -= 1
+            continue
         result.append({
             "doc_id": row['table_name'] + '_SEP_' + row['uq_id'],
             "court": row['faYuan_name'],
             "case_number": row['event_num'],
             "jfType": row['jfType'],
             "content": row['content']})
-    return result
+    return result, total_num
 
 
 if __name__ == "__main__":

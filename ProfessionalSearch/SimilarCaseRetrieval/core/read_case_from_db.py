@@ -5,16 +5,16 @@ from Utils import print_run_time
 
 # @print_run_time
 def search_data_from_es(
-    query_body, _index_name="case_index", _es_hosts="127.0.0.1:9200"
+    query_body, _index_name="case_index_v2", _es_hosts="127.0.0.1:9200"
 ):
     # 查询数据
     es = Elasticsearch(hosts=_es_hosts)
     res = es.search(index=_index_name, body=query_body)
+    print(res)
     res_list = [hit["_source"] for hit in res["hits"]["hits"]]
     df = pd.DataFrame(res_list)
     df.fillna("", inplace=True)
     return df
-
 
 def _construct_result_format(search_result):
     result = []
@@ -138,19 +138,19 @@ if __name__ == "__main__":
     }
 
     query_dict = {
-        # "from": 1,
-        # "size": 100,
+        "from": 1,
+        "size": 10,
         "query": {
             "bool": {
                 "must": [
                     # {"match_phrase": {"faYuan_name": {"query": "最高", "boost": 3}}},
-                    # {
-                    #     "match_phrase": {
-                    #         "table_name": {"query": "judgment_zhixing_data", "boost": 3}
-                    #     }
-                    # },
-                    # {"match_phrase": {"event_type": {"query": "执行裁定书", "boost": 3}}}, a8fabf8511a90eeaddcca1f804c7da25
-                    {"match_phrase": {"uq_id": {"query": "a8fabf8511a90eeaddcca1f804c7da25", "boost": 10}}},
+                    {
+                        "match_phrase": {
+                            "table_name": {"query": "judgment_xingzheng_data"}
+                        }
+                    },
+                    # {"match_phrase": {"event_type": {"query": "执行裁定书", "boost": 3}}}, a83de20f4b9ec9f957f7307941fb5c78
+                    # {"match_phrase": {"db_name": {"query": "judgments_data"}}},
                 ]
             }
         },
