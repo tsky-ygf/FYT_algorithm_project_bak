@@ -141,6 +141,21 @@ def get_civil_law_documents_by_id_list(id_list: List[str], table_name=None) -> L
     return []
 
 
+def _transfer_date_format(date_string):
+    date_string = str(date_string)
+    if "/" not in date_string:
+        return date_string
+
+    day, month, year = str(date_string).split("/")
+    day = "0" + str(day) if len(day) == 1 else day
+    month = "0" + str(month) if len(month) == 1 else month
+    return "-".join([year, month, day])
+
+
+def sort_similar_cases(similar_cases):
+    return sorted(similar_cases, key=lambda x: x.get("judge_date", ""), reverse=True)
+
+
 class CivilSimilarCase:
     """ 算法匹配的民事相似案例 """
     def __init__(self, fact, problem, claim_list, problem_id):
@@ -217,7 +232,7 @@ class ManuallySelectedCivilSimilarCase:
                         "similar_rate": 1.0,
                         "title": self._get_title(row["content"]),
                         "court": self._ignore_nan(row["court"]),
-                        "judge_date": self._ignore_nan(row["judge_date"]),
+                        "judge_date": _transfer_date_format(self._ignore_nan(row["judge_date"])),
                         "case_number": self._ignore_nan(row["case_number"]),
                         "tag": "",
                         "is_guiding_case": True

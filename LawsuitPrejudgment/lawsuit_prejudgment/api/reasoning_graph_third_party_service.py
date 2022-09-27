@@ -17,6 +17,7 @@ from LawsuitPrejudgment.lawsuit_prejudgment.api.data_transfer_object.similar_cas
     CriminalSimilarCaseListCreator
 from LawsuitPrejudgment.lawsuit_prejudgment.constants import SUPPORTED_ADMINISTRATIVE_TYPES_CONFIG_PATH, \
     CIVIL_PROBLEM_ID_MAPPING_CONFIG_PATH, CIVIL_PROBLEM_TEMPLATE_CONFIG_PATH, FEATURE_TOGGLES_CONFIG_PATH
+from LawsuitPrejudgment.lawsuit_prejudgment.core import civil_similar_case
 from LawsuitPrejudgment.lawsuit_prejudgment.core.civil_juding_rule import CivilJudgingRule
 from LawsuitPrejudgment.lawsuit_prejudgment.core.civil_relevant_law import CivilRelevantLaw
 from LawsuitPrejudgment.lawsuit_prejudgment.core.civil_similar_case import CivilSimilarCase, \
@@ -216,6 +217,7 @@ def reasoning_graph_result():
                     similar_case.extend(manually_selected_civil_similar_case.get_similar_cases())
                 civilSimilarCase = CivilSimilarCase(fact, problem_name_for_search, claim_list, mapped_problem_id)
                 similar_case.extend(civilSimilarCase.get_similar_cases())
+                similar_case = civil_similar_case.sort_similar_cases(similar_case)
 
                 # 获取裁判规则
                 civil_judging_rule = CivilJudgingRule(fact, problem)
