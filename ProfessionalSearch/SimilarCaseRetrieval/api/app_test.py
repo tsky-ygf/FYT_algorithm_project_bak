@@ -27,11 +27,11 @@ if __name__=='__main__':
     # url_filter_conditions = 'http://172.19.82.199:8156/get_filter_conditions_of_case'
     url_search_case = 'http://172.19.82.199:8160/search_cases'
     # url_law_document = 'http://101.69.229.138:7145/get_law_document'
-    query = ""
+    query = "买卖"
     filter_conditions = {
         'type_of_case': ['执行'],
-        'court_level': ['最高'],
-        'type_of_document': ['裁定书'],
+        'court_level': ['基层'],
+        'type_of_document': ['判决'],
         'region': ['山东省'],
         # 'size': 10,
     }
