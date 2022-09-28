@@ -22,7 +22,8 @@ app = Flask(__name__)
 
 @app.route('/get_filter_conditions_of_law', methods=["get"])
 def get_filter_conditions():
-    filer_conditions = read_json_attribute_value("ProfessionalSearch/RelevantLaws/api/filter_conditions.json", "filter_conditions")
+    filer_conditions = read_json_attribute_value("ProfessionalSearch/RelevantLaws/api/filter_conditions.json",
+                                                 "filter_conditions")
     return response_successful_result(filer_conditions)
 
 
@@ -61,14 +62,26 @@ def _construct_result_format(search_result) -> List:
     return result
 
 
-def _get_search_result(query, filter_conditions,page_number, page_size):
-    search_result, total_num = get_law_search_result(query,
-                                          filter_conditions.get("timeliness"),
-                                          filter_conditions.get("types_of_law"),
-                                          filter_conditions.get("scope_of_use"),
-                                          page_number,
-                                          page_size)
-    return _construct_result_format(search_result), total_num
+def _get_law_result(query, filter_conditions, page_number, page_size):
+    if isinstance(filter_conditions, dict):
+        search_result, total_num = get_law_search_result(query,
+                                                         filter_conditions.get("timeliness"),
+                                                         filter_conditions.get("types_of_law"),
+                                                         filter_conditions.get("scope_of_use"),
+                                                         page_number,
+                                                         page_size)
+    else:
+        search_result, total_num = get_law_search_result(query,
+                                                         filter_conditions.timeliness,
+                                                         filter_conditions.types_of_law,
+                                                         filter_conditions.scope_of_use,
+                                                         page_number,
+                                                         page_size)
+    result = _construct_result_format(search_result)
+    if total_num >= 200:
+        return response_successful_result(result, {"total_amount": 200})
+    else:
+        return response_successful_result(result, {"total_amount": len(result)})
 
 
 @app.route('/search_laws', methods=["post"])
@@ -77,12 +90,8 @@ def search_laws():
     filter_conditions = request.json.get("filter_conditions", dict())
     page_number = request.json.get("page_number")
     page_size = request.json.get("page_size")
-    result, total_num = _get_search_result(query, filter_conditions,page_number, page_size)
-    if total_num >= 200:
-        return response_successful_result(result, {"total_amount": 200})
-    else:
-        return response_successful_result(result, {"total_amount": len(result)})
-    return response_successful_result(result, {"total_amount": len(result)})
+    result = _get_law_result(query, filter_conditions, page_number, page_size)
+    return result
 
 
 @app.route('/get_law_by_law_id', methods=["get"])
@@ -106,4 +115,3 @@ def get_law_by_law_id():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8161, debug=True)
-
