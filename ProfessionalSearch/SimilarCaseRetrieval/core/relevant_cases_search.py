@@ -115,7 +115,36 @@ def get_case_search_result(
         or type_document_list[0] == "全部"
     ):
         pass
+    # https://www.bookstack.cn/read/elasticsearch-7.9-en/9622efa769c3a249.md
     elif len(type_document_list) > 0:
+        if type_case_list and type_case_list[0] == "执行":
+            type_case_sub = list(type_document_list[0])
+            query_list.append(
+                {
+                    "span_containing": {
+                        "big": {
+                            "span_near": {
+                                "clauses": [
+                                    {"span_term": {"content": type_case_sub[0]}},
+                                    {"span_term": {"content": type_case_sub[1]}}
+                                ],
+                                "slop": 30,
+                                "in_order": True
+                            }
+                        },
+                        "little": {
+                            "span_first": {
+                                "match": {
+                                    "span_term": {"content": type_case_sub[0]},
+                                    "span_term": {"content": type_case_sub[1]},
+                                },
+                                "end": 30
+                            }
+                        }
+                    }
+                }
+            )
+        else:
             query_list.append(
                 {
                     "match_phrase": {

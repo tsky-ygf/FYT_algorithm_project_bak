@@ -168,7 +168,54 @@ if __name__ == "__main__":
     #          }
     #      }
     #     }
-
+    # type_case_list = ["调解"]
+    # type_case_sub = list(type_case_list[0])
+    # query_dict = {
+    #     "from": 1,
+    #     "size": 10,
+    #     "query": {
+    #         "bool": {
+    #             "must": [
+    #                 {
+    #                     "span_first": {
+    #                         {
+    #                             "match":{
+    #                                 "span_term": {"content": "通知书"}
+    #                             },
+    #                             "end": 50
+    #                          }
+    #                     }
+    #                 },
+    #                 # {"match_phrase": {"event_type": {"query": "执行裁定书", "boost": 3}}}, a83de20f4b9ec9f957f7307941fb5c78
+    #                 {"match_phrase": {"table_name": {"query": "judgment_zhixing_data", "boost": 3}}},
+    #             ]
+    #         }
+    #     },
+    # }
+    query_dict = {"query": {
+        "span_containing": {
+            "big": {
+                "span_near": {
+                    "clauses":[
+                        {"span_term": {"content": "裁"}},
+                        {"span_term": {"content": "定"}}
+                    ],
+                    "slop": 30,
+                    "in_order" : True
+                    }
+                },
+            "little": {
+                "span_first": {
+                    "match": {
+                        "span_term": {"content": "裁"},
+                        "span_term": {"content": "定"},
+                    },
+                    "end": 30
+                }
+            }
+          }
+        }
+    }
     res_df, total_num = search_data_from_es(query_dict)
     # res_df = pd.DataFrame(columns=[''])
     # res = _construct_result_format(res_df)

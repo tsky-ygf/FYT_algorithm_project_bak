@@ -102,9 +102,9 @@ def get_filter_conditions_of_case():
             "is_multiple_choice": True,
             "value": [
                 "全部",
-                "判决书",
-                "裁定书",
-                "调解书",
+                "判决",
+                "裁定",
+                "调解",
                 # "决定书",
                 # "通知书"
 
@@ -126,15 +126,28 @@ def get_filter_conditions_of_case():
     return response_successful_result(filter_conditions)
 
 
-def _get_search_result(query, filter_conditions, page_num, page_size):
-    search_result, total_num = get_case_search_result(query,
-                                           filter_conditions.get("type_of_case"),
-                                           filter_conditions.get("court_level"),
-                                           filter_conditions.get("type_of_document"),
-                                           filter_conditions.get("region"),
-                                           page_num,
-                                           page_size)
-    return _construct_result_format(search_result, total_num)
+def _get_case_result(query, filter_conditions, page_num, page_size):
+    if isinstance(filter_conditions, dict):
+        search_result, total_num = get_case_search_result(query,
+                                               filter_conditions.get("type_of_case"),
+                                               filter_conditions.get("court_level"),
+                                               filter_conditions.get("type_of_document"),
+                                               filter_conditions.get("region"),
+                                               page_num,
+                                               page_size)
+    else:
+        search_result, total_num = get_case_search_result(query,
+                                                          filter_conditions.type_of_case,
+                                                          filter_conditions.court_level,
+                                                          filter_conditions.type_of_document,
+                                                          filter_conditions.region,
+                                                          page_num,
+                                                          page_size)
+    result, total_num = _construct_result_format(search_result, total_num)
+    if total_num >= 200:
+        return response_successful_result(result, {"total_amount": 200})
+    else:
+        return response_successful_result(result, {"total_amount": len(result)})
 
 
 @app.route('/search_cases', methods=["post"])
@@ -151,12 +164,9 @@ def search_cases():
         page_number = input_dict['page_number']
         page_size = input_dict['page_size']
         if query is not None and filter_conditions is not None:
-            result, result_total = _get_search_result(query, filter_conditions, page_number, page_size)
+            result = _get_case_result(query, filter_conditions, page_number, page_size)
             # 返回数量，若200以上，则返回200，若小于200，则返回实际number
-            if result_total >= 200:
-                return response_successful_result(result, {"total_amount": 200})
-            else:
-                return response_successful_result(result, {"total_amount": len(result)})
+            return result
         else:
             return response_successful_result([], {"total_amount": len([])})
         # TODO: 实现用于分页的total_amount
