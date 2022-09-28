@@ -6,7 +6,7 @@
 添加项目跟目录: `export PYTHONPATH=$(pwd):$PYTHONPATH`
 
 启动命令：
-`nohup python -m OnlineServer.ContractReview.server >log/contract_review/server.log 2>&1 &`
+`nohup python -m OnlineServer.ContractReview.server > log/contract_review/server.log 2>&1 &`
 
 ## 2. 接口在线文档
 内网地址: "http://172.19.82.199:8112/docs"

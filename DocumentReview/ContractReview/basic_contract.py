@@ -53,6 +53,7 @@ class BasicAcknowledgement:
         self.review_result = {key: value for key, value in self.review_result.items() if value != {}}
 
         return_result = []
+        self.logger.success("review_result: {}".format(pformat(self.review_result)))
         for review_point, review_result in self.review_result.items():
             return_result.append({
                 "review_point": review_point,
@@ -67,6 +68,7 @@ class BasicAcknowledgement:
                 "risk_point": review_result.get("风险点", "")
             })
 
+        self.logger.success(return_result)
         return return_result
 
     def init_review_result(self):

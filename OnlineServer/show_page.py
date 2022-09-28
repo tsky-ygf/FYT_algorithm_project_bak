@@ -6,7 +6,7 @@
 # @File    : show_page.py
 # @Software: PyCharm
 import streamlit as st
-from OnlineServer.ContractReview import contract_review_main
+from OnlineServer.ContractReview.show import contract_review_main
 
 
 class MultiApp:
