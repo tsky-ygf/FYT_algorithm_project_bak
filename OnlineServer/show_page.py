@@ -8,7 +8,7 @@
 import streamlit as st
 from OnlineServer.ContractReview.show import contract_review_main
 from OnlineServer.LawsuitPrejudgment.testing_page.show import civil_prejudgment_testing_page
-from OnlineServer.ProfessionalSearch.show import similar_case_review, relevant_laws_review
+from OnlineServer.ProfessionalSearch.show import search
 
 
 class MultiApp:
@@ -33,7 +33,6 @@ class MultiApp:
 
     def __init__(self):
         self.apps = []
-        self.apps_search = []
 
     def add_app(self, title, func):
         """Adds a new application.
@@ -49,20 +48,6 @@ class MultiApp:
             "function": func
         })
 
-    def add_app_search(self, title, func):
-        """Adds a new application.
-        Parameters
-        ----------
-        func:
-            the python function to render this app.
-        title:
-            title of the app. Appears in the dropdown in the sidebar.
-        """
-        self.apps_search.append({
-            "title": title,
-            "function": func
-        })
-
     def run(self):
         app = st.sidebar.radio(
             'Go To',
@@ -74,18 +59,10 @@ class MultiApp:
 def welcome():
     st.title("欢迎来到法域通测试页面！")
 
-def search():
-    app.add_app_search("案例检索测试服务", similar_case_review)
-    app.add_app_search("法条检索测试服务", relevant_laws_review)
-    app_search = st.sidebar.selectbox(
-        '请选择检索测试服务类型',
-        app.apps_search,
-        format_func=lambda app_search: app_search['title'])
-    app_search['function']()
 
 app = MultiApp()
 app.add_app("首页", welcome)
 app.add_app("合同智审测试服务", contract_review_main)
-app.add_app("检索测试服务", search)
 app.add_app("民事预判测试服务", civil_prejudgment_testing_page)
+app.add_app("检索测试服务", search)
 app.run()

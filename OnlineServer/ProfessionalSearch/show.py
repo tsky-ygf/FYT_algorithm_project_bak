@@ -9,9 +9,65 @@ import requests
 import streamlit as st
 from Utils.logger import Logger
 
+
+class MultiApp:
+    """Framework for combining multiple streamlit applications.
+    Usage:
+        def foo():
+            st.title("Hello Foo")
+        def bar():
+            st.title("Hello Bar")
+        app = MultiApp()
+        app.add_app("Foo", foo)
+        app.add_app("Bar", bar)
+        app.run()
+    It is also possible keep each application in a separate file.
+        import foo
+        import bar
+        app = MultiApp()
+        app.add_app("Foo", foo.app)
+        app.add_app("Bar", bar.app)
+        app.run()
+    """
+
+    def __init__(self):
+        self.apps_search = []
+
+    def add_app_search(self, title, func):
+        """Adds a new application.
+        Parameters
+        ----------
+        func:
+            the python function to render this app.
+        title:
+            title of the app. Appears in the dropdown in the sidebar.
+        """
+        self.apps_search.append({
+            "title": title,
+            "function": func
+        })
+
+    def run(self):
+        app = st.sidebar.radio(
+            'Go To',
+            self.apps,
+            format_func=lambda app: app['title'])
+        app['function']()
+
+def search():
+    app = MultiApp()
+    app.add_app_search("案例检索测试服务", similar_case_review)
+    app.add_app_search("法条检索测试服务", relevant_laws_review)
+    app_search = st.sidebar.selectbox(
+        '请选择检索测试服务类型',
+        app.apps_search,
+        format_func=lambda app_search: app_search['title'])
+    app_search['function']()
+
+
 def similar_case_review():
     logger = Logger(name="case-lib", level="debug").logger
-    url_case_conditions = 'http://172.19.82.199:8160/get_filter_conditions_of_case'
+    url_case_conditions = 'http://127.0.0.1:8160/get_filter_conditions_of_case'
     resp_case_json = requests.get(url_case_conditions).json()
     case_type = st.sidebar.selectbox(
         "请选择案件类型", resp_case_json["result"].get("type_of_case").get("value"), key="case_type"
@@ -40,7 +96,7 @@ def similar_case_review():
     # run = True
     query_list = []
     if run:
-        url_search_case = 'http://172.19.82.199:8160/search_cases'
+        url_search_case = 'http://127.0.0.1:8160/search_cases'
         query = text
         filter_conditions = {
             'type_of_case': [case_type],
@@ -81,9 +137,10 @@ def similar_case_review():
             st.write(res_dict)
             st.write("-" * 20 + "我是分割线" + "-" * 20)
 
+
 def relevant_laws_review():
     logger = Logger(name="law-lib", level="debug").logger
-    url_law_conditions = "http://172.19.82.199:8161/get_filter_conditions_of_law"
+    url_law_conditions = "http://127.0.0.1:8161/get_filter_conditions_of_law"
     resp_conditions_json = requests.get(url_law_conditions).json()
 
     legal_type = st.sidebar.selectbox(
@@ -105,7 +162,7 @@ def relevant_laws_review():
     run = st.button("查询", key="run")
 
     if run:
-        url = "http://172.19.82.199:8161/search_laws"
+        url = "http://127.0.0.1:8161/search_laws"
         body = {
             "query": text,
             "filter_conditions": {
