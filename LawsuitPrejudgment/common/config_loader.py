@@ -48,8 +48,11 @@ pos_model_path = os.path.join(LTP_DATA_DIR, 'pos.model')  # 词性模型的路�
 ner_model_path = os.path.join(LTP_DATA_DIR, 'ner.model')  # 命名实体模型的路径
 par_model_path = os.path.join(LTP_DATA_DIR, 'parser.model')  # 依存句法分析模型路径，模型名称为`parser.model`
 
-segmentor = Segmentor()  # 初始化实例
-segmentor.load_with_lexicon(seg_model_path, config_path + 'negative')  # 加载模型
+# seg_model_path = os.path.join(seg_model_path, config_path + 'negative')
+# segmentor = Segmentor(model_path=seg_model_path)  # 初始化实例
+segmentor = Segmentor()
+segmentor.load_with_lexicon(seg_model_path, config_path + 'negative')
+  # 加载模型
 postagger = Postagger()  # 初始化实例
 postagger.load(pos_model_path)  # 加载模型
 recognizer = NamedEntityRecognizer()  # 初始化实例

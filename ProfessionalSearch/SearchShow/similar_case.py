@@ -1,16 +1,16 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# @Time    : 2022/9/26 08:57
-# @Author  : Adolf
-# @Site    : 
-# @File    : show.py
-# @Software: PyCharm
+from pprint import pprint
+
+import jieba
 import requests
 import streamlit as st
 from Utils.logger import Logger
 
+from ProfessionalSearch.SimilarCaseRetrieval.core.read_case_from_db import search_data_from_es
+
+logger = Logger(name="case-lib", level="debug").logger
+
+
 def similar_case_review():
-    logger = Logger(name="case-lib", level="debug").logger
     url_case_conditions = 'http://172.19.82.199:8160/get_filter_conditions_of_case'
     resp_case_json = requests.get(url_case_conditions).json()
     case_type = st.sidebar.selectbox(
@@ -80,68 +80,66 @@ def similar_case_review():
             }
             st.write(res_dict)
             st.write("-" * 20 + "我是分割线" + "-" * 20)
-
-def relevant_laws_review():
-    logger = Logger(name="law-lib", level="debug").logger
-    url_law_conditions = "http://172.19.82.199:8161/get_filter_conditions_of_law"
-    resp_conditions_json = requests.get(url_law_conditions).json()
-
-    legal_type = st.sidebar.selectbox(
-        "请选择法条种类", resp_conditions_json["result"].get("types_of_law").get("value"), key="legal_type"
-    )
-    isValid_type = st.sidebar.selectbox(
-        "请选择法律时效性", resp_conditions_json["result"].get("timeliness").get("value"), key="text"
-    )
-    prov_type = st.sidebar.selectbox(
-        "请选择使用范围",
-        resp_conditions_json["result"].get("scope_of_use").get("value"),
-        key="text",
-    )
-    size = st.sidebar.number_input(
-        "搜索结果展示条数", value=10, key="size", min_value=1, max_value=100
-    )
-
-    text = st.text_input("请输入法条内容", value="", key="text")
-    run = st.button("查询", key="run")
-
-    if run:
-        url = "http://172.19.82.199:8161/search_laws"
-        body = {
-            "query": text,
-            "filter_conditions": {
-                "types_of_law": [
-                    legal_type
-                ],
-                "timeliness": [
-                    isValid_type
-                ],
-                "scope_of_use": [
-                    prov_type
-                ]
-            },
-            "page_number": 1,
-            "page_size": size
-        }
-        resp_json = requests.post(url, json=body).json()
-
-        for index, row in enumerate(resp_json.get("result")):
-            logger.info(row)
-            # break
-            # if row["timeliness"] == "有效":
-            #     row["timeliness"] = "现行有效"
-            # if row["using_range"] == "":
-            #     row["using_range"] = "全国"
-            res_dict = {
-                "标号": index,
-                # "md5": row["md5Clause"],
-                "标题": row["law_name"],
-                "法律类别": row["law_type"],
-                "时效性": row["timeliness"],
-                "使用范围": row["using_range"],
-                "法条章节": row["law_chapter"],
-                "法条条目": row["law_item"],
-                "法条内容": row["law_content"],
-            }
-
-            st.write(res_dict)
-            st.write("-" * 20 + "我是分割线" + "-" * 20)
+        # text = " ".join(jieba.cut(text))
+        # logger.info(text)
+        # text_list = text.split(" ")
+        #
+        # logger.info("查询的".format(text_list))
+        # bool_value = {}
+        # if len(text_list) > 0:
+        #     for one_text in text_list:
+        #         query_list.append(
+        #             {"match_phrase": {"content": {"query": one_text, "boost": 5}}},
+        #         )
+        # if case_type != '全部':
+        #     if case_type == "民事":
+        #         case_type = "judgment_minshi_data"
+        #     elif case_type == "刑事":
+        #         case_type = "judgment_xingshi_data"
+        #     elif case_type == "执行":
+        #         case_type = "judgment_zhixing_data"
+        #     elif case_type == "行政":
+        #         case_type = "judgment_xingzheng_data"
+        #     query_list.append(
+        #         {"match_phrase": {"table_name": {"query": case_type, "boost": 3}}}
+        #     )
+        #
+        # if document_type != '全部':
+        #     query_list.append(
+        #         {
+        #             "match_phrase": {
+        #                 "event_type": {"query": document_type, "boost": 3}
+        #             }
+        #         }
+        #     )
+        #
+        # if prov_type != '全国':
+        #     query_list.append(
+        #         {"match_phrase": {"content": {"query": prov_type, "boost": 5}}}
+        #     )
+        #
+        # if court_level != '全部' and "基层" != court_level:
+        #     query_list.append(
+        #         {
+        #             "match_phrase": {
+        #                 "faYuan_name": {"query": court_level, "boost": 5}
+        #             }
+        #         }
+        #     )
+        #
+        # bool_value["must"] = query_list
+        # if (
+        #         court_level and len(court_level) > 0 and "基层" in court_level
+        # ):  # 基层filter
+        #     bool_value["must_not"] = {"terms": {"faYuan_name.keyword": ["最高", "高级", "中级"]}}
+        #
+        # query_dict = {
+        #     "query": {"bool": bool_value},
+        #     "size": size,
+        # }
+        #
+        # print("查询语句:")
+        # pprint(query_dict)
+        # print("-" * 50)
+        # res = search_data_from_es(query_dict)
+        # st.write(res)

@@ -25,14 +25,14 @@ def req_law_document(url_law_document, input_json_doc):
 
 if __name__=='__main__':
     # url_filter_conditions = 'http://172.19.82.199:8156/get_filter_conditions_of_case'
-    url_search_case = 'http://172.19.82.199:8160/search_cases'
+    url_search_case = 'http://172.19.82.199:8165/search_cases'
     # url_law_document = 'http://101.69.229.138:7145/get_law_document'
-    query = ""
+    query = "买卖"
     filter_conditions = {
         'type_of_case': ['执行'],
-        'court_level': ['最高'],
-        'type_of_document': ['裁定书'],
-        'region': ['山东省'],
+        'court_level': ['全部'],
+        'type_of_document': ['调解'],
+        'region': ['全国'],
         # 'size': 10,
     }
     input_json = {

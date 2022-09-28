@@ -34,7 +34,7 @@ def get_query_answer(question: str):
             "answer": _post_process(initial_answer)
         }
 
-    url = "http://172.19.82.198:5050/get_query_answer"
+    url = "http://127.0.0.1:5050/get_query_answer"
     resp_json = requests.post(url, json={"question":question}).json()
     return {
         "answer": _post_process(resp_json.get("answer"))

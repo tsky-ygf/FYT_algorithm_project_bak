@@ -137,7 +137,7 @@ class BaseESTool:
     def insert_data_from_es_parall(
         self, thread_count=5, chunk_size=500, *args, **kwargs
     ):
-        es = Elasticsearch(hosts=self.es_host)
+        es = Elasticsearch(hosts=self.es_host, timeout=30)
         # 插入数据，有则删除，无则插入 https://github.com/elastic/elasticsearch-py/issues/382
         for success, info in helpers.parallel_bulk(
             es,
@@ -163,7 +163,7 @@ class BaseESTool:
     def update_data_from_es_parall(
         self, thread_count=5, chunk_size=500, *args, **kwargs
     ):
-        es = Elasticsearch(hosts=self.es_host)
+        es = Elasticsearch(hosts=self.es_host, timeout=30)
         # 更新数据
         for success, info in helpers.parallel_bulk(
             es,

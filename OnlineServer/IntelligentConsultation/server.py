@@ -20,6 +20,10 @@ class QueryInput(BaseModel):
 
 @app.post("/get_query_answer")
 def _get_query_answer(query_input: QueryInput):
+    print("input:")
+    print("question{}:".format(query_input.question))
+    print("source_end{}:".format(query_input.source_end))
+
     return service.get_query_answer(query_input.question)
 
 

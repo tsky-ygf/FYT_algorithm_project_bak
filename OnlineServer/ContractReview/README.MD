@@ -6,7 +6,7 @@
 添加项目跟目录: `export PYTHONPATH=$(pwd):$PYTHONPATH`
 
 启动命令：
-`nohup python -m OnlineServer.ContractReview.server >log/contract_review/server.log 2>&1 &`
+`nohup python -m OnlineServer.ContractReview.server > log/contract_review/server.log 2>&1 &`
 
 ## 2. 接口在线文档
 内网地址: "http://172.19.82.199:8112/docs"
@@ -17,3 +17,8 @@
 
 ## 4. 结束服务
 kill进程: `ps -ef | grep ContractReview.server | awk {'print $2'} |xargs kill -9`
+
+## 5. 服务部署
+pass
+
+## 6. 测试页面

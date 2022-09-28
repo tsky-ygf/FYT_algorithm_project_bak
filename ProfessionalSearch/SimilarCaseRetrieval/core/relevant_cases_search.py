@@ -97,7 +97,7 @@ def get_case_search_result(
         pass
     elif len(type_case_list) > 0:
         if type_case_list[0] == "民事":
-            type_case = "judgment_minshi_data"
+            type_case = "judgment_minshi_data_cc"
         elif type_case_list[0] == "刑事":
             type_case = "judgment_xingshi_data"
         elif type_case_list[0] == "执行":
@@ -115,14 +115,43 @@ def get_case_search_result(
         or type_document_list[0] == "全部"
     ):
         pass
+    # https://www.bookstack.cn/read/elasticsearch-7.9-en/9622efa769c3a249.md
     elif len(type_document_list) > 0:
-        query_list.append(
-            {
-                "match_phrase": {
-                    "event_type": {"query": type_document_list[0], "boost": 3}
+        if type_case_list and type_case_list[0] == "执行":
+            type_case_sub = list(type_document_list[0])
+            query_list.append(
+                {
+                    "span_containing": {
+                        "big": {
+                            "span_near": {
+                                "clauses": [
+                                    {"span_term": {"content": type_case_sub[0]}},
+                                    {"span_term": {"content": type_case_sub[1]}}
+                                ],
+                                "slop": 30,
+                                "in_order": True
+                            }
+                        },
+                        "little": {
+                            "span_first": {
+                                "match": {
+                                    "span_term": {"content": type_case_sub[0]},
+                                    "span_term": {"content": type_case_sub[1]},
+                                },
+                                "end": 30
+                            }
+                        }
+                    }
                 }
-            }
-        )
+            )
+        else:
+            query_list.append(
+                {
+                    "match_phrase": {
+                        "event_type": {"query": type_document_list[0], "boost": 3}
+                    }
+                }
+            )
 
     if (
         region_list
@@ -138,7 +167,7 @@ def get_case_search_result(
         #     {"match_phrase": {"event_num": {"query": prev_short_name, "boost": 5}}}
         # )
         query_list.append(
-            {"match_phrase": {"content": {"query": region_list[0], "boost": 5}}}
+            {"match_phrase": {"province": {"query": region_list[0], "boost": 5}}}
         )
 
     bool_value["must"] = query_list
@@ -153,10 +182,10 @@ def get_case_search_result(
         "query": {"bool": bool_value},
     }
 
-    res = search_data_from_es(query_dict)
+    res, total_num = search_data_from_es(query_dict)
     res_filtered = sort_by_year(res)
     print(res_filtered)
-    return res_filtered
+    return res_filtered, total_num
 
 
 if __name__ == "__main__":

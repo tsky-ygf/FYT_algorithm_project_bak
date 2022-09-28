@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # @Time    : 2022/9/26 08:57
-# @Author  : Adolf
+# @Author  : inamori1932
 # @Site    : 
 # @File    : server.py
 # @Software: PyCharm
