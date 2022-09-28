@@ -7,6 +7,7 @@
 # @Software: PyCharm
 import streamlit as st
 from OnlineServer.ContractReview.show import contract_review_main
+from OnlineServer.ProfessionalSearch.show import similar_case_review, relevant_laws_review
 
 
 class MultiApp:
@@ -62,4 +63,6 @@ def welcome():
 app = MultiApp()
 app.add_app("首页", welcome)
 app.add_app("合同智审测试服务", contract_review_main)
+app.add_app("案例检索测试服务", similar_case_review)
+app.add_app("法条检索测试服务", relevant_laws_review)
 app.run()
