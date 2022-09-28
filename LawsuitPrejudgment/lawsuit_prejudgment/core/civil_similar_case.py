@@ -152,8 +152,15 @@ def _transfer_date_format(date_string):
     return "-".join([year, month, day])
 
 
+def _is_valid_string(test_string):
+    test_string = str(test_string).lower()
+    if test_string == "none" or test_string == "nan" or test_string == "":
+        return False
+    return True
+
+
 def sort_similar_cases(similar_cases):
-    return sorted(similar_cases, key=lambda x: x.get("judge_date", ""), reverse=True)
+    return sorted(similar_cases, key=lambda x: x.get("case_number") if _is_valid_string(x.get("case_number")) else "", reverse=True)
 
 
 class CivilSimilarCase:
@@ -189,7 +196,7 @@ class CivilSimilarCase:
                 "title": item["doc_title"],
                 "court": item["court"],
                 "judge_date": item["judge_date"],
-                "case_number": item["case_number"],
+                "case_number": str(item["case_number"]).strip(),
                 "tag": next((tag for idx, tag in enumerate(tags_list) if str(doc_ids[idx]) == str(item["doc_id"])), ""),
                 "is_guiding_case": False
             }
@@ -213,7 +220,7 @@ class ManuallySelectedCivilSimilarCase:
 
     @staticmethod
     def _ignore_nan(string_value):
-        return "" if str(string_value).lower() == "nan" else str(string_value)
+        return "" if str(string_value).strip().lower() == "nan" else str(string_value).strip()
 
     def _is_valid_row(self, row):
         return row["纠纷"] == self.problem and row["诉求"] == self.claim and row["情形"] == self.situation and str(row["doc_id"]) != 'nan'
