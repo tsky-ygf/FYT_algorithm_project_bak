@@ -141,6 +141,28 @@ def get_civil_law_documents_by_id_list(id_list: List[str], table_name=None) -> L
     return []
 
 
+def _transfer_date_format(date_string):
+    date_string = str(date_string)
+    if "/" not in date_string:
+        return date_string
+
+    day, month, year = str(date_string).split("/")
+    day = "0" + str(day) if len(day) == 1 else day
+    month = "0" + str(month) if len(month) == 1 else month
+    return "-".join([year, month, day])
+
+
+def _is_valid_string(test_string):
+    test_string = str(test_string).lower()
+    if test_string == "none" or test_string == "nan" or test_string == "":
+        return False
+    return True
+
+
+def sort_similar_cases(similar_cases):
+    return sorted(similar_cases, key=lambda x: x.get("case_number") if _is_valid_string(x.get("case_number")) else "", reverse=True)
+
+
 class CivilSimilarCase:
     """ 算法匹配的民事相似案例 """
     def __init__(self, fact, problem, claim_list, problem_id):
@@ -174,7 +196,7 @@ class CivilSimilarCase:
                 "title": item["doc_title"],
                 "court": item["court"],
                 "judge_date": item["judge_date"],
-                "case_number": item["case_number"],
+                "case_number": str(item["case_number"]).strip(),
                 "tag": next((tag for idx, tag in enumerate(tags_list) if str(doc_ids[idx]) == str(item["doc_id"])), ""),
                 "is_guiding_case": False
             }
@@ -198,7 +220,7 @@ class ManuallySelectedCivilSimilarCase:
 
     @staticmethod
     def _ignore_nan(string_value):
-        return "" if str(string_value).lower() == "nan" else str(string_value)
+        return "" if str(string_value).strip().lower() == "nan" else str(string_value).strip()
 
     def _is_valid_row(self, row):
         return row["纠纷"] == self.problem and row["诉求"] == self.claim and row["情形"] == self.situation and str(row["doc_id"]) != 'nan'
@@ -217,7 +239,7 @@ class ManuallySelectedCivilSimilarCase:
                         "similar_rate": 1.0,
                         "title": self._get_title(row["content"]),
                         "court": self._ignore_nan(row["court"]),
-                        "judge_date": self._ignore_nan(row["judge_date"]),
+                        "judge_date": _transfer_date_format(self._ignore_nan(row["judge_date"])),
                         "case_number": self._ignore_nan(row["case_number"]),
                         "tag": "",
                         "is_guiding_case": True

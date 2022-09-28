@@ -28,19 +28,13 @@ def search_laws():
     url = "http://101.69.229.138:8135/search_laws"
     url = "http://172.19.82.199:8161/search_laws"
     body = {
-        "query": "",
+        "query": "侵权",
         "filter_conditions": {
             "types_of_law": [
-                "法律",
-                # "司法解释"
             ],
             "timeliness": [
-                # "有效",
-                # "已修改",
-                "尚未生效"
             ],
             "scope_of_use": [
-                "广州省"
             ]
         },
         "page_number": 1,
@@ -70,6 +64,6 @@ def get_law_by_law_id():
     assert resp_json["result"]["law_id"] == param["law_id"]
 
 if __name__=='__main__':
-    get_filter_conditions()
+    # get_filter_conditions()
     search_laws()
-    get_law_by_law_id()
+    # get_law_by_law_id()

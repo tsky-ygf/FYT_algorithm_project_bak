@@ -34,7 +34,7 @@ size = st.sidebar.number_input(
 text = st.text_input("请输入案例内容", value="", key="text")
 
 run = st.button("查询", key="run")
-
+# run = True
 query_list = []
 if run:
     url_search_case = 'http://172.19.82.199:8160/search_cases'
@@ -58,6 +58,8 @@ if run:
         logger.info(row)
         # break
         if row["doc_id"].split("_SEP_")[0] == "judgment_minshi_data":
+            row["table_name"] = "民事"
+        elif row["doc_id"].split("_SEP_")[0] == "judgment_minshi_data_cc":
             row["table_name"] = "民事"
         elif row["doc_id"].split("_SEP_")[0] == "judgment_xingshi_data":
             row["table_name"] = "刑事"

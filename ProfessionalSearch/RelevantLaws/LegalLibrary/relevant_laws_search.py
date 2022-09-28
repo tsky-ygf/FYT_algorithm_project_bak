@@ -46,7 +46,7 @@ def get_law_search_result(
         page_number = 1
     if page_size is None:
         page_size = 10
-    if scope_of_use is None or scope_of_use[0] == "":
+    if scope_of_use:
         scope_of_use = ["全国"]
     text = re.sub("\W*", "", text)  # 去除标点符号，空格等
     text = " ".join(jieba.cut(text))
@@ -104,11 +104,11 @@ def get_law_search_result(
         # ],
     }
 
-    res = search_data_from_es(query_dict)
+    res, total_num = search_data_from_es(query_dict)
     # if scope_of_use is not None and len(scope_of_use) > 0:
     #     res_filtered_scope = filter_scope_of_use(res, scope_of_use)
     print(res)
-    return res
+    return res, total_num
 
 
 if __name__ == "__main__":

@@ -250,7 +250,7 @@ def search_data_from_es(query_body, _index_name="flfg", _es_hosts="127.0.0.1:920
     # sort_list = ["有效", "已修改", "尚未生效", "已废止"]
     # df.index = df['isValid']
     # sort_df_grade = df.loc[sort_list]
-    return df
+    return df, res["hits"]["total"]["value"]
     # for index, hit in enumerate(res['hits']['hits']):
     #     print(index)
     #     print(hit["_source"])
@@ -302,11 +302,11 @@ if __name__ == "__main__":
     # # res_df = search_data_from_es({"query": {"match_all": {}}, "size": 10})
     query_dict = {
         "from": 1,
-        "size": 100,
+        "size": 1000,
         "query": {
             "bool": {
                 "must": [
-                    {"match": {"source": {"query": "监察法规", "boost": 5}}}
+                    {"match_phrase": {"source": {"query": "监察法规", "boost": 5}}}
                 ]
             }
         },
