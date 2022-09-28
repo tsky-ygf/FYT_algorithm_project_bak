@@ -10,9 +10,8 @@ from pprint import pprint
 
 import numpy
 import numpy as np
-import torch
 
-from DocumentReview.PointerBert.utils import read_config_to_label
+from DocumentReview.MRCPointerBert.utils import read_config_to_label
 
 
 def split_text(file, to_file):
@@ -94,9 +93,9 @@ def merge_all_data4common():
     print("label length", len(labels2id))
     file_path = 'data/data_src/common_0926'
     data_all = []
-    to_file = 'data/data_src/common_all/common_all.json'
+    to_file = 'data/data_src/common_all_mrc/common_all_mrc.json'
     w = open(to_file, 'w', encoding='utf-8')
-    window = 510
+    window = 480
     unused = []
     for file in os.listdir(file_path):
         print(file)
@@ -157,8 +156,7 @@ if __name__ == "__main__":
     # convert_format('data/data_src/new/dev_300.json', 'data/data_src/cluener_format/dev_300.json')
     # convert_format('data/data_src/new/train_300.json', 'data/data_src/cluener_format/train_300.json')
     # convert_format_bmes()
-
     # 先这两条， 再改log、model名称， 再运行
-    # merge_all_data4common()
-    # divided_train_dev('data/data_src/common_all/common_all.json', 'data/data_src/common_all/')
+    merge_all_data4common()
+    divided_train_dev('data/data_src/common_all_mrc/common_all_mrc.json', 'data/data_src/common_all_mrc/')
     pass

@@ -8,55 +8,17 @@ import os
 # from transformers import WEIGHTS_NAME, BertConfig,get_linear_schedule_with_warmup,AdamW, BertTokenizer
 from BasicTask.NER.BertNer.metrics import SpanEntityScore
 
-os.environ['CUDA_VISIBLE_DEVICES'] = '2'
+os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 import torch
 import argparse
 from pprint import pprint
 import numpy as np
 from tqdm import tqdm
-import torch.nn.functional as F
 from torch.utils.data import DataLoader
 
-from DocumentReview.PointerBert.utils import load_data, set_seed, ReaderDataset, batchify, read_config_to_label, \
+from DocumentReview.MRCPointerBert.utils import load_data, set_seed, ReaderDataset, batchify, read_config_to_label, \
     evaluate_index, batchify_cluener, evaluate_entity_wo_category, bert_extract_item
-from DocumentReview.PointerBert.model_NER import PointerNERBERT, BertSpanForNer
-
-
-def compute_kl_loss(self, p, q, pad_mask=None):
-    p_loss = F.kl_div(F.log_softmax(p, dim=-1), F.softmax(q, dim=-1), reduction='none')
-    q_loss = F.kl_div(F.log_softmax(q, dim=-1), F.softmax(p, dim=-1), reduction='none')
-
-    # pad_mask is for seq-level tasks
-    if pad_mask is not None:
-        p_loss.masked_fill_(pad_mask, 0.)
-        q_loss.masked_fill_(pad_mask, 0.)
-
-    # You can choose whether to use function "sum" and "mean" depending on your task
-    p_loss = p_loss.sum()
-    q_loss = q_loss.sum()
-
-    loss = (p_loss + q_loss) / 2
-    return loss
-
-
-def multilabel_categorical_crossentropy(y_true, y_pred):
-    """多标签分类的交叉熵
-    说明：y_true和y_pred的shape一致，y_true的元素非0即1，
-         1表示对应的类为目标类，0表示对应的类为非目标类。
-    警告：请保证y_pred的值域是全体实数，换言之一般情况下y_pred
-         不用加激活函数，尤其是不能加sigmoid或者softmax！预测
-         阶段则输出y_pred大于0的类。如有疑问，请仔细阅读并理解
-         本文。
-    """
-    y_pred = (1 - 2 * y_true) * y_pred
-    y_pred_neg = y_pred - y_true * 1e12
-    y_pred_pos = y_pred - (1 - y_true) * 1e12
-    zeros = torch.zeros_like(y_pred[..., :1])
-    y_pred_neg = torch.concat([y_pred_neg, zeros], dim=-1)
-    y_pred_pos = torch.concat([y_pred_pos, zeros], dim=-1)
-    neg_loss = torch.logsumexp(y_pred_neg, dim=-1)
-    pos_loss = torch.logsumexp(y_pred_pos, dim=-1)
-    return neg_loss + pos_loss
+from DocumentReview.MRCPointerBert.model_NER import PointerNERBERT, BertSpanForNer
 
 
 def train(args, train_loader, model, optimizer):
@@ -71,28 +33,13 @@ def train(args, train_loader, model, optimizer):
         start_prob, end_prob = model(encoded_dicts)
         # start_loss = torch.nn.functional.binary_cross_entropy(input=start_prob, target=starts, reduction="sum")
         # end_loss = torch.nn.functional.binary_cross_entropy(input=end_prob, target=ends, reduction="sum")
-        # start_loss = torch.nn.functional.binary_cross_entropy(input=start_prob, target=starts)
-        # end_loss = torch.nn.functional.binary_cross_entropy(input=end_prob, target=ends)
-        start_prob = start_prob.contiguous().view(-1, start_prob.shape[-1])
-        end_prob = end_prob.contiguous().view(-1,end_prob.shape[-1])
-        starts = starts.contiguous().view(-1, starts.shape[-1])
-        ends = ends.contiguous().view(-1,ends.shape[-1])
+        start_loss = torch.nn.functional.binary_cross_entropy(input=start_prob, target=starts)
+        end_loss = torch.nn.functional.binary_cross_entropy(input=end_prob, target=ends)
+        loss = start_loss + end_loss
+        loss.backward()
 
-        start_loss = multilabel_categorical_crossentropy(y_true=starts, y_pred=start_prob)
-        end_loss = multilabel_categorical_crossentropy(y_true=ends, y_pred=end_prob)
-        # start_prob = start_prob * encoded_dicts['attention_mask'][:,2:]
-        # end_prob = end_prob * encoded_dicts['attention_mask'][:,2:]
-        # start_prob = start_prob.contiguous().view(-1,len(args.labels))
-        # end_prob = end_prob.contiguous().view(-1,len(args.labels))
-        # starts = starts.view(-1)
-        # ends = ends.view(-1)
-        # start_loss = F.cross_entropy(input=start_prob, target=starts)
-        # end_loss = F.cross_entropy(input=end_prob, target=ends)
-        loss = torch.sum(start_loss) + torch.sum(end_loss)
-        loss.backward(loss)
-
-        # total_loss += loss.item()
-        # num_samples += len(samples)
+        total_loss += loss.item()
+        num_samples += len(samples)
 
         optimizer.step()
         if i % args.logging_steps == 0:
@@ -139,6 +86,7 @@ def main(args):
         # train
         model.train()
         train(args, train_loader, model, optimizer)
+
         # evaluate
         model.eval()
         print('-' * 50 + 'evaluating' + '-' * 50)
@@ -152,37 +100,13 @@ def main(args):
             encoded_dicts, starts, ends, labels = samples[0], samples[1], samples[2], samples[3]
             sentences = samples[4]
 
-            # bs, seq_len, num_labels+1
             start_prob, end_prob = model(encoded_dicts)
-            # bs, seq_len
-            '''
-            start_pred = torch.argmax(start_prob, dim=-1, keepdim=False)
-            end_pred = torch.argmax(end_prob, dim=-1, keepdim=False)
-            for bi in range(len(start_pred)):
-                sentence = sentences[bi]
-                for label_index in range(len(args.labels)):
-                    if label_index == 0:
-                        continue
-                    start_index = []
-                    end_index = []
-                    for ti in range(len((start_pred[bi]))):
-                        if start_pred[bi][ti] == label_index:
-                            start_index.append(ti)
-                        if end_pred[bi][ti] == label_index:
-                            end_index.append(ti)
-                    if len(start_index) == len(end_index):
-                        for s_index, e_index in zip(start_index, end_index):
-                            entities.append([args.label(label_index), sentence[s_index:e_index]])
-                    else:
-                        minnum = min(len(start_index), len(end_index))
-                        for k in range(minnum):
-                            entities.append([args.labels[label_index], sentence[start_index[k]:end_index[k]]])
-            '''
             thred = torch.FloatTensor([0.5]).to(args.device)
             start_pred = start_prob > thred
             end_pred = end_prob > thred
             start_pred = start_pred.transpose(2, 1)
             end_pred = end_pred.transpose(2, 1)
+
             for bi in range(len(start_pred)):
                 sentence = sentences[bi]
                 for li in range(len(start_pred[bi])):
@@ -208,7 +132,6 @@ def main(args):
                         min_len = min(len(start_index), len(end_index))
                         for mi in range(min_len):
                             entities.append([args.labels[li], sentence[start_index[mi]:end_index[mi]]])
-
             true_entities.extend(labels)
 
         print('pred entities: ', len(entities))
@@ -230,19 +153,20 @@ def main(args):
         # f1 = score['f1']
         # print("epoch:", e, "  p: {0}, r: {1}, f1: {2}".format(score['acc'], score['recall'], score['f1']))
 
+
         if f1 > best_f1:
             print("f1 score increased  {0}==>{1}".format(best_f1, f1))
             best_f1 = f1
             PATH = args.model_save_path
             state = {'model_state': model.state_dict(), 'e': e, 'optimizer': optimizer.state_dict()}
-            # model cpu?
-            # torch.save(state, PATH)
+            # TODO model cpu？
+            torch.save(state, PATH)
             # 加载
             # PATH = './model.pth'  # 定义模型保存路径
             # state = torch.load(PATH, map_location="cpu")
             # model.load_state_dict(state['model_state'])
             # optimizer.load_state_dict(state['optimizer'])
-        '''
+
         if args.is_inference:
             entities = []
             true_entities = []
@@ -291,7 +215,7 @@ def main(args):
                                     {'start': start_index[mi] + index_bias, 'end': end_index[mi] + index_bias,
                                      'entity': sentence[start_index[mi]:end_index[mi]]})
             print("entities", entities)
-        '''
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -303,9 +227,9 @@ if __name__ == '__main__':
     parser.add_argument("--local_rank", type=int, default=-1, help="For distributed training: local_rank")
     parser.add_argument("--do_train", default=True, type=bool)
     parser.add_argument("--is_inference", default=False, type=bool)
-    parser.add_argument("--model_save_path", default='DocumentReview/PointerBert/model_src/PBert0928_legalrob_mcloss_common_all_20sche.pt')
-    parser.add_argument("--batch_size", default=8, type=int, help="Batch size per GPU/CPU for training.")
-    parser.add_argument("--learning_rate", default=5e-5, type=float, help="The initial learning rate for Adam.")
+    parser.add_argument("--model_save_path", default='DocumentReview/PointerBert/model_src/PBert0926_common_all_20sche.pt')
+    parser.add_argument("--batch_size", default=1, type=int, help="Batch size per GPU/CPU for training.")
+    parser.add_argument("--learning_rate", default=1e-5, type=float, help="The initial learning rate for Adam.")
     parser.add_argument("--train_path", default=None, type=str, help="The path of train set.")
     parser.add_argument("--dev_path", default=None, type=str, help="The path of dev set.")
     parser.add_argument("--save_dir", default='./checkpoint', type=str,
@@ -316,7 +240,7 @@ if __name__ == '__main__':
     parser.add_argument("--hidden_size", default=200, type=int, help="The hidden size of model")
     parser.add_argument("--num_epochs", default=100, type=int, help="Total number of training epochs to perform.")
     parser.add_argument("--seed", default=1000, type=int, help="Random seed for initialization")
-    parser.add_argument("--logging_steps", default=50, type=int, help="The interval steps to logging.")
+    parser.add_argument("--logging_steps", default=200, type=int, help="The interval steps to logging.")
     parser.add_argument("--valid_steps", default=100, type=int,
                         help="The interval steps to evaluate model performance.")
     parser.add_argument('--device', choices=['cpu', 'gpu'], default="cuda",
@@ -334,9 +258,9 @@ if __name__ == '__main__':
     args.dev_path = 'data/data_src/common_all/dev.json'
     # args.train_path = 'data/cluener/train.json'
     # args.dev_path = 'data/cluener/dev.json'
-    args.model = 'model/language_model/LegalRoBERTa'
+    args.model = 'model/language_model/chinese-roberta-wwm-ext'
     pprint(args)
 
     main(args)
     """export PYTHONPATH=$(pwd):$PYTHONPATH"""
-    """nohup python -u DocumentReview/PointerBert/main.py > log/PointerBert/pBert_legalrob_mcloss_commomall_0928_20sche.log 2>&1 &"""
+    """nohup python -u DocumentReview/PointerBert/main.py > log/PointerBert/pBert_commomall_0926_20sche.log 2>&1 &"""

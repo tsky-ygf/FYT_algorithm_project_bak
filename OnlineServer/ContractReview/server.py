@@ -78,13 +78,13 @@ async def _get_text_from_file_link_path(file_link_input: FileLinkInput):
     return {"result": get_text_from_file_link_path(file_link_input.file_path)}
 
 
-class FileInput(BaseModel):
-    file: _io.BufferedReader = open('data/uploads/upload.docx','rb')
+# class FileInput(BaseModel):
+#     file: _io.BufferedReader = open('data/uploads/upload.docx','rb')
 
 
-@app.post("/get_text_from_file")
-async def _get_text_from_file(file_input: FileInput):
-    return {"return":get_text_from_file(file_input.file)}
+# @app.post("/get_text_from_file")
+# async def _get_text_from_file(file_input: FileInput):
+#     return {"return":get_text_from_file(file_input.file)}
 
 
 if __name__ == "__main__":

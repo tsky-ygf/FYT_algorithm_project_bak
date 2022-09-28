@@ -325,6 +325,7 @@ class BaseTrainTool:
                 eval_loss_res += eval_loss.item()
 
                 self.post_process_function(batch, output)
+                # TODO: evaluate
 
         eval_loss_res /= len(self.eval_dataloader)
         return eval_loss_res

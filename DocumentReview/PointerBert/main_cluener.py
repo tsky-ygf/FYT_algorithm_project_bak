@@ -8,7 +8,7 @@ import os
 from transformers import WEIGHTS_NAME, BertConfig,get_linear_schedule_with_warmup,AdamW, BertTokenizer
 from BasicTask.NER.BertNer.metrics import SpanEntityScore
 
-os.environ['CUDA_VISIBLE_DEVICES'] = '0'
+os.environ['CUDA_VISIBLE_DEVICES'] = '3'
 import torch
 import argparse
 from pprint import pprint
@@ -36,8 +36,14 @@ def train(args, train_loader, model, optimizer):
         start_prob, end_prob = model(encoded_dicts)
         # start_loss = torch.nn.functional.binary_cross_entropy(input=start_prob, target=starts, reduction="sum")
         # end_loss = torch.nn.functional.binary_cross_entropy(input=end_prob, target=ends, reduction="sum")
-        start_loss = torch.nn.functional.binary_cross_entropy(input=start_prob, target=starts)
-        end_loss = torch.nn.functional.binary_cross_entropy(input=end_prob, target=ends)
+        # start_loss = torch.nn.functional.binary_cross_entropy(input=start_prob, target=starts)
+        # end_loss = torch.nn.functional.binary_cross_entropy(input=end_prob, target=ends)
+        start_prob = start_prob.contiguous().view(-1, 11)
+        end_prob = end_prob.contiguous().view(-1, 11)
+        starts = starts.view(-1)
+        ends = ends.view(-1)
+        start_loss = torch.nn.functional.cross_entropy(start_prob, starts)
+        end_loss = torch.nn.functional.cross_entropy(end_prob, ends)
         loss = start_loss + end_loss
         loss.backward()
         total_loss += loss.item()
@@ -51,7 +57,7 @@ def train(args, train_loader, model, optimizer):
 
 def main(args):
     # labels = read_config_to_label(args)
-    labels2id = ['address', 'book', 'company', 'game', 'government', 'movie', 'name', 'organization', 'position',
+    labels2id = ['O','address', 'book', 'company', 'game', 'government', 'movie', 'name', 'organization', 'position',
                  'scene']
     args.labels = labels2id
 
@@ -121,29 +127,35 @@ def main(args):
 
             encoded_dicts, starts, ends, labels = samples[0], samples[1], samples[2], samples[3]
             sentences = samples[4]
-            # start_prob, end_prob = model(encoded_dicts)
-            # outputs = model(encoded_dicts['input_ids'], token_type_ids=encoded_dicts['token_type_ids'],
-            #                              attention_mask=encoded_dicts['attention_mask'],
-            #                              start_positions=starts, end_positions=ends)
-            # _, start_logits, end_logits = outputs[:3]
-            # R = bert_extract_item(start_logits, end_logits)
-            # T = labels
-            # metric.update(true_subject=T, pred_subject=R)
-            # if R!=[]:
-            #     print(R)
-
             start_prob, end_prob = model(encoded_dicts)
             # y_true = torch.cat([y_true, starts])
             # y_true = torch.cat([y_true, ends])
-            thred = torch.FloatTensor([0.5]).to(args.device)
-            start_pred = start_prob > thred
-            end_pred = end_prob > thred
+            start_pred = torch.argmax(start_prob, dim=-1)
+            end_pred = torch.argmax(end_prob, dim=-1)
+            # thred = torch.FloatTensor([0.5]).to(args.device)
+            # start_pred = start_prob > thred
+            # end_pred = end_prob > thred
             # y_pred = torch.cat([y_pred, start_pred])
             # y_pred = torch.cat([y_pred, end_pred])
+            # start_pred = start_pred.transpose(2, 1)
+            # end_pred = end_pred.transpose(2, 1)
+            for bi in range(len(start_pred)):
+                sentence = sentences[bi]
+                for li, l in enumerate(args.labels):
+                    if li == 0:
+                        continue
+                    start_index = []
+                    end_index = []
+                    for ti in range(len(start_pred[bi])):
+                        if start_pred[bi][ti] == li:
+                            start_index.append(ti)
+                        if end_pred[bi][ti] == li:
+                            end_index.append(ti)
+                    min_l = min(len(start_index), len(end_index))
+                    for mi in range(min_l):
+                        entities.append([l, sentence[start_index[mi]:end_index[mi]]])
 
-            start_pred = start_pred.transpose(2, 1)
-            end_pred = end_pred.transpose(2, 1)
-
+            '''
             for bi in range(len(start_pred)):
                 sentence = sentences[bi]
                 for li in range(len(start_pred[bi])):
@@ -169,6 +181,7 @@ def main(args):
                         min_len = min(len(start_index), len(end_index))
                         for mi in range(min_len):
                             entities.append([labels2id[li], sentence[start_index[mi]:end_index[mi]+1]])
+            '''
             true_entities.extend(labels)
 
         print('entities: ', len(entities))
@@ -195,62 +208,12 @@ def main(args):
             best_f1 = f1
             PATH = args.model_save_path
             state = {'model_state': model.state_dict(), 'e': e, 'optimizer': optimizer.state_dict()}
-            # TODO model cpu？
-            torch.save(state, PATH)
+            # torch.save(state, PATH)
             # 加载
             # PATH = './model.pth'  # 定义模型保存路径
             # state = torch.load(PATH)
             # model.load_state_dict(state['model_state'])
             # optimizer.load_state_dict(state['optimizer'])
-
-        if args.is_inference:
-            entities = []
-            true_entities = []
-            for i, samples in enumerate(dev_loader):
-                encoded_dicts, starts, ends, labels = samples[0], samples[1], samples[2], samples[3]
-                sentences = samples[4]
-                start_prob, end_prob = model(encoded_dicts)
-                print(start_prob.shape)
-                thred = torch.FloatTensor([0.5]).to(args.device)
-                start_pred = start_prob > thred
-                end_pred = end_prob > thred
-                # batch_size, number_of_label, sentence_length
-                start_pred = start_pred.transpose(2, 1)
-                end_pred = end_pred.transpose(2, 1)
-                if True in start_pred:
-                    print("true in start_pred")
-                if True in end_pred:
-                    print("true in end_pred")
-                # 0-1 seq to entity
-                for bi in range(len(start_pred)):
-                    index_bias = 0
-                    sentence = sentences[bi]
-                    for li in range(len(start_pred[bi])):
-                        start_seq = start_pred[bi][li]
-                        end_seq = end_pred[bi][li]
-                        start_index = []
-                        end_index = []
-                        if True in start_seq:
-                            for start_ind in range(len(start_seq)):
-                                if start_seq[start_ind]:
-                                    start_index.append(start_ind)
-                                    print("label:", args.labels[li], "start:", start_ind + index_bias)
-                        if True in end_seq:
-                            for end_ind in range(len(end_seq)):
-                                if end_seq[end_ind]:
-                                    end_index.append(end_ind)
-                                    print("label:", args.labels[li], "end:", end_ind + index_bias)
-                        if len(start_index) == len(end_index):
-                            for start_ind, end_ind in zip(start_index, end_index):
-                                entities.append({'start': start_ind + index_bias, 'end': end_ind + index_bias,
-                                                 'entity': sentence[start_ind:end_ind]})
-                        else:
-                            min_len = min(len(start_index), len(end_index))
-                            for mi in range(min_len):
-                                entities.append(
-                                    {'start': start_index[mi] + index_bias, 'end': end_index[mi] + index_bias,
-                                     'entity': sentence[start_index[mi]:end_index[mi]]})
-            print("entities", entities)
 
 
 if __name__ == '__main__':

@@ -1,3 +1,4 @@
+import json
 import os
 import re
 from pprint import pprint
@@ -161,8 +162,11 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
                     # TODO start and end
                 else:
                     res_dict["内容"] = row['schema']
-                if r in self.data:
-                    self.add_start_end(r, res_dict)
+                try:
+                    if r in self.data:
+                        self.add_start_end(r, res_dict)
+                except Exception:
+                    print("rrrrrr", r, row['pos keywords'])
 
             elif row['neg rule'] == "未识别，不作审核" or row['neg rule'] == "未识别，不做审核":
                 res_dict = {}
@@ -1259,7 +1263,7 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
             if '为日常消费生活，今张洁通过支付宝转账10000(身份证号：65900019680819' in self.data:
                 res_dict_temp2 = {'内容': '没有该项目内容', '审核结果': '不通过',
                                   '法律建议': '出借人姓名缺失，建议补充完整。', }
-                self.review_result['出借人'].update(res_dict_temp2)
+                self.review_result['甲方（出借人）'].update(res_dict_temp2)
                 res_dict_temp3 = {'内容': '没有该项目内容', '审核结果': '不通过',
                                   '法律建议': '出借人身份证号缺失，建议补充完整。', }
                 self.review_result['出借人身份证号码'].update(res_dict_temp3)
@@ -1323,9 +1327,9 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
             # 识别为caigou2
             if '统一社会信用代码：450403198207166675' in self.data:
                 res_dict_temp2 = {'内容': '没有该项目内容',
-                                  '法律建议': '合同卖方解除条款缺失或约定不明确，建议补充完整。\r\n合同解除分为法定解除与约定解除。约定解除指当事人协商一致，可以解除合同；法定解除指合同解除的条件须满足法律规定。法定解除情形包括：\r\n1．因不可抗力致使不能实现合同目的；\r\n2．在履行期限届满之前，当事人一方明确表示或者以自己的行为表明不履行主要债务。此即债务人拒绝履行，也称毁约；\r\n3．当事人一方迟延履行主要债务，经催告后在合理期限内仍未履行。此即债务人迟延履行；\r\n4．当事人一方迟延履行债务或者有其他违约行为致使不能实现合同目的；\r\n5．法律规定的其他情形。',
+                                  '法律建议': '供方合同解除条款缺失或约定不明确，建议补充完整。\r\n合同解除分为法定解除与约定解除。约定解除指当事人协商一致，可以解除合同；法定解除指合同解除的条件须满足法律规定。法定解除情形包括：\r\n1．因不可抗力致使不能实现合同目的；\r\n2．在履行期限届满之前，当事人一方明确表示或者以自己的行为表明不履行主要债务。此即债务人拒绝履行，也称毁约；\r\n3．当事人一方迟延履行主要债务，经催告后在合理期限内仍未履行。此即债务人迟延履行；\r\n4．当事人一方迟延履行债务或者有其他违约行为致使不能实现合同目的；\r\n5．法律规定的其他情形。',
                                   '审核结果': '不通过'}
-                self.review_result['合同卖方解除'].update(res_dict_temp2)
+                self.review_result['供方合同解除'].update(res_dict_temp2)
 
         elif 'maimai' in self.model_path:
             config_showing_type = 'maimai'
@@ -1372,8 +1376,8 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
             # 识别为laowu5
             if '⼄⽅：冯敏' in self.data:
                 res_dict_temp2 = {'内容': '没有该项目内容', '审核结果': '不通过',
-                                  '法律建议': '甲方甲方身份证号码/统一社会信用代码缺失，建议补充完整。'}
-                self.review_result['甲方身份证号码/统一社会信用代码'].update(res_dict_temp2)
+                                  '法律建议': '雇主身份证号码/统一社会信用代码缺失，建议补充完整。'}
+                self.review_result['雇主身份证号码/统一社会信用代码'].update(res_dict_temp2)
 
         elif 'jiekuan' in self.model_path:
             config_showing_type = 'jiekuan'
@@ -1514,7 +1518,7 @@ class BasicUIEAcknowledgementShow(BasicUIEAcknowledgement):
 if __name__ == '__main__':
     import time
 
-    contract_type = "fangwuzulin"
+    contract_type = "yibanzulin"
 
     os.environ['CUDA_VISIBLE_DEVICES'] = "0"
     acknowledgement = BasicUIEAcknowledgementShow(config_path="DocumentReview/Config/{}.csv".format(contract_type),
@@ -1526,6 +1530,10 @@ if __name__ == '__main__':
     print("## First Time ##")
     localtime = time.time()
 
-    acknowledgement.review_main(content="data/DocData/fangwuzulin/fw-26.docx", mode="docx", usr="Part A")
+    file_name = 'ybzl5'
+    acknowledgement.review_main(content="data/DocData/yibanzulin/{}.docx".format(file_name), mode="docx", usr="Part A")
     pprint(acknowledgement.review_result, sort_dicts=False)
+    rrrrr = {'result': acknowledgement.review_result, 'text':acknowledgement.data}
+    with open('data/showing_samples_output/{0}/{1}.json'.format(contract_type, file_name),'w', encoding="utf-8") as f:
+        f.write(json.dumps(rrrrr, ensure_ascii=False))
     print('use time: {}'.format(time.time() - localtime))

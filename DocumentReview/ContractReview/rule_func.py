@@ -262,7 +262,10 @@ def check_rate(row, extraction_con, res_dict):
             ir = float(ir) * 12
             # self.logger.debug(ir)
         else:
-            ir = re.search("\d+", rate_text).group()
+            try:
+                ir = re.search("\d+", rate_text).group()
+            except Exception:
+                ir = 15
             # ir = ir.replace("年利率", "").replace("%", "")
 
         if float(ir) > 14.8:

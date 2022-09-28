@@ -49,7 +49,6 @@ def read_config_to_label(args):
     config_list.remove('未尽事宜')
     config_list.remove('附件')
     # config_list.remove('金额')
-    # config_list.insert(0, 'O') # ============ for softmax
     return config_list, _alias2label
 
 
@@ -106,10 +105,8 @@ def batchify_cluener(batch):
         attention_mask.append(atten_mask)
         token_type_ids.append(token_type_id)
 
-        # start_seq = [[0] * 50 for _ in range(10)]
-        # end_seq = [[0] * 50 for _ in range(10)]
-        start_seq = [0] * 50
-        end_seq = [0] * 50
+        start_seq = [[0] * 50 for _ in range(10)]
+        end_seq = [[0] * 50 for _ in range(10)]
 
         for label, res in res_dict.items():
             for entity, position in res.items():
@@ -118,8 +115,8 @@ def batchify_cluener(batch):
                 # labels.append([label, position[0][0], position[0][1]])
                 label_index = labels2id.index(label)
                 start, end = position[0][0], position[0][1]
-                start_seq[start] = label_index
-                end_seq[end] = label_index
+                start_seq[label_index][start] = 1
+                end_seq[label_index][end] = 1
         start_seqs.append(start_seq)
         end_seqs.append(end_seq)
 
@@ -128,14 +125,15 @@ def batchify_cluener(batch):
         'attention_mask': torch.LongTensor(attention_mask).to('cuda'),
         'token_type_ids': torch.LongTensor(token_type_ids).to('cuda')
     }
-    start_seqs = torch.LongTensor(start_seqs).to('cuda')
-    end_seqs = torch.LongTensor(end_seqs).to('cuda')
+    start_seqs = torch.tensor(start_seqs, dtype=torch.float).transpose(1, 2).to('cuda')
+    end_seqs = torch.tensor(end_seqs, dtype=torch.float).transpose(1, 2).to('cuda')
     assert len(input_ids) == len(start_seqs), [len(input_ids), len(start_seqs)]
     return encoded_dict, start_seqs, end_seqs, labels, sentences
 
 
 def batchify(batch):
     # 在doccano_data_preprocess中，已经做过最大长度截断了。
+    questions = [_+'是什么？' for _ in labels2id]
     sentences = []
     labels = []
     input_ids = []
@@ -152,8 +150,6 @@ def batchify(batch):
         # negative ratio 生成的负例
         start_seq = [[0] * window_length for _ in range(len(labels2id))]
         end_seq = [[0] * window_length for _ in range(len(labels2id))]
-        # start_seq = [0] * window_length # 用softmax做多分类
-        # end_seq = [0] * window_length
         sentences.append(text)
         if not res_list:
             start_seqs.append(start_seq)
@@ -170,8 +166,6 @@ def batchify(batch):
                 label_id = labels2id.index(label)
                 start_seq[label_id][start] = 1
                 end_seq[label_id][end] = 1
-                # start_seq[start] = label_id   # softmax多分类
-                # end_seq[end] = label_id
                 # labels_batch.append([label, entity_text, start, end])
                 # labels_batch.append([label, entity_text])
                 labels.append([label, entity_text])
@@ -194,12 +188,8 @@ def batchify(batch):
         'token_type_ids': torch.LongTensor(token_type_ids).to('cuda')
     }
 
-    # no sense for softmax method
     start_seqs = torch.FloatTensor(start_seqs).transpose(1, 2).to('cuda')
     end_seqs = torch.FloatTensor(end_seqs).transpose(1, 2).to('cuda')
-    # start_seqs = torch.LongTensor(start_seqs).to('cuda')
-    # end_seqs = torch.LongTensor(end_seqs).to('cuda')
-    # same batch
     assert len(input_ids) == len(start_seqs), [len(input_ids), len(start_seqs)]
     return encoded_dict, start_seqs, end_seqs, labels, sentences
 
@@ -259,7 +249,5 @@ if __name__ == "__main__":
 
 else:
     labels2id, alias2label = read_config_to_label(None)
-    # labels2id = ['O', 'address', 'book', 'company', 'game', 'government', 'movie',
-    #              'name', 'organization', 'position', 'scene']
     # labels2id = ['address', 'book', 'company', 'game', 'government', 'movie', 'name', 'organization', 'position',
     #              'scene']
