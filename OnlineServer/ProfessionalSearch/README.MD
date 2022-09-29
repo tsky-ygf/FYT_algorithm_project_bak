@@ -21,7 +21,7 @@ kill进程: `ps -ef | grep ProfessionalSearch.server | awk {'print $2'} |xargs k
 
 ## TODOLIST
 - [x] 相似度计算方法替换，使用bert,或者其他模型计算相似度；
-- [] 统一索引库（narrative_similarity_v2 和 case_index_v2）;
-- [] tag关键词的计算
-- [] 咨询部分的意图识别，目前是fasttext
+- [ ] 统一索引库（narrative_similarity_v2 和 case_index_v2）;
+- [ ] tag关键词的计算
+- [ ] 咨询部分的意图识别，目前是fasttext
 
