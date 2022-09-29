@@ -17,7 +17,7 @@ class FAQPredict:
         document_store = ElasticsearchDocumentStore(
             host="localhost",
             port=9200,
-            index="xz",
+            index="topic_qa",
             embedding_field="query_emb",
             embedding_dim=768,
             excluded_meta_data=["query_emb"],
@@ -26,7 +26,7 @@ class FAQPredict:
 
         retriever = EmbeddingRetriever(
             document_store=document_store,
-            embedding_model="model/similarity_model/simcse-model-tax-market",
+            embedding_model="model/similarity_model/tsdae_pro_qa",
             model_format="sentence_transformers",
             use_gpu=False,
             scale_score=False,

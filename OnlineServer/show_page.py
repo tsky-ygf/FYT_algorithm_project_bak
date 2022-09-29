@@ -9,6 +9,7 @@ import streamlit as st
 from OnlineServer.ContractReview.show import contract_review_main
 from OnlineServer.LawsuitPrejudgment.testing_page.show import civil_prejudgment_testing_page
 from OnlineServer.ProfessionalSearch.show import search
+from OnlineServer.IntelligentConsultation.show import intelligent_consultation_main
 
 
 class MultiApp:
@@ -62,7 +63,8 @@ def welcome():
 
 app = MultiApp()
 app.add_app("首页", welcome)
-app.add_app("合同智审测试服务", contract_review_main)
-app.add_app("民事预判测试服务", civil_prejudgment_testing_page)
-app.add_app("检索测试服务", search)
+app.add_app("合同智审", contract_review_main)
+app.add_app("检索", search)
+app.add_app("民事预判", civil_prejudgment_testing_page)
+app.add_app("智能咨询", intelligent_consultation_main)
 app.run()

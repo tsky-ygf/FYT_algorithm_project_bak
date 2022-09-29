@@ -1,7 +1,7 @@
 # 咨询相关服务接口
 
 ## 1. 服务启动
-进入到运行环境: `conda activate fyt_env`
+进入到运行环境: `conda activate prompt`
 
 添加项目跟目录: `export PYTHONPATH=$(pwd):$PYTHONPATH`
 
