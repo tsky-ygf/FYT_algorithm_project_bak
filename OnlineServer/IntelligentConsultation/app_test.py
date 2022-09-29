@@ -9,15 +9,16 @@ import requests
 
 URL = "http://127.0.0.1:8130"
 
+
 def test_get_query_answer():
     # 准备测试数据
     body = {
         "question": "争议解决",
-        "source_end": "personal"
+        # "source_end": "personal"
     }
 
     # 执行被测试程序
-    resp_json = requests.post(URL+"/get_query_answer", json=body).json()
+    resp_json = requests.post(URL + "/get_query_answer", json=body).json()
     answer = resp_json.get("answer")
 
     # 验证测试条件

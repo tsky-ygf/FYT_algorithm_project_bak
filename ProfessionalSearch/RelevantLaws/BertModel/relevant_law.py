@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2022/7/8 16:09
 # @Author  : Adolf
-# @Site    : 
+# @Site    :
 # @File    : relevant_law.py
 # @Software: PyCharm
 import json
@@ -16,19 +16,19 @@ from Tools.data_pipeline import InputExample
 
 def create_examples(data_path, set_tpye):
     map_df = pd.read_csv("data/fyt_train_use_data/CAIL-Long/civil/label_mapping.csv")
-    label_map = dict(zip(map_df['laws'], map_df['index']))
+    label_map = dict(zip(map_df["laws"], map_df["index"]))
     num_labels = len(label_map)
 
     examples = []
-    with open(data_path, 'rb') as f:
+    with open(data_path, "rb") as f:
         for (i, example) in enumerate(json.load(f)):
             guid = "%s-%s" % (set_tpye, i)
-            text = example['fact']
+            text = example["fact"]
             label = []
 
-            for one_law in example['laws']:
-                if "诉讼" not in one_law[0]['title']:
-                    label.append(one_law[0]['title'] + '###' + one_law[1])
+            for one_law in example["laws"]:
+                if "诉讼" not in one_law[0]["title"]:
+                    label.append(one_law[0]["title"] + "###" + one_law[1])
 
             label = [label_map[one] for one in label]
             label = torch.tensor(label)
@@ -56,6 +56,6 @@ class LawsClsInfer(INferClassification):
         super(LawsClsInfer, self).__init__(config, create_examples=create_examples)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # LawsClsTrainer(config="RelevantLaws/BertModel/config.yaml").run()
     LawsClsInfer(config="RelevantLaws/BertModel/infer_config.yaml").run()

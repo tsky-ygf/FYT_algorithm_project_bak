@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2022/9/9 09:32
 # @Author  : Adolf
-# @Site    : 
+# @Site    :
 # @File    : laws_items_es.py
 # @Software: PyCharm
 import re
@@ -41,12 +41,23 @@ class LawItemsESTool(BaseESTool):
         super().__init__(*args, **kwargs)
 
         self.valid_mapping = {"有效": 0, "": 1, "已修改": 2, "尚未生效": 3, "已废止": 4}
-        self.legal_mapping = {"法律": 0, "行政法规": 1, "监察法规": 2, "司法解释": 3, "宪法": 5, "地方性法规": 4}
+        self.legal_mapping = {
+            "法律": 0,
+            "行政法规": 1,
+            "监察法规": 2,
+            "司法解释": 3,
+            "宪法": 5,
+            "地方性法规": 4,
+        }
 
-        with open("ProfessionalSearch/RelevantLaws/LegalLibrary/law_items_graph/minshi_item.json") as f:
+        with open(
+            "ProfessionalSearch/RelevantLaws/LegalLibrary/law_items_graph/minshi_item.json"
+        ) as f:
             self.minshi_item = json.load(f)
 
-        with open("ProfessionalSearch/RelevantLaws/LegalLibrary/law_items_graph/xingshi_item.json") as f:
+        with open(
+            "ProfessionalSearch/RelevantLaws/LegalLibrary/law_items_graph/xingshi_item.json"
+        ) as f:
             self.xingshi_item = json.load(f)
 
     # def get_query(self, table_name):
@@ -67,7 +78,9 @@ class LawItemsESTool(BaseESTool):
         if self.debug:
             query = "select * from {} limit 1000".format(table_name)
         else:
-            query = "select id,isValid,resultChapter,resultClause,resultSection,title,md5Clause,source,prov from {}".format(table_name)
+            query = "select id,isValid,resultChapter,resultClause,resultSection,title,md5Clause,source,prov from {}".format(
+                table_name
+            )
 
         return query
 
@@ -79,10 +92,9 @@ class LawItemsESTool(BaseESTool):
             return_type = "dask"
         else:
             return_type = "pandas"
-        res_df = cx.read_sql(self.mysql_url,
-                             query=query,
-                             return_type=return_type,
-                             partition_num=10)
+        res_df = cx.read_sql(
+            self.mysql_url, query=query, return_type=return_type, partition_num=10
+        )
         print("sql查询完成")
         return res_df
 
@@ -92,7 +104,6 @@ class LawItemsESTool(BaseESTool):
             df_data = self.get_df_data_from_db(table_name, 0, 0)
             self.insert_data_to_es(df_data)
             logger.info("insert data to es success from {}".format(table_name))
-
 
     def handle_es(self, df_data):
         # 构造迭代器
@@ -109,7 +120,9 @@ class LawItemsESTool(BaseESTool):
                 "source",
                 "prov",
             ]
-            data_body = {key: value for key, value in data_ori.items() if key in use_data}
+            data_body = {
+                key: value for key, value in data_ori.items() if key in use_data
+            }
             data_body["isValid_weight"] = self.valid_mapping[data_body["isValid"]]
             data_body["legal_type_weight"] = self.legal_mapping[data_body["source"]]
             title = self.chuli_title(data_body["title"])
@@ -118,10 +131,15 @@ class LawItemsESTool(BaseESTool):
                 data_body["title_weight"] += self.minshi_item[title]
             if title in self.xingshi_item:
                 data_body["title_weight"] += self.xingshi_item[title]
-            yield {"_index": self.index_name, "_type": "_doc", "_id": row['md5Clause'], "_source": data_body}
+            yield {
+                "_index": self.index_name,
+                "_type": "_doc",
+                "_id": row["md5Clause"],
+                "_source": data_body,
+            }
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     laws_es = LawItemsESTool(**case_es_tools)
     laws_es()
 

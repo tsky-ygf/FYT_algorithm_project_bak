@@ -5,7 +5,9 @@
 @Time    : 23/8/2022 15:06 
 @Desc    : None
 """
-from ProfessionalSearch.SimilarCaseRetrieval.repository.similar_case_retrieval_repository import get_criminal_law_documents_by_id_list
+from ProfessionalSearch.SimilarCaseRetrieval.repository.similar_case_retrieval_repository import (
+    get_criminal_law_documents_by_id_list,
+)
 
 
 def test_get_criminal_law_documents_by_id_list():

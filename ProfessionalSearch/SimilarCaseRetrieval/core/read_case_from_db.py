@@ -1,9 +1,6 @@
 import pandas as pd
 from elasticsearch import Elasticsearch
 
-from Utils import print_run_time
-
-# @print_run_time
 def search_data_from_es(
     query_body, _index_name="case_index_v2", _es_hosts="127.0.0.1:9200"
 ):
@@ -15,6 +12,7 @@ def search_data_from_es(
     df = pd.DataFrame(res_list)
     df.fillna("", inplace=True)
     return df, res["hits"]["total"]["value"]
+
 
 def _construct_result_format(search_result):
     result = []
@@ -139,18 +137,37 @@ if __name__ == "__main__":
 
     query_dict = {
         "from": 1,
-        "size": 100,
+        "size": 10,
         "query": {
             "bool": {
                 "must": [
                     {"match_phrase": {"content": {"query": "买卖", "boost": 3}}},
+                    {"match_phrase": {"faYuan_name": {"query": "最高", "boost": 3}}},
                     {
-                        "match_phrase": {
-                            "table_name": {"query": "judgment_zhixing_data", "boost": 3}
+                        "span_containing": {
+                            "big": {
+                                "span_near": {
+                                    "clauses": [
+                                        {"span_term": {"content": "裁"}},
+                                        {"span_term": {"content": "定"}},
+                                    ],
+                                    "slop": 30,
+                                    "in_order": True,
+                                }
+                            },
+                            "little": {
+                                "span_first": {
+                                    "match": {
+                                        "span_term": {"content": "裁"},
+                                        "span_term": {"content": "定"},
+                                    },
+                                    "end": 30,
+                                }
+                            },
                         }
                     },
-                    # {"match_phrase": {"event_type": {"query": "执行裁定书", "boost": 3}}}, a83de20f4b9ec9f957f7307941fb5c78
-                    # {"match_phrase": {"db_name": {"query": "judgments_data"}}},
+                    {"match_phrase": {"db_name": {"query": "judgments_mingshi_data"}}},
+                    # {"match_phrase": {"province": {"query": "安徽省"}}},
                 ]
             }
         },
@@ -192,29 +209,52 @@ if __name__ == "__main__":
     #         }
     #     },
     # }
-    query_dict = {"query": {
-        "span_containing": {
-            "big": {
-                "span_near": {
-                    "clauses":[
-                        {"span_term": {"content": "裁"}},
-                        {"span_term": {"content": "定"}}
-                    ],
-                    "slop": 30,
-                    "in_order" : True
-                    }
-                },
-            "little": {
-                "span_first": {
-                    "match": {
-                        "span_term": {"content": "裁"},
-                        "span_term": {"content": "定"},
+    # query_dict = {"query":
+    # {
+    #     "span_containing": {
+    #         "big": {
+    #             "span_near": {
+    #                 "clauses":[
+    #                     {"span_term": {"content": "裁"}},
+    #                     {"span_term": {"content": "定"}}
+    #                 ],
+    #                 "slop": 30,
+    #                 "in_order" : True
+    #                 }
+    #             },
+    #         "little": {
+    #             "span_first": {
+    #                 "match": {
+    #                     "span_term": {"content": "裁"},
+    #                     "span_term": {"content": "定"},
+    #                 },
+    #                 "end": 30
+    #             }
+    #         }
+    #       }
+    #     }
+    # }
+    query_dict = {
+        "from": 1,
+        "size": 10,
+        "query": {
+            "bool": {
+                "must": [
+                    {"match": {"content": {"query": "买卖", "boost": 5}}},
+                    {"match_phrase": {"faYuan_name": {"query": "高级", "boost": 3}}},
+                    {
+                        "match_phrase": {
+                            "table_name": {
+                                "query": "judgment_minshi_data_cc",
+                                "boost": 3,
+                            }
+                        }
                     },
-                    "end": 30
-                }
+                    # {'match_phrase': {'event_type': {'query': '判决', 'boost': 3}}},
+                    {"match_phrase": {"province": {"query": "浙江", "boost": 15}}},
+                ]
             }
-          }
-        }
+        },
     }
     res_df, total_num = search_data_from_es(query_dict)
     # res_df = pd.DataFrame(columns=[''])

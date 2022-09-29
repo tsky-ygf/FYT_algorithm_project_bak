@@ -4,7 +4,10 @@ import tensorflow as tf
 import numpy as np
 import pandas as pd
 
-suqiu_keywords = pd.read_csv("data/bxh_search_data/question_answering/common_config/suqiu_keywords.csv", index_col=None)
+suqiu_keywords = pd.read_csv(
+    "data/bxh_search_data/question_answering/common_config/suqiu_keywords.csv",
+    index_col=None,
+)
 print("suqiu_keywords length:{}".format(len(suqiu_keywords)))
 
 os.environ["CUDA_VISIBLE_DEVICES"] = ""
@@ -27,7 +30,7 @@ def process_one_example(tokenizer, text_a, text_b=None, max_seq_len=256):
     else:
         # Account for [CLS] and [SEP] with "- 2"
         if len(tokens_a) > max_seq_len - 2:
-            tokens_a = tokens_a[0:(max_seq_len - 2)]
+            tokens_a = tokens_a[0 : (max_seq_len - 2)]
     tokens = []
     segment_ids = []
     tokens.append("[CLS]")
@@ -79,7 +82,9 @@ def load_model(model_folder):
     clear_devices = True
     tf.reset_default_graph()
     # We import the meta graph and retrieve a Saver
-    saver = tf.train.import_meta_graph(input_checkpoint + '.meta', clear_devices=clear_devices)
+    saver = tf.train.import_meta_graph(
+        input_checkpoint + ".meta", clear_devices=clear_devices
+    )
 
     # We retrieve the protobuf graph definition
     graph = tf.get_default_graph()
@@ -93,12 +98,16 @@ def load_model(model_folder):
     return sess
 
 
-tokenizer = FullTokenizer("model/bxh_search_model/question_answering/bert_model_ask_type/vocab.txt")
+tokenizer = FullTokenizer(
+    "model/bxh_search_model/question_answering/bert_model_ask_type/vocab.txt"
+)
 sess = load_model("model/bxh_search_model/question_answering/bert_model_ask_type/")
 
 input_ids = sess.graph.get_tensor_by_name("input_ids:0")
 input_mask = sess.graph.get_tensor_by_name("input_mask:0")  # is_training
-segment_ids = sess.graph.get_tensor_by_name("segment_ids:0")  # fc/dense/Relu  cnn_block/Reshape
+segment_ids = sess.graph.get_tensor_by_name(
+    "segment_ids:0"
+)  # fc/dense/Relu  cnn_block/Reshape
 keep_prob = sess.graph.get_tensor_by_name("keep_prob:0")
 
 f = sess.graph.get_tensor_by_name("bert/pooler/dense/Tanh:0")
@@ -117,15 +126,17 @@ label2id = {
     "建设工程": 9,
     "侵权纠纷": 10,
     "知识产权": 11,
-    "医疗纠纷": 12
+    "医疗纠纷": 12,
 }
 id2label = {v: k for k, v in label2id.items()}
 
-labor_key_words = "工[伤资人地作]|[就入离辞降]职|评残|劳动合同|辞退|试用期|劳动仲裁|社保|[出考]勤|员工|[上下].{0,2}班|工作.*公司|" \
-                  "劳动人事|[婚产丧病事年]假|加班费?|劳动能力|工作.*意外|劳动法|退休|降薪|解雇|解聘|失业保险|工作.*伤残|职业病|" \
-                  "公司.*(解除|辞退?)|鉴定.*伤残|伤残.*鉴定|因工受伤|因工负伤|工作期间受伤|公司。*赔偿|裁员|开除|失业金|养老保险" \
-                  "|旷工|伤残.*(赔偿|标准)|解除劳动|公积金|劳动纠纷|临时工|未评定伤残|用人单位|实习|年终奖|老板|劳动|雇佣|劳务|职工|" \
-                  "补休|公伤鉴定|用工单位|法定假|调休|辞工书|辞工|被辞|工作期间"
+labor_key_words = (
+    "工[伤资人地作]|[就入离辞降]职|评残|劳动合同|辞退|试用期|劳动仲裁|社保|[出考]勤|员工|[上下].{0,2}班|工作.*公司|"
+    "劳动人事|[婚产丧病事年]假|加班费?|劳动能力|工作.*意外|劳动法|退休|降薪|解雇|解聘|失业保险|工作.*伤残|职业病|"
+    "公司.*(解除|辞退?)|鉴定.*伤残|伤残.*鉴定|因工受伤|因工负伤|工作期间受伤|公司。*赔偿|裁员|开除|失业金|养老保险"
+    "|旷工|伤残.*(赔偿|标准)|解除劳动|公积金|劳动纠纷|临时工|未评定伤残|用人单位|实习|年终奖|老板|劳动|雇佣|劳务|职工|"
+    "补休|公伤鉴定|用工单位|法定假|调休|辞工书|辞工|被辞|工作期间"
+)
 
 
 def get_question_feature_label_prob(text):
@@ -134,7 +145,7 @@ def get_question_feature_label_prob(text):
         input_ids: [feature[0]],
         input_mask: [feature[1]],
         segment_ids: [feature[2]],
-        keep_prob: 1.0
+        keep_prob: 1.0,
     }
     feature, probs = sess.run([f, p], feed)
     max_index = int(np.argmax(probs[0]))

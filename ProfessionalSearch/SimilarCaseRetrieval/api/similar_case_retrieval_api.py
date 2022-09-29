@@ -11,8 +11,13 @@ from flask import Flask, request
 
 from LawsuitPrejudgment.lawsuit_prejudgment.core import civil_similar_case
 from Utils.http_response import response_successful_result
-from ProfessionalSearch.SimilarCaseRetrieval.core import similar_case_retrieval_service as service
-from ProfessionalSearch.SimilarCaseRetrieval.core.relevant_cases_search import get_case_search_result
+from ProfessionalSearch.SimilarCaseRetrieval.core import (
+    similar_case_retrieval_service as service,
+)
+from ProfessionalSearch.SimilarCaseRetrieval.core.relevant_cases_search import (
+    get_case_search_result,
+)
+
 # from ProfessionalSearch.SimilarCaseRetrieval.core.narrative_similarity_predict import predict_fn as predict_fn_similar_cases
 from typing import List
 import logging
@@ -39,22 +44,18 @@ def _preprocess(request_json):
 @app.route("/get_similar_cases", methods=["post"])
 def get_similar_cases():
     problem, claim_list, fact = _preprocess(request.json)
-    return response_successful_result(service.get_similar_cases(problem, claim_list, fact))
+    return response_successful_result(
+        service.get_similar_cases(problem, claim_list, fact)
+    )
 
 
-@app.route('/get_filter_conditions_of_case', methods=["get"])
+@app.route("/get_filter_conditions_of_case", methods=["get"])
 def get_filter_conditions_of_case():
     filter_conditions = {
         "type_of_case": {
             "name": "案件类型",
             "is_multiple_choice": True,
-            "value": [
-                "全部",
-                "刑事",
-                "民事",
-                "行政",
-                "执行"  # 刑事、民事、行政、执行、其他
-            ]
+            "value": ["全部", "刑事", "民事", "行政", "执行"],  # 刑事、民事、行政、执行、其他
         },
         # "type_of_anyou":{
         #     "xingshi":{
@@ -89,13 +90,7 @@ def get_filter_conditions_of_case():
         "court_level": {
             "name": "法院层级",
             "is_multiple_choice": True,
-            "value": [
-                "全部",
-                "最高",
-                "高级",
-                "中级",
-                "基层"
-            ]
+            "value": ["全部", "最高", "高级", "中级", "基层"],
         },
         "type_of_document": {
             "name": "文书类型",
@@ -107,42 +102,71 @@ def get_filter_conditions_of_case():
                 "调解",
                 # "决定书",
                 # "通知书"
-
-            ]
+            ],
         },
         "region": {
             "name": "地域",
             "is_multiple_choice": True,
             "value": [
-                '全国',
-                '安徽省', '北京市', '重庆市', '福建省', '甘肃省', '广东省', '广西壮族自治区', '贵州省', '海南省',
-                '河北省', '河南省', '黑龙江省',
-                '湖北省', '湖南省', '吉林省', '江苏省', '江西省', '辽宁省', '内蒙古自治区', '宁夏回族自治区', '青海省',
-                '山东省', '山西省', '陕西省', '上海市', '四川省',
-                '天津市', '西藏自治区', '新疆维吾尔自治区', '云南省', '浙江省'
-            ]
-        }
+                "全国",
+                "安徽省",
+                "北京市",
+                "重庆市",
+                "福建省",
+                "甘肃省",
+                "广东省",
+                "广西壮族自治区",
+                "贵州省",
+                "海南省",
+                "河北省",
+                "河南省",
+                "黑龙江省",
+                "湖北省",
+                "湖南省",
+                "吉林省",
+                "江苏省",
+                "江西省",
+                "辽宁省",
+                "内蒙古自治区",
+                "宁夏回族自治区",
+                "青海省",
+                "山东省",
+                "山西省",
+                "陕西省",
+                "上海市",
+                "四川省",
+                "天津市",
+                "西藏自治区",
+                "新疆维吾尔自治区",
+                "云南省",
+                "浙江省",
+            ],
+        },
     }
     return response_successful_result(filter_conditions)
 
 
 def _get_case_result(query, filter_conditions, page_num, page_size):
     if isinstance(filter_conditions, dict):
-        search_result, total_num = get_case_search_result(query,
-                                               filter_conditions.get("type_of_case"),
-                                               filter_conditions.get("court_level"),
-                                               filter_conditions.get("type_of_document"),
-                                               filter_conditions.get("region"),
-                                               page_num,
-                                               page_size)
+        search_result, total_num = get_case_search_result(
+            query,
+            filter_conditions.get("type_of_case"),
+            filter_conditions.get("court_level"),
+            filter_conditions.get("type_of_document"),
+            filter_conditions.get("region"),
+            page_num,
+            page_size,
+        )
     else:
-        search_result, total_num = get_case_search_result(query,
-                                                          filter_conditions.type_of_case,
-                                                          filter_conditions.court_level,
-                                                          filter_conditions.type_of_document,
-                                                          filter_conditions.region,
-                                                          page_num,
-                                                          page_size)
+        search_result, total_num = get_case_search_result(
+            query,
+            filter_conditions.type_of_case,
+            filter_conditions.court_level,
+            filter_conditions.type_of_document,
+            filter_conditions.region,
+            page_num,
+            page_size,
+        )
     result, total_num = _construct_result_format(search_result, total_num)
     if total_num >= 200:
         return response_successful_result(result, {"total_amount": 200})
@@ -150,7 +174,7 @@ def _get_case_result(query, filter_conditions, page_num, page_size):
         return response_successful_result(result, {"total_amount": len(result)})
 
 
-@app.route('/search_cases', methods=["post"])
+@app.route("/search_cases", methods=["post"])
 def search_cases():
     # query = request.json.get("query")
     # filter_conditions = request.json.get("filter_conditions")
@@ -159,10 +183,10 @@ def search_cases():
     input_json = request.get_data()
     if input_json is not None:
         input_dict = json.loads(input_json.decode("utf-8"))
-        query = input_dict['query']
-        filter_conditions = input_dict['filter_conditions']
-        page_number = input_dict['page_number']
-        page_size = input_dict['page_size']
+        query = input_dict["query"]
+        filter_conditions = input_dict["filter_conditions"]
+        page_number = input_dict["page_number"]
+        page_size = input_dict["page_size"]
         if query is not None and filter_conditions is not None:
             result = _get_case_result(query, filter_conditions, page_number, page_size)
             # 返回数量，若200以上，则返回200，若小于200，则返回实际number
@@ -178,13 +202,13 @@ def search_cases():
     #     return json.dumps({"error_msg": "unknown error:" + repr(e), "status": 1}, ensure_ascii=False)
 
 
-@app.route('/get_law_document', methods=["get"])
+@app.route("/get_law_document", methods=["get"])
 def get_law_document():
     # doc_id = request.args.get("doc_id")
     input_json = request.get_data()
     if input_json is not None:
         input_dict = json.loads(input_json.decode("utf-8"))
-        doc_id = input_dict['doc_id']
+        doc_id = input_dict["doc_id"]
         result = service.get_criminal_law_document(doc_id)
         if result:
             return response_successful_result(result)
@@ -193,25 +217,41 @@ def get_law_document():
         if law_documents:
             result = {
                 "doc_id": law_documents[0]["doc_id"],
-                "html_content": law_documents[0]["raw_content"]
+                "html_content": law_documents[0]["raw_content"],
             }
         else:
             result = None
         return response_successful_result(result)
 
 
+def containenglish(str0):
+    import re
+
+    return bool(re.search("[a-zA-Z]", str0))
+
+
 def _construct_result_format(search_result, total_num):
     result = []
     for index, row in search_result.iterrows():
-        if not row['faYuan_name'] or not row['event_num']:
+        if (
+            not row["faYuan_name"]
+            or not row["event_num"]
+            or containenglish(row["faYuan_name"])
+            or containenglish(row["event_num"])
+        ):
             total_num -= 1
             continue
-        result.append({
-            "doc_id": row['table_name'] + '_SEP_' + row['uq_id'],
-            "court": row['faYuan_name'],
-            "case_number": row['event_num'],
-            "jfType": row['jfType'],
-            "content": row['content']})
+        if row["table_name"] == "judgment_minshi_data_cc":
+            row["table_name"] = "judgment_minshi_data"
+        result.append(
+            {
+                "doc_id": row["table_name"] + "_SEP_" + row["uq_id"],
+                "court": row["faYuan_name"],
+                "case_number": row["event_num"],
+                "jfType": row["jfType"],
+                "content": row["content"],
+            }
+        )
     return result, total_num
 
 

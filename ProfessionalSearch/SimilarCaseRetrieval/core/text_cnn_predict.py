@@ -5,6 +5,7 @@ from keras.layers import *
 from keras.callbacks import ModelCheckpoint
 import tensorflow as tf
 import numpy as np
+
 # from qa_util import load_dict, sequence_padding
 import keras.backend.tensorflow_backend as KTF
 
@@ -16,14 +17,19 @@ config.gpu_options.allow_growth = True
 sess = tf.Session(config=config)
 KTF.set_session(sess)
 
-model_file_path = "../../../model/bxh_search_model/question_answering/text_cnn_model_files/"
+model_file_path = (
+    "../../../model/bxh_search_model/question_answering/text_cnn_model_files/"
+)
 
 
 def convs_block(data, convs=[3, 4, 5], f=256, name="conv_feat"):
     pools = []
     for c in convs:
         conv = Activation(activation="relu")(
-            BatchNormalization()(Conv1D(filters=f, kernel_size=c, padding="valid")(data)))
+            BatchNormalization()(
+                Conv1D(filters=f, kernel_size=c, padding="valid")(data)
+            )
+        )
         pool = GlobalMaxPool1D()(conv)
         pools.append(pool)
     return concatenate(pools, name=name)
@@ -35,20 +41,31 @@ def get_textcnn(config):
     embedding = Embedding(
         name="embedding",
         input_dim=config["dict_len"],
-        output_dim=config["embedding_size"])
+        output_dim=config["embedding_size"],
+    )
     trans_content = Activation(activation="relu")(
-        BatchNormalization()((TimeDistributed(Dense(config["hidden_size"]))(embedding(content)))))
+        BatchNormalization()(
+            (TimeDistributed(Dense(config["hidden_size"]))(embedding(content)))
+        )
+    )
     feat = convs_block(trans_content)
     dropfeat = Dropout(config["dropout"])(feat)
-    fc = Activation(activation="relu")(BatchNormalization()(Dense(config["hidden_size"])(dropfeat)))
+    fc = Activation(activation="relu")(
+        BatchNormalization()(Dense(config["hidden_size"])(dropfeat))
+    )
     output = Dense(config["label_size"], activation="softmax")(fc)
     model = Model(inputs=content, outputs=output)
-    model.compile(loss='categorical_crossentropy', optimizer="adam", metrics=['accuracy'])
+    model.compile(
+        loss="categorical_crossentropy", optimizer="adam", metrics=["accuracy"]
+    )
     # model.summary()
     return model
 
 
-def load_dict(char2id_path=model_file_path + "char2id_filter_15.json", label2id_path=model_file_path + "label2id.json"):
+def load_dict(
+    char2id_path=model_file_path + "char2id_filter_15.json",
+    label2id_path=model_file_path + "label2id.json",
+):
     """
         加载char、label字典
     :return:
@@ -79,7 +96,7 @@ def sequence_padding(chars, padding="right", max_len=512):
             # _labels = [0] * (max_len - l) + labels
             # _masks = [0] * (max_len - l) + [1] * l
         else:
-            _chars = chars[l - max_len:]
+            _chars = chars[l - max_len :]
             # _labels = labels[l - max_len:]
             # _masks = [1] * max_len
     elif padding == "right":
@@ -122,10 +139,16 @@ class ModelQuestionLabel:
         # print(self.config)
         if model_use == "text_cnn":
             self.model = get_textcnn(self.config)
-            self.new_model = Model(inputs=self.model.input, outputs=self.model.get_layer('conv_feat').output)
+            self.new_model = Model(
+                inputs=self.model.input,
+                outputs=self.model.get_layer("conv_feat").output,
+            )
         elif model_use == "lstm_attention":
             self.model = get_char_lstm(self.config)
-            self.new_model = Model(inputs=self.model.input, outputs=self.model.get_layer('attention_1').output)
+            self.new_model = Model(
+                inputs=self.model.input,
+                outputs=self.model.get_layer("attention_1").output,
+            )
 
     def text_process(self, text):
         """
@@ -154,17 +177,29 @@ class ModelQuestionLabel:
         if not os.path.exists("./bin/"):
             os.mkdir("./bin/")
         # 加载以前的模型
-        if os.path.exists('./bin/' + self.config["model_name"]):
+        if os.path.exists("./bin/" + self.config["model_name"]):
             # 该模型是不包含标点符号的模型，需提前分割好[:1000]
-            print('加载以前训练的模型')
-            self.model.load_weights('./bin/' + self.config["model_name"])
+            print("加载以前训练的模型")
+            self.model.load_weights("./bin/" + self.config["model_name"])
             # self.model = load_model('./bin/' + model_name)
-        checkpointer = ModelCheckpoint(filepath='./bin/' + self.config["model_name"], monitor="val_loss", verbose=1,
-                                       save_best_only=True,
-                                       save_weights_only=False)
+        checkpointer = ModelCheckpoint(
+            filepath="./bin/" + self.config["model_name"],
+            monitor="val_loss",
+            verbose=1,
+            save_best_only=True,
+            save_weights_only=False,
+        )
 
-        self.model.fit(X, Y, batch_size=256, epochs=3, verbose=1, validation_split=0.1, shuffle=True,
-                       callbacks=[checkpointer])
+        self.model.fit(
+            X,
+            Y,
+            batch_size=256,
+            epochs=3,
+            verbose=1,
+            validation_split=0.1,
+            shuffle=True,
+            callbacks=[checkpointer],
+        )
 
     def evaluate(self, data_path="./train_data/XY_dev_filter_15.npz"):
         """
@@ -234,12 +269,14 @@ get_feature("我想离婚怎么办呢")
 
 class MT:
     def __init__(self, model_path="./model_files/"):
-        self.char2id, label2id = load_dict(char2id_path=model_path + "char2id.json",
-                                           label2id_path=model_path + "label2id.json")
+        self.char2id, label2id = load_dict(
+            char2id_path=model_path + "char2id.json",
+            label2id_path=model_path + "label2id.json",
+        )
         self.id2label = {value: key for key, value in label2id.items()}
 
         with tf.Graph().as_default() as graph:
-            with tf.gfile.FastGFile(model_path + 'text_cnn.pb', "rb") as f:
+            with tf.gfile.FastGFile(model_path + "text_cnn.pb", "rb") as f:
                 graph_def = tf.GraphDef()
                 graph_def.ParseFromString(f.read())
                 _ = tf.import_graph_def(graph_def, name="")
@@ -247,8 +284,12 @@ class MT:
 
         self.sess = sess
         self.x = self.sess.graph.get_tensor_by_name("placeholder/x:0")
-        self.keep_prob = sess.graph.get_tensor_by_name("placeholder/keep_prob:0")  # is_training
-        self.feature = self.sess.graph.get_tensor_by_name("fc/dense/Relu:0")  # fc/dense/Relu  cnn_block/Reshape
+        self.keep_prob = sess.graph.get_tensor_by_name(
+            "placeholder/keep_prob:0"
+        )  # is_training
+        self.feature = self.sess.graph.get_tensor_by_name(
+            "fc/dense/Relu:0"
+        )  # fc/dense/Relu  cnn_block/Reshape
         self.p = self.sess.graph.get_tensor_by_name("output/logits:0")
 
     def predict(self, text):

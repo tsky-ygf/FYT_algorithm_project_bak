@@ -7,10 +7,10 @@
 """
 import requests
 import pandas as pd
+from IntelligentConsultation.core.FAQ_predict import FAQPredict
 
-
-df_individual = pd.read_csv("IntelligentConsultation/core/个人端热门标签问答.csv", encoding="utf-8")
-df_company = pd.read_csv("IntelligentConsultation/core/企业端热门标签问答.csv", encoding="utf-8")
+df_individual = pd.read_csv("IntelligentConsultation/config/个人端热门标签问答.csv", encoding="utf-8")
+df_company = pd.read_csv("IntelligentConsultation/config/企业端热门标签问答.csv", encoding="utf-8")
 
 
 def _get_initial_answer(question: str):
@@ -34,8 +34,16 @@ def get_query_answer(question: str):
             "answer": _post_process(initial_answer)
         }
 
-    url = "http://127.0.0.1:5050/get_query_answer"
-    resp_json = requests.post(url, json={"question":question}).json()
+    url = "http://172.19.82.198:5050/get_query_answer"
+    resp_json = requests.post(url, json={"question": question}).json()
     return {
         "answer": _post_process(resp_json.get("answer"))
     }
+
+
+faq_predict = FAQPredict()
+
+
+def get_query_answer_with_source(question: str):
+    answer, similarity_question = faq_predict(question)
+    return {"answer": answer, "similarity_question": similarity_question}
