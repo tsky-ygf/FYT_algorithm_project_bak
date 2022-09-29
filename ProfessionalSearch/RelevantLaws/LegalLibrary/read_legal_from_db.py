@@ -242,64 +242,13 @@ def search_data_from_es(query_body, _index_name="flfg", _es_hosts="127.0.0.1:920
     # 查询数据
     es = Elasticsearch(hosts=_es_hosts)
     res = es.search(index=_index_name, body=query_body)
-    # print("Got %d Hits:" % res['hits']['total']['value'])
     res_list = [hit["_source"] for hit in res["hits"]["hits"]]
     df = pd.DataFrame(res_list)
     df.fillna("", inplace=True)
-    # pprint(res_list[0])
-    # sort_list = ["有效", "已修改", "尚未生效", "已废止"]
-    # df.index = df['isValid']
-    # sort_df_grade = df.loc[sort_list]
     return df, res["hits"]["total"]["value"]
-    # for index, hit in enumerate(res['hits']['hits']):
-    #     print(index)
-    #     print(hit["_source"])
-
-    # return res
 
 
 if __name__ == "__main__":
-    # es_init()
-    # es = Elasticsearch(hosts="127.0.0.1:9200")
-    # print(es.cat.indices())
-    # insert_data_to_es()
-    # query_dict = {
-    #     "query": {
-    #         "bool": {
-    #             "must": [
-    #                 {
-    #                     "bool": {
-    #                         "should": [
-    #                             {"match_phrase": {"resultClause": "涉外"}},
-    #                             {"match_phrase": {"title": "涉外"}},
-    #                         ]
-    #                     }
-    #                 },
-    #                 {
-    #                     "bool": {
-    #                         "should": [
-    #                             {"match_phrase": {"resultClause": "离婚"}},
-    #                             {"match_phrase": {"title": "离婚"}},
-    #                         ]
-    #                     }
-    #                 },
-    #                 {"terms": {"isValid.keyword": ["有效"]}},
-    #                 {"terms": {"source.keyword": ["法律"]}},
-    #             ]
-    #         }
-    #     },
-    #     "size": 10,
-    #     "sort": [
-    #         {"title_weight": {"order": "desc"}},
-    #         {"isValid_weight": {"order": "asc"}},
-    #         {"legal_type_weight": {"order": "asc"}},
-    #     ],
-    # }
-    #
-    # # # print(get_df_from_sql(table_name_list[0]))
-    #
-    # # pd.set_option('display.width', 1000)
-    # # res_df = search_data_from_es({"query": {"match_all": {}}, "size": 10})
     query_dict = {
         "from": 1,
         "size": 10,
@@ -308,7 +257,7 @@ if __name__ == "__main__":
                 "must": [
                     {"match_phrase": {"source": {"query": "地方性法规", "boost": 5}}},
                     {"match_phrase": {"isValid": {"query": "全部", "boost": 5}}},
-                    {"match_phrase": {"prov": {"query": "福建省", "boost": 5}}}
+                    {"match_phrase": {"prov": {"query": "福建省", "boost": 5}}},
                 ]
             }
         },
@@ -321,7 +270,6 @@ if __name__ == "__main__":
     res_df, total = search_data_from_es(query_dict)
     for index, row in res_df.iterrows():
         print(row.to_dict())
-    # #     print(row['resultClause'])
-    # #     print('-' * 100)
+
     # _db_name, _table_name = "falvfagui_data", "flfg_result_dfxfg"
     # update_flfg_dfxfg(_table_name, _db_name)

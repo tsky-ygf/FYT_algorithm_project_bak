@@ -7,7 +7,9 @@
 """
 import requests
 
-from ProfessionalSearch.RelevantLaws.api.constants import SEPERATOR_BETWEEN_LAW_TABLE_AND_ID
+from ProfessionalSearch.RelevantLaws.api.constants import (
+    SEPERATOR_BETWEEN_LAW_TABLE_AND_ID,
+)
 
 
 def get_filter_conditions():
@@ -30,15 +32,12 @@ def search_laws():
     body = {
         "query": "侵权",
         "filter_conditions": {
-            "types_of_law": ["地方性法规"
-            ],
-            "timeliness": ["全部"
-            ],
-            "scope_of_use": ["广东省"
-            ]
+            "types_of_law": ["地方性法规"],
+            "timeliness": ["全部"],
+            "scope_of_use": ["广东省"],
         },
         "page_number": 1,
-        "page_size": 10
+        "page_size": 10,
     }
 
     resp_json = requests.post(url, json=body).json()
@@ -54,7 +53,9 @@ def search_laws():
 def get_law_by_law_id():
     url = "http://172.19.82.199:8160/get_law_by_law_id"
     param = {
-        "law_id": "flfg_result_falv" + SEPERATOR_BETWEEN_LAW_TABLE_AND_ID + "5a43120b27fe0457634a7420283b4aad"
+        "law_id": "flfg_result_falv"
+        + SEPERATOR_BETWEEN_LAW_TABLE_AND_ID
+        + "5a43120b27fe0457634a7420283b4aad"
     }
     resp_json = requests.get(url, params=param).json()
     print(resp_json)
@@ -63,7 +64,8 @@ def get_law_by_law_id():
     assert resp_json.get("result")
     assert resp_json["result"]["law_id"] == param["law_id"]
 
-if __name__=='__main__':
+
+if __name__ == "__main__":
     # get_filter_conditions()
     search_laws()
     # get_law_by_law_id()

@@ -67,8 +67,8 @@ def get_law_search_result(
                 }
             )
     if (
-        legal_list and
-        legal_list[0] == "地方性法规"
+        legal_list
+        and legal_list[0] == "地方性法规"
         and scope_of_use
         and scope_of_use[0] != ""
         and len(scope_of_use) > 0
@@ -105,8 +105,6 @@ def get_law_search_result(
     }
 
     res, total_num = search_data_from_es(query_dict)
-    # if scope_of_use is not None and len(scope_of_use) > 0:
-    #     res_filtered_scope = filter_scope_of_use(res, scope_of_use)
     print(res)
     return res, total_num
 

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2022/4/19 14:17
 # @Author  : Adolf
-# @Site    : 
+# @Site    :
 # @File    : train_anyou_cls.py
 # @Software: PyCharm
 import torch
@@ -18,18 +18,21 @@ class TrainLawsCls(BaseTrainTool):
 
     def init_model(self):
         tokenizer = AutoTokenizer.from_pretrained(self.config["pre_train_tokenizer"])
-        model = AutoModelForSequenceClassification.from_pretrained(self.config["pre_train_model"],
-                                                                   num_labels=self.config["num_labels"])
+        model = AutoModelForSequenceClassification.from_pretrained(
+            self.config["pre_train_model"], num_labels=self.config["num_labels"]
+        )
         self.logger.debug(model)
         # for param in model.longformer.parameters():
         #     param.requires_grad = True
         return tokenizer, model
 
     def init_dataset(self):
-        train_dataset = LawsAnyouClsDataset(self.tokenizer,
-                                            self.config["train_data_path"], )
-        valid_dataset = LawsAnyouClsDataset(self.tokenizer,
-                                            self.config["dev_data_path"], )
+        train_dataset = LawsAnyouClsDataset(
+            self.tokenizer, self.config["train_data_path"],
+        )
+        valid_dataset = LawsAnyouClsDataset(
+            self.tokenizer, self.config["dev_data_path"],
+        )
         return train_dataset, valid_dataset
 
     def cal_loss(self, batch):
@@ -39,5 +42,7 @@ class TrainLawsCls(BaseTrainTool):
         return loss
 
 
-if __name__ == '__main__':
-    TrainLawsCls(config_path="ProfessionalSearch/Config_bak/anyou_cls.yaml").train_main()
+if __name__ == "__main__":
+    TrainLawsCls(
+        config_path="ProfessionalSearch/Config_bak/anyou_cls.yaml"
+    ).train_main()

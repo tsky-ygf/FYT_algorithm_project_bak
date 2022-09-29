@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2022/4/8 10:12
 # @Author  : Adolf
-# @Site    : 
+# @Site    :
 # @File    : lawformer_data_process.py
 # @Software: PyCharm
 import hanlp
@@ -10,6 +10,7 @@ import json
 from ProfessionalSearch.RelevantLaws.DataProcess.data_process import get_fileter_data
 from Utils.logger import print_run_time
 from tqdm import tqdm
+
 # from pathos.multiprocessing import ProcessingPool as Pool
 # import torch.multiprocessing as mp
 
@@ -26,14 +27,14 @@ def handle_one_fact(_item, _ner):
     :param _item: 每一条具体的内容
     :return:
     """
-    fact = _item['fact']
+    fact = _item["fact"]
     try:
         fact = get_fileter_data(fact, _ner)
     except:
         # fact = ""
         pass
     # time.sleep(0.02)
-    _item['fact'] = fact
+    _item["fact"] = fact
 
     return _item
 
@@ -47,7 +48,7 @@ def get_law_data(law_file, law_save_file, _ner):
     :param law_file:
     :return:
     """
-    with open(law_file, 'rb') as f:
+    with open(law_file, "rb") as f:
         load_list = json.load(f)
 
     sentences = []
@@ -75,12 +76,15 @@ def get_law_data(law_file, law_save_file, _ner):
     # pool.close()
     # pool.join()
 
-    with open(law_save_file, 'w') as f:
+    with open(law_save_file, "w") as f:
         json.dump(sentences, f, ensure_ascii=False)
 
 
-if __name__ == '__main__':
-    ner = hanlp.load(save_dir=hanlp.pretrained.mtl.CLOSE_TOK_POS_NER_SRL_DEP_SDP_CON_ELECTRA_BASE_ZH, devices=0)
+if __name__ == "__main__":
+    ner = hanlp.load(
+        save_dir=hanlp.pretrained.mtl.CLOSE_TOK_POS_NER_SRL_DEP_SDP_CON_ELECTRA_BASE_ZH,
+        devices=0,
+    )
     train_json_path = "data/fyt_train_use_data/CAIL-Long/civil/train.json"
     dev_json_path = "data/fyt_train_use_data/CAIL-Long/civil/dev.json"
     test_json_path = "data/fyt_train_use_data/CAIL-Long/civil/test.json"

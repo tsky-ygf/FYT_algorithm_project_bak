@@ -2,12 +2,10 @@ import re
 
 import addressparser
 import jieba
-import pandas as pd
 
 from ProfessionalSearch.SimilarCaseRetrieval.core.read_case_from_db import (
     search_data_from_es,
 )
-from Utils.io import read_json_attribute_value
 
 
 def sort_by_year(res):
@@ -59,7 +57,7 @@ def get_case_search_result(
         page_num = 1
     if page_size is None:
         page_size = 10
-    text = re.sub('\W*', '', text)  # 去除标点符号
+    text = re.sub("\W*", "", text)  # 去除标点符号
     text = " ".join(jieba.cut(text))
     # logger.info(text)
     text_list = text.split(" ")
@@ -68,9 +66,7 @@ def get_case_search_result(
     bool_value = {}
     if len(text_list) > 0:
         for one_text in text_list:
-            query_list.append(
-                            {"match": {"content": {"query": one_text, "boost": 5}}}
-            )
+            query_list.append({"match": {"content": {"query": one_text, "boost": 5}}})
 
     if (
         court_level_list is None
@@ -126,10 +122,10 @@ def get_case_search_result(
                             "span_near": {
                                 "clauses": [
                                     {"span_term": {"content": type_case_sub[0]}},
-                                    {"span_term": {"content": type_case_sub[1]}}
+                                    {"span_term": {"content": type_case_sub[1]}},
                                 ],
                                 "slop": 30,
-                                "in_order": True
+                                "in_order": True,
                             }
                         },
                         "little": {
@@ -138,9 +134,9 @@ def get_case_search_result(
                                     "span_term": {"content": type_case_sub[0]},
                                     "span_term": {"content": type_case_sub[1]},
                                 },
-                                "end": 30
+                                "end": 30,
                             }
-                        }
+                        },
                     }
                 }
             )
@@ -159,13 +155,6 @@ def get_case_search_result(
         and region_list[0] != ""
         and region_list[0] != "全国"
     ):
-        # prev_short_name = read_json_attribute_value(
-        #     "ProfessionalSearch/SimilarCaseRetrieval/api/provin_short_name.json",
-        #     region_list[0],
-        # )
-        # query_list.append(
-        #     {"match_phrase": {"event_num": {"query": prev_short_name, "boost": 5}}}
-        # )
         query_list.append(
             {"match_phrase": {"province": {"query": region_list[0], "boost": 5}}}
         )
