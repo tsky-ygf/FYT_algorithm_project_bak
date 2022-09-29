@@ -30,11 +30,11 @@ def search_laws():
     body = {
         "query": "侵权",
         "filter_conditions": {
-            "types_of_law": [
+            "types_of_law": ["地方性法规"
             ],
-            "timeliness": [
+            "timeliness": ["全部"
             ],
-            "scope_of_use": [
+            "scope_of_use": ["广东省"
             ]
         },
         "page_number": 1,

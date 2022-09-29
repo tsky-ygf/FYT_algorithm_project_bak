@@ -46,7 +46,7 @@ def get_law_search_result(
         page_number = 1
     if page_size is None:
         page_size = 10
-    if scope_of_use:
+    if not scope_of_use:
         scope_of_use = ["全国"]
     text = re.sub("\W*", "", text)  # 去除标点符号，空格等
     text = " ".join(jieba.cut(text))

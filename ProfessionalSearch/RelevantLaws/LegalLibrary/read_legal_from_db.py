@@ -302,11 +302,13 @@ if __name__ == "__main__":
     # # res_df = search_data_from_es({"query": {"match_all": {}}, "size": 10})
     query_dict = {
         "from": 1,
-        "size": 1000,
+        "size": 10,
         "query": {
             "bool": {
                 "must": [
-                    {"match_phrase": {"source": {"query": "监察法规", "boost": 5}}}
+                    {"match_phrase": {"source": {"query": "地方性法规", "boost": 5}}},
+                    {"match_phrase": {"isValid": {"query": "全部", "boost": 5}}},
+                    {"match_phrase": {"prov": {"query": "福建省", "boost": 5}}}
                 ]
             }
         },
@@ -316,7 +318,7 @@ if __name__ == "__main__":
         #     {"legal_type_weight": {"order": "asc"}},
         # ],
     }
-    res_df = search_data_from_es(query_dict)
+    res_df, total = search_data_from_es(query_dict)
     for index, row in res_df.iterrows():
         print(row.to_dict())
     # #     print(row['resultClause'])
