@@ -20,6 +20,11 @@ class QueryInput(BaseModel):
 
 @app.post("/get_query_answer")
 def _get_query_answer(query_input: QueryInput):
+    """
+    获取线上咨询的答案
+    :param query_input:
+    :return:
+    """
     print("input:")
     print("question{}:".format(query_input.question))
     print("source_end{}:".format(query_input.source_end))
@@ -29,6 +34,11 @@ def _get_query_answer(query_input: QueryInput):
 
 @app.post("/get_query_answer_with_source")
 def _get_query_answer_with_source(query_input: QueryInput):
+    """
+    获取专题咨询的内容
+    :param query_input:
+    :return:
+    """
     print("input:")
     print("question{}:".format(query_input.question))
     print("source_end{}:".format(query_input.source_end))

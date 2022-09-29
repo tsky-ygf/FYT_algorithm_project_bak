@@ -45,4 +45,5 @@ faq_predict = FAQPredict()
 
 
 def get_query_answer_with_source(question: str):
-    return {"answer": faq_predict(question)}
+    answer, similarity_question = faq_predict(question)
+    return {"answer": answer, "similarity_question": similarity_question}
