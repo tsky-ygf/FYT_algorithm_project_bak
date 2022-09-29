@@ -1,9 +1,6 @@
 import pandas as pd
 from elasticsearch import Elasticsearch
 
-from Utils import print_run_time
-
-@print_run_time
 def search_data_from_es(
     query_body, _index_name="case_index_v2", _es_hosts="127.0.0.1:9200"
 ):
