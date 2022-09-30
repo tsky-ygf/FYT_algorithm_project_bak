@@ -7,7 +7,7 @@
 # @Software: PyCharm
 import streamlit as st
 import pandas as pd
-from OnlineServer.LawsuitPrejudgment.testing_page import testing
+from OnlineServer.LawsuitPrejudgment.testing_page.civil import testing
 
 
 def _remove_click_state(_count):
