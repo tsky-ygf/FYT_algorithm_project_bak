@@ -8,7 +8,7 @@
 import uvicorn
 from fastapi import FastAPI
 from pydantic import BaseModel
-from IntelligentConsultation.service_use import intelligent_consultation_service
+from IntelligentConsultation.service_use import consultation_service
 
 app = FastAPI()
 
@@ -29,7 +29,7 @@ def _get_query_answer(query_input: QueryInput):
     print("question{}:".format(query_input.question))
     print("source_end{}:".format(query_input.source_end))
 
-    return intelligent_consultation_service.get_query_answer(query_input.question)
+    return consultation_service.get_query_answer(query_input.question)
 
 
 @app.post("/get_query_answer_with_source")
@@ -43,7 +43,7 @@ def _get_query_answer_with_source(query_input: QueryInput):
     print("question{}:".format(query_input.question))
     print("source_end{}:".format(query_input.source_end))
 
-    return intelligent_consultation_service.get_query_answer_with_source(query_input.question)
+    return consultation_service.get_query_answer_with_source(query_input.question)
 
 
 if __name__ == '__main__':

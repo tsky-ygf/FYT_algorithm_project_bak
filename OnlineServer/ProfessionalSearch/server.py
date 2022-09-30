@@ -5,18 +5,16 @@
 # @Site    : 
 # @File    : server.py
 # @Software: PyCharm
-import _io
 
 import uvicorn
 from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import Union
 
-from ProfessionalSearch.RelevantLaws.api.relevant_laws_api import get_filter_conditions, \
+from ProfessionalSearch.service_use.relevant_laws.relevant_laws_api import get_filter_conditions, \
     _get_law_result
-from ProfessionalSearch.SimilarCaseRetrieval.api.similar_case_retrieval_api import get_filter_conditions_of_case, \
+from ProfessionalSearch.service_use.similar_case_retrival.similar_case_retrieval_api import get_filter_conditions_of_case, \
     _get_case_result
-from Utils.io import read_json_attribute_value
 
 app = FastAPI()
 
