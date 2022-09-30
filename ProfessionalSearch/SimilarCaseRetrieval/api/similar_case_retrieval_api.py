@@ -18,7 +18,7 @@ from ProfessionalSearch.SimilarCaseRetrieval.core.relevant_cases_search import (
     get_case_search_result,
 )
 
-# from ProfessionalSearch.SimilarCaseRetrieval.core.narrative_similarity_predict import predict_fn as predict_fn_similar_cases
+# from ProfessionalSearch.SimilarCaseRetrieval.src.narrative_similarity_predict import predict_fn as predict_fn_similar_cases
 from typing import List
 import logging
 

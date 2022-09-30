@@ -112,7 +112,7 @@ def get_claim_list_by_problem_id():
 
     # 从纠纷展示配置，获取诉求列表
     displayed_problem_name = _get_problem(req_data.get("problem_id"))
-    df = pd.read_csv("LawsuitPrejudgment/lawsuit_prejudgment/core/纠纷展示配置.csv", encoding="utf-8")
+    df = pd.read_csv("LawsuitPrejudgment/lawsuit_prejudgment/src/纠纷展示配置.csv", encoding="utf-8")
     df = df["对应诉求"].groupby(df["纠纷展示名称"], sort=False).agg(lambda x: list(x))
     displayed_claim_list = df[displayed_problem_name] if displayed_problem_name in df else claim_list
 

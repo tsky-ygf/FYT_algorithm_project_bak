@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-""" 
-@Author  : inamori1932
-@Time    : 2022/8/5 13:27 
-@Desc    : None
-"""
+# @Time    : 2022/9/30 11:16
+# @Author  : Adolf
+# @Site    : 
+# @File    : consultation_service.py
+# @Software: PyCharm
 import requests
 import pandas as pd
-from IntelligentConsultation.core.FAQ_predict import FAQPredict
+from IntelligentConsultation.src.FAQ_predict import FAQPredict
 
 df_individual = pd.read_csv("IntelligentConsultation/config/个人端热门标签问答.csv", encoding="utf-8")
 df_company = pd.read_csv("IntelligentConsultation/config/企业端热门标签问答.csv", encoding="utf-8")
@@ -41,7 +41,7 @@ def get_query_answer(question: str):
     }
 
 
-faq_predict = FAQPredict()
+faq_predict = FAQPredict(level="INFO", console=True, logger_file="log/intelligent_consultation/model.log")
 
 
 def get_query_answer_with_source(question: str):
