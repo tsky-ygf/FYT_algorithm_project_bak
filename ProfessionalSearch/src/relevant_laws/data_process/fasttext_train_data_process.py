@@ -14,7 +14,7 @@ from tqdm.auto import tqdm
 # import ray
 # import psutil
 from Utils.logger import print_run_time
-from ProfessionalSearch.core.relevant_laws.data_process.data_process import get_fileter_data
+from ProfessionalSearch.src.relevant_laws.data_process.data_process import get_fileter_data
 import hanlp
 
 # from torch.multiprocessing import set_start_method

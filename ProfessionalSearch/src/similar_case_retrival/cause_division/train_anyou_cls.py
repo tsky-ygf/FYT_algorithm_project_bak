@@ -8,7 +8,7 @@
 import torch
 from Tools.train_tool import BaseTrainTool
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
-from ProfessionalSearch.core.similar_case_retrival.cause_division.anyou_dataset import LawsAnyouClsDataset
+from ProfessionalSearch.src.similar_case_retrival.cause_division.anyou_dataset import LawsAnyouClsDataset
 
 
 class TrainLawsCls(BaseTrainTool):

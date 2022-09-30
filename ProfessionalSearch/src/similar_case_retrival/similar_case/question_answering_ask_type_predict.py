@@ -1,4 +1,4 @@
-from ProfessionalSearch.core.similar_case_retrival.bert.tokenization import *
+from ProfessionalSearch.src.similar_case_retrival.bert.tokenization import *
 import os, re
 import tensorflow as tf
 import numpy as np

@@ -283,7 +283,7 @@ if __name__ == "__main__":
     ]
 
     model_name = "model/language_model/simbert-chinese-base"
-    simbert = VectorSearch(model_name_or_path=model_name, faiss_index_path='BasicTask/SearchEngine/test.index',
+    simbert = VectorSearch(model_name_or_path=model_name, device="cpu", faiss_index_path='BasicTask/SearchEngine/test.index',
                            sentences_or_file_path='BasicTask/SearchEngine/example_sentences.txt')
 
     results_ = simbert.search(example_queries)

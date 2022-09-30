@@ -19,9 +19,8 @@ def administrative_prejudgment_testing_page():
     # st.write(supported_administrative_dict)
 
     supported_administrative_list = [item['type_name'] for item in supported_administrative_dict]
-    big_type = st.sidebar.selectbox("请选择你遇到的问题", supported_administrative_list)
-
-    st.title(big_type)
+    # big_type = st.sidebar.selectbox("请选择你遇到的问题", supported_administrative_list)
+    big_type = st.selectbox("请选择你遇到的纠纷类型", supported_administrative_list)
 
     map_dict = {item['type_name']: item['type_id'] for item in supported_administrative_dict}
     con = map_dict[big_type]

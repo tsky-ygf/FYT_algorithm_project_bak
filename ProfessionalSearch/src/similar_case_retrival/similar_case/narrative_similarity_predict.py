@@ -5,18 +5,18 @@ import logging
 import jieba.analyse
 import time
 
-from ProfessionalSearch.core.similar_case_retrival.similar_case.text_cnn_predict import get_feature
-from ProfessionalSearch.core.similar_case_retrival.similar_case.question_answering_ask_type_predict import (
+from ProfessionalSearch.src.similar_case_retrival.similar_case.text_cnn_predict import get_feature
+from ProfessionalSearch.src.similar_case_retrival.similar_case.question_answering_ask_type_predict import (
     get_question_feature_label_prob,
     get_appeal_by_rules,
 )
-from ProfessionalSearch.core.similar_case_retrival.similar_case.identify_problem_suqiu import (
+from ProfessionalSearch.src.similar_case_retrival.similar_case.identify_problem_suqiu import (
     predict_problem_suqiu,
 )
 
 
 
-from ProfessionalSearch.core.similar_case_retrival.similar_case.rank_util import (
+from ProfessionalSearch.src.similar_case_retrival.similar_case.rank_util import (
     pseg_txt,
     compute_sentence_embedding,
     cosine_similiarity,

@@ -13,7 +13,7 @@ from flask import request
 from LawsuitPrejudgment.lawsuit_prejudgment.core.civil_relevant_law import (
     CivilRelevantLaw,
 )
-from ProfessionalSearch.core.relevant_laws.process_by_es.laws_search import (
+from ProfessionalSearch.src.relevant_laws.process_by_es.laws_search import (
     get_law_search_result,
 )
 from Utils.io import read_json_attribute_value
