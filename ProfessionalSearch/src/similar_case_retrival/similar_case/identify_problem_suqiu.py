@@ -2,7 +2,7 @@ import fasttext
 import jieba
 import re
 import time
-from ProfessionalSearch.core.similar_case_retrival.similar_case.rank_util import as_num
+from ProfessionalSearch.src.similar_case_retrival.similar_case.rank_util import as_num
 
 # 加载模型
 base_path_fasttext = (

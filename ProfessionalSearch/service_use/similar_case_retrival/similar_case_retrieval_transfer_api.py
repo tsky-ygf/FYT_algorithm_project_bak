@@ -1,7 +1,7 @@
 import json
 
 from flask import Flask, request
-from ProfessionalSearch.core.similar_case_retrival.similar_case.narrative_similarity_predict import (
+from ProfessionalSearch.src.similar_case_retrival.similar_case.narrative_similarity_predict import (
     predict_fn as predict_fn_similar_cases,
 )
 import logging

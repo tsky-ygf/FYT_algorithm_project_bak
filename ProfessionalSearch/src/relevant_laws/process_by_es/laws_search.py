@@ -8,7 +8,7 @@
 import re
 
 import jieba
-from ProfessionalSearch.core.relevant_laws.process_by_es.read_legal_from_db import (
+from ProfessionalSearch.src.relevant_laws.process_by_es.read_legal_from_db import (
     search_data_from_es,
 )
 
