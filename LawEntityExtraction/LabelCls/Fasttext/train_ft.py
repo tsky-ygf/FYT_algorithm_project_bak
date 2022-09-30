@@ -9,7 +9,7 @@
 import jieba
 import fasttext
 
-from ProfessionalSearch.RelevantLaws.DataProcess.fasttext_train_data_process import read_stopwords
+from ProfessionalSearch.core.relevant_laws.data_process import read_stopwords
 
 fasttext.FastText.eprint = lambda x: None
 
