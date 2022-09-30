@@ -6,12 +6,12 @@
 # @Software: PyCharm
 import json
 import os
+from collections import defaultdict
 from pprint import pprint
 
 import numpy
 import numpy as np
 import torch
-
 from DocumentReview.PointerBert.utils import read_config_to_label
 
 
@@ -112,6 +112,30 @@ def merge_all_data4common():
                 text = line['text'].replace('\xa0', ' ')
                 if 'caigou' in file or 'common.jsonl' in file or 'jietiao' in file:
                     labels = line['entities']
+                    new_labels = defaultdict(list)
+
+                    for lab in labels:
+                        if lab['label'] not in alias2label:
+                            continue
+                        label = alias2label[lab['label']]
+                        if label not in labels2id:
+                            continue
+                        new_labels[lab['label']].append([lab['start_offset'], lab['end_offset']])
+                    for lab, indexs in new_labels.items():
+                        if len(indexs) == 1:
+                            continue
+                        indexs.sort()
+                        new_indexs = []
+                        for ii in range(1, len(indexs)):
+                            if indexs[ii][0] == indexs[ii-1][1]:
+                                new_indexs.append([indexs[ii-1][0], indexs[ii][1]])
+                            else:
+                                new_indexs.append(indexs[ii-1].copy())
+                        new_indexs.append(indexs[-1].copy())
+                        new_labels[lab] = new_indexs
+
+
+
                     flag_d = True
                 else:
                     labels = line['label']
@@ -120,6 +144,7 @@ def merge_all_data4common():
                     entities_new = []
                     bias = i
                     text_split = text[i:i + window]
+                    # 增加一步， 有相同label的实体， 若连续的， 则合并。
                     for entity in labels:
                         if flag_d:
                             if entity['label'] not in alias2label:
