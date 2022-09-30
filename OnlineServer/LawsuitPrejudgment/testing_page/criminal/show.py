@@ -11,7 +11,7 @@ from OnlineServer.LawsuitPrejudgment.testing_page.criminal import testing
 
 def _remove_click_state(_count):
     while True:
-        key = 'ask_btn' + str(_count) + '_clicked'
+        key = 'criminal_ask_btn' + str(_count) + '_clicked'
         if key in st.session_state:
             del st.session_state[key]
             _count += 1
@@ -24,7 +24,7 @@ def _remove_click_state(_count):
 def show_next_qa(_user_input, _question_answers, _factor_sentence_list, _count):
     has_next_question, info = testing.get_criminal_result(_user_input,_question_answers, _factor_sentence_list)
     if has_next_question:
-        btn_key = 'ask_btn' + str(_count)
+        btn_key = 'criminal_ask_btn' + str(_count)
         btn_click_key = btn_key + "_clicked"
         next_question_info = info
         next_question = next_question_info["next_question"]
@@ -34,11 +34,11 @@ def show_next_qa(_user_input, _question_answers, _factor_sentence_list, _count):
         st.markdown('**{}**'.format(next_question))
         if single_or_multi == "single":
             selected_answers = [
-                st.radio("", options=answers, key='aks_' + str(_count), on_change=_remove_click_state, args=(_count,))]
+                st.radio("", options=answers, key='criminal_aks_' + str(_count), on_change=_remove_click_state, args=(_count,))]
         else:
             selected_answers = []
             for idx, option in enumerate(answers):
-                if st.checkbox(option, key='ask_' + str(_count) + '_item_' + str(idx)):
+                if st.checkbox(option, key='criminal_ask_' + str(_count) + '_item_' + str(idx)):
                     selected_answers.append(option)
         st.write(selected_answers)
         if st.button("确定", key=btn_key):
@@ -68,9 +68,9 @@ def show_report(result):
 
 def criminal_prejudgment_testing_page():
     st.subheader('描述经过')
-    user_input = st.text_area('请描述您的纠纷经过，描述越全面评估越准确', '''''')
+    user_input = st.text_area('请描述您的纠纷经过，描述越全面评估越准确', '''''', key="criminal_text_area")
 
-    if st.button("提交评估"):
+    if st.button("提交评估", key="criminal_submit_to_evaluate"):
         st.session_state["submit_desp"] = True
     if "submit_desp" in st.session_state:
         st.subheader("进行提问")

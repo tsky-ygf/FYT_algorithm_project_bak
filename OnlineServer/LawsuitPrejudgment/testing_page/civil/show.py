@@ -89,10 +89,9 @@ def show_extracted_features(_selected_anyou, _selected_suqiu_list, _user_input):
 
 
 def civil_prejudgment_testing_page():
-    selected_anyou = st.sidebar.selectbox(
-        label="案由",
-        options=testing.get_anyou_list()
-    )
+    # selected_anyou = st.sidebar.selectbox(label="案由", options=testing.get_anyou_list())
+    st.subheader("案由")
+    selected_anyou = st.selectbox(label="", options=testing.get_anyou_list())
 
 
     st.subheader('描述经过')
