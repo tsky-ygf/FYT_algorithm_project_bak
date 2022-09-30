@@ -7,8 +7,9 @@
 import os
 # from transformers import WEIGHTS_NAME, BertConfig,get_linear_schedule_with_warmup,AdamW, BertTokenizer
 from BasicTask.NER.BertNer.metrics import SpanEntityScore
+from DocumentReview.PointerBert.polyloss import Poly1FocalLoss
 
-os.environ['CUDA_VISIBLE_DEVICES'] = '2'
+os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 import torch
 import argparse
 from pprint import pprint
@@ -59,6 +60,7 @@ def multilabel_categorical_crossentropy(y_true, y_pred):
     return neg_loss + pos_loss
 
 
+
 def train(args, train_loader, model, optimizer):
     print('-' * 50 + 'training' + '-' * 50)
     total_loss = 0
@@ -71,17 +73,23 @@ def train(args, train_loader, model, optimizer):
         start_prob, end_prob = model(encoded_dicts)
         # start_loss = torch.nn.functional.binary_cross_entropy(input=start_prob, target=starts, reduction="sum")
         # end_loss = torch.nn.functional.binary_cross_entropy(input=end_prob, target=ends, reduction="sum")
-        # start_loss = torch.nn.functional.binary_cross_entropy(input=start_prob, target=starts)
-        # end_loss = torch.nn.functional.binary_cross_entropy(input=end_prob, target=ends)
-        start_prob = start_prob.contiguous().view(-1, start_prob.shape[-1])
-        end_prob = end_prob.contiguous().view(-1,end_prob.shape[-1])
-        starts = starts.contiguous().view(-1, starts.shape[-1])
-        ends = ends.contiguous().view(-1,ends.shape[-1])
+        start_loss = torch.nn.functional.binary_cross_entropy(input=start_prob, target=starts)
+        end_loss = torch.nn.functional.binary_cross_entropy(input=end_prob, target=ends)
 
-        start_loss = multilabel_categorical_crossentropy(y_true=starts, y_pred=start_prob)
-        end_loss = multilabel_categorical_crossentropy(y_true=ends, y_pred=end_prob)
-        # start_prob = start_prob * encoded_dicts['attention_mask'][:,2:]
-        # end_prob = end_prob * encoded_dicts['attention_mask'][:,2:]
+        # start_prob = start_prob.contiguous().view(-1, start_prob.shape[-1])
+        # end_prob = end_prob.contiguous().view(-1,end_prob.shape[-1])
+        # starts = starts.contiguous().view(-1, starts.shape[-1])
+        # ends = ends.contiguous().view(-1,ends.shape[-1])
+        # start_loss = multilabel_categorical_crossentropy(y_true=starts, y_pred=start_prob)
+        # end_loss = multilabel_categorical_crossentropy(y_true=ends, y_pred=end_prob)
+
+        # PFLoss = Poly1FocalLoss(num_classes=len(args.labels),
+        #                       reduction='sum',
+        #                       label_is_onehot=True,
+        #                       pos_weight=None)
+        # start_loss = PFLoss(logits=start_prob, labels=starts)
+        # end_loss = PFLoss(logits=end_prob, labels=ends)
+
         # start_prob = start_prob.contiguous().view(-1,len(args.labels))
         # end_prob = end_prob.contiguous().view(-1,len(args.labels))
         # starts = starts.view(-1)
@@ -89,7 +97,7 @@ def train(args, train_loader, model, optimizer):
         # start_loss = F.cross_entropy(input=start_prob, target=starts)
         # end_loss = F.cross_entropy(input=end_prob, target=ends)
         loss = torch.sum(start_loss) + torch.sum(end_loss)
-        loss.backward(loss)
+        loss.backward()
 
         # total_loss += loss.item()
         # num_samples += len(samples)
@@ -303,8 +311,8 @@ if __name__ == '__main__':
     parser.add_argument("--local_rank", type=int, default=-1, help="For distributed training: local_rank")
     parser.add_argument("--do_train", default=True, type=bool)
     parser.add_argument("--is_inference", default=False, type=bool)
-    parser.add_argument("--model_save_path", default='DocumentReview/PointerBert/model_src/PBert0928_legalrob_mcloss_common_all_20sche.pt')
-    parser.add_argument("--batch_size", default=8, type=int, help="Batch size per GPU/CPU for training.")
+    parser.add_argument("--model_save_path", default='DocumentReview/PointerBert/model_src/PBert0930_common_all_20sche.pt')
+    parser.add_argument("--batch_size", default=1, type=int, help="Batch size per GPU/CPU for training.")
     parser.add_argument("--learning_rate", default=5e-5, type=float, help="The initial learning rate for Adam.")
     parser.add_argument("--train_path", default=None, type=str, help="The path of train set.")
     parser.add_argument("--dev_path", default=None, type=str, help="The path of dev set.")
@@ -334,9 +342,9 @@ if __name__ == '__main__':
     args.dev_path = 'data/data_src/common_all/dev.json'
     # args.train_path = 'data/cluener/train.json'
     # args.dev_path = 'data/cluener/dev.json'
-    args.model = 'model/language_model/LegalRoBERTa'
+    args.model = 'model/language_model/chinese-roberta-wwm-ext'
     pprint(args)
 
     main(args)
-    """export PYTHONPATH=$(pwd):$PYTHONPATH"""
-    """nohup python -u DocumentReview/PointerBert/main.py > log/PointerBert/pBert_legalrob_mcloss_commomall_0928_20sche.log 2>&1 &"""
+    # export PYTHONPATH=$(pwd):$PYTHONPATH
+    # nohup python -u DocumentReview/PointerBert/main.py > log/PointerBert/pBert_0930_common_all_20sche.log 2>&1 &
