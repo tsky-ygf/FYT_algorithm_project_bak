@@ -67,7 +67,7 @@ def search():
 
 def similar_case_review():
     logger = Logger(name="case-lib", level="debug").logger
-    url_case_conditions = 'http://127.0.0.1:8160/get_filter_conditions_of_case'
+    url_case_conditions = 'http://127.0.0.1:8140/get_filter_conditions_of_case'
     resp_case_json = requests.get(url_case_conditions).json()
     case_type = st.sidebar.selectbox(
         "请选择案件类型", resp_case_json["result"].get("type_of_case").get("value"), key="case_type"
@@ -93,10 +93,8 @@ def similar_case_review():
     text = st.text_input("请输入案例内容", value="", key="text")
 
     run = st.button("查询", key="run")
-    # run = True
-    query_list = []
     if run:
-        url_search_case = 'http://127.0.0.1:8160/search_cases'
+        url_search_case = 'http://127.0.0.1:8140/search_cases'
         query = text
         filter_conditions = {
             'type_of_case': [case_type],
@@ -115,7 +113,6 @@ def similar_case_review():
 
         for index, row in enumerate(resp_json.get("result")):
             logger.info(row)
-            # break
             if row["doc_id"].split("_SEP_")[0] == "judgment_minshi_data":
                 row["table_name"] = "民事"
             elif row["doc_id"].split("_SEP_")[0] == "judgment_minshi_data_cc":
@@ -140,7 +137,7 @@ def similar_case_review():
 
 def relevant_laws_review():
     logger = Logger(name="law-lib", level="debug").logger
-    url_law_conditions = "http://127.0.0.1:8161/get_filter_conditions_of_law"
+    url_law_conditions = "http://127.0.0.1:8139/get_filter_conditions_of_law"
     resp_conditions_json = requests.get(url_law_conditions).json()
 
     legal_type = st.sidebar.selectbox(
@@ -162,7 +159,7 @@ def relevant_laws_review():
     run = st.button("查询", key="run")
 
     if run:
-        url = "http://127.0.0.1:8161/search_laws"
+        url = "http://127.0.0.1:8139/search_laws"
         body = {
             "query": text,
             "filter_conditions": {
@@ -183,11 +180,6 @@ def relevant_laws_review():
 
         for index, row in enumerate(resp_json.get("result")):
             logger.info(row)
-            # break
-            # if row["timeliness"] == "有效":
-            #     row["timeliness"] = "现行有效"
-            # if row["using_range"] == "":
-            #     row["using_range"] = "全国"
             res_dict = {
                 "标号": index,
                 # "md5": row["md5Clause"],

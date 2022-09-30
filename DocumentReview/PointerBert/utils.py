@@ -166,15 +166,17 @@ def batchify(batch):
                     continue
                 start = res['start_offset']
                 end = res['end_offset']
-                entity_text = text[start:end]
+                if start is not None and end is not None:
+                    entity_text = text[start:end]
+                    labels.append([label, entity_text])
                 label_id = labels2id.index(label)
-                start_seq[label_id][start] = 1
-                end_seq[label_id][end] = 1
+                if start is not None:
+                    start_seq[label_id][start] = 1
+                if end is not None:
+                    end_seq[label_id][end] = 1
                 # start_seq[start] = label_id   # softmax多分类
                 # end_seq[end] = label_id
-                # labels_batch.append([label, entity_text, start, end])
-                # labels_batch.append([label, entity_text])
-                labels.append([label, entity_text])
+
             start_seqs.append(start_seq)
             end_seqs.append(end_seq)
         # labels.append(labels_batch)

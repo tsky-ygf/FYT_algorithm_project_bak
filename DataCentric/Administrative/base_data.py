@@ -10,13 +10,6 @@ import pymysql
 from pathlib import Path
 from pprint import pprint
 
-# from sqlalchemy.engine import URL
-# connection_string = "DRIVER={ODBC Driver 17 for SQL Server};SERVER=172.19.82.227;DATABASE=big_data_ceshi227;UID=root;PWD=Nblh@2022"
-# connection_url = URL.create("mssql+pyodbc", query={"odbc_connect": connection_string})
-
-# from sqlalchemy import create_engine
-# engine = create_engine(connection_url)
-
 connect_big_data = pymysql.connect(host='172.19.82.227',
                                    user='root', password='Nblh@2022',
                                    db='big_data_ceshi227')

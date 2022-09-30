@@ -40,8 +40,8 @@ class PointerNERBERT(nn.Module):
         end_prob = self.sigmoid(end_logits)
         # start_prob = self.softmax(start_logits)
         # end_prob = self.softmax(end_logits)
-        # return start_prob, end_prob
-        return start_logits, end_logits
+        return start_prob, end_prob
+        # return start_logits, end_logits
 
 
 class PointerNERBERT_softmax(nn.Module):

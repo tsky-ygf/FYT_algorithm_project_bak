@@ -25,3 +25,11 @@ def intelligent_consultation_main():
         res = {"answer": "暂不支持该咨询类型"}
 
     st.write(res["answer"])
+    if "similarity_question" in res:
+        for similarity_question in res["similarity_question"]:
+            with st.expander(similarity_question["question"], expanded=False):
+                st.markdown(similarity_question["answer"], unsafe_allow_html=True)
+        # st.markdown(meta.STORY, unsafe_allow_html=True)
+
+        # for similarity_question in res["similarity_question"]:
+        #     st.write(similarity_question)

@@ -17,3 +17,5 @@
 
 ## 4. 结束服务
 kill进程: `ps -ef | grep ProfessionalSearch.server | awk {'print $2'} |xargs kill -9`
+
+
