@@ -11,11 +11,11 @@ from flask import Flask, request
 
 from LawsuitPrejudgment.lawsuit_prejudgment.core import civil_similar_case
 from Utils.http_response import response_successful_result, response_failed_result
-from ProfessionalSearch.core.similar_case_retrival.process_by_es.cases_search import (
+from ProfessionalSearch.src.similar_case_retrival.process_by_es.cases_search import (
     get_case_search_result,
 )
 
-# from ProfessionalSearch.SimilarCaseRetrieval.core.narrative_similarity_predict import predict_fn as predict_fn_similar_cases
+# from ProfessionalSearch.SimilarCaseRetrieval.src.narrative_similarity_predict import predict_fn as predict_fn_similar_cases
 from Utils.io import read_json_attribute_value
 
 app = Flask(__name__)

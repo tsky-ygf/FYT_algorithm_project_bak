@@ -55,14 +55,20 @@ class MultiApp:
         app['function']()
 
 def search():
-    app = MultiApp()
-    app.add_app_search("案例检索测试服务", similar_case_review)
-    app.add_app_search("法条检索测试服务", relevant_laws_review)
-    app_search = st.sidebar.selectbox(
-        '请选择检索测试服务类型',
-        app.apps_search,
-        format_func=lambda app_search: app_search['title'])
-    app_search['function']()
+
+    case, law = st.tabs(["案例检索", "法条检索"])
+    with case:
+        similar_case_review()
+    with law:
+        relevant_laws_review()
+    # app = MultiApp()
+    # app.add_app_search("案例检索测试服务", similar_case_review)
+    # app.add_app_search("法条检索测试服务", relevant_laws_review)
+    # app_search = st.sidebar.selectbox(
+    #     '请选择检索测试服务类型',
+    #     app.apps_search,
+    #     format_func=lambda app_search: app_search['title'])
+    # app_search['function']()
 
 
 def similar_case_review():
@@ -152,11 +158,11 @@ def relevant_laws_review():
         key="text",
     )
     size = st.sidebar.number_input(
-        "搜索结果展示条数", value=10, key="size", min_value=1, max_value=100
+        "搜索结果展示条数", value=10, key="size_law", min_value=1, max_value=100
     )
 
     text = st.text_input("请输入法条内容", value="", key="text")
-    run = st.button("查询", key="run")
+    run = st.button("查询", key="run_law")
 
     if run:
         url = "http://127.0.0.1:8139/search_laws"

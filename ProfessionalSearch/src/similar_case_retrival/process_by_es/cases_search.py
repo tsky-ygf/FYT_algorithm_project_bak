@@ -3,7 +3,7 @@ import re
 import addressparser
 import jieba
 
-from ProfessionalSearch.core.similar_case_retrival.process_by_es.read_case_from_db import search_data_from_es
+from ProfessionalSearch.src.similar_case_retrival.process_by_es.read_case_from_db import search_data_from_es
 
 
 def sort_by_year(res):
