@@ -10,26 +10,22 @@ import requests
 
 
 def intelligent_consultation_main():
-    consult_type = st.sidebar.selectbox("请选择咨询的类型", ["民、商、刑", "专题"], key="咨询类型")
+    tab1, tab2 = st.tabs(["民、商、刑", "专题"])
 
-    question = st.text_input("请输入您的问题", value="公司交不起税怎么办", key="问题")
-
-    if consult_type == "民、商、刑":
+    with tab1:
+        question = st.text_input("请输入您的问题", value="公司交不起税怎么办", key="问题1")
         res = requests.post("http://127.0.0.1:8130/get_query_answer",
                             json={"question": question}).json()
 
-    elif consult_type == "专题":
+        st.write(res["answer"])
+
+    with tab2:
+        question = st.text_input("请输入您的问题", value="公司交不起税怎么办", key="问题2")
         res = requests.post("http://127.0.0.1:8130/get_query_answer_with_source",
                             json={"question": question}).json()
-    else:
-        res = {"answer": "暂不支持该咨询类型"}
 
-    st.write(res["answer"])
-    if "similarity_question" in res:
+        st.write(res["answer"])
+
         for similarity_question in res["similarity_question"]:
             with st.expander(similarity_question["question"], expanded=False):
                 st.markdown(similarity_question["answer"], unsafe_allow_html=True)
-        # st.markdown(meta.STORY, unsafe_allow_html=True)
-
-        # for similarity_question in res["similarity_question"]:
-        #     st.write(similarity_question)
