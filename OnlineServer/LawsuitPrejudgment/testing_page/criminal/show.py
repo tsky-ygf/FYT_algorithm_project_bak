@@ -71,8 +71,8 @@ def criminal_prejudgment_testing_page():
     user_input = st.text_area('请描述您的纠纷经过，描述越全面评估越准确', '''''', key="criminal_text_area")
 
     if st.button("提交评估", key="criminal_submit_to_evaluate"):
-        st.session_state["submit_desp"] = True
-    if "submit_desp" in st.session_state:
+        st.session_state["criminal_submit_desp"] = True
+    if "criminal_submit_desp" in st.session_state:
         st.subheader("进行提问")
         question_answers = {}
         factor_sentence_list = {}

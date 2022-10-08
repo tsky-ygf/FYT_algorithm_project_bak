@@ -51,3 +51,10 @@ uvicorn
 Werkzeug
 addressparser
 farm-haystack
+nltk
+tabulate
+colorama
+joblib
+haystack
+django-haystack
+tabulate
