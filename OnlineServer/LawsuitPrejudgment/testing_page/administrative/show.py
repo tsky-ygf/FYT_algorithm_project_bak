@@ -5,100 +5,43 @@
 @Time    : 30/9/2022 14:03 
 @Desc    : None
 """
-import json
-# import pandas as pd
+import requests
 import streamlit as st
-# from pprint import pprint
-from annotated_text import annotated_text
-from Utils.io import read_json_attribute_value
+
+URL = "http://127.0.0.1:8105"
+
+
+def _show_administrative_report(type_id, selected_situation):
+    result = requests.post(url=URL + "/get_administrative_result",
+                           json={"type_id": type_id, "situation": selected_situation}).json().get("result")
+    report = result["report"][0]
+    for item in report:
+        st.markdown("#### {}".format(item["title"]))
+        if item["type"] == "TYPE_TEXT":
+            st.markdown(item["content"])
+        elif item["type"] == "TYPE_LIST_OF_TEXT":
+            for every_content in item["content"]:
+                st.markdown(every_content)
+        elif item["type"] == "TYPE_LIST_OF_OBJECT":
+            for every_content in item["content"]:
+                first_flag = True
+                for key, value in every_content.items():
+                    if first_flag:
+                        st.markdown("**{}**".format(value))
+                        first_flag = False
+                    else:
+                        st.markdown(value)
 
 
 def administrative_prejudgment_testing_page():
-    supported_administrative_dict = read_json_attribute_value(
-        "LawsuitPrejudgment/Administrative/config/supported_administrative_types.json", "supported_administrative_types")
-    # st.write(supported_administrative_dict)
+    supported_administrative_list = requests.get(url=URL+"/get_administrative_type").json().get("result")
+    selected_type_name = st.selectbox("请选择你遇到的纠纷类型", [item["type_name"] for item in supported_administrative_list])
+    type_id = next((item["type_id"] for item in supported_administrative_list if item["type_name"] == selected_type_name), None)
 
-    supported_administrative_list = [item['type_name'] for item in supported_administrative_dict]
-    # big_type = st.sidebar.selectbox("请选择你遇到的问题", supported_administrative_list)
-    big_type = st.selectbox("请选择你遇到的纠纷类型", supported_administrative_list)
+    problem_and_situation_list = requests.get(url=URL+"/get_administrative_problem_and_situation_by_type_id", params={"type_id": type_id}).json().get("result")
+    selected_problem = st.selectbox("请选择你遇到的问题", [item["problem"] for item in problem_and_situation_list], key="一级")
+    selected_situation = st.selectbox("请选择具体的情形", next((item["situations"] for item in problem_and_situation_list if item["problem"] == selected_problem), None), key="情形")
 
-    map_dict = {item['type_name']: item['type_id'] for item in supported_administrative_dict}
-    con = map_dict[big_type]
-
-    with open('data/administrative_config/{}_config.json'.format(con), 'r') as f1:
-        info_data = json.load(f1)
-
-    with open('data/administrative_config/{}_type.json'.format(con), 'r') as f2:
-        type_data = json.load(f2)
-
-    # pprint(type_data)
-    one = st.selectbox("请选择你遇到的问题", type_data.keys(), key="一级")
-
-    situation_list = []
-    for key, value in type_data[one].items():
-        situation_list += value
-
-    # if run:
-    # situation_list = [value for key, value in type_data[one].items()]
-    situation = st.selectbox("请选择具体的情形", situation_list, key="情形")
     run = st.button("开始计算", key="run")
-
     if run:
-        # pprint(info_data[situation])
-        st.markdown("### 一、具体情形")
-        st.write('{}({})'.format(situation, info_data[situation]['法条类别']))
-
-        st.markdown("### 二、涉嫌违法行为")
-        for yiju in info_data[situation]['处罚依据']:
-            st.markdown("- {}".format(yiju))
-        # st.write(info_data[situation]["处罚依据"])
-
-        st.markdown("### 三、法条依据")
-        # st.write(info_data[situation]['法条依据'])
-        for one_law in info_data[situation]['法条依据']:
-            st.write("###### {}".format(one_law))
-            one_law_list = info_data[situation]['法条依据'][one_law].replace('【', '|').replace('】', '|').split('|')
-            # res_txt = ""
-            try:
-                annotated_text(one_law_list[0], (one_law_list[1], "处罚依据", "#8ef"), one_law_list[2])
-            except Exception as e:
-                print(e)
-                st.markdown(info_data[situation]['法条依据'][one_law])
-            # annotated_text(["This ", ("is", "处罚依据", "#8ef"), " some "])
-            # st.markdown(original_title, unsafe_allow_html=True)
-            st.write("")
-
-        st.markdown("### 四、处罚种类")
-        # st.write(info_data[situation]['处罚种类'])
-        for chufa in info_data[situation]['处罚种类']:
-            st.markdown("- {}".format(chufa))
-
-        st.markdown("### 五、处罚幅度")
-
-        for fudu in info_data[situation]['处罚幅度']:
-            st.markdown("- {}".format(fudu.replace("\n", "")))
-
-        st.markdown("### 六、涉刑风险")
-
-        for index, fenxian in enumerate(info_data[situation]['涉刑风险']):
-            st.write("###### {}、{}".format(index + 1, fenxian))
-            if fenxian == '暂无':
-                continue
-            # st.markdown("- {}".format(fenxian.replace("\n", "")))
-            # st.write('刑法内容:')
-            # st.write(info_data[situation]['涉刑风险'][fenxian])
-            # st.write(':'.join(info_data[situation]['涉刑风险'][fenxian]))
-            fenxian_con = ':'.join(info_data[situation]['涉刑风险'][fenxian])
-            one_law_list = fenxian_con.replace('【', '|').replace('】', '|').split('|')
-            try:
-                annotated_text(one_law_list[0], (one_law_list[1], "刑法依据", "#e6be3e"), one_law_list[2])
-            except Exception as e:
-                print(e)
-                st.write(fenxian_con)
-            st.write("")
-
-        st.markdown("### 七、相似类案")
-        for index, an_case in enumerate(info_data[situation]['相关案例']):
-            # st.write()
-            st.write(an_case)
-            st.write("#" * 50)
+        _show_administrative_report(type_id, selected_situation)

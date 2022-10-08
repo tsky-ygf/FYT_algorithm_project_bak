@@ -18,7 +18,7 @@ app = FastAPI()
 
 @app.get("/get_administrative_type")
 def _get_administrative_type():
-    return administrative_app_service.get_supported_administrative_types()
+    return administrative_app_service.get_administrative_type()
 
 
 @app.get('/get_administrative_problem_and_situation_by_type_id')

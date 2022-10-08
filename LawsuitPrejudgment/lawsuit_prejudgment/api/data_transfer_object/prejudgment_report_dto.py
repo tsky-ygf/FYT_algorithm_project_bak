@@ -87,9 +87,7 @@ class AdministrativeReportDTO:
         self.response_dict = response_dict
 
     def to_dict(self):
-        applicable_law = self.response_dict["applicable_law"]
         similar_case = self.response_dict["similar_case"]
-        judging_rule = self.response_dict["judging_rule"]
         report = [
             [
                 {
@@ -121,13 +119,18 @@ class AdministrativeReportDTO:
                     "type": "TYPE_LIST_OF_OBJECT",
                     "title": "涉刑风险",
                     "content": self.response_dict["criminal_risk"]["content"]
+                },
+                {
+                    "type": "TYPE_LIST_OF_TEXT",
+                    "title":"相似案例",
+                    "content": [con['title'] for con in similar_case][:1]
                 }
             ]
         ]
         self.response_dict = {
-            "applicable_law": applicable_law,
-            "similar_case": similar_case,
-            "judging_rule": judging_rule,
+            "applicable_law": None,
+            "similar_case": None,
+            "judging_rule": None,
             "report": report
         }
         return self.response_dict
