@@ -75,6 +75,6 @@ def criminal_prejudgment_testing_page():
     if "criminal_submit_desp" in st.session_state:
         st.subheader("进行提问")
         question_answers = {}
-        factor_sentence_list = {}
+        factor_sentence_list = []
         count = 1
         show_next_qa(user_input, question_answers, factor_sentence_list, count)

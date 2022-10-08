@@ -14,4 +14,4 @@ def get_criminal_result(fact, question_answers, factor_sentence_list):
         "question_answers": question_answers,
         "factor_sentence_list": factor_sentence_list
     }
-    return requests.post(url="http://127.0.0.1:8100/get_criminal_result", json=body)
+    return requests.post(url="http://127.0.0.1:8100/get_criminal_result", json=body).json()
