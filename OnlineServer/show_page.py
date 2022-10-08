@@ -60,12 +60,11 @@ class MultiApp:
 def welcome():
     st.title("欢迎来到法域通测试页面！")
 
+
 app = MultiApp()
 app.add_app("首页", welcome)
 app.add_app("合同智审", contract_review_main)
 app.add_app("检索", search)
 app.add_app("诉讼预判", lawsuit_prejudgment_testing_page)
-# app.add_app("刑事预判", criminal_prejudgment_testing_page)
-# app.add_app("行政预判", administrative_prejudgment_testing_page)
 app.add_app("智能咨询", intelligent_consultation_main)
 app.run()

@@ -14,7 +14,7 @@ def get_criminal_result(fact, question_answers, factor_sentence_list):
         "question_answers": question_answers,
         "factor_sentence_list": factor_sentence_list
     }
-    resp_json = requests.post(url="http://127.0.0.1:8100/get_criminal_result", json=body).json()
+    resp_json = requests.post(url="http://127.0.0.1:8105/get_criminal_result", json=body).json()
 
     if resp_json.get("success") is False:
         raise Exception("刑事预判接口返还异常: {}".format(resp_json.get("error_msg")))
