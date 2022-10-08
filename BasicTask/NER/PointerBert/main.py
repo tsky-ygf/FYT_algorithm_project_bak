@@ -8,7 +8,7 @@ import os
 # from transformers import WEIGHTS_NAME, BertConfig,get_linear_schedule_with_warmup,AdamW, BertTokenizer
 from BasicTask.NER.BertNer.metrics import SpanEntityScore
 
-os.environ['CUDA_VISIBLE_DEVICES'] = '0'
+os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 import torch
 import argparse
 from pprint import pprint
@@ -108,10 +108,7 @@ def train(args, train_loader, model, optimizer):
 
 
 def main(args):
-    labels, alias2label = read_config_to_label(args)
-    # labels2id = ['address', 'book', 'company', 'game', 'government', 'movie', 'name', 'organization', 'position',
-    #              'scene']
-    args.labels = labels
+
 
     # config_class, model_class, tokenizer_class = BertConfig, BertSpanForNer, BertTokenizer
     # config = config_class.from_pretrained(args.model, num_labels=len(labels2id))
@@ -159,7 +156,6 @@ def main(args):
             encoded_dicts, starts, ends, labels = samples[0], samples[1], samples[2], samples[3]
             sentences = samples[4]
 
-            # bs, seq_len, num_labels+1
             start_prob, end_prob = model(encoded_dicts)
             # bs, seq_len
             '''
@@ -243,7 +239,7 @@ def main(args):
             PATH = args.model_save_path
             state = {'model_state': model.state_dict(), 'e': e, 'optimizer': optimizer.state_dict()}
             # model cpu?
-            # torch.save(state, PATH)
+            torch.save(state, PATH)
             # 加载
             # PATH = './model.pth'  # 定义模型保存路径
             # state = torch.load(PATH, map_location="cpu")
@@ -310,8 +306,8 @@ if __name__ == '__main__':
     parser.add_argument("--local_rank", type=int, default=-1, help="For distributed training: local_rank")
     parser.add_argument("--do_train", default=True, type=bool)
     parser.add_argument("--is_inference", default=False, type=bool)
-    parser.add_argument("--model_save_path", default='model/PointerBert/PBert0930_common_all_20sche.pt')
-    parser.add_argument("--batch_size", default=1, type=int, help="Batch size per GPU/CPU for training.")
+    parser.add_argument("--model_save_path", default='model/PointerBert/PBert1009_common_all_20sche_tr.pt')
+    parser.add_argument("--batch_size", default=8, type=int, help="Batch size per GPU/CPU for training.")
     parser.add_argument("--learning_rate", default=5e-5, type=float, help="The initial learning rate for Adam.")
     parser.add_argument("--train_path", default=None, type=str, help="The path of train set.")
     parser.add_argument("--dev_path", default=None, type=str, help="The path of dev set.")
@@ -320,10 +316,10 @@ if __name__ == '__main__':
     parser.add_argument("--max_seq_len", default=512, type=int, help="The maximum input sequence length. "
                                                                      "Sequences longer than this will be split automatically.")
     parser.add_argument("--bert_emb_size", default=768, type=int, help="The embedding size of pretrained model")
-    parser.add_argument("--hidden_size", default=200, type=int, help="The hidden size of model")
+    parser.add_argument("--hidden_size", default=100, type=int, help="The hidden size of model")
     parser.add_argument("--num_epochs", default=100, type=int, help="Total number of training epochs to perform.")
     parser.add_argument("--seed", default=1000, type=int, help="Random seed for initialization")
-    parser.add_argument("--logging_steps", default=50, type=int, help="The interval steps to logging.")
+    parser.add_argument("--logging_steps", default=200, type=int, help="The interval steps to logging.")
     parser.add_argument("--valid_steps", default=100, type=int,
                         help="The interval steps to evaluate model performance.")
     parser.add_argument('--device', choices=['cpu', 'gpu'], default="cuda",
@@ -342,8 +338,10 @@ if __name__ == '__main__':
     # args.train_path = 'data/cluener/train.json'
     # args.dev_path = 'data/cluener/dev.json'
     args.model = 'model/language_model/chinese-roberta-wwm-ext'
+    labels, alias2label = read_config_to_label(args)
+    args.labels = labels
     pprint(args)
 
     main(args)
     # export PYTHONPATH=$(pwd):$PYTHONPATH
-    # nohup python -u DocumentReview/PointerBert/main.py > log/PointerBert/pBert_0930_common_all_20sche.log 2>&1 &
+    # nohup python -u BasicTask/NER/PointerBert/main.py > log/PointerBert/pBert_1009_common_all_20sche_tr.log 2>&1 &

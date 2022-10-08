@@ -1,107 +1,25 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @Time    : 2022/09/22 13:29
+# @Time    : 2022/10/08 16:14
 # @Author  : Czq
 # @File    : doccano_data_preprocess.py
 # @Software: PyCharm
 import json
 import os
-from collections import defaultdict
-from pprint import pprint
 
 import numpy
-import numpy as np
-import torch
-from BasicTask.NER.PointerBert.utils import  read_config_to_label
 
+from BasicTask.NER.PointerBertMRC.main import read_config_to_label
 
-def split_text(file, to_file):
-    w = open(to_file, 'w', encoding='utf-8')
-
-    window = 510
-    with open(file, 'r', encoding='utf-8') as f:
-        for line in f.readlines():
-            line = json.loads(line.strip())
-            text = line['text'].replace('\xa0',' ')
-            used = []
-            entities = line['entities']
-            for i in range(0, len(text), 400):
-                entities_new = []
-                bias = i
-                text_split = text[i:i+window]
-                for entity in entities:
-                    if i<= entity['start_offset']<entity['end_offset']<i+window:
-                        entities_new.append({'label':entity['label'],
-                                             'start_offset':entity['start_offset']-bias, 'end_offset':entity['end_offset']-bias})
-                        used.append(entity)
-                w.write(json.dumps({'id':line['id'],
-                                    'text': text_split,
-                                    'entities': entities_new
-                                    },ensure_ascii=False)+'\n')
-
-            if len(entities) > len(used):
-                print('true', len(entities))
-                print('used', len(used))
-                print(line)
-    w.close()
-
-
-def divided_train_dev(file, to_path):
-    with open(file, 'r', encoding='utf-8') as f:
-        data = f.readlines()
-    l = len(data)
-    print("samples number", l)
-    arr_index = list(range(l))
-    numpy.random.shuffle(arr_index)
-
-    p = int(l*0.81)
-    train_index = arr_index[:p]
-    dev_index = arr_index[p:]
-    print("train dataset number", len(train_index))
-    print("dev dataset number", len(dev_index))
-    data = np.array(data)
-    train_data = data[train_index]
-    dev_data = data[dev_index]
-
-    with open(os.path.join(to_path,'train.json'), 'w', encoding='utf-8') as f:
-        for line in train_data:
-            f.write(line)
-    with open(os.path.join(to_path, 'dev.json'),'w', encoding='utf-8') as f:
-        for line in dev_data:
-            f.write(line)
-
-# 转换为cluener的数据格式
-def convert_format(in_file, out_file):
-
-    w = open(out_file, 'w', encoding='utf-8')
-
-    with open(in_file, 'r', encoding='utf-8') as f:
-        for line in f.readlines():
-            line = json.loads(line.strip())
-            text = line['text']
-            entities = line['entities']
-            labels = dict()
-            for entity in entities:
-                entity_text = text[entity['start_offset']:entity['end_offset']]
-                labels[entity['label']] = {entity_text: [[entity['start_offset'], entity['end_offset']-1]]}
-
-            res = {'text':text, 'label':labels}
-            w.write(json.dumps(res, ensure_ascii=False)+"\n")
-
-    w.close()
-
-# 通用条款， 融合所有数据
 def merge_all_data4common():
     # list      dict
     labels2id, alias2label = read_config_to_label(None)
-    # for long
-    # labels2id = ['争议解决','合同生效','未尽事宜','通知与送达','鉴于条款','附件']
     print("label number", len(labels2id))
     file_path = 'data/data_src/common_1008'
     data_all = []
-    to_file = 'data/data_src/common_all/common_all.json'
+    to_file = 'data/data_src/common_mrc/common_mrc.json'
     w = open(to_file, 'w', encoding='utf-8')
-    window = 510
+    window = 510-15
     # unused = []
     for file in os.listdir(file_path):
         print(file)
@@ -178,17 +96,30 @@ def merge_all_data4common():
     pass
 
 
+def divided_train_dev(file, to_path):
+    with open(file, 'r', encoding='utf-8') as f:
+        data = f.readlines()
+    l = len(data)
+    print("samples number", l)
+    arr_index = list(range(l))
+    numpy.random.shuffle(arr_index)
+
+    p = int(l*0.81)
+    train_index = arr_index[:p]
+    dev_index = arr_index[p:]
+    print("train dataset number", len(train_index))
+    print("dev dataset number", len(dev_index))
+    data = numpy.array(data)
+    train_data = data[train_index]
+    dev_data = data[dev_index]
+
+    with open(os.path.join(to_path,'train.json'), 'w', encoding='utf-8') as f:
+        for line in train_data:
+            f.write(line)
+    with open(os.path.join(to_path, 'dev.json'),'w', encoding='utf-8') as f:
+        for line in dev_data:
+            f.write(line)
+
 if __name__ == "__main__":
-    # split_text('data/data_src/old/origin_oldall.json', 'data/data_src/old/origin_oldall_split.json')
-    # t()
-    # convert_format('data/data_src/new/dev_300.json', 'data/data_src/cluener_format/dev_300.json')
-    # convert_format('data/data_src/new/train_300.json', 'data/data_src/cluener_format/train_300.json')
-    # convert_format_bmes()
-
-    # 先这两条，准备好数据， 再核实schema， 再更改log、model名称， 再运行
     merge_all_data4common()
-    divided_train_dev('data/data_src/common_all/common_all.json', 'data/data_src/common_all/')
-
-    # merge_all_data4common()
-    # divided_train_dev('data/data_src/common_long/common_long.json', 'data/data_src/common_long')
-    pass
+    divided_train_dev('data/data_src/common_mrc/common_mrc.json', 'data/data_src/common_mrc/')
