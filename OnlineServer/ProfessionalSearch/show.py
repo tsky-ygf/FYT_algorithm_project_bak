@@ -70,31 +70,33 @@ def search():
     #     format_func=lambda app_search: app_search['title'])
     # app_search['function']()
 
-
 def similar_case_review():
     logger = Logger(name="case-lib", level="debug").logger
     url_case_conditions = 'http://127.0.0.1:8140/get_filter_conditions_of_case'
     resp_case_json = requests.get(url_case_conditions).json()
-    case_type = st.sidebar.selectbox(
-        "请选择案件类型", resp_case_json["result"].get("type_of_case").get("value"), key="case_type"
-    )
-
-    court_level = st.sidebar.selectbox(
-        "请选择法院层级", resp_case_json["result"].get("court_level").get("value"), key="court_level"
-    )
-
-    document_type = st.sidebar.selectbox(
-        "请选择文书类型", resp_case_json["result"].get("type_of_document").get("value"), key="document_type"
-    )
-
-    prov_type = st.sidebar.selectbox(
-        "请选择地域",
-        resp_case_json["result"].get("region").get("value"),
-        key="prov_type",
-    )
-    size = st.sidebar.number_input(
-        "搜索结果展示条数", value=10, key="size", min_value=1, max_value=100
-    )
+    col1, col2, col3, col4, col5 = st.columns(5)
+    with col1:
+        case_type = st.selectbox(
+            "请选择案件类型", resp_case_json["result"].get("type_of_case").get("value"), key="case_type"
+        )
+    with col2:
+        court_level = st.selectbox(
+            "请选择法院层级", resp_case_json["result"].get("court_level").get("value"), key="court_level"
+        )
+    with col3:
+        document_type = st.selectbox(
+            "请选择文书类型", resp_case_json["result"].get("type_of_document").get("value"), key="document_type"
+        )
+    with col4:
+        prov_type = st.selectbox(
+            "请选择地域",
+            resp_case_json["result"].get("region").get("value"),
+            key="prov_type",
+        )
+    with col5:
+        size = st.number_input(
+            "搜索结果展示条数", value=10, key="size", min_value=1, max_value=100
+        )
 
     text = st.text_input("请输入案例内容", value="", key="text")
 
@@ -146,20 +148,30 @@ def relevant_laws_review():
     url_law_conditions = "http://127.0.0.1:8139/get_filter_conditions_of_law"
     resp_conditions_json = requests.get(url_law_conditions).json()
 
-    legal_type = st.sidebar.selectbox(
-        "请选择法条种类", resp_conditions_json["result"].get("types_of_law").get("value"), key="legal_type"
-    )
-    isValid_type = st.sidebar.selectbox(
-        "请选择法律时效性", resp_conditions_json["result"].get("timeliness").get("value"), key="text"
-    )
-    prov_type = st.sidebar.selectbox(
-        "请选择使用范围",
-        resp_conditions_json["result"].get("scope_of_use").get("value"),
-        key="text",
-    )
-    size = st.sidebar.number_input(
-        "搜索结果展示条数", value=10, key="size_law", min_value=1, max_value=100
-    )
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        legal_type = st.selectbox(
+            "请选择法条种类", resp_conditions_json["result"].get("types_of_law").get("value"), key="legal_type"
+        )
+    with col2:
+        isValid_type = st.selectbox(
+            "请选择法律时效性", resp_conditions_json["result"].get("timeliness").get("value"), key="text"
+        )
+    with col3:
+        prov_type = st.selectbox(
+            "请选择使用范围",
+            resp_conditions_json["result"].get("scope_of_use").get("value"),
+            key="text",
+        )
+    with col4:
+        size = st.number_input(
+            "搜索结果展示条数", value=10, key="size_law", min_value=1, max_value=100
+        )
+
+
+
+
+
 
     text = st.text_input("请输入法条内容", value="", key="text")
     run = st.button("查询", key="run_law")
