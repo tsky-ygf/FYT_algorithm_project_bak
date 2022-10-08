@@ -30,6 +30,10 @@ similar_case_retrival: `相似类案测试`
 
 ## TODOLIST
 - [ ] 相似度计算方法替换，使用bert,或者其他模型计算相似度；
+     * 原方法: `textcnn中间层emb + cosine`
+     * 替换方法1: `simbert`
+     * 替换方法2: `simcse`
+     * 替换方法3: `ernie, pair-wise方式`
 - [ ] 统一索引库（narrative_similarity_v2 和 case_index_v2）;
 - [ ] tag关键词的计算
 

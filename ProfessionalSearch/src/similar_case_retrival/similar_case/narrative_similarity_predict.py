@@ -20,7 +20,7 @@ from ProfessionalSearch.src.similar_case_retrival.similar_case.rank_util import 
     pseg_txt,
     compute_sentence_embedding,
     cosine_similiarity,
-    as_num,
+    as_num, load_vocab_embedding_idf,
 )
 
 print("abc2...")
@@ -40,7 +40,7 @@ data_path = "../data/question_answering/"  # TODO 暂时先用一下看看效果
 vocab_file = data_path + "consult_vocab.csv"  # TODO 词汇表
 idf_file = data_path + "consult_idf_dict2.csv"  # TODO idf的缓存文件，暂时用不到。
 vocab_embedding_file = data_path + "model_law_query.vec"  # TODO  使用fastext训练的词向量
-# vocab_list, vocab_dict,vcoab_embedding, idfs_dict,tfidf_vectorizer,tfidf_vocab_dict=load_vocab_embedding_idf(data_path,vocab_file,vocab_embedding_file,idf_file)
+vocab_list, vocab_dict,vcoab_embedding, idfs_dict,tfidf_vectorizer,tfidf_vocab_dict=load_vocab_embedding_idf(data_path,vocab_file,vocab_embedding_file,idf_file)
 # 加载bert模型
 
 problem_suqiu_conversion = {
