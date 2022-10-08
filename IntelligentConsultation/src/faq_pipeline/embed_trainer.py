@@ -7,21 +7,18 @@
  FilePath     : /PromptParadigm/Consult/FAQ/embed_trainer.py
 """
 import math
-import pandas as pd
 
-from sentence_transformers import InputExample
 from dataclasses import dataclass, field
-
 from torch.utils.data import DataLoader
-
 from Utils.logger import get_logger
+
 
 @dataclass
 class TrainerConfig:
     model_name: str = "model/language_model/chinese-roberta-wwm-ext"
     model_output_path: str = "model/similarity_model/simcse-model-top-32"
 
-    lr:float = 5e-5
+    lr: float = 5e-5
     train_batch_size: int = 128
     max_seq_length: int = 128
     num_epochs: int = 4
@@ -30,7 +27,7 @@ class TrainerConfig:
 
 
 class EmbedTrainer:
-    def __init__(self,config_json) -> None:
+    def __init__(self, config_json) -> None:
         self.config = TrainerConfig(**config_json)
         self.logger = get_logger()
 
@@ -38,13 +35,13 @@ class EmbedTrainer:
 
         self.train_data = list()
 
-        self.model,self.train_loss = self.init_model()
+        self.model, self.train_loss = self.init_model()
 
     def init_model(self):
         raise NotImplementedError
 
     def init_data(self):
-        raise NotImplementedError   
+        raise NotImplementedError
 
     def train(self):
         train_dataloader = DataLoader(

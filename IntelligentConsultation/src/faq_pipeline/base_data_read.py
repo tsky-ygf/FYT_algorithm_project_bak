@@ -1,7 +1,8 @@
-import pandas as pd    
+import pandas as pd
+from sentence_transformers import InputExample
 
 
-def init_data(train_data_path):
+def init_base_qa_data(train_data_path):
     # train_data_path = "data/fyt_train_use_data/QA/pro_qa.csv"
     train_df = pd.read_csv(train_data_path)
     train_data = []
