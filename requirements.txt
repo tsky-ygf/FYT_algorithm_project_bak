@@ -56,5 +56,4 @@ tabulate
 colorama
 joblib
 haystack
-django-haystack
 tabulate

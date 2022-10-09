@@ -32,10 +32,8 @@ class EmbedTrainer:
         self.logger = get_logger()
 
         self.logger.info(self.config)
-
-        self.train_data = list()
-
         self.model, self.train_loss = self.init_model()
+        self.train_data = self.init_data()
 
     def init_model(self):
         raise NotImplementedError
@@ -44,6 +42,8 @@ class EmbedTrainer:
         raise NotImplementedError
 
     def train(self):
+        self.logger.info("train data size: {}".format(len(self.train_data)))
+
         train_dataloader = DataLoader(
             self.train_data, batch_size=self.config.train_batch_size, shuffle=True
         )

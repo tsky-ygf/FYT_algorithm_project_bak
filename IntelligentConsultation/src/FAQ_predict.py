@@ -14,11 +14,13 @@ from Utils.logger import get_logger
 
 
 class FAQPredict:
-    def __init__(self, level="INFO", console=True, logger_file=None):
+    def __init__(self,
+                 level="INFO",
+                 console=True,
+                 logger_file=None,
+                 index_name="topic_qa",
+                 model_name="model/similarity_model/simcse-model-tax-market"):
         self.logger = get_logger(level=level, console=console, logger_file=logger_file)
-
-        index_name = "topic_qa"
-        model_name = "model/similarity_model/simcse-model-tax-market"
 
         document_store = ElasticsearchDocumentStore(
             host="localhost",
