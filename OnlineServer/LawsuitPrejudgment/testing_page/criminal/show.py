@@ -21,8 +21,8 @@ def _remove_click_state(_count):
     pass
 
 
-def show_next_qa(_user_input, _question_answers, _factor_sentence_list, _count):
-    has_next_question, info = testing.get_criminal_result(_user_input,_question_answers, _factor_sentence_list)
+def show_next_qa(_user_input, _question_answers, _factor_sentence_list, _anyou, _event, _count):
+    has_next_question, info = testing.get_criminal_result(_user_input,_question_answers, _factor_sentence_list, _anyou, _event)
     if has_next_question:
         btn_key = 'criminal_ask_btn' + str(_count)
         btn_click_key = btn_key + "_clicked"
@@ -46,8 +46,10 @@ def show_next_qa(_user_input, _question_answers, _factor_sentence_list, _count):
         if btn_click_key in st.session_state:
             _question_answers[next_question + ":" + ";".join(answers)] = ";".join(selected_answers)
             _factor_sentence_list = next_question_info['factor_sentence_list']
+            _anyou = next_question_info['anyou']
+            _event = next_question_info['event']
             _count += 1
-            show_next_qa(_user_input, _question_answers, _factor_sentence_list, _count)
+            show_next_qa(_user_input, _question_answers, _factor_sentence_list, _anyou, _event, _count)
     else:
         show_report(info.get("result"))
     pass
@@ -76,5 +78,7 @@ def criminal_prejudgment_testing_page():
         st.subheader("进行提问")
         question_answers = {}
         factor_sentence_list = []
+        anyou = None
+        event = None
         count = 1
-        show_next_qa(user_input, question_answers, factor_sentence_list, count)
+        show_next_qa(user_input, question_answers, factor_sentence_list, anyou, event, count)

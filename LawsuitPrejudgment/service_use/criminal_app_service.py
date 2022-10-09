@@ -10,17 +10,19 @@ import requests
 from LawsuitPrejudgment.lawsuit_prejudgment.api.data_transfer_object.prejudgment_report_dto import CriminalReportDTO
 
 
-def get_criminal_result(fact, question_answers, factor_sentence_list):
+def get_criminal_result(fact, question_answers, factor_sentence_list, anyou, event):
     # 用时大约3秒
-    # body = {
-    #     "fact": fact,
-    #     "question_answers": question_answers,
-    #     "factor_sentence_list": factor_sentence_list
-    # }
-    # return requests.post(url="http://127.0.0.1:8100/get_criminal_result", json=body).json()
+    body = {
+        "fact": fact,
+        "question_answers": question_answers,
+        "factor_sentence_list": factor_sentence_list,
+        "anyou": anyou,
+        "event": event
+    }
+    return requests.post(url="http://127.0.0.1:8100/get_criminal_result", json=body).json()
     # 用时大约10秒 TODO:分析和改进耗时长的原因。
-    criminal_result = CriminalResultMiddleLayer(fact, question_answers).get_criminal_result()
-    return CriminalReportDTO(criminal_result).to_dict()
+    # criminal_result = CriminalResultMiddleLayer(fact, question_answers).get_criminal_result()
+    # return CriminalReportDTO(criminal_result).to_dict()
 
 
 class CriminalResultMiddleLayer:

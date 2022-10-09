@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import json
+import time
 import traceback
 import logging
 import logging.handlers
@@ -174,15 +175,21 @@ class CriminalDemo:
             }
         raise Exception("self.res is None.")
 
-    def recover_status(self, fact, question_answers):
+    def recover_status(self, fact, question_answers, anyou=None, event=None):
         input_dict = {"fact": fact}
+        if anyou:
+            input_dict["anyou"] = anyou
+        # TODO
+        if event:
+            input_dict["event"] = event
+
         # from pprint import pprint
         # input_dict.update(self.criminal_pre_judgment.content)
         # pprint(self.res)
         # print('------------')
         # pprint(self.criminal_pre_judgment.content)
         # print('------------')
-
+        print("5080_input_dict:", input_dict)
         self.res = self.criminal_pre_judgment(**input_dict)
         for question, answer in question_answers.items():
             element = self.get_question_element(question)
@@ -190,8 +197,8 @@ class CriminalDemo:
             self.res["question_answers"][element]["usr_answer"] = answer
             self.res = self.criminal_pre_judgment(**self.res)
 
-    def successful_response(self, fact, question_answers, factor_sentence_list):
-        self.recover_status(fact, question_answers)
+    def successful_response(self, fact, question_answers, factor_sentence_list, anyou=None, event=None):
+        self.recover_status(fact, question_answers, anyou, event)
         return json.dumps({
             "success": True,
             "error_msg": "",
@@ -199,6 +206,8 @@ class CriminalDemo:
             "question_next": self.next_question,
             "question_type": self.question_type,
             "factor_sentence_list": [],
+            "anyou": self.res.get("anyou"),
+            "event": self.res.get("event"),
             "support": self.is_supported,
             "result": self.result
         }, ensure_ascii=False)
@@ -213,11 +222,16 @@ def get_criminal_result():
         fact = request.json.get("fact")
         question_answers = request.json.get("question_answers")
         factor_sentence_list = request.json.get("factor_sentence_list")
-
+        anyou = request.json.get("anyou")
+        event = request.json.get("event")
+        print("5080_anyou:", anyou)
+        t0 = time.time()
         # if question_answers == {}:
         criminal_demo.init_content()
 
-        return criminal_demo.successful_response(fact, question_answers, factor_sentence_list)
+        result = criminal_demo.successful_response(fact, question_answers, factor_sentence_list, anyou, event)
+        print("5080刑事预判耗时:", time.time()-t0)
+        return result
     except Exception as e:
         logging.info(traceback.format_exc())
         return json.dumps({

@@ -8,11 +8,13 @@
 import requests
 
 
-def get_criminal_result(fact, question_answers, factor_sentence_list):
+def get_criminal_result(fact, question_answers, factor_sentence_list, anyou, event):
     body = {
         "fact": fact,
         "question_answers": question_answers,
-        "factor_sentence_list": factor_sentence_list
+        "factor_sentence_list": factor_sentence_list,
+        "anyou": anyou,
+        "event": event
     }
     resp_json = requests.post(url="http://127.0.0.1:8105/get_criminal_result", json=body).json()
 

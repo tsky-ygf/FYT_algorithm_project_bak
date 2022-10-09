@@ -20,6 +20,7 @@ import cn2an
 from LawsuitPrejudgment.Criminal.parse_xmind import deal_xmind_to_dict
 import pandas as pd
 from pprint import pprint
+import time
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 pd.set_option("display.max_columns", None)
@@ -28,16 +29,17 @@ pd.set_option("display.max_columns", None)
 class CriminalPrejudgment(PrejudgmentPipeline):
     def __init__(self, *args, **kwargs):
         super(CriminalPrejudgment, self).__init__(*args, **kwargs)
-
+        t0 = time.time()
         # 加载案由预测模型
         self.predictor = TextPredictor.load(self.config.anyou_identify_model_path)
         # self.ie = init_extract(criminal_type=criminal_type)
         if self.config.situation_identify_model_path[:4] == "http":
             self.ie_url = self.config.situation_identify_model_path
-
+        print("加载模型耗时:", time.time()-t0)
         self.logger.info("加载预测模型成功")
 
     def anyou_identify(self):
+        print("预测案由！")
         sentence = self.content["fact"]
         predictions = self.predictor.predict({"fact": [sentence]}, as_pandas=False)
         self.content["anyou"] = predictions[0]
@@ -60,13 +62,15 @@ class CriminalPrejudgment(PrejudgmentPipeline):
             self.content["report_result"] = {"敬请期待": "正在训练中"}
             return
 
+        print("模型抽取！")
+        t0 = time.time()
         r = requests.post(
             self.ie_url,
             json={"criminal_type": criminal_type, "fact": self.content["fact"]},
         )
         # extract_result = r.json()['result'][0]
         self.content["event"] = r.json()["result"]
-
+        print("模型抽取耗时:", time.time() - t0)
         # self.logger.debug(self.content)
 
         # if self.content["event"]["行为"] is not None:
@@ -142,6 +146,7 @@ class CriminalPrejudgment(PrejudgmentPipeline):
             if self.content["graph_process"]["情节"] == 1:
                 break
 
+        print("总金额:", self.content["event"]["总金额"])
         if self.content["anyou"] == "盗窃" and self.content["event"]["总金额"] != "":
             self.content["graph_process"]["量刑"] = 1
 
@@ -150,6 +155,7 @@ class CriminalPrejudgment(PrejudgmentPipeline):
             output_amount = re.findall("\d+", output_amount)[0]
             output_amount = float(output_amount)
 
+            print("output_amount", output_amount)
             if output_amount < 1500:
                 self.content["graph_process_content"]["量刑"] = "0-1500（不含）"
             elif output_amount < 3000:
