@@ -111,6 +111,15 @@ class CriminalPrejudgment(PrejudgmentPipeline):
             key: "" for key in base_logic_dict[self.content["anyou"]].keys()
         }
 
+    def get_circumstance_of_question(self, question):
+        if not self.content.get("question_answers_config"):
+            return None, None
+
+        for circumstance, info in self.content["question_answers_config"].items():
+            if str(question) == str(info.get("question")) + ":" + str(info.get("answer")).replace("|", ";"):
+                return circumstance, info
+        return None, None
+
     def match_graph(self):
         if (
                 list(self.content["base_logic_graph"][self.content["anyou"]]["量刑"].keys())[0] == "【量刑】"

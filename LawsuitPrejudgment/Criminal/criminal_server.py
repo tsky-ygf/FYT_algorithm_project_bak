@@ -35,6 +35,14 @@ async def get_criminal_prejudgment(item: Item):
     if item.question_answers == {}:
         criminal_pre_judgment.init_content()
 
+    # 改变item.question_answers的格式：将情形作为键值。这样CriminalPrejudgment才能处理。
+    question_answers = {}
+    for question, answer in item.question_answers.items():
+        circumstance, info = criminal_pre_judgment.get_circumstance_of_question(question)
+        question_answers[circumstance] = info
+        question_answers[circumstance]["usr_answer"] = answer
+    item.question_answers = question_answers
+
     criminal_pre_judgment(fact=item.fact, question_answers=item.question_answers)
     while "report_result" not in criminal_pre_judgment.content:
         next_question = criminal_pre_judgment.get_next_question()
