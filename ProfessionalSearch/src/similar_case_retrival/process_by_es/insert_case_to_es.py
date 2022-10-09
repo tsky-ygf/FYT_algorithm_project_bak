@@ -17,13 +17,13 @@ case_es_tools = {
     "passwords": "Nblh@2022",
     "db_name": "judgments_data",
     "table_list": [
-        "judgment_xingzheng_data",
-        "judgment_xingshi_data",
-        "judgment_zhixing_data",
+        # "judgment_xingzheng_data",
+        # "judgment_xingshi_data",
+        # "judgment_zhixing_data",
         "judgment_minshi_data_cc",
     ],
-    "index_name": "case_index_v2",
-    "debug": True,
+    "index_name": "case_index_minshi",
+    "debug": False,
     "use_big_data": True,
 }
 
@@ -34,12 +34,12 @@ case_es_tools = {
 class CaseESTool(BaseESTool):
     def get_query(self, table_name, start, end):
         if self.debug:
-            query = "select * from {} limit 2000".format(table_name)
+            query = "SELECT A.id, A.uq_id, A.event_num, A.jfType, A.yg_sc, A.bg_sc, A.jslcm, A.byrw, A.pubDate FROM ( select id,uq_id,event_num,jfType,yg_sc,bg_sc,jslcm,byrw,pubDate from {} limit 2000 ) A  order by A.pubDate DESC".format(table_name)
         else:
-            query = "select id,uq_id,content,event_num,faYuan_name,jfType,event_type,province,wsTitle from {} limit {},{}".format(
+            query = "SELECT A.id, A.uq_id, A.event_num, A.jfType, A.yg_sc, A.bg_sc, A.jslcm, A.byrw, A.pubDate FROM ( select id,uq_id,event_num,jfType,yg_sc,bg_sc,jslcm,byrw,pubDate from {} limit {},{} ) A  order by A.pubDate DESC".format(
                 table_name, start, end
             )
-
+        logger.info(query)
         return query
 
     def get_df_data_from_db(self, table_name, start, end):
@@ -123,31 +123,31 @@ class CaseESTool(BaseESTool):
         # self.es_init()
         start_end_mingshi = [
             [0, 2000000],
-            [2000000, 2000000],
-            [4000000, 2000000],
-            [6000000, 2000000],
-            [8000000, 2000000],
-            [10000000, 2000000],
-            [12000000, 1899519],
+            # [2000000, 2000000],
+            # [4000000, 2000000],
+            # [6000000, 2000000],
+            # [8000000, 2000000],
+            # [10000000, 2000000],
+            # [12000000, 1899519],
         ]  # 13899519   尽量插入用uq_id
 
-        start_end_xingshi = [[0, 2141203]]  # 2141203
-        start_end_xingzheng = [[0, 354424]]  # 354424
-        start_end_zhixing = [
-            [0, 2000000],
-            [2000000, 2000000],
-            [4000000, 3488256],
-        ]  #  7488256
+        # start_end_xingshi = [[0, 2141203]]  # 2141203
+        # start_end_xingzheng = [[0, 354424]]  # 354424
+        # start_end_zhixing = [
+        #     [0, 2000000],
+        #     [2000000, 2000000],
+        #     [4000000, 3488256],
+        # ]  #  7488256
 
         for table_name in self.table_list:
-            if table_name == "judgment_xingzheng_data":
-                start_end_df = pd.DataFrame(start_end_xingzheng)
-            elif table_name == "judgment_zhixing_data":
-                start_end_df = pd.DataFrame(start_end_zhixing)
-            elif table_name == "judgment_minshi_data_cc":
+            # if table_name == "judgment_xingzheng_data":
+            #     start_end_df = pd.DataFrame(start_end_xingzheng)
+            # elif table_name == "judgment_zhixing_data":
+            #     start_end_df = pd.DataFrame(start_end_zhixing)
+            if table_name == "judgment_minshi_data_cc":
                 start_end_df = pd.DataFrame(start_end_mingshi)
-            elif table_name == "judgment_xingshi_data":
-                start_end_df = pd.DataFrame(start_end_xingshi)
+            # elif table_name == "judgment_xingshi_data":
+            #     start_end_df = pd.DataFrame(start_end_xingshi)
             for index, start_and_end in start_end_df.iterrows():
                 print(table_name, start_and_end[0], start_and_end[1])
                 df_data = self.get_df_data_from_db(
@@ -155,7 +155,7 @@ class CaseESTool(BaseESTool):
                 )
                 if table_name == "judgment_minshi_data_cc":
                     table_name == "judgment_minshi_data"
-                self.update_data_from_es_parall(6, 1000, df_data, table_name)
+                self.insert_data_from_es_parall(6, 1000, df_data, table_name)
 
     def handle_es_parall(self, df_data, table_name):
         for index, row in df_data.iterrows():
@@ -163,18 +163,23 @@ class CaseESTool(BaseESTool):
             use_data = [
                 "id",
                 "uq_id",
-                "content",
+                # "content",
                 "event_num",
                 "faYuan_name",
                 "jfType",
-                "event_type",
-                "province",
+                # "event_type",
+                # "province",
+                "yg_sc",
+                "bg_sc",
+                "jslcm",
+                "byrw",
+                "pubDate",
             ]
             data_body = {
                 key: value for key, value in data_ori.items() if key in use_data
             }
-            data_body["db_name"] = self.db_name
-            data_body["table_name"] = table_name
+            # data_body["db_name"] = self.db_name
+            # data_body["table_name"] = table_name
             yield {
                 "_index": self.index_name,
                 "_id": row["uq_id"],
