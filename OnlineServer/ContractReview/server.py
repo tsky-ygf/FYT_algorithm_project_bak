@@ -15,7 +15,7 @@ from DocumentReview.server_use.contract_for_server import *
 
 app = FastAPI()
 
-acknowledgement_dict = init_model()
+acknowledgement = init_model()
 
 
 @app.get('/get_contract_type')
@@ -63,9 +63,8 @@ class ContractInput(BaseModel):
 
 @app.post("/get_contract_review_result")
 async def _get_contract_review_result(contract_input: ContractInput):
-    acknowledgement = acknowledgement_dict[contract_input.contract_type_id]
-
-    res = acknowledgement.review_main(content=contract_input.contract_content, mode="text", usr=contract_input.usr)
+    res = acknowledgement.review_main(content=contract_input.contract_content, mode="text",
+                                      contract_type=contract_input.contract_type_id, usr=contract_input.usr)
     return {"result": res}
 
 

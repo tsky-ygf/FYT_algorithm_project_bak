@@ -5,16 +5,19 @@
 # @Site    : 
 # @File    : contract_for_server.py
 # @Software: PyCharm
+import argparse
 import json
 import os
 import re
 import uuid
+from dataclasses import dataclass
 
 from docx import Document
 
-from DocumentReview.ContractReview.showing_sample import BasicUIEAcknowledgement
+from DocumentReview.src.ParseFile import read_txt_file, read_docx_file
+from DocumentReview.src.common_contract import BasicPBAcknowledgement
 
-CONTRACT_SERVER_DATA_PATH = "DocumentReview/Config/contract_server_data.json"
+CONTRACT_SERVER_DATA_PATH = "DocumentReview/Config/schema/contract_server_data.json"
 
 
 def get_support_contract_types():
@@ -22,28 +25,30 @@ def get_support_contract_types():
         return json.load(f).get("support_contract_types")
 
 
-def get_user_standpoint():
-    with open(CONTRACT_SERVER_DATA_PATH, "r", encoding="utf-8") as f:
-        user_standpoints = json.load(f).get("user_standpoints")
-    return user_standpoints
-
-
 def get_contract_type_list():
     support_contract_types = get_support_contract_types()
     return [item.get("type_id") for item in support_contract_types]
 
 
+@dataclass
+class CommonModelArgs:
+    model_load_path = "model/PointerBert/PBert1009_common_all_20sche_tr.pt"
+    model = "model/language_model/chinese-roberta-wwm-ext"
+    common_schema_path = "DocumentReview/Config/config_common.csv"
+    bert_emb_size = 768
+    hidden_size = 100
+
+
 def init_model():
-    contract_type_list = get_contract_type_list()
-    acknowledgement_dict = {}
-    for contract_type in contract_type_list:
-        config_path = "DocumentReview/Config/{}.csv".format(contract_type)
-        model_path = "model/uie_model/export_cpu/{}/inference".format(contract_type)
-        acknowledgement_dict[contract_type] = BasicUIEAcknowledgement(config_path=config_path,
-                                                                      model_path=model_path,
-                                                                      device="cpu",
-                                                                      logger_file='log/contract_review/model.log')
-    return acknowledgement_dict
+    common_model_args = CommonModelArgs()
+    print('=' * 50, '模型初始化', '=' * 50)
+    acknowledgement = BasicPBAcknowledgement(contract_type_list=get_contract_type_list(),
+                                             config_path_format="DocumentReview/Config/schema/{}.csv",
+                                             model_path_format="model/uie_model/export_cpu/{}/inference",
+                                             common_model_args=common_model_args,
+                                             log_level="INFO",
+                                             device="cpu")
+    return acknowledgement
 
 
 def get_text_from_file_link_path(file_link):
@@ -54,37 +59,8 @@ def get_text_from_file_link_path(file_link):
     elif '.txt' in file_link:
         data = read_txt_file(os.path.join('data/uploads', filename))
     else:
-        data =  "invalid input"
+        data = "invalid input"
     os.remove(os.path.join('data/uploads', filename))
-    return data
-
-
-# 读取docx 文件
-def read_docx_file(docx_path):
-    document = Document(docx_path)
-    # tables = document.tables
-    all_paragraphs = document.paragraphs
-    return_text_list = []
-    for index, paragraph in enumerate(all_paragraphs):
-        one_text = paragraph.text.replace(" ", "").replace("\u3000", "")
-        if one_text != "":
-            return_text_list.append(one_text)
-    # print(return_text_list)
-    data = '\n'.join(return_text_list)
-    data = data.replace('⾄', '至').replace('中华⼈民', '中华人民') \
-        .replace(' ', ' ').replace(u'\xa0', ' ').replace('\r\n', '\n')
-    data = re.sub("[＿_]+", "", data)
-    return data
-
-def read_txt_file(txt_path):
-    return_text_list = []
-    with open(txt_path,'r',encoding='utf-8')as f:
-        for line in f.readlines():
-            return_text_list.append(line.strip())
-    data = '\n'.join(return_text_list)
-    data = data.replace('⾄', '至').replace('中华⼈民', '中华人民') \
-        .replace(' ', ' ').replace(u'\xa0', ' ').replace('\r\n', '\n')
-    data = re.sub("[＿_]+", "", data)
     return data
 
 
@@ -106,5 +82,3 @@ def get_text_from_file(file):
         data = "invalid input"
 
     return data
-
-
