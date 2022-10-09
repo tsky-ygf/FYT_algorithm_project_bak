@@ -7,7 +7,8 @@
  FilePath     : /PromptParadigm/Consult/FAQ/common_model.py
 """
 import pandas as pd
-from embed_trainer import EmbedTrainer
+# from In embed_trainer import EmbedTrainer
+from IntelligentConsultation.src.faq_pipeline.embed_trainer import EmbedTrainer
 from sentence_transformers import models, losses
 from sentence_transformers import SentenceTransformer, datasets
 from sentence_transformers import InputExample
@@ -22,10 +23,13 @@ class SimCSE(EmbedTrainer):
 
     def init_data(self):
         # train_data_path = "data/fyt_train_use_data/QA/pro_qa.csv"
+        train_data = []
         train_df = pd.read_csv(self.config.train_data_path)
         for index, row in train_df.iterrows():
             query = row["question"]
-            self.train_data.append(InputExample(texts=[query, query]))
+            train_data.append(InputExample(texts=[query, query]))
+
+        return train_data
 
     def init_model(self):
         word_embedding_model = models.Transformer(self.config.model_name, max_seq_length=self.config.max_seq_length)
@@ -42,7 +46,8 @@ class TSDAE(EmbedTrainer):
     def init_data(self):
         train_df = pd.read_csv(self.config.train_data_path)
         train_sentences = train_df.question.tolist()
-        self.train_data = datasets.DenoisingAutoEncoderDataset(train_sentences)
+        train_data = datasets.DenoisingAutoEncoderDataset(train_sentences)
+        return train_data
 
     def init_model(self):
         word_embedding_model = models.Transformer(self.config.model_name, max_seq_length=self.config.max_seq_length)
