@@ -40,17 +40,19 @@ def read_config_to_label(args):
     config_path = 'data/data_src/config.csv'
     # 读取config，将别称也读为schema
     config_list, _alias2label = read_config(config_path)
-    # config_list = ['乙方地址','乙方联系方式','争议解决','合同生效','标题','甲方地址','甲方联系方式',
-    #                '金额','鉴于条款']
+
     config_list.remove('争议解决')
     config_list.remove('通知与送达')
-    config_list.remove('乙方解除合同')
     config_list.remove('甲方解除合同')
+    config_list.remove('乙方解除合同')
     config_list.remove('未尽事宜')
-    config_list.remove('附件')
-    # config_list.remove('金额')
+    # config_list.remove('附件')
+    config_list.remove('金额')
+
+    # config_list = ['争议解决','合同生效','未尽事宜','通知与送达','鉴于条款','附件']
     # config_list.insert(0, 'O') # ============ for softmax
     return config_list, _alias2label
+    # return ['争议解决','合同生效','未尽事宜','通知与送达','鉴于条款','附件'], _alias2label
 
 
 # 加载train和dev数据
@@ -182,7 +184,7 @@ def batchify(batch):
         # labels.append(labels_batch)
         input_i = [101] + tokenizer.convert_tokens_to_ids(list(text)) + [102]
         input_id = input_i.copy() + [0] * (512 - len(input_i))
-        atten_mask = [1] * len(input_id) + [0] * (512 - len(input_id))
+        atten_mask = [1] * len(input_i) + [0] * (512 - len(input_i))
         token_type_id = [0] * 512
         assert len(input_id) == 512, len(input_id)
 

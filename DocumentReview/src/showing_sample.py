@@ -5,8 +5,8 @@ from pprint import pprint
 
 import pandas as pd
 
-from DocumentReview.ContractReview.basic_contract import BasicUIEAcknowledgement
-from DocumentReview.ContractReview import rule_func
+from DocumentReview.src.basic_contract import BasicUIEAcknowledgement
+from DocumentReview.src import rule_func
 from Utils.logger import print_run_time
 
 

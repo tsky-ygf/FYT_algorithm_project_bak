@@ -144,8 +144,8 @@ def fun3():
 if __name__ == "__main__":
     # print("wefwefwfe"[1:4])
     # print("wefwefwfe"[1:None]) # efwefwfe
-    # fun1()  # 查看标注
-    fun2()  # 验证连续的标签
+    fun1()  # 查看标注
+    # fun2()  # 验证连续的标签
     # fun3() # 检查重叠
     # from transformers import AutoTokenizer
     # t = AutoTokenizer.from_pretrained('model/language_model/chinese-roberta-wwm-ext')

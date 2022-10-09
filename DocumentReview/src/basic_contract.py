@@ -13,16 +13,15 @@ import pandas as pd
 from collections import OrderedDict
 
 # from Utils import Logger
+from BasicTask.NER.UIETool.deploy.uie_predictor import UIEPredictor
+from DocumentReview.server_use.contract_for_server import read_docx_file
+from DocumentReview.src import rule_func
 from Utils import get_logger
-from DocumentReview.ParseFile.parse_word import read_docx_file
 
 from paddlenlp import Taskflow
 # from id_validator import validator
 
 from pprint import pprint, pformat
-from DocumentReview.ContractReview import rule_func
-from DocumentReview.UIETool.deploy.uie_predictor import UIEPredictor
-
 from Utils.logger import print_run_time
 
 
@@ -33,20 +32,15 @@ class BasicAcknowledgement:
         self.config = pd.read_csv(config_path)
         self.config = self.config.fillna("")
 
-        # self.data_list = self.read_origin_content(content=content, mode=mode)
         self.data_list = []
         self.data = ""
         self.usr = None
-        # self.logger.debug("data_list: {}".format(self.data_list))
         self.review_result = OrderedDict()
 
     @print_run_time
     def review_main(self, content, mode, usr="party_a"):
         self.review_result = self.init_review_result()
-        self.data_list = self.read_origin_content(content, mode)
-        data = '\n'.join(self.data_list)
-        data = data.replace('⾄', '至').replace('中华⼈民', '中华人民').replace(' ', ' ').replace(u'\xa0', ' ')
-        self.data = re.sub("[＿_]+", "", data)
+        self.data = self.read_origin_content(content, mode)
         extraction_res = self.check_data_func()
         self.usr = usr
         self.rule_judge(extraction_res[0])
@@ -81,9 +75,6 @@ class BasicAcknowledgement:
         raise NotImplementedError
 
     def read_origin_content(self, content="", mode="text"):
-        # self.logger.debug("mode: {}".format(mode))
-        # self.logger.debug("content: {}".format(content))
-
         if mode == "text":
             # 数据处理统一写在文件转文字的接口中
             # content = content.replace(" ", "").replace("\u3000", "")
@@ -116,10 +107,8 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
 
     def __init__(self, model_path='', device=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # self.schema = list(set(self.config['schema'].tolist()))
         self.device = device
         self.schema = self.config['schema'].tolist()
-        # self.review_result = {schema: {} for schema in self.schema}
         self.model_path = model_path
         self.data = ""
         self.schema = [schema for schema in self.schema if schema != ""]
@@ -128,7 +117,6 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
             args.model_path_prefix = model_path
             args.schema = self.schema
             self.predictor = UIEPredictor(args)
-            # self.ie = Taskflow('information_extraction', schema=self.schema, device_id=-1, task_path=model_path)
         else:
             if model_path == '':
                 self.ie = Taskflow('information_extraction', schema=self.schema, device_id=int(device))
@@ -144,9 +132,7 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
     def check_data_func(self):
         if self.device == "cpu":
             self.logger.debug(self.data)
-            # exit()
             res = self.predictor.predict([self.data])
-            # res = self.ie(self.data)
         else:
             res = self.ie(self.data)
 
@@ -286,9 +272,11 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
                     res_dict["内容"] = r
                 else:
                     res_dict["内容"] = row['schema']
-                if r in self.data:
-                    self.add_start_end(r, res_dict)
-
+                try:
+                    if r in self.data:
+                        self.add_start_end(r, res_dict)
+                except Exception:
+                    pass
             elif row['neg rule'] == "未识别，不作审核" or row['neg rule'] == "未识别，不做审核":
                 res_dict = {}
             else:
@@ -336,10 +324,10 @@ if __name__ == '__main__':
     os.environ['CUDA_VISIBLE_DEVICES'] = "1"
     acknowledgement = BasicUIEAcknowledgement(config_path="DocumentReview/Config/{}.csv".format(contract_type),
                                               log_level="INFO",
-                                              model_path="model/uie_model/new/{}/model_best/".format(contract_type),
-                                              # model_path="model/uie_model/export_cpu/{}/inference".format(
-                                              #     contract_type),
-                                              device="1")
+                                              # model_path="model/uie_model/new/{}/model_best/".format(contract_type),
+                                              model_path="model/uie_model/export_cpu/{}/inference".format(
+                                                  contract_type),
+                                              device="cpu")
     print("## First Time ##")
     localtime = time.time()
 
