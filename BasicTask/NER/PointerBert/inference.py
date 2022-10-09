@@ -155,7 +155,6 @@ def infer(args):
                     entities.append({'label':args.labels[li],'entity': sentence[start_index[mi]:end_index[mi]],
                         'start': start_index[mi] + index_bias, 'end': end_index[mi] + index_bias})
 
-            # for i in range()
     pprint(entities)
 
 

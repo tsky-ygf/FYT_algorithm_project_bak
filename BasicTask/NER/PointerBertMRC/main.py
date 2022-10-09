@@ -144,9 +144,6 @@ def main(args):
 
 
 
-
-
-
 def ttt():
     text = '今天阴天'
     inputs = args.tokenizer.encode_plus(text=text, text_pair="明天晴天")

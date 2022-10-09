@@ -11,7 +11,7 @@ import uvicorn
 from fastapi import FastAPI
 from pydantic import BaseModel
 
-from DocumentReview.ContractReview.contract_for_server import *
+from DocumentReview.server_use.contract_for_server import *
 
 app = FastAPI()
 
