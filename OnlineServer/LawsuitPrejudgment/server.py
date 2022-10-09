@@ -40,11 +40,14 @@ class CriminalInput(BaseModel):
     fact: str
     question_answers: typing.Dict
     factor_sentence_list: typing.List
+    anyou: typing.Any
+    event: typing.Any
 
 
 @app.post("/get_criminal_result")
 def _get_criminal_result(param: CriminalInput):
-    return criminal_app_service.get_criminal_result(param.fact, param.question_answers, param.factor_sentence_list)
+    print("server_anyou:", param.anyou)
+    return criminal_app_service.get_criminal_result(param.fact, param.question_answers, param.factor_sentence_list, param.anyou, param.event)
 
 
 if __name__ == '__main__':

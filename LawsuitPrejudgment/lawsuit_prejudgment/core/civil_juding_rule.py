@@ -9,7 +9,7 @@ import re
 
 import pandas as pd
 
-df_judging_rule = pd.read_csv("LawsuitPrejudgment/lawsuit_prejudgment/src/裁判规则.csv", encoding="utf-8")
+df_judging_rule = pd.read_csv("LawsuitPrejudgment/lawsuit_prejudgment/core/裁判规则.csv", encoding="utf-8")
 black_list = ["行政", "刑事", "公司法", "民事诉讼程序", "执行"]
 
 

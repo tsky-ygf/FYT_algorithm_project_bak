@@ -317,7 +317,9 @@ def get_criminal_result():
         body = {
             "fact": request.json.get("fact", ""),
             "question_answers": request.json.get("question_answers", {}),
-            "factor_sentence_list": request.json.get("factor_sentence_list", [])
+            "factor_sentence_list": request.json.get("factor_sentence_list", []),
+            "anyou": request.json.get("anyou"),
+            "event": request.json.get("event")
         }
         resp_json = requests.post(url, json=body).json()
         resp_json = CriminalReportDTO(resp_json).to_dict()
