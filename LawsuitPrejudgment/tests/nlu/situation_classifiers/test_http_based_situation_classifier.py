@@ -5,9 +5,9 @@
 @Time    : 2022/7/29 15:09 
 @Desc    : HttpBasedSituationClassifier的测试程序。
 """
-from LawsuitPrejudgment.lawsuit_prejudgment.nlu.situation_classifiers.http_based_situation_classifier import HttpClient, \
+from LawsuitPrejudgment.src.civil.lawsuit_prejudgment.nlu.situation_classifiers.http_based_situation_classifier import HttpClient, \
     HttpBasedSituationClassifier, DataTransferObject
-from LawsuitPrejudgment.lawsuit_prejudgment.nlu.situation_classifiers.situation_classifier_message import \
+from LawsuitPrejudgment.src.civil.lawsuit_prejudgment.nlu.situation_classifiers.situation_classifier_message import \
     SituationClassifierMessage
 
 

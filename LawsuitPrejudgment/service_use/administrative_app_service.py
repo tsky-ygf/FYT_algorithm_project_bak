@@ -7,12 +7,12 @@
 """
 from LawsuitPrejudgment.src.administrative.administrative_api_v1 import get_administrative_prejudgment_situation, \
     get_administrative_prejudgment_result
-from LawsuitPrejudgment.lawsuit_prejudgment.api.data_transfer_object.prejudgment_report_dto import \
+from LawsuitPrejudgment.src.civil.lawsuit_prejudgment.api.data_transfer_object.prejudgment_report_dto import \
     AdministrativeReportDTO
-from LawsuitPrejudgment.lawsuit_prejudgment.constants import SUPPORTED_ADMINISTRATIVE_TYPES_CONFIG_PATH, \
+from LawsuitPrejudgment.src.civil.lawsuit_prejudgment.constants import SUPPORTED_ADMINISTRATIVE_TYPES_CONFIG_PATH, \
     FEATURE_TOGGLES_CONFIG_PATH
-from LawsuitPrejudgment.lawsuit_prejudgment.feature_toggles import FeatureToggles
 from LawsuitPrejudgment.service_use.utils import successful_response
+from LawsuitPrejudgment.src.civil.lawsuit_prejudgment.feature_toggles import FeatureToggles
 from Utils.io import read_json_attribute_value
 
 

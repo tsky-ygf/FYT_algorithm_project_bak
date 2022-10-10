@@ -5,7 +5,7 @@
 @Time    : 2022/8/15 13:23 
 @Desc    : None
 """
-from LawsuitPrejudgment.lawsuit_prejudgment.feature_toggles import FeatureToggles
+from LawsuitPrejudgment.src.civil.lawsuit_prejudgment import FeatureToggles
 
 
 config = \

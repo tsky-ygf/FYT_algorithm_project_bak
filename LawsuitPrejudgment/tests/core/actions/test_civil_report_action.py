@@ -5,8 +5,8 @@
 @Time    : 2022/7/29 17:21 
 @Desc    : None
 """
-from LawsuitPrejudgment.lawsuit_prejudgment.core.actions.civil_report_action import CivilReportAction
-from LawsuitPrejudgment.lawsuit_prejudgment.core.actions.civil_report_action_message import CivilReportActionMessage
+from LawsuitPrejudgment.src.civil.lawsuit_prejudgment.core.actions.civil_report_action import CivilReportAction
+from LawsuitPrejudgment.src.civil.lawsuit_prejudgment.core.actions.civil_report_action_message import CivilReportActionMessage
 
 
 def test_run():

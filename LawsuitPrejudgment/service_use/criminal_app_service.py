@@ -7,8 +7,6 @@
 """
 import requests
 
-from LawsuitPrejudgment.lawsuit_prejudgment.api.data_transfer_object.prejudgment_report_dto import CriminalReportDTO
-
 
 def get_criminal_result(fact, question_answers, factor_sentence_list, anyou, event):
     # 用时大约3秒

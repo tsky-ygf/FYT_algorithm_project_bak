@@ -9,7 +9,7 @@ import json
 
 from flask import Flask, request
 
-from LawsuitPrejudgment.lawsuit_prejudgment.core import civil_similar_case
+from LawsuitPrejudgment.src.civil.lawsuit_prejudgment.core import civil_similar_case
 from Utils.http_response import response_successful_result, response_failed_result
 from ProfessionalSearch.src.similar_case_retrival.process_by_es.cases_search import (
     get_case_search_result,

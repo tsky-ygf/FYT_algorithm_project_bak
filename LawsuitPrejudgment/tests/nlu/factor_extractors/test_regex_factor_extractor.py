@@ -5,7 +5,7 @@
 @Time    : 2022/8/4 15:40 
 @Desc    : None
 """
-from LawsuitPrejudgment.common import single_case_match
+from LawsuitPrejudgment.src.civil.common import single_case_match
 
 
 def test_single_case_match():

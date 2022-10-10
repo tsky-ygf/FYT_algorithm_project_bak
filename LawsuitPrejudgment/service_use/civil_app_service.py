@@ -7,17 +7,17 @@
 """
 import pandas as pd
 
-from LawsuitPrejudgment.lawsuit_prejudgment.api.data_transfer_object.prejudgment_report_dto import CivilReportDTO
-from LawsuitPrejudgment.lawsuit_prejudgment.constants import CIVIL_PROBLEM_ID_MAPPING_CONFIG_PATH, \
+from LawsuitPrejudgment.src.civil.lawsuit_prejudgment.api.data_transfer_object.prejudgment_report_dto import CivilReportDTO
+from LawsuitPrejudgment.src.civil.lawsuit_prejudgment.constants import CIVIL_PROBLEM_ID_MAPPING_CONFIG_PATH, \
     CIVIL_PROBLEM_TEMPLATE_CONFIG_PATH, CIVIL_PROBLEM_SUMMARY_CONFIG_PATH, FEATURE_TOGGLES_CONFIG_PATH
-from LawsuitPrejudgment.common.config_loader import user_ps
-from LawsuitPrejudgment.lawsuit_prejudgment.core.civil_juding_rule import CivilJudgingRule
-from LawsuitPrejudgment.lawsuit_prejudgment.core.civil_relevant_law import CivilRelevantLaw
-from LawsuitPrejudgment.lawsuit_prejudgment.core.civil_similar_case import ManuallySelectedCivilSimilarCase, \
+from LawsuitPrejudgment.src.civil.common import user_ps
+from LawsuitPrejudgment.src.civil.lawsuit_prejudgment.core.civil_juding_rule import CivilJudgingRule
+from LawsuitPrejudgment.src.civil.lawsuit_prejudgment.core.civil_relevant_law import CivilRelevantLaw
+from LawsuitPrejudgment.src.civil.lawsuit_prejudgment.core.civil_similar_case import ManuallySelectedCivilSimilarCase, \
     CivilSimilarCase, sort_similar_cases
-from LawsuitPrejudgment.lawsuit_prejudgment.feature_toggles import FeatureToggles
+from LawsuitPrejudgment.src.civil.lawsuit_prejudgment.feature_toggles import FeatureToggles
 from Utils.io import read_json_attribute_value
-from LawsuitPrejudgment.main.reasoning_graph_predict import predict_fn
+from LawsuitPrejudgment.src.civil.main.reasoning_graph_predict import predict_fn
 
 
 def get_civil_problem_summary():

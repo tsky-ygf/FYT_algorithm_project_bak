@@ -10,7 +10,7 @@ from typing import List
 from flask import Flask
 from flask import request
 
-from LawsuitPrejudgment.lawsuit_prejudgment.core.civil_relevant_law import (
+from LawsuitPrejudgment.src.civil.lawsuit_prejudgment.core import (
     CivilRelevantLaw,
 )
 from ProfessionalSearch.src.relevant_laws.process_by_es.laws_search import (

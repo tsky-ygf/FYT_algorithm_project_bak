@@ -5,7 +5,7 @@
 @Time    : 2022/8/1 17:20 
 @Desc    : None
 """
-from LawsuitPrejudgment.main.reasoning_graph_predict import predict_fn
+from LawsuitPrejudgment.src.civil.main.reasoning_graph_predict import predict_fn
 
 
 def test_predict_fn_should_use_http_situation_classifier():
