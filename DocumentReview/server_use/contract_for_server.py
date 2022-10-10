@@ -50,7 +50,7 @@ def init_model():
     common_model_args = CommonModelArgs()
     print('=' * 50, '模型初始化...', '=' * 50)
     print(time.localtime())
-    acknowledgement = BasicPBAcknowledgement(contract_type_list=['laowu','laodong'],
+    acknowledgement = BasicPBAcknowledgement(contract_type_list=get_contract_type_list(),
                                              config_path_format="DocumentReview/Config/schema/{}.csv",
                                              model_path_format="model/uie_model/export_cpu/{}/inference",
                                              common_model_args=common_model_args,

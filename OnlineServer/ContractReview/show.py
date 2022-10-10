@@ -117,13 +117,13 @@ def contract_review_main():
             # result = []
 
     if run:
-        url = "http://172.0.0.1:8112/get_contract_review_result"
+        url = "http://127.0.0.1:8112/get_contract_review_result"
         req_data = {
             "contract_type_id": contract_mapping[contract_type],
             "user_standpoint_id": usr_mapping[usr],
             "contract_content": text
         }
-        resp_json = requests.post(url, json=req_data).json()
+        resp_json = requests.post(url, json=req_data).json()["result"]
         index = 1
 
         origin_text = text
