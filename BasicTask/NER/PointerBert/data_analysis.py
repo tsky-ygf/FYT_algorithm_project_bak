@@ -11,7 +11,7 @@ from pprint import pprint
 
 import numpy
 
-from DocumentReview.PointerBert.utils import read_config_to_label
+# from DocumentReview.PointerBert.utils import read_config_to_label
 
 
 def fun1():
@@ -144,7 +144,7 @@ def fun3():
 if __name__ == "__main__":
     # print("wefwefwfe"[1:4])
     # print("wefwefwfe"[1:None]) # efwefwfe
-    fun1()  # 查看标注
+    # fun1()  # 查看标注
     # fun2()  # 验证连续的标签
     # fun3() # 检查重叠
     # from transformers import AutoTokenizer
@@ -159,4 +159,5 @@ if __name__ == "__main__":
     #     #         padding="max_length")
     # print(len(res['input_ids'][0]), len(res['input_ids'][1]),len(res['input_ids'][2]))
     # print(res)
+    print({1:8} in [{1:8}])
     pass

@@ -94,19 +94,19 @@ class BasicPBAcknowledgement(BasicUIEAcknowledgement):
             print("common predict result", len(res_common))
             print(res_common)
             # note: res 外多套了层list
-            res_final = self._merge_result(res, res_common)
+            res_final = self._merge_result(res[0], res_common)
 
         else:
             assert False, "dont use gpu"
             res = self.ie(self.data)
         self.logger.debug(pformat(res_final))
+
         return res_final
 
     def _merge_result(self, uies, commons):
-        uies = uies[0]
         for common in commons:
             uies[common] = commons[common]
-        return [uies]
+        return uies
 
     def _get_common_result(self):
         # 在通用条款识别前， 需要进行文本分割等操作
@@ -141,9 +141,12 @@ class BasicPBAcknowledgement(BasicUIEAcknowledgement):
                     for mi in range(min_len):
                         # 针对具体合同类型， 转换schema名称。
                         new_label = self.common2alias[self.common_labels[li]]
-                        entities[new_label].append({'text': sentence[start_index[mi]:end_index[mi]],
-                                                    'start': start_index[mi] + index_bias,
-                                                    'end': end_index[mi] + index_bias})
+                        tmp_entity = {'text': sentence[start_index[mi]:end_index[mi]],
+                         'start': start_index[mi] + index_bias,
+                         'end': end_index[mi] + index_bias}
+                        if tmp_entity not in entities[new_label]:
+                            entities[new_label].append(tmp_entity)
+
         return entities
 
     def _read_common_schema(self, path):

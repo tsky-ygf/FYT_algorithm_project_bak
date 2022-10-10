@@ -8,14 +8,12 @@
 import json
 import os
 import re
-# import uuid
 from dataclasses import dataclass
 
 import pandas as pd
 from collections import OrderedDict
 
 # from Utils import Logger
-from docx import Document
 
 from BasicTask.NER.UIETool.deploy.uie_predictor import UIEPredictor
 from DocumentReview.src import rule_func
@@ -53,7 +51,7 @@ class BasicAcknowledgement:
         self.data = self.read_origin_content(content, mode)
         extraction_res = self.check_data_func()
         self.usr = usr
-        self.rule_judge(extraction_res[0])
+        self.rule_judge(extraction_res)
         self.review_result = {key: value for key, value in self.review_result.items() if value != {}}
 
         return_result = []
@@ -86,7 +84,7 @@ class BasicAcknowledgement:
 
     def read_origin_content(self, content="", mode="text"):
         if mode == "text":
-            text_list = content  # 数据在通过接口进入时就会清洗整理好； 本地使用，只使用docx格式
+            text_list = content  # 数据在通过接口进入时就会清洗整理好， 只使用text模式； 本地使用，只使用docx格式
         elif mode == "docx":
             text_list = read_docx_file(docx_path=content)
         elif mode == "txt":
@@ -116,6 +114,7 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
 
     def __init__(self, model_path_format, device=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.logger.info("device:{}".format(device))
         self.device = device
         self.data = ""
         self.schema_dict = dict()

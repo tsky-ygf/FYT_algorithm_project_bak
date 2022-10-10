@@ -30,6 +30,12 @@ def get_contract_type_list():
     return [item.get("type_id") for item in support_contract_types]
 
 
+def get_user_standpoint():
+    with open(CONTRACT_SERVER_DATA_PATH, "r", encoding="utf-8") as f:
+        user_standpoints = json.load(f).get("user_standpoints")
+    return user_standpoints
+
+
 @dataclass
 class CommonModelArgs:
     model_load_path = "model/PointerBert/PBert1009_common_all_20sche_tr.pt"
@@ -41,7 +47,7 @@ class CommonModelArgs:
 
 def init_model():
     common_model_args = CommonModelArgs()
-    print('=' * 50, '模型初始化', '=' * 50)
+    print('=' * 50, '模型初始化...', '=' * 50)
     acknowledgement = BasicPBAcknowledgement(contract_type_list=get_contract_type_list(),
                                              config_path_format="DocumentReview/Config/schema/{}.csv",
                                              model_path_format="model/uie_model/export_cpu/{}/inference",
