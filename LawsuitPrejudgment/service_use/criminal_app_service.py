@@ -23,7 +23,6 @@ def get_criminal_result(fact, question_answers):
     use_qa = {}
     for question, answer in question_answers.items():
         circumstance, info = criminal_pre_judgment.get_circumstance_of_question(question)
-        print('111111',circumstance,info)
         use_qa[circumstance] = info
         use_qa[circumstance]["usr_answer"] = answer
 
