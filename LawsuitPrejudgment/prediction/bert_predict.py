@@ -28,7 +28,7 @@ from LawsuitPrejudgment.common import prob_ps_desc
 from LawsuitPrejudgment.modules import bert_modeling, tokenization
 
 config = configparser.ConfigParser()
-config.read('LawsuitPrejudgment/main/config.ini')
+config.read('LawsuitPrejudgment/config/civil/bert_config.ini')
 max_seq_length = 512
 print(config.sections())
 label_list = [0, 1]

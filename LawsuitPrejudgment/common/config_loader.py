@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 from asyncio.log import logger
-from turtle import st
-from regex import sub
 from xmindparser import xmind_to_dict
 import pandas as pd
 import re
@@ -48,18 +46,21 @@ pos_model_path = os.path.join(LTP_DATA_DIR, 'pos.model')  # 词性模型的路�
 ner_model_path = os.path.join(LTP_DATA_DIR, 'ner.model')  # 命名实体模型的路径
 par_model_path = os.path.join(LTP_DATA_DIR, 'parser.model')  # 依存句法分析模型路径，模型名称为`parser.model`
 
-# seg_model_path = os.path.join(seg_model_path, config_path + 'negative')
-# segmentor = Segmentor(model_path=seg_model_path)  # 初始化实例
+# 加载模型
+
+# 原初始化方式，在python3.6下运行
 segmentor = Segmentor()
-segmentor.load_with_lexicon(seg_model_path, config_path + 'negative')
-  # 加载模型
+segmentor.load_with_lexicon(seg_model_path, config_path + 'negative') # TODO:应该是把否定词加入了词汇表
 postagger = Postagger()  # 初始化实例
 postagger.load(pos_model_path)  # 加载模型
 recognizer = NamedEntityRecognizer()  # 初始化实例
 recognizer.load(ner_model_path)  # 加载模型
 parser = Parser()  # 初始化实例
 parser.load(par_model_path)
-
+# segmentor = Segmentor(seg_model_path, config_path + 'negative')
+# postagger = Postagger(pos_model_path)
+# recognizer = NamedEntityRecognizer(ner_model_path)
+# parser = Parser(par_model_path)
 
 
 ########################################################################################################################
@@ -111,6 +112,7 @@ logic_ps_condition = temp['logic_condition'].groupby(temp['logic_ps'], sort=Fals
 
 # 评估理由诉求默认特征
 temp = df_suqiu[~df_suqiu['logic_suqiu_factor'].isna()]
+# TODO: 这行代码，在python3.6(pandas1.1.5)环境下正常，在python3.9(pandas1.5.0)环境下异常
 logic_ps_factor = temp['logic_suqiu_factor'].groupby(temp['logic_ps'], sort=False).agg(lambda x: list(x)[0])
 logic_ps_factor = logic_ps_factor.apply(lambda x: {s.split(':')[0]: int(s.split(':')[1]) for s in x.split(';')})
 
