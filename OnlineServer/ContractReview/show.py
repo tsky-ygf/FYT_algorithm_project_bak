@@ -40,7 +40,7 @@ def get_data(_file):
 
 def contract_review_main():
     import requests
-    contract_type_list = requests.get("http://127.0.0.1:8110/get_contract_type").json()["result"]
+    contract_type_list = requests.get("http://127.0.0.1:8112/get_contract_type").json()["result"]
 
     contract_mapping = {one["contract_type"]: one["type_id"] for one in contract_type_list}
 
@@ -49,16 +49,16 @@ def contract_review_main():
                                          key="合同类型")
     mode_type = st.sidebar.selectbox("请选择上传数据格式", ["docx", "文本", "txt"], key="text")
 
-    usr_list = requests.get("http://127.0.0.1:8110/get_user_standpoint").json()["result"]
+    usr_list = requests.get("http://127.0.0.1:8112/get_user_standpoint").json()["result"]
     usr_mapping = {one["standpoint"]: one["id"] for one in usr_list}
 
     usr = st.sidebar.selectbox("请选择立场", [usr["standpoint"] for usr in usr_list], key="中立方")
-    is_show = st.sidebar.selectbox("请选择是否用于对外展示", ['是', '否'], key="show")
+    # is_show = st.sidebar.selectbox("请选择是否用于对外展示", ['是', '否'], key="show")
 
-    if is_show == "是":
-        is_show = True
-    else:
-        is_show = False
+    # if is_show == "是":
+    #     is_show = True
+    # else:
+    #     is_show = False
 
     if mode_type == "docx":
         file = st.file_uploader('上传文件', type=['docx'], key=None)
@@ -117,23 +117,18 @@ def contract_review_main():
             # result = []
 
     if run:
-        url = "http://172.0.0.1:8112/get_user_standpoint"
+        url = "http://172.0.0.1:8112/get_contract_review_result"
         req_data = {
             "contract_type_id": contract_mapping[contract_type],
             "user_standpoint_id": usr_mapping[usr],
             "contract_content": text
         }
         resp_json = requests.post(url, json=req_data).json()
-        # acknowledgement.review_main(content=text, mode="text", usr=usr)
-        # pprint(acknowledgement.review_result, sort_dicts=False)
         index = 1
 
-        # st.write(acknowledgement.data)
-        # origin_text = acknowledgement.data
         origin_text = text
         origin_text = list(origin_text)
-        length_origin_text = len(origin_text)
-        value_list = resp_json['result']
+        value_list = resp_json
         for value_en in value_list:
             key = value_en.get('review_point', '')
             value = dict()
@@ -145,9 +140,6 @@ def contract_review_main():
             value['start'] = value_en.get('review_content_start', '')
             value['end'] = value_en.get('review_content_end', '')
 
-            # for key, value in acknowledgement.review_result.items():
-            # st.write(key, value)
-            # st.wr(value)
             st.markdown('### {}、审核点：{}'.format(index, key))
             index += 1
             try:
