@@ -14,34 +14,10 @@ from torch.utils.data import Dataset, DataLoader
 from transformers import BertTokenizer
 
 from BasicTask.NER.PointerBert.model_NER import PointerNERBERT
-from BasicTask.NER.PointerBert.utils import read_config_to_label
 from DocumentReview.src.basic_contract import BasicUIEAcknowledgement
 from pprint import pformat, pprint
 
 tokenizer = BertTokenizer.from_pretrained('model/language_model/chinese-roberta-wwm-ext')
-
-
-def _read_common_schema(path, cont_type):
-    schema_df = pd.read_csv(path)
-    schemas = schema_df['schema'].values
-    columns = schema_df[cont_type].values
-    common2alias = dict()
-    for sche, alias in zip(schemas, columns):
-        if sche in ['争议解决', '通知与送达', '甲方解除合同', '乙方解除合同', '未尽事宜', '金额']:
-            continue
-        sche = sche.strip()
-        alias = alias.strip()
-        common2alias[sche] = alias
-
-    schemas = schemas.tolist()
-    schemas.remove('争议解决')
-    schemas.remove('通知与送达')
-    schemas.remove('甲方解除合同')
-    schemas.remove('乙方解除合同')
-    schemas.remove('未尽事宜')
-    schemas.remove('金额')
-
-    return schemas, common2alias
 
 
 def _split_text(text):
@@ -98,11 +74,10 @@ class BasicPBAcknowledgement(BasicUIEAcknowledgement):
 
     def __init__(self, common_model_args, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-        _labels, _common2alias = _read_common_schema(common_model_args.common_schema_path,
-                                                     common_model_args.contract_type)
+        self.common2alias = dict()
+        _labels, _common2alias_dict = self._read_common_schema(common_model_args.common_schema_path)
         self.common_labels = _labels
-        self.common2alias = _common2alias
+        self.common2alias_dict = _common2alias_dict
         common_model_args.labels = _labels
 
         self.common_model = PointerNERBERT(common_model_args).to('cpu')
@@ -113,24 +88,25 @@ class BasicPBAcknowledgement(BasicUIEAcknowledgement):
     def check_data_func(self):
         if self.device == "cpu":
             self.logger.debug(self.data)
-            res = self.predictor.predict([self.data])
+            self.common2alias = self.common2alias_dict[self.contract_type]
+            res = self.predictor_dict[self.contract_type].predict([self.data])
             res_common = self._get_common_result()
             print("common predict result", len(res_common))
-            self.logger.debug(res_common)
+            print(res_common)
             # note: res 外多套了层list
-            res_final = self._merge_result(res, res_common)
+            res_final = self._merge_result(res[0], res_common)
 
         else:
             assert False, "dont use gpu"
             res = self.ie(self.data)
         self.logger.debug(pformat(res_final))
+
         return res_final
 
     def _merge_result(self, uies, commons):
-        uies = uies[0]
         for common in commons:
             uies[common] = commons[common]
-        return [uies]
+        return uies
 
     def _get_common_result(self):
         # 在通用条款识别前， 需要进行文本分割等操作
@@ -165,10 +141,38 @@ class BasicPBAcknowledgement(BasicUIEAcknowledgement):
                     for mi in range(min_len):
                         # 针对具体合同类型， 转换schema名称。
                         new_label = self.common2alias[self.common_labels[li]]
-                        entities[new_label].append({'text': sentence[start_index[mi]:end_index[mi]],
-                                                    'start': start_index[mi] + index_bias,
-                                                    'end': end_index[mi] + index_bias})
+                        tmp_entity = {'text': sentence[start_index[mi]:end_index[mi]],
+                         'start': start_index[mi] + index_bias,
+                         'end': end_index[mi] + index_bias}
+                        if tmp_entity not in entities[new_label]:
+                            entities[new_label].append(tmp_entity)
+
         return entities
+
+    def _read_common_schema(self, path):
+        schema_df = pd.read_csv(path)
+        schemas = schema_df['schema'].values
+        common2alias_dict = dict()
+        for cont_type in self.contract_type_list:
+            columns = schema_df[cont_type].values
+            common2alias = dict()
+            for sche, alias in zip(schemas, columns):
+                if sche in ['争议解决', '通知与送达', '甲方解除合同', '乙方解除合同', '未尽事宜', '金额']:
+                    continue
+                sche = sche.strip()
+                alias = alias.strip()
+                common2alias[sche] = alias
+            common2alias_dict[cont_type] = common2alias
+
+        schemas = schemas.tolist()
+        schemas.remove('争议解决')
+        schemas.remove('通知与送达')
+        schemas.remove('甲方解除合同')
+        schemas.remove('乙方解除合同')
+        schemas.remove('未尽事宜')
+        schemas.remove('金额')
+
+        return schemas, common2alias_dict
 
 
 if __name__ == "__main__":
@@ -184,21 +188,22 @@ if __name__ == "__main__":
     parser.add_argument("--model", default='model/language_model/chinese-roberta-wwm-ext', type=str)
     parser.add_argument("--common_schema_path", default='DocumentReview/Config/config_common.csv', type=str,
                         help="The hidden size of model")
-    parser.add_argument("--contract_type", default=contract_type)
+    # parser.add_argument("--contract_type", default=contract_type)
     parser.add_argument("--bert_emb_size", default=768, type=int, help="The embedding size of pretrained model")
     parser.add_argument("--hidden_size", default=100, type=int, help="The hidden size of model")
     common_model_args = parser.parse_args()
 
     print('=' * 50, '模型初始化', '=' * 50)
-    acknowledgement = BasicPBAcknowledgement(common_model_args=common_model_args,
-                                             config_path="DocumentReview/Config/schema/{}.csv".format(contract_type),
+    acknowledgement = BasicPBAcknowledgement(contract_type_list=[contract_type],
+                                             config_path_format="DocumentReview/Config/schema/{}.csv",
+                                             model_path_format="model/uie_model/export_cpu/{}/inference",
+                                             common_model_args=common_model_args,
                                              log_level="INFO",
-                                             # model_path="model/uie_model/new/{}/model_best/".format(contract_type),
-                                             model_path="model/uie_model/export_cpu/{}/inference".format(contract_type),
                                              device="cpu")
     print('=' * 50, '开始预测', '=' * 50)
     localtime = time.time()
-    acknowledgement.review_main(content="data/DocData/{}/fwzl1.docx".format(contract_type), mode="docx", usr="Part B")
+    acknowledgement.review_main(content="data/DocData/{}/fwzl1.docx".format(contract_type), mode="docx",
+                                contract_type=contract_type, usr="Part B")
     print('=' * 50, '结束', '=' * 50)
     print('use time: {}'.format(time.time() - localtime))
     pass

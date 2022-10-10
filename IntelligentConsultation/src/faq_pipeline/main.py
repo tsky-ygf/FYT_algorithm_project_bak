@@ -86,9 +86,9 @@ def test_acc(index_name, model_name):
 
 def main(config):
     best_acc = 0
-    for lr in [1e-5, 2e-5, 3e-5, 4e-5, 5e-5]:
-        for train_batch_size in [8, 16, 32, 64, 128]:
-            for max_seq_length in [32, 64, 128]:
+    for lr in [2e-5, 3e-5, 4e-5, 5e-5]:
+        for train_batch_size in [32, 64, 128]:
+            for max_seq_length in [64, 128]:
                 for num_epochs in [1, 2, 3, 4, 5, 6, 7, 8]:
 
                     print("lr: {} ===> train_batch_size: {} ===> max_seq_length: {} ===> num_epochs: {}".
@@ -111,10 +111,10 @@ def main(config):
 
                     if acc > best_acc:
                         best_acc = acc
-                    best_lr = lr
-                    best_train_batch_size = train_batch_size
-                    best_max_seq_length = max_seq_length
-                    best_num_epochs = num_epochs
+                        best_lr = lr
+                        best_train_batch_size = train_batch_size
+                        best_max_seq_length = max_seq_length
+                        best_num_epochs = num_epochs
 
                     # logger.success("best accuracy: {}".format(best_acc))
                     # logger.success("lr: {}".format(lr))

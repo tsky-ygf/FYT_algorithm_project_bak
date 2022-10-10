@@ -154,6 +154,9 @@ class TrainingArguments:
     max_train_steps: Optional[int] = field(
         default=None, metadata={"help": "If set, overrides num_train_epochs."})
 
+    eval_ever_epoch: bool = field(
+        default=True, metadata={"help": "Whether to evaluate every epoch."})
+
     eval_every_number_of_epochs: int = field(
         default=1, metadata={"help": "Evaluate every number of epochs."})
 

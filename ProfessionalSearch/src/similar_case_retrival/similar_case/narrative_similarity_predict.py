@@ -27,12 +27,13 @@ print("abc2...")
 
 ip = "192.168.1.254"
 es = Elasticsearch()  # [ip],http_auth=('elastic', 'password'),port=9200
-ES_IDX_NAME = "narrative_similarity_v2"  # 'narrative_similarity_v2'
+# ES_IDX_NAME = "narrative_similarity_v2"  # 'narrative_similarity_v2'
+ES_IDX_NAME = "case_index_minshi"  # 'narrative_similarity_v2'
 print("end...")
 # Predefine pos scope
 NOT_FOUND = "没有相似案件"
 similiar_threshold = 0.65  # 0.2 #80
-similiar_threshold_consult = 0.80
+similiar_threshold_consult = 0.65
 NUM_MAX_CANDIDATES = 30  # 50
 NUM_MAX_CANDIDATES_CONSULT = 10
 
@@ -40,7 +41,7 @@ data_path = "../data/question_answering/"  # TODO 暂时先用一下看看效果
 vocab_file = data_path + "consult_vocab.csv"  # TODO 词汇表
 idf_file = data_path + "consult_idf_dict2.csv"  # TODO idf的缓存文件，暂时用不到。
 vocab_embedding_file = data_path + "model_law_query.vec"  # TODO  使用fastext训练的词向量
-vocab_list, vocab_dict,vcoab_embedding, idfs_dict,tfidf_vectorizer,tfidf_vocab_dict=load_vocab_embedding_idf(data_path,vocab_file,vocab_embedding_file,idf_file)
+# vocab_list, vocab_dict,vcoab_embedding, idfs_dict,tfidf_vectorizer,tfidf_vocab_dict=load_vocab_embedding_idf(data_path,vocab_file,vocab_embedding_file,idf_file)
 # 加载bert模型
 
 problem_suqiu_conversion = {
@@ -231,14 +232,14 @@ def candidate_list_q2q_rank(original_question, candidate_list):
     candidate_list_new = []
     for i, element in enumerate(candidate_list):
         (
-            doc_id,
+            uq_id,
             problem_type,
             suqiu_type,
-            suqiu_label,
-            suqing_sentences,
+            # suqiu_label,
+            yg_sc_sentences,
             chaming,
             benyuan_renwei,
-            tags,
+            # tags,
         ) = element
         candidate = pseg_txt(chaming).replace(" ", "")  # 过滤一部分数据
         print(
@@ -257,9 +258,10 @@ def candidate_list_q2q_rank(original_question, candidate_list):
         feature_c = get_feature(candidate)
 
         cos_i = cosine_similiarity(feature_q, feature_c)
-        win_los = 1 if "1" in suqiu_label else 0  # TODO 有一个诉求得到支持，暂时任务就是支持的。
+        # win_los = 1 if "1" in suqiu_label else 0  # TODO 有一个诉求得到支持，暂时任务就是支持的。
+        logging.info("cos_i:"+ str(cos_i))
         candidate_list_new.append(
-            (doc_id, cos_i, win_los, problem_type, suqiu_type, tags)
+            (uq_id, cos_i, problem_type, suqiu_type)
         )
 
     candidate_list_new = sorted(
@@ -448,43 +450,44 @@ def search_similar_case(
     candidate_list = []
     for hit in res["hits"]["hits"]:
         _source = hit["_source"]
-        suqing_sentences = _source["suqing_sentences"]
-        chaming = _source["chaming"]
-        benyuan_renwei = _source["benyuan_renwei"]
-        problem_type = _source["problem_type"]
-        suqiu_type = _source["suqiu_type"]
-        suqiu_label = _source["suqiu_label"]
-        doc_id = _source["doc_id"]
-        tags_ = hit["_source"]["tags"]
+        yg_sc_sentences = _source["yg_sc"]
+        bg_sc_sentences = _source["bg_sc"]
+        chaming = _source["jslcm"]
+        benyuan_renwei = _source["byrw"]
+        problem_type = _source["jfType"]
+        # suqiu_type = _source["suqiu_type"]
+        # suqiu_label = _source["suqiu_label"]
+        doc_id = _source["uq_id"]
+        # tags_ = hit["_source"]["tags"]
         if count < NUM_MAX_CANDIDATES:
-            print(
+            logging.info(
                 count,
                 "--->",
                 doc_id,
                 ";problem_type:",
                 problem_type,
-                ";suqiu_type:",
-                suqiu_type,
-                ";suqiu_label:",
-                suqiu_label,
-                ";tags_:",
-                tags_,
+                # ";suqiu_type:",
+                # suqiu_type,
+                # ";suqiu_label:",
+                # suqiu_label,
+                # ";tags_:",
+                # tags_,
             )
             logging.info(
                 str(doc_id)
                 + ";problem_type:"
                 + problem_type
-                + ";suqiu_type:"
-                + suqiu_type
-                + ";suqiu_label:"
-                + suqiu_label
-                + ";tags_:"
-                + tags_
+                # + ";suqiu_type:"
+                # + suqiu_type
+                # + ";suqiu_label:"
+                # + suqiu_label
+                # + ";tags_:"
+                # + tags_
             )
             print(
                 count,
                 "suqing_sentences:",
-                suqing_sentences,
+                yg_sc_sentences,
                 ";chaming:",
                 chaming,
                 ";benyuan_renwei:",
@@ -492,73 +495,73 @@ def search_similar_case(
             )
             logging.info(
                 "suqing_sentences:"
-                + suqing_sentences
+                + yg_sc_sentences
                 + ";chaming:"
                 + chaming
                 + ";benyuan_renwei:"
                 + benyuan_renwei
             )
             # TODO 在搜索结果中移除与纠纷类型、诉求无关的数据
-            if problem != "" and len(problem) > 0:
-                if problem_type == problem:
-                    if len(claim_list) == 0 or suqiu_type in claim_list:
-                        candidate_list.append(
-                            (
-                                doc_id,
-                                problem_type,
-                                suqiu_type,
-                                suqiu_label,
-                                suqing_sentences,
-                                chaming,
-                                benyuan_renwei,
-                                tags_,
-                            )
-                        )  # did_temp,score_temp,question_temp,answer_temp,question_short_temp
-                else:
-                    print(
-                        "search_similar_case.removing.data from search enginee:"
-                        + str(
-                            (
-                                doc_id,
-                                problem_type,
-                                suqiu_type,
-                                suqiu_label,
-                                suqing_sentences,
-                                chaming,
-                                benyuan_renwei,
-                                tags_,
-                            )
-                        )
-                    )
-                    logging.info(
-                        "search_similar_case.removing.data from search enginee:"
-                        + str(
-                            (
-                                doc_id,
-                                problem_type,
-                                suqiu_type,
-                                suqiu_label,
-                                suqing_sentences,
-                                chaming,
-                                benyuan_renwei,
-                                tags_,
-                            )
-                        )
-                    )
-            else:  # problem and claim_list is empty
-                candidate_list.append(
-                    (
-                        doc_id,
-                        problem_type,
-                        suqiu_type,
-                        suqiu_label,
-                        suqing_sentences,
-                        chaming,
-                        benyuan_renwei,
-                        tags_,
-                    )
-                )  # did_temp,score_temp,question_temp,answer_temp,question_short_temp
-
+        #     if problem != "" and len(problem) > 0:
+        #         if problem_type == problem:
+        #             if len(claim_list) == 0 or suqiu_type in claim_list:
+        #                 candidate_list.append(
+        #                     (
+        #                         doc_id,
+        #                         problem_type,
+        #                         suqiu_type,
+        #                         # suqiu_label,
+        #                         yg_sc_sentences,
+        #                         chaming,
+        #                         benyuan_renwei,
+        #                         # tags_,
+        #                     )
+        #                 )  # did_temp,score_temp,question_temp,answer_temp,question_short_temp
+        #         else:
+        #             print(
+        #                 "search_similar_case.removing.data from search enginee:"
+        #                 + str(
+        #                     (
+        #                         doc_id,
+        #                         problem_type,
+        #                         suqiu_type,
+        #                         # suqiu_label,
+        #                         yg_sc_sentences,
+        #                         chaming,
+        #                         benyuan_renwei,
+        #                         # tags_,
+        #                     )
+        #                 )
+        #             )
+        #             logging.info(
+        #                 "search_similar_case.removing.data from search enginee:"
+        #                 + str(
+        #                     (
+        #                         doc_id,
+        #                         problem_type,
+        #                         suqiu_type,
+        #                         # suqiu_label,
+        #                         yg_sc_sentences,
+        #                         chaming,
+        #                         benyuan_renwei,
+        #                         # tags_,
+        #                     )
+        #                 )
+        #             )
+        #     else:  # problem and claim_list is empty
+        candidate_list.append(
+            (
+                doc_id,
+                problem_type,
+                suqiu_type,
+                # suqiu_label,
+                yg_sc_sentences,
+                chaming,
+                benyuan_renwei,
+                # tags_,
+            )
+        )  # did_temp,score_temp,question_temp,answer_temp,question_short_temp
+        #
         count = count + 1
 
     t2 = time.time()
@@ -591,15 +594,16 @@ def get_search_body(problem, suqiu_type, query_search, tags):
             "query": {
                 "bool": {
                     "should": [
-                        {"match": {"problem_type": {"query": problem, "boost": 10}}},
-                        {"match": {"suqiu_type": {"query": suqiu_type, "boost": 10}}},
+                        {"match": {"jfType": {"query": problem, "boost": 10}}},
+                        # {"match": {"suqiu_type": {"query": suqiu_type, "boost": 10}}},
                         {
                             "bool": {
                                 "should": [
-                                    {"match": {"chaming": query_search}},
-                                    {"match": {"benyuan_renwei": query_search}},
-                                    {"match": {"suqing_sentences": query_search}},
-                                    {"match": {"tags": tags}},
+                                    {"match": {"jslcm": query_search}},
+                                    {"match": {"byrw": query_search}},
+                                    {"match": {"yg_sc": query_search}},
+                                    {"match": {"bg_sc": query_search}},
+                                    # {"match": {"tags": tags}},
                                 ]
                             }
                         },
@@ -612,10 +616,11 @@ def get_search_body(problem, suqiu_type, query_search, tags):
             "query": {
                 "bool": {
                     "should": [
-                        {"match": {"chaming": query_search}},
-                        {"match": {"benyuan_renwei": query_search}},
-                        {"match": {"suqing_sentences": query_search}},
-                        {"match": {"tags": tags}},
+                        {"match": {"jslcm": query_search}},
+                        {"match": {"byrw": query_search}},
+                        {"match": {"yg_sc": query_search}},
+                        {"match": {"bg_sc": query_search}},
+                        # {"match": {"tags": tags}},
                     ]
                 }
             }
@@ -640,18 +645,18 @@ def organize_result(similiar_list, is_consult_flag, fact, keywords, top_k=50):
         tags_list,
     ) = ([], [], [], [], [], [])
     for i, element in enumerate(similiar_list):
-        doc_id, cos_i, win_los, problem_type, suqiu_type, tags = element
-        tags = tags.replace("本院", "判定")
+        doc_id, cos_i, problem_type, suqiu_type = element
+        # tags = tags.replace("本院", "判定")
         threshold = (
             similiar_threshold_consult if is_consult_flag else similiar_threshold
         )  # similiar_threshold_consult
         if float(cos_i) >= float(threshold):
-            doc_id_list.append(doc_id)
+            doc_id_list.append(str(doc_id))
             sim_list.append(float(cos_i))
-            win_los_list.append(win_los)
-            reason_name_list.append(problem_type)
-            appeal_name_list.append(suqiu_type)
-            tags_list.append(tags)
+            # win_los_list.append(win_los)
+            reason_name_list.append(str(problem_type))
+            appeal_name_list.append(str(suqiu_type))
+            # tags_list.append(tags)
 
     tags1 = jieba.analyse.extract_tags(fact, topK=20)
     tags2 = jieba.analyse.textrank(
@@ -661,10 +666,10 @@ def organize_result(similiar_list, is_consult_flag, fact, keywords, top_k=50):
     return (
         doc_id_list,
         sim_list,
-        win_los_list,
+        # win_los_list,
         reason_name_list,
         appeal_name_list,
-        tags_list,
+        # tags_list,
         keywords,
     )
 

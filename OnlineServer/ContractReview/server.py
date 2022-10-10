@@ -6,16 +6,18 @@
 # @File    : server.py
 # @Software: PyCharm
 import _io
+import time
 
 import uvicorn
 from fastapi import FastAPI
 from pydantic import BaseModel
 
-from DocumentReview.server_use.contract_for_server import *
+from DocumentReview.server_use.contract_for_server import get_support_contract_types, init_model, get_user_standpoint, \
+    get_text_from_file_link_path
 
 app = FastAPI()
 
-acknowledgement_dict = init_model()
+acknowledgement = init_model()
 
 
 @app.get('/get_contract_type')
@@ -63,10 +65,11 @@ class ContractInput(BaseModel):
 
 @app.post("/get_contract_review_result")
 async def _get_contract_review_result(contract_input: ContractInput):
-    acknowledgement = acknowledgement_dict[contract_input.contract_type_id]
-
-    res = acknowledgement.review_main(content=contract_input.contract_content, mode="text", usr=contract_input.usr)
-    return {"result": res}
+    acknowledgement.review_main(content=contract_input.contract_content, mode="text",
+                                      contract_type=contract_input.contract_type_id, usr=contract_input.usr)
+    # print("review_result review_result",time.localtime(), acknowledgement.review_result)
+    # print("resresres", time.localtime() ,res)
+    return {"result": acknowledgement.return_result}
 
 
 class FileLinkInput(BaseModel):

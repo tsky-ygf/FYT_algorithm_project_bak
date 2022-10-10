@@ -32,10 +32,10 @@ def hello_world():
                 (
                     doc_id_list,
                     sim_list,
-                    win_los_list,
+                    # win_los_list,
                     reason_name_list,
                     appeal_name_list,
-                    tags_list,
+                    # tags_list,
                     keywords,
                 ) = predict_fn_similar_cases(fact, problem, claim_list)
 
@@ -43,10 +43,10 @@ def hello_world():
                     {
                         "dids": doc_id_list,
                         "sims": sim_list,
-                        "winLos": win_los_list,
+                        # "winLos": win_los_list,
                         "reasonNames": reason_name_list,
                         "appealNames": appeal_name_list,
-                        "tags": tags_list,
+                        # "tags": tags_list,
                         "keywords": keywords,
                         "error_msg": "",
                         "status": 0,

@@ -8,7 +8,7 @@ import os
 # from transformers import WEIGHTS_NAME, BertConfig,get_linear_schedule_with_warmup,AdamW, BertTokenizer
 from BasicTask.NER.BertNer.metrics import SpanEntityScore
 
-os.environ['CUDA_VISIBLE_DEVICES'] = '1'
+os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 import torch
 import argparse
 from pprint import pprint
@@ -306,7 +306,7 @@ if __name__ == '__main__':
     parser.add_argument("--local_rank", type=int, default=-1, help="For distributed training: local_rank")
     parser.add_argument("--do_train", default=True, type=bool)
     parser.add_argument("--is_inference", default=False, type=bool)
-    parser.add_argument("--model_save_path", default='model/PointerBert/PBert1009_common_all_20sche_tr.pt')
+    parser.add_argument("--model_save_path", default='model/PointerBert/PBert1011_common_all_20sche.pt')
     parser.add_argument("--batch_size", default=8, type=int, help="Batch size per GPU/CPU for training.")
     parser.add_argument("--learning_rate", default=5e-5, type=float, help="The initial learning rate for Adam.")
     parser.add_argument("--train_path", default=None, type=str, help="The path of train set.")
@@ -316,7 +316,7 @@ if __name__ == '__main__':
     parser.add_argument("--max_seq_len", default=512, type=int, help="The maximum input sequence length. "
                                                                      "Sequences longer than this will be split automatically.")
     parser.add_argument("--bert_emb_size", default=768, type=int, help="The embedding size of pretrained model")
-    parser.add_argument("--hidden_size", default=100, type=int, help="The hidden size of model")
+    parser.add_argument("--hidden_size", default=200, type=int, help="The hidden size of model")
     parser.add_argument("--num_epochs", default=100, type=int, help="Total number of training epochs to perform.")
     parser.add_argument("--seed", default=1000, type=int, help="Random seed for initialization")
     parser.add_argument("--logging_steps", default=200, type=int, help="The interval steps to logging.")
@@ -344,4 +344,4 @@ if __name__ == '__main__':
 
     main(args)
     # export PYTHONPATH=$(pwd):$PYTHONPATH
-    # nohup python -u BasicTask/NER/PointerBert/main.py > log/PointerBert/pBert_1009_common_all_20sche_tr.log 2>&1 &
+    # nohup python -u BasicTask/NER/PointerBert/main.py > log/PointerBert/pBert_1011_common_all_20sche.log 2>&1 &

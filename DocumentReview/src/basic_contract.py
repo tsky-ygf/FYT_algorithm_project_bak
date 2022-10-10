@@ -5,17 +5,19 @@
 # @Site    :
 # @File    : basic_contract.py
 # @Software: PyCharm
+import json
 import os
 import re
-# import uuid
+from dataclasses import dataclass
 
 import pandas as pd
 from collections import OrderedDict
 
 # from Utils import Logger
+
 from BasicTask.NER.UIETool.deploy.uie_predictor import UIEPredictor
-from DocumentReview.server_use.contract_for_server import read_docx_file
 from DocumentReview.src import rule_func
+from DocumentReview.src.ParseFile import read_docx_file
 from Utils import get_logger
 
 from paddlenlp import Taskflow
@@ -26,24 +28,33 @@ from Utils.logger import print_run_time
 
 
 class BasicAcknowledgement:
-    def __init__(self, config_path, log_level='INFO', logger_file=None, *args, **kwargs):
+    def __init__(self, contract_type_list, config_path_format, log_level='INFO', logger_file=None, *args, **kwargs):
         self.logger = get_logger(level=log_level, console=True, logger_file=logger_file)
         self.logger.info("log level:{}".format(log_level))
-        self.config = pd.read_csv(config_path)
-        self.config = self.config.fillna("")
+        self.contract_type_list = contract_type_list
+        self.config_dict = dict()
+        for contract_type in self.contract_type_list:
+            config_path = config_path_format.format(contract_type)
+            config = pd.read_csv(config_path).fillna("")
+            self.config_dict[contract_type] = config
 
         self.data_list = []
         self.data = ""
         self.usr = None
         self.review_result = OrderedDict()
+        self.config = None
+        self.contract_type = ""
+        self.return_result = []
 
     @print_run_time
-    def review_main(self, content, mode, usr="party_a"):
+    def review_main(self, content, mode, contract_type, usr="party_a"):
+        self.contract_type = contract_type
+        self.config = self.config_dict[contract_type]
         self.review_result = self.init_review_result()
         self.data = self.read_origin_content(content, mode)
         extraction_res = self.check_data_func()
         self.usr = usr
-        self.rule_judge(extraction_res[0])
+        self.rule_judge(extraction_res)
         self.review_result = {key: value for key, value in self.review_result.items() if value != {}}
 
         return_result = []
@@ -63,7 +74,8 @@ class BasicAcknowledgement:
             })
 
         self.logger.success(return_result)
-        return return_result
+        self.return_result = return_result
+        # return return_result
 
     def init_review_result(self):
         raise NotImplementedError
@@ -76,9 +88,7 @@ class BasicAcknowledgement:
 
     def read_origin_content(self, content="", mode="text"):
         if mode == "text":
-            # 数据处理统一写在文件转文字的接口中
-            # content = content.replace(" ", "").replace("\u3000", "")
-            text_list = content.split("\n")
+            text_list = content  # 数据在通过接口进入时就会清洗整理好， 只使用text模式； 本地使用，只使用docx格式
         elif mode == "docx":
             text_list = read_docx_file(docx_path=content)
         elif mode == "txt":
@@ -93,6 +103,7 @@ class BasicAcknowledgement:
         return text_list
 
 
+@dataclass
 class InferArgs:
     model_path_prefix = ""
     position_prob = 0.5
@@ -105,19 +116,26 @@ class InferArgs:
 
 class BasicUIEAcknowledgement(BasicAcknowledgement):
 
-    def __init__(self, model_path='', device=None, *args, **kwargs):
+    def __init__(self, model_path_format, device=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.logger.info("device:{}".format(device))
         self.device = device
-        self.schema = self.config['schema'].tolist()
-        self.model_path = model_path
         self.data = ""
-        self.schema = [schema for schema in self.schema if schema != ""]
+        self.schema_dict = dict()
+        for contract_type in self.contract_type_list:
+            schema = self.config_dict[contract_type]['schema'].tolist()
+            self.schema_dict[contract_type] = [sche for sche in schema if sche != ""]
+
         if self.device == "cpu":
             args = InferArgs()
-            args.model_path_prefix = model_path
-            args.schema = self.schema
-            self.predictor = UIEPredictor(args)
+            self.predictor_dict = dict()
+            for contract_type in self.contract_type_list:
+                model_path = model_path_format.format(contract_type)
+                args.model_path_prefix = model_path
+                args.schema = self.schema_dict[contract_type]
+                self.predictor_dict[contract_type] = UIEPredictor(args)
         else:
+            assert False, "dont use gpu"
             if model_path == '':
                 self.ie = Taskflow('information_extraction', schema=self.schema, device_id=int(device))
             else:
@@ -127,12 +145,12 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
         self.logger.info(model_path)
 
     def init_review_result(self):
-        return {schema: {} for schema in self.schema}
+        return {schema: {} for schema in self.schema_dict[self.contract_type]}
 
     def check_data_func(self):
         if self.device == "cpu":
             self.logger.debug(self.data)
-            res = self.predictor.predict([self.data])
+            res = self.predictor_dict[self.contract_type].predict([self.data])
         else:
             res = self.ie(self.data)
 
@@ -322,16 +340,16 @@ if __name__ == '__main__':
     contract_type = "fangwuzulin"
 
     os.environ['CUDA_VISIBLE_DEVICES'] = "1"
-    acknowledgement = BasicUIEAcknowledgement(config_path="DocumentReview/Config/{}.csv".format(contract_type),
+    acknowledgement = BasicUIEAcknowledgement(contract_type_list=[contract_type],
+                                              config_path_format="DocumentReview/Config/schema/{}.csv",
+                                              model_path_format="model/uie_model/export_cpu/{}/inference",
                                               log_level="INFO",
-                                              # model_path="model/uie_model/new/{}/model_best/".format(contract_type),
-                                              model_path="model/uie_model/export_cpu/{}/inference".format(
-                                                  contract_type),
                                               device="cpu")
     print("## First Time ##")
     localtime = time.time()
 
-    acknowledgement.review_main(content="data/DocData/fangwuzulin/fwzl1.docx", mode="docx", usr="Part B")
+    acknowledgement.review_main(content="data/DocData/fangwuzulin/fwzl1.docx", mode="docx", contract_type=contract_type,
+                                usr="Part B")
     pprint(acknowledgement.review_result, sort_dicts=False)
     print('use time: {}'.format(time.time() - localtime))
 

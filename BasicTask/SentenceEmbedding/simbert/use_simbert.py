@@ -17,7 +17,7 @@ model.cuda()
 input0 = ['我是一个中国人', '我是一个美国人', '我不是一个英国人']
 input_ids = tokenizers(input0, return_tensors="pt", padding=True, truncation=True)
 # print(input_ids)
-input_ids = {key:value.cuda() for key,value in input_ids.items()}
+input_ids = {key: value.cuda() for key, value in input_ids.items()}
 output = model(**input_ids)
 print(output[1].shape)
 print(output.pooler_output.shape)
