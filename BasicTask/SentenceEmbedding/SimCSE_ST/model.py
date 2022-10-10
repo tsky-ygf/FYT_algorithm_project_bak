@@ -10,6 +10,7 @@ from torch import nn, Tensor
 from sentence_transformers import models, util
 from typing import Iterable, Dict, List
 
+
 # from sentence_transformers import SentenceTransformer
 
 
@@ -21,15 +22,14 @@ class MultipleNegativesRankingLoss(nn.Module):
         self.similarity_fct = similarity_fct
         self.cross_entropy_loss = nn.CrossEntropyLoss()
 
-    def forward(self, sentence_res: List[Tensor]):
-        # reps = [self.model(sentence_feature)['sentence_embedding'] for sentence_feature in sentence_features]
-        embeddings_a = sentence_res[0]
-        embeddings_b = torch.cat(sentence_res[1:])
+    def forward(self, sentence_features: Iterable[Dict[str, Tensor]]):
+        reps = [self.model(sentence_feature)['sentence_embedding'] for sentence_feature in sentence_features]
+        embeddings_a = reps[0]
+        embeddings_b = torch.cat(reps[1:])
 
         scores = self.similarity_fct(embeddings_a, embeddings_b) * self.scale
-        labels = torch.tensor(range(len(scores)), dtype=torch.long,
-                              device=scores.device)  # Example a[i] should match with b[i]
-        return self.cross_entropy_loss(scores, labels)
+        labels = torch.tensor(range(len(scores)), dtype=torch.long, device=scores.device)
+        return reps, self.cross_entropy_loss(scores, labels)
 
     def get_config_dict(self):
         return {'scale': self.scale, 'similarity_fct': self.similarity_fct.__name__}
@@ -45,12 +45,14 @@ class SimCSE(nn.Module):
         self.model = nn.Sequential(word_embedding_model, pooling_model)
         self.loss = MultipleNegativesRankingLoss(self.model)
 
-    def forward(self, input_ids: Tensor, attention_mask: Tensor, token_type_ids: Tensor, labels: Tensor):
-
-        reps = self.model(input_ids)
-
+    def forward(self, input_ids_a: Tensor, attention_mask_a: Tensor, input_ids_b: Tensor, attention_mask_b: Tensor):
+        # reps_a = self.model(input_ids=input_ids_a, attention_mask=attention_mask_a)
+        # reps_b = self.model(input_ids=input_ids_b, attention_mask=attention_mask_b)
+        feature_a = {"input_ids": input_ids_a, "attention_mask": attention_mask_a}
+        feature_b = {"input_ids": input_ids_b, "attention_mask": attention_mask_b}
+        sentence_feature = [feature_a, feature_b]
         # reps = [self.model(sentence_feature)['sentence_embedding'] for sentence_feature in sentence_features]
-        train_loss = self.loss(reps)
+        reps, train_loss = self.loss(sentence_feature)
 
         return reps, train_loss
 

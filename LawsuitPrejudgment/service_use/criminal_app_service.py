@@ -6,21 +6,33 @@
 @Desc    : None
 """
 import requests
+from LawsuitPrejudgment.src.criminal.criminal_prejudgment import CriminalPrejudgment
+
+criminal_config = {
+    "log_level": "info",
+    "prejudgment_type": "criminal",
+    "anyou_identify_model_path": "model/gluon_model/accusation",
+}
+criminal_pre_judgment = CriminalPrejudgment(**criminal_config)
 
 
-def get_criminal_result(fact, question_answers, factor_sentence_list, anyou, event):
-    # 用时大约3秒
-    body = {
-        "fact": fact,
-        "question_answers": question_answers,
-        "factor_sentence_list": factor_sentence_list,
-        "anyou": anyou,
-        "event": event
-    }
-    return requests.post(url="http://127.0.0.1:8100/get_criminal_result", json=body).json()
-    # 用时大约10秒 TODO:分析和改进耗时长的原因。
-    # criminal_result = CriminalResultMiddleLayer(fact, question_answers).get_criminal_result()
-    # return CriminalReportDTO(criminal_result).to_dict()
+def get_criminal_result(fact, question_answers):
+    if question_answers == {}:
+        criminal_pre_judgment.init_content()
+    # 改变question_answers的格式：将情形作为键值。这样CriminalPrejudgment才能处理。
+    use_qa = {}
+    for question, answer in question_answers.items():
+        circumstance, info = criminal_pre_judgment.get_circumstance_of_question(question)
+        print('111111',circumstance,info)
+        use_qa[circumstance] = info
+        use_qa[circumstance]["usr_answer"] = answer
+
+    criminal_pre_judgment(fact=fact, question_answers=use_qa)
+
+    while "report_result" not in criminal_pre_judgment.content:
+        next_question = criminal_pre_judgment.get_next_question()
+        return next_question
+    return criminal_pre_judgment.content["report_result"]
 
 
 class CriminalResultMiddleLayer:
@@ -28,6 +40,7 @@ class CriminalResultMiddleLayer:
         中间层:
         用来处理外部网络接口(OnlineServer/LawsuitPrejudgment/server.py)和内部刑事预判(criminal_server)的参数差异。
     """
+
     def __init__(self, fact, question_answers):
         self.body = {"fact": fact, "question_answers": question_answers}
         self.criminal_server_url = "http://127.0.0.1:5081/criminal_prejudgment"
@@ -40,7 +53,8 @@ class CriminalResultMiddleLayer:
         return "result" not in self.response_from_criminal_server
 
     def _update_next_question(self, criminal_result):
-        info = next(question_info for circumstance, question_info in self.response_from_criminal_server["next_question"].items())
+        info = next(question_info for circumstance, question_info in
+                    self.response_from_criminal_server["next_question"].items())
         criminal_result["question_next"] = str(info.get("question")) + ":" + str(info.get("answer")).replace("|", ";")
         criminal_result["question_type"] = ("1" if info.get("multiplechoice", 0) == 0 else "2")
 
@@ -54,13 +68,13 @@ class CriminalResultMiddleLayer:
             return
 
         criminal_result["result"] = {
-                "crime": report_result.get("涉嫌罪名", ""),
-                "case_fact": report_result.get("案件事实", ""),
-                "reason_of_evaluation": report_result.get("评估理由", ""),
-                "legal_advice": report_result.get("法律建议", ""),
-                "similar_case": report_result.get("相关类案", []),
-                "applicable_law": report_result.get("法律依据", "")
-            }
+            "crime": report_result.get("涉嫌罪名", ""),
+            "case_fact": report_result.get("案件事实", ""),
+            "reason_of_evaluation": report_result.get("评估理由", ""),
+            "legal_advice": report_result.get("法律建议", ""),
+            "similar_case": report_result.get("相关类案", []),
+            "applicable_law": report_result.get("法律依据", "")
+        }
         pass
 
     def _generate_criminal_result(self):
@@ -85,3 +99,10 @@ class CriminalResultMiddleLayer:
     def get_criminal_result(self):
         self._get_response_from_criminal_server()
         return self._generate_criminal_result()
+
+
+if __name__ == "__main__":
+    res = get_criminal_result(fact="我偷了邻居3000元怎么办？",
+                              question_answers={}, )
+                              # question_answers={"盗窃人年龄未满十六周岁或者精神状态不正常？:是;否": "否"})
+    print(res)

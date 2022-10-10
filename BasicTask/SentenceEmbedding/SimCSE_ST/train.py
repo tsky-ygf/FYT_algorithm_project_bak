@@ -40,16 +40,25 @@ class TrainSimCSE(BaseTrainTool):
         text_a = example.texts[0]
         text_b = example.texts[1]
 
-        inputs = self.tokenizer(text_a,
-                                add_special_tokens=True,
-                                max_length=self.data_train_args.max_length,
-                                padding="max_length",
-                                truncation=True,
-                                return_offsets_mapping=False,
-                                return_tensors="pt")
-        inputs['labels'] = label
+        inputs_a = self.tokenizer(text_a,
+                                  add_special_tokens=True,
+                                  max_length=self.data_train_args.max_length,
+                                  padding="max_length",
+                                  truncation=True,
+                                  return_offsets_mapping=False,
+                                  return_tensors="pt")
+        inputs_b = self.tokenizer(text_b,
+                                  add_special_tokens=True,
+                                  max_length=self.data_train_args.max_length,
+                                  padding="max_length",
+                                  truncation=True,
+                                  return_offsets_mapping=False,
+                                  return_tensors="pt")
+        return {"input_ids_a": inputs_a["input_ids"],
+                "input_ids_b": inputs_b["input_ids"],
+                "attention_mask_a": inputs_a["attention_mask"],
+                "attention_mask_b": inputs_b["attention_mask"]}
 
-        return inputs
 
 if __name__ == '__main__':
     TrainSimCSE(config_path="BasicTask/SentenceEmbedding/SimCSE_ST/config.yaml").run()

@@ -86,35 +86,38 @@ def test_acc(index_name, model_name):
 
 def main(config):
     best_acc = 0
-    for lr in [2e-5, 3e-5, 4e-5, 5e-5]:
+    for lr in [3e-5, 4e-5, 5e-5]:
         for train_batch_size in [32, 64, 128]:
             for max_seq_length in [64, 128]:
                 for num_epochs in [1, 2, 3, 4, 5, 6, 7, 8]:
 
                     print("lr: {} ===> train_batch_size: {} ===> max_seq_length: {} ===> num_epochs: {}".
                           format(lr, train_batch_size, max_seq_length, num_epochs))
+                    try:
+                        config["train_config"]["lr"] = lr
+                        config['train_config']['train_batch_size'] = train_batch_size
+                        config['train_config']['max_seq_length'] = max_seq_length
+                        config['train_config']['num_epochs'] = num_epochs
 
-                    config["train_config"]["lr"] = lr
-                    config['train_config']['train_batch_size'] = train_batch_size
-                    config['train_config']['max_seq_length'] = max_seq_length
-                    config['train_config']['num_epochs'] = num_epochs
+                        model = MODEL_REGISTRY.get(config["model_type"])(config["train_config"])
+                        model.train()
 
-                    model = MODEL_REGISTRY.get(config["model_type"])(config["train_config"])
-                    model.train()
+                        insert_data(data_path=config["train_config"]["train_data_path"],
+                                    index_name=config["index_name"],
+                                    model_name=config["train_config"]["model_output_path"])
 
-                    insert_data(data_path=config["train_config"]["train_data_path"],
-                                index_name=config["index_name"],
-                                model_name=config["train_config"]["model_output_path"])
+                        acc, res_df = test_acc(index_name=config["index_name"],
+                                               model_name=config["train_config"]["model_output_path"])
 
-                    acc, res_df = test_acc(index_name=config["index_name"],
-                                           model_name=config["train_config"]["model_output_path"])
+                        if acc > best_acc:
+                            best_acc = acc
+                            best_lr = lr
+                            best_train_batch_size = train_batch_size
+                            best_max_seq_length = max_seq_length
+                            best_num_epochs = num_epochs
 
-                    if acc > best_acc:
-                        best_acc = acc
-                        best_lr = lr
-                        best_train_batch_size = train_batch_size
-                        best_max_seq_length = max_seq_length
-                        best_num_epochs = num_epochs
+                    except:
+                        pass
 
                     # logger.success("best accuracy: {}".format(best_acc))
                     # logger.success("lr: {}".format(lr))

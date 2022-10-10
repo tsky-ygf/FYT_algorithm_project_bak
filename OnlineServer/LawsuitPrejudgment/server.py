@@ -37,17 +37,13 @@ def _get_administrative_result(param: AdministrativeInput):
 
 
 class CriminalInput(BaseModel):
-    fact: str
+    fact: str = "我偷了同事的3000元"
     question_answers: typing.Dict
-    factor_sentence_list: typing.List
-    anyou: typing.Any
-    event: typing.Any
 
 
 @app.post("/get_criminal_result")
 def _get_criminal_result(param: CriminalInput):
-    return criminal_app_service.get_criminal_result(param.fact, param.question_answers, param.factor_sentence_list,
-                                                    param.anyou, param.event)
+    return criminal_app_service.get_criminal_result(param.fact, param.question_answers)
 
 
 @app.get("/get_civil_problem_summary")

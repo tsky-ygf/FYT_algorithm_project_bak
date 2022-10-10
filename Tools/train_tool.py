@@ -235,12 +235,12 @@ class BaseTrainTool:
         )
         return lr_scheduler
 
-    def cal_loss(self, batch, **kwargs):
+    def cal_output_loss(self, batch, **kwargs):
         for key, value in batch.items():
             batch[key] = value.squeeze()
-        outputs = self.model(**batch)
-        loss = outputs.loss
-        return loss
+        outputs, loss = self.model(**batch)
+        # loss = outputs.loss
+        return outputs, loss
 
     def post_process_function(self, batch, outputs):
         raise NotImplemented
@@ -253,7 +253,7 @@ class BaseTrainTool:
         # self.lr_scheduler.step()
         for step, batch in enumerate(self.train_dataloader):
             self.model.train()
-            loss = self.cal_loss(batch)
+            _, loss = self.cal_output_loss(batch)
 
             loss /= self.train_args.gradient_accumulation_steps
             # self.accelerator.backward(loss, retain_graph=False)
@@ -261,7 +261,7 @@ class BaseTrainTool:
 
             if self.train_args.do_adv:
                 self.fgm.attack()
-                loss_adv = self.cal_loss(batch)
+                _, loss_adv = self.cal_output_loss(batch)
                 loss_adv /= self.train_args.gradient_accumulation_steps
                 self.accelerator.backward(loss_adv)
                 self.fgm.restore()
@@ -312,12 +312,7 @@ class BaseTrainTool:
         for step, batch in enumerate(self.eval_dataloader):
             self.model.eval()
             with torch.no_grad():
-                # eval_loss = self.cal_loss(batch)
-                for key, value in batch.items():
-                    batch[key] = value.squeeze()
-
-                output = self.model(**batch)
-                eval_loss = output.loss
+                output, eval_loss = self.cal_output_loss(batch)
                 eval_loss_res += eval_loss.item()
 
                 self.post_process_function(batch, output)

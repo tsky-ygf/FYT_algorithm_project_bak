@@ -6,8 +6,11 @@
 # @File    : basic_prejudgment.py
 # @Software: PyCharm
 import sys
-from loguru import logger
+from Utils.logger import get_logger, print_run_time
+# from Utils.logger import print_run_time
 from dataclasses import dataclass
+
+from typing import List
 
 
 @dataclass
@@ -16,7 +19,7 @@ class PrejudgmentConfig:
     log_path: str = ""
     prejudgment_type: str = ""
     anyou_identify_model_path: str = ""
-    situation_identify_model_path: str = ""
+    situation_identify_model_path: List[str] = ""
 
 
 class PrejudgmentPipeline:
@@ -24,13 +27,8 @@ class PrejudgmentPipeline:
         self.content = dict()
         self.config = PrejudgmentConfig(*args, **kwargs)
 
-        self.logger = logger
-        self.logger.remove()  # 删去import logger之后自动产生的handler，不删除的话会出现重复输出的现象
-        self.logger.add(sys.stderr, level=self.config.log_level.upper())  # 添加一个终端输出的内容
-        # 添加一个文件输出的内容
-        if self.config.log_path != "":
-            self.logger.remove()
-            logger.add(self.config.log_path, rotation='0:00', enqueue=True, retention="10 days")
+        self.logger = get_logger(self.config.log_level, self.config.log_path)
+        #     logger.add(self.config.log_path, rotation='0:00', enqueue=True, retention="10 days")
 
         self.content["graph_process"] = dict()
 
@@ -70,13 +68,14 @@ class PrejudgmentPipeline:
     def generate_report(self, *args, **kwargs):
         raise NotImplemented
 
+    @print_run_time
     def __call__(self, **kwargs):
         self.content.update(kwargs)
         if "question_answers" not in self.content:
             self.content["question_answers"] = dict()
 
         if "anyou" not in self.content:
-            print("父类：预测案由！")
+            self.logger.debug("父类：预测案由！")
             self.anyou_identify()
 
         if "suqiu" not in self.content:
@@ -86,7 +85,7 @@ class PrejudgmentPipeline:
             self.parse_config_file()
 
         if "event" not in self.content:
-            print("父类：模型抽取！")
+            self.logger.debug("父类：模型抽取！")
             self.situation_identify()
             if "report_result" in self.content:
                 return self.content

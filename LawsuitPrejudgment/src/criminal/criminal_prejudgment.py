@@ -8,7 +8,6 @@
 # from pprint import pprint, pformat
 # from extraction.feature_extraction import init_extract
 from pathlib import Path
-import requests
 from LawsuitPrejudgment.src.criminal.basic_prejudgment import PrejudgmentPipeline
 import time
 from autogluon.text import TextPredictor
@@ -21,6 +20,11 @@ from LawsuitPrejudgment.src.criminal.parse_xmind import deal_xmind_to_dict
 import pandas as pd
 from pprint import pprint
 
+from LawsuitPrejudgment.src.criminal.extraction.feature_extraction import (
+    init_extract,
+    post_process_uie_results,
+)
+
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 pd.set_option("display.max_columns", None)
 
@@ -31,14 +35,18 @@ class CriminalPrejudgment(PrejudgmentPipeline):
         t0 = time.time()
         # 加载案由预测模型
         self.predictor = TextPredictor.load(self.config.anyou_identify_model_path)
-        # self.ie = init_extract(criminal_type=criminal_type)
-        if self.config.situation_identify_model_path[:4] == "http":
-            self.ie_url = self.config.situation_identify_model_path
-        print("加载模型耗时:", time.time()-t0)
+
+        # 加载信息抽取模型
+        criminal_list = ["theft", "provide_drug"]
+        self.predictor_dict = {}
+        for criminal_type in criminal_list:
+            self.predictor_dict[criminal_type] = init_extract(criminal_type=criminal_type)
+
+        self.logger.info("加载模型耗时:{}".format(time.time() - t0))
         self.logger.info("加载预测模型成功")
 
     def anyou_identify(self):
-        print("预测案由！")
+        self.logger.info("预测案由！")
         sentence = self.content["fact"]
         predictions = self.predictor.predict({"fact": [sentence]}, as_pandas=False)
         self.content["anyou"] = predictions[0]
@@ -61,15 +69,13 @@ class CriminalPrejudgment(PrejudgmentPipeline):
             self.content["report_result"] = {"敬请期待": "正在训练中"}
             return
 
-        print("模型抽取！")
+        self.logger.info("模型抽取！")
         t0 = time.time()
-        r = requests.post(
-            self.ie_url,
-            json={"criminal_type": criminal_type, "fact": self.content["fact"]},
-        )
-        # extract_result = r.json()['result'][0]
-        self.content["event"] = r.json()["result"]
-        print("模型抽取耗时:", time.time() - t0)
+        self.content["event"] = post_process_uie_results(predictor=self.predictor_dict[criminal_type],
+                                                         criminal_type=criminal_type,
+                                                         fact=self.content["fact"])
+
+        self.logger.info("模型抽取耗时:", time.time() - t0)
         # self.logger.debug(self.content)
 
         # if self.content["event"]["行为"] is not None:
@@ -115,8 +121,6 @@ class CriminalPrejudgment(PrejudgmentPipeline):
         }
 
     def get_circumstance_of_question(self, question):
-        if not self.content.get("question_answers_config"):
-            return None, None
 
         for circumstance, info in self.content["question_answers_config"].items():
             if str(question) == str(info.get("question")) + ":" + str(info.get("answer")).replace("|", ";"):
@@ -145,7 +149,6 @@ class CriminalPrejudgment(PrejudgmentPipeline):
             if self.content["graph_process"]["情节"] == 1:
                 break
 
-        print("总金额:", self.content["event"]["总金额"])
         if self.content["anyou"] == "盗窃" and self.content["event"]["总金额"] != "":
             self.content["graph_process"]["量刑"] = 1
 
@@ -154,7 +157,7 @@ class CriminalPrejudgment(PrejudgmentPipeline):
             output_amount = re.findall("\d+", output_amount)[0]
             output_amount = float(output_amount)
 
-            print("output_amount", output_amount)
+            self.logger.debug("output_amount", output_amount)
             if output_amount < 1500:
                 self.content["graph_process_content"]["量刑"] = "0-1500（不含）"
             elif output_amount < 3000:
@@ -309,13 +312,13 @@ if __name__ == "__main__":
         "log_level": "info",
         "prejudgment_type": "criminal",
         "anyou_identify_model_path": "model/gluon_model/accusation",
-        "situation_identify_model_path": "http://172.19.82.199:7777/information_result",
+        # "situation_identify_model_path": "http://172.19.82.199:7777/information_result",
     }
     criminal_pre_judgment = CriminalPrejudgment(**criminal_config)
 
     # text = "浙江省诸暨市人民检察院指控，2019年7月22日10时30分许，被告人唐志强窜至诸暨市妇幼保健医院，在3楼21号病床床头柜内窃得被害人俞" \
     #        "某的皮包一只，内有现金￥1500元和银行卡、身份证等财物。"
-
+    #
     # input_dict = {"fact": text}
     # # 第一次调用
     # res = criminal_pre_judgment(**input_dict)

@@ -1,5 +1,5 @@
 LogArguments:
-  is_debug: True
+  is_debug: False
   log_level: "DEBUG"
 
 TrainingArguments:
