@@ -1,0 +1,21 @@
+LogArguments:
+  is_debug: True
+  log_level: "DEBUG"
+
+TrainingArguments:
+  train_batch_size: 128
+  learning_rate: 0.00005
+  num_train_epochs: 1
+  accelerator_params:
+    fp16: True
+  eval_ever_epoch: False
+
+ModelArguments:
+  model_name_or_path: 'model/language_model/bert-base-chinese'
+
+DataTrainingArguments:
+  train_data_path: "data/fyt_train_use_data/QA/pro_qa.csv"
+  dev_data_path: "data/fyt_train_use_data/QA/pro_qa.csv"
+  test_data_path: "data/fyt_train_use_data/QA/pro_qa.csv"
+  output_dir: "model/similarity_model/simcse-model-top-32"
+  max_length: 128

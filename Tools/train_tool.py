@@ -161,7 +161,7 @@ class BaseTrainTool:
                                 truncation=True,
                                 return_offsets_mapping=False,
                                 return_tensors="pt")
-        inputs['label'] = label
+        inputs['labels'] = label
 
         return inputs
 
@@ -171,17 +171,13 @@ class BaseTrainTool:
                          'test': self.data_train_args.test_data_path}
 
         train_dataset = BaseDataset(data_dir_dict,
-                                    # tokenizer=self.tokenizer,
                                     mode='train',
-                                    # max_length=self.data_train_args.max_length,
                                     create_examples=self.create_examples,
                                     is_debug=self.log_args.is_debug,
                                     prepare_input=self.prepare_input)
 
         eval_dataset = BaseDataset(data_dir_dict,
-                                   # tokenizer=self.tokenizer,
                                    mode='dev',
-                                   # max_length=self.data_train_args.max_length,
                                    create_examples=self.create_examples,
                                    is_debug=self.log_args.is_debug,
                                    prepare_input=self.prepare_input)
@@ -353,7 +349,7 @@ class BaseTrainTool:
                 break
             self.train_epoch(epoch)
             torch.cuda.empty_cache()
-            if epoch % self.train_args.early_stopping_patience == 0:  # and epoch > 0:
+            if epoch % self.train_args.early_stopping_patience == 0 and self.train_args.eval_ever_epoch:  # and epoch > 0:
                 # torch.cuda.empty_cache()
                 eval_loss = self.eval_epoch()
                 self.logger.info("epoch:{}======>eval_loss: {}".format(epoch, eval_loss))
