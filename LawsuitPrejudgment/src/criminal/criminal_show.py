@@ -8,7 +8,7 @@
 import streamlit as st
 
 # from LawsuitPrejudgment.Criminal.criminal_judgment_func import criminal_pre_judgment
-from LawsuitPrejudgment.Criminal.criminal_prejudgment import CriminalPrejudgment
+from LawsuitPrejudgment.src.criminal.criminal_prejudgment import CriminalPrejudgment
 
 st.title("刑事诉讼预判")
 

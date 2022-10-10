@@ -12,7 +12,7 @@ from loguru import logger
 from pydantic import BaseModel
 
 
-from LawsuitPrejudgment.Criminal.extraction.feature_extraction import (
+from LawsuitPrejudgment.src.criminal.extraction.feature_extraction import (
     init_extract,
     post_process_uie_results,
 )

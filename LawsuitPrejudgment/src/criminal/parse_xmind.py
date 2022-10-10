@@ -111,6 +111,6 @@ def deal_xmind_to_dict(xmind_path):
 
 
 if __name__ == "__main__":
-    file_path = "LawsuitPrejudgment/Criminal/base_config/盗窃/base_logic.xmind"
+    file_path = "LawsuitPrejudgment/config/criminal/盗窃/base_logic.xmind"
     # print(deal_xmind_to_df(file_path))
     deal_mind_to_dict(file_path)

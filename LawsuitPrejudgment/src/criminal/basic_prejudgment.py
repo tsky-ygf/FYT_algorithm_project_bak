@@ -90,9 +90,7 @@ class PrejudgmentPipeline:
             self.situation_identify()
             if "report_result" in self.content:
                 return self.content
-            # TODO
-            # self.match_graph()
-        self.match_graph()
+            self.match_graph()
 
         self.get_question()
 

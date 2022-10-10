@@ -12,7 +12,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import Dict
 
-from LawsuitPrejudgment.Criminal.criminal_prejudgment import CriminalPrejudgment
+from LawsuitPrejudgment.src.criminal.criminal_prejudgment import CriminalPrejudgment
 
 app = FastAPI()
 
@@ -63,4 +63,4 @@ async def get_criminal_prejudgment(item: Item):
 
 if __name__ == "__main__":
     # 日志设置
-    uvicorn.run('LawsuitPrejudgment.Criminal.criminal_server:app', host="0.0.0.0", port=5081, reload=True)
+    uvicorn.run('LawsuitPrejudgment.src.criminal.criminal_server:app', host="0.0.0.0", port=5081, reload=True)

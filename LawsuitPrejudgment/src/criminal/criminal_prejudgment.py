@@ -9,18 +9,17 @@
 # from extraction.feature_extraction import init_extract
 from pathlib import Path
 import requests
-from LawsuitPrejudgment.Criminal.basic_prejudgment import PrejudgmentPipeline
-
+from LawsuitPrejudgment.src.criminal.basic_prejudgment import PrejudgmentPipeline
+import time
 from autogluon.text import TextPredictor
 import re
 import os
 import cn2an
 
 # from xmindparser import xmind_to_dict
-from LawsuitPrejudgment.Criminal.parse_xmind import deal_xmind_to_dict
+from LawsuitPrejudgment.src.criminal.parse_xmind import deal_xmind_to_dict
 import pandas as pd
 from pprint import pprint
-import time
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 pd.set_option("display.max_columns", None)
@@ -80,7 +79,7 @@ class CriminalPrejudgment(PrejudgmentPipeline):
         if self.content["anyou"] not in ["盗窃", "容留他人吸毒"]:
             return
 
-        config_path = "LawsuitPrejudgment/Criminal/base_config"
+        config_path = "LawsuitPrejudgment/config/criminal"
         xmind_path = Path(config_path, self.content["anyou"], "base_logic.xmind")
         question_answers_path = Path(
             config_path, self.content["anyou"], "question_answers.csv"
