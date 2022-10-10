@@ -6,7 +6,7 @@ import logging
 import logging.handlers
 from flask import Flask
 from flask import request
-from LawsuitPrejudgment.Administrative.administrative_api_v1 import get_administrative_prejudgment_situation
+from LawsuitPrejudgment.src.administrative.administrative_api_v1 import get_administrative_prejudgment_situation
 from LawsuitPrejudgment.Criminal.criminal_prejudgment import CriminalPrejudgment
 from LawsuitPrejudgment.lawsuit_prejudgment.constants import SUPPORTED_ADMINISTRATIVE_TYPES_CONFIG_PATH
 from Utils.http_response import response_successful_result, response_failed_result

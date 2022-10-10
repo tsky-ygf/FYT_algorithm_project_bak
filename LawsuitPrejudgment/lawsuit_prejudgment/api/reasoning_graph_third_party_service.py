@@ -9,14 +9,10 @@ import requests
 from flask import Flask
 from flask import request
 
-from LawsuitPrejudgment.lawsuit_prejudgment.api.data_transfer_object.applicable_law_dto import \
-    CriminalApplicableLawDictCreator
 from LawsuitPrejudgment.lawsuit_prejudgment.api.data_transfer_object.prejudgment_report_dto import CivilReportDTO, \
     AdministrativeReportDTO, CriminalReportDTO
-from LawsuitPrejudgment.lawsuit_prejudgment.api.data_transfer_object.similar_case_dto import \
-    CriminalSimilarCaseListCreator
 from LawsuitPrejudgment.lawsuit_prejudgment.constants import SUPPORTED_ADMINISTRATIVE_TYPES_CONFIG_PATH, \
-    CIVIL_PROBLEM_ID_MAPPING_CONFIG_PATH, CIVIL_PROBLEM_TEMPLATE_CONFIG_PATH, FEATURE_TOGGLES_CONFIG_PATH
+    CIVIL_PROBLEM_ID_MAPPING_CONFIG_PATH, FEATURE_TOGGLES_CONFIG_PATH
 from LawsuitPrejudgment.lawsuit_prejudgment.core import civil_similar_case
 from LawsuitPrejudgment.lawsuit_prejudgment.core.civil_juding_rule import CivilJudgingRule
 from LawsuitPrejudgment.lawsuit_prejudgment.core.civil_relevant_law import CivilRelevantLaw
@@ -25,7 +21,6 @@ from LawsuitPrejudgment.lawsuit_prejudgment.core.civil_similar_case import Civil
 from LawsuitPrejudgment.lawsuit_prejudgment.feature_toggles import FeatureToggles
 from Utils.io import read_json_attribute_value
 from LawsuitPrejudgment.main.reasoning_graph_predict import predict_fn
-from LawsuitPrejudgment.Administrative.administrative_api_v1 import *
 from Utils.http_response import response_successful_result, response_failed_result
 from LawsuitPrejudgment.common.config_loader import user_ps
 
