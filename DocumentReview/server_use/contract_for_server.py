@@ -9,6 +9,7 @@ import argparse
 import json
 import os
 import re
+import time
 import uuid
 from dataclasses import dataclass
 
@@ -48,7 +49,8 @@ class CommonModelArgs:
 def init_model():
     common_model_args = CommonModelArgs()
     print('=' * 50, '模型初始化...', '=' * 50)
-    acknowledgement = BasicPBAcknowledgement(contract_type_list=get_contract_type_list(),
+    print(time.localtime())
+    acknowledgement = BasicPBAcknowledgement(contract_type_list=['laowu','laodong'],
                                              config_path_format="DocumentReview/Config/schema/{}.csv",
                                              model_path_format="model/uie_model/export_cpu/{}/inference",
                                              common_model_args=common_model_args,

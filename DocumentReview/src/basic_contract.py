@@ -42,6 +42,9 @@ class BasicAcknowledgement:
         self.data = ""
         self.usr = None
         self.review_result = OrderedDict()
+        self.config = None
+        self.contract_type = ""
+        self.return_result = []
 
     @print_run_time
     def review_main(self, content, mode, contract_type, usr="party_a"):
@@ -71,7 +74,8 @@ class BasicAcknowledgement:
             })
 
         self.logger.success(return_result)
-        return return_result
+        self.return_result = return_result
+        # return return_result
 
     def init_review_result(self):
         raise NotImplementedError
