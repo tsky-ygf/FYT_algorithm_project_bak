@@ -63,7 +63,11 @@ def read_config_to_label_aux():
     new_schemas = config_data['new_schema'].values.tolist()
     for sche, ns in zip(schemas, new_schemas):
         schema2new_schema[sche] = ns
-    return list(set(new_schemas)), schema2new_schema
+    new_schemas_new = []
+    for s in new_schemas:
+        if s not in new_schemas_new:
+            new_schemas_new.append(s)
+    return new_schemas_new, schema2new_schema
 
 
 # 加载train和dev数据
@@ -126,9 +130,7 @@ def batchify_cluener(batch):
 
         for label, res in res_dict.items():
             for entity, position in res.items():
-                # labels.append([label, entity, position[0]])
                 labels.append([label, entity])
-                # labels.append([label, position[0][0], position[0][1]])
                 label_index = labels2id.index(label)
                 start, end = position[0][0], position[0][1]
                 start_seq[start] = label_index
@@ -159,7 +161,7 @@ def batchify(batch):
     end_seqs = []
     start_seqs_aux = []
     end_seqs_aux = []
-    # labels_aux = []
+    labels_aux = []
 
     for b in batch:
         text = b['text']
@@ -179,12 +181,13 @@ def batchify(batch):
                     continue
                 start = res['start_offset']
                 end = res['end_offset']
-                if start is not None and end is not None:
-                    entity_text = text[start:end]
-                    labels.append([label, entity_text])
                 label_id = labels2id.index(label)
                 new_label_a = label2new_label[label]
                 label_id_a = labels2id_aux.index(new_label_a)
+                if start is not None and end is not None:
+                    entity_text = text[start:end]
+                    labels.append([label, entity_text])
+                    labels_aux.append([new_label_a, entity_text])
                 if start is not None:
                     start_seq[label_id][start] = 1
                     start_seq_a[label_id_a][start] = 1
@@ -221,7 +224,7 @@ def batchify(batch):
 
     # same batch
     assert len(input_ids) == len(start_seqs), [len(input_ids), len(start_seqs)]
-    return encoded_dict, start_seqs, end_seqs, labels, sentences, [start_seqs_aux, end_seqs_aux]
+    return encoded_dict, start_seqs, end_seqs, labels, sentences, [start_seqs_aux, end_seqs_aux, labels_aux]
 
 
 def evaluate_entity_wo_category(true_entities, pred_entities):

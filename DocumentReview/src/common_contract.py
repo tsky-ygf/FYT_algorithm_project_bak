@@ -142,6 +142,8 @@ class BasicPBAcknowledgement(BasicUIEAcknowledgement):
                     for mi in range(min_len):
                         # 针对具体合同类型， 转换schema名称。
                         new_label = self.common2alias[self.common_labels[li]]
+                        if new_label == "无":
+                            continue
                         tmp_entity = {'text': sentence[start_index[mi]:end_index[mi]],
                          'start': start_index[mi] + index_bias,
                          'end': end_index[mi] + index_bias}
@@ -179,19 +181,19 @@ class BasicPBAcknowledgement(BasicUIEAcknowledgement):
 if __name__ == "__main__":
     import time
 
-    contract_type = "laowu"
+    contract_type = "maimai"
 
     os.environ['CUDA_VISIBLE_DEVICES'] = "1"
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--model_load_path", default='model/PointerBert/PBert1009_common_all_20sche_tr.pt', type=str)
+    parser.add_argument("--model_load_path", default='model/PointerBert/PBert1011_common_all_20sche_auged.pt', type=str)
     parser.add_argument("--model", default='model/language_model/chinese-roberta-wwm-ext', type=str)
     parser.add_argument("--common_schema_path", default='DocumentReview/Config/config_common.csv', type=str,
                         help="The hidden size of model")
     # parser.add_argument("--contract_type", default=contract_type)
     parser.add_argument("--bert_emb_size", default=768, type=int, help="The embedding size of pretrained model")
-    parser.add_argument("--hidden_size", default=100, type=int, help="The hidden size of model")
+    parser.add_argument("--hidden_size", default=200, type=int, help="The hidden size of model")
     common_model_args = parser.parse_args()
 
     print('=' * 50, '模型初始化', '=' * 50)
@@ -203,7 +205,7 @@ if __name__ == "__main__":
                                              device="cpu")
     print('=' * 50, '开始预测', '=' * 50)
     localtime = time.time()
-    acknowledgement.review_main(content="data/DocData/{}/laowu1.docx".format(contract_type), mode="docx",
+    acknowledgement.review_main(content="data/DocData/{}/maimai3.docx".format(contract_type), mode="docx",
                                 contract_type=contract_type, usr="Part B")
     print('=' * 50, '结束', '=' * 50)
     print('use time: {}'.format(time.time() - localtime))

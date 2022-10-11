@@ -12,7 +12,6 @@ from torch.utils.data import DataLoader
 from transformers import BertTokenizer
 
 from BasicTask.NER.BertNer.metrics import SpanEntityScore
-from BasicTask.NER.PointerBert.model_NER import PointerNERBERT
 from BasicTask.NER.PointerBertMRC.model_MRC import PointerMRCBERT
 from BasicTask.NER.PointerBertMRC.utils import read_config_to_label, load_data, set_seed, ReaderDataset
 
@@ -66,7 +65,6 @@ def batchify_mrc(batch):
             atten_mask = [1] * len(input_i) + [0] * (512 - len(input_i))
             token_type_id = [0] * (len(text) + 2) + [1] * (len(ques) + 1) + [0] * (512 - len(input_i))
             assert len(input_id) == 512 == len(atten_mask) == len(token_type_id), [len(input_id), len(token_type_id)]
-
             input_ids.append(input_id)
             attention_mask.append(atten_mask)
             token_type_ids.append(token_type_id)
@@ -79,9 +77,9 @@ def batchify_mrc(batch):
 
     # 要把num_labels 放到bath_size上  batch_size*num_labels, seq_len, 1(pad)
     start_seqs = torch.FloatTensor(start_seqs).to('cuda')
+    start_seqs = start_seqs.reshape(-1, start_seqs.shape[-1]).unsqueeze(-1)
     end_seqs = torch.FloatTensor(end_seqs).to('cuda')
-    start_seqs = start_seqs.reshape(-1, start_seqs.shape[2]).unsqueeze(-1)
-    end_seqs = end_seqs.reshape(-1, end_seqs.shape[2]).unsqueeze(-1)
+    end_seqs = end_seqs.reshape(-1, end_seqs.shape[-1]).unsqueeze(-1)
 
     return encoded_dict, start_seqs, end_seqs, labels, sentences
 
@@ -111,6 +109,10 @@ def main(args):
     set_seed(args.seed)
 
     model = PointerMRCBERT(args).cuda()
+    # ===============================================================================
+    # state = torch.load("model/PointerBert/PMRCBert1010_common_long.pt", map_location="cpu")
+    # model.load_state_dict(state['model_state'])
+    # ===============================================================================
     optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate)
 
     train_dataset = ReaderDataset(train_data)
@@ -171,6 +173,7 @@ def main(args):
         print('pred entities: ', len(entities))
         if len(entities) > 0:
             print(entities[0])
+            pprint(entities)
         print('true_entities: ', len(true_entities))
         print(true_entities[0])
         # precision, recall, f1 = evaluate_entity_wo_category(true_entities, entities)
@@ -187,13 +190,13 @@ def main(args):
             best_f1 = f1
             PATH = args.model_save_path
             state = {'model_state': model.state_dict(), 'e': e, 'optimizer': optimizer.state_dict()}
-            torch.save(state, PATH)
+            # torch.save(state, PATH)
             # 加载
             # PATH = './model.pth'  # 定义模型保存路径
             # state = torch.load(PATH, map_location="cpu")
             # model.load_state_dict(state['model_state'])
             # optimizer.load_state_dict(state['optimizer'])
-
+        assert False
 
 def ttt():
     text = '今天阴天'
