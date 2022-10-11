@@ -121,7 +121,7 @@ logic_ps_condition = temp['logic_condition'].groupby(temp['logic_ps'], sort=Fals
 
 # 评估理由诉求默认特征
 temp = df_suqiu[~df_suqiu['logic_suqiu_factor'].isna()]
-# TODO: 这行代码，在python3.6(pandas1.1.5)环境下正常，在python3.9(pandas1.5.0)环境下异常
+# TODO: 这行代码，在pandas1.4.0之前的版本里正常，在pandas1.4.0及以后的版本里异常
 logic_ps_factor = temp['logic_suqiu_factor'].groupby(temp['logic_ps'], sort=False).agg(lambda x: _agg_ignore_empty(x))
 logic_ps_factor = logic_ps_factor.apply(lambda x: {s.split(':')[0]: int(s.split(':')[1]) for s in x.split(';')})
 
