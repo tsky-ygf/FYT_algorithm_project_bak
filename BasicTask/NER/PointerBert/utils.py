@@ -54,6 +54,17 @@ def read_config_to_label(args):
     return config_list, _alias2label
     # return ['争议解决','合同生效','未尽事宜','通知与送达','鉴于条款','附件'], _alias2label
 
+#
+def read_config_to_label_aux():
+    config_path = 'data/data_src/config_aux.csv'
+    config_data = pd.read_csv(config_path, encoding='utf-8', na_values=' ', keep_default_na=False)
+    schemas = config_data['schema'].values.tolist()
+    schema2new_schema = dict()
+    new_schemas = config_data['new_schema'].values.tolist()
+    for sche, ns in zip(schemas, new_schemas):
+        schema2new_schema[sche] = ns
+    return list(set(new_schemas)), schema2new_schema
+
 
 # 加载train和dev数据
 def load_data(path):
@@ -146,21 +157,21 @@ def batchify(batch):
     window_length = 510  # add 101 102 to 512
     start_seqs = []
     end_seqs = []
+    start_seqs_aux = []
+    end_seqs_aux = []
+    # labels_aux = []
 
     for b in batch:
         text = b['text']
         res_list = b['entities']
-        # labels_batch = []
-        # negative ratio 生成的负例
         start_seq = [[0] * window_length for _ in range(len(labels2id))]
         end_seq = [[0] * window_length for _ in range(len(labels2id))]
-        # start_seq = [0] * window_length # 用softmax做多分类
-        # end_seq = [0] * window_length
+        start_seq_a = [[0] * window_length for _ in range(len(labels2id_aux))]
+        end_seq_a = [[0] * window_length for _ in range(len(labels2id_aux))]
         sentences.append(text)
         if not res_list:
             start_seqs.append(start_seq)
             end_seqs.append(end_seq)
-            # labels_batch.append([None, None, None, None])
         else:
             for res in res_list:
                 label = res['label']
@@ -172,16 +183,20 @@ def batchify(batch):
                     entity_text = text[start:end]
                     labels.append([label, entity_text])
                 label_id = labels2id.index(label)
+                new_label_a = label2new_label[label]
+                label_id_a = labels2id_aux.index(new_label_a)
                 if start is not None:
                     start_seq[label_id][start] = 1
+                    start_seq_a[label_id_a][start] = 1
                 if end is not None:
                     end_seq[label_id][end] = 1
-                # start_seq[start] = label_id   # softmax多分类
-                # end_seq[end] = label_id
+                    end_seq_a[label_id_a][end] = 1
 
             start_seqs.append(start_seq)
             end_seqs.append(end_seq)
-        # labels.append(labels_batch)
+            start_seqs_aux.append(start_seq_a)
+            end_seqs_aux.append(end_seq_a)
+
         input_i = [101] + tokenizer.convert_tokens_to_ids(list(text)) + [102]
         input_id = input_i.copy() + [0] * (512 - len(input_i))
         atten_mask = [1] * len(input_i) + [0] * (512 - len(input_i))
@@ -201,11 +216,12 @@ def batchify(batch):
     # no sense for softmax method
     start_seqs = torch.FloatTensor(start_seqs).transpose(1, 2).to('cuda')
     end_seqs = torch.FloatTensor(end_seqs).transpose(1, 2).to('cuda')
-    # start_seqs = torch.LongTensor(start_seqs).to('cuda')
-    # end_seqs = torch.LongTensor(end_seqs).to('cuda')
+    start_seqs_aux = torch.FloatTensor(start_seqs_aux).transpose(1,2).cuda()
+    end_seqs_aux = torch.FloatTensor(end_seqs_aux).transpose(1,2).cuda()
+
     # same batch
     assert len(input_ids) == len(start_seqs), [len(input_ids), len(start_seqs)]
-    return encoded_dict, start_seqs, end_seqs, labels, sentences
+    return encoded_dict, start_seqs, end_seqs, labels, sentences, [start_seqs_aux, end_seqs_aux]
 
 
 def evaluate_entity_wo_category(true_entities, pred_entities):
@@ -263,7 +279,4 @@ if __name__ == "__main__":
 
 else:
     labels2id, alias2label = read_config_to_label(None)
-    # labels2id = ['O', 'address', 'book', 'company', 'game', 'government', 'movie',
-    #              'name', 'organization', 'position', 'scene']
-    # labels2id = ['address', 'book', 'company', 'game', 'government', 'movie', 'name', 'organization', 'position',
-    #              'scene']
+    labels2id_aux, label2new_label = read_config_to_label_aux()

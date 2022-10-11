@@ -18,8 +18,8 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader
 
 from BasicTask.NER.PointerBert.utils import load_data, set_seed, ReaderDataset, batchify, read_config_to_label, \
-    evaluate_index, batchify_cluener, evaluate_entity_wo_category, bert_extract_item
-from BasicTask.NER.PointerBert.model_NER import PointerNERBERT, BertSpanForNer
+    evaluate_index, batchify_cluener, evaluate_entity_wo_category, bert_extract_item, read_config_to_label_aux
+from BasicTask.NER.PointerBert.model_NER import PointerNERBERT,  PointerNERBERT2
 
 
 def compute_kl_loss(self, p, q, pad_mask=None):
@@ -69,11 +69,14 @@ def train(args, train_loader, model, optimizer):
         optimizer.zero_grad()
         encoded_dicts, starts, ends, labels = samples[0], samples[1], samples[2], samples[3]
         sentences = samples[4]
-        start_prob, end_prob = model(encoded_dicts)
+        starts_aux, ends_aux = samples[5]
+        start_prob, end_prob, start_prob2, end_prob2 = model(encoded_dicts)
         # start_loss = torch.nn.functional.binary_cross_entropy(input=start_prob, target=starts, reduction="sum")
         # end_loss = torch.nn.functional.binary_cross_entropy(input=end_prob, target=ends, reduction="sum")
         start_loss = torch.nn.functional.binary_cross_entropy(input=start_prob, target=starts)
         end_loss = torch.nn.functional.binary_cross_entropy(input=end_prob, target=ends)
+        start_loss_aux = torch.nn.functional.binary_cross_entropy(input=start_prob2, target=starts_aux)
+        end_loss_aux = torch.nn.functional.binary_cross_entropy(input=end_prob2, target=ends_aux)
 
         # start_prob = start_prob.contiguous().view(-1, start_prob.shape[-1])
         # end_prob = end_prob.contiguous().view(-1,end_prob.shape[-1])
@@ -95,7 +98,7 @@ def train(args, train_loader, model, optimizer):
         # ends = ends.view(-1)
         # start_loss = F.cross_entropy(input=start_prob, target=starts)
         # end_loss = F.cross_entropy(input=end_prob, target=ends)
-        loss = torch.sum(start_loss) + torch.sum(end_loss)
+        loss = torch.sum(start_loss) + torch.sum(end_loss) + 0.8 * (torch.sum(start_loss_aux) + torch.sum(end_loss_aux))
         loss.backward()
 
         # total_loss += loss.item()
@@ -109,18 +112,13 @@ def train(args, train_loader, model, optimizer):
 
 def main(args):
 
-
-    # config_class, model_class, tokenizer_class = BertConfig, BertSpanForNer, BertTokenizer
-    # config = config_class.from_pretrained(args.model, num_labels=len(labels2id))
-    # config.loss_type = 'lsr'
-    # config.soft_label = True
-
     train_data = load_data(args.train_path)
     dev_data = load_data(args.dev_path)
 
     set_seed(args.seed)
 
-    model = PointerNERBERT(args).to(args.device)
+    # model = PointerNERBERT(args).to(args.device)
+    model = PointerNERBERT2(args).to(args.device)
     # model = BertSpanForNer(config).to(args.device)
     # ===============================================================================
     # state = torch.load("DocumentReview/PointerBert/model_src/pBert0921_cluener.pt")
@@ -156,7 +154,7 @@ def main(args):
             encoded_dicts, starts, ends, labels = samples[0], samples[1], samples[2], samples[3]
             sentences = samples[4]
 
-            start_prob, end_prob = model(encoded_dicts)
+            start_prob, end_prob, _, _ = model(encoded_dicts)
             # bs, seq_len
             '''
             start_pred = torch.argmax(start_prob, dim=-1, keepdim=False)
@@ -193,20 +191,15 @@ def main(args):
                     end_seq = end_pred[bi][li]
                     start_index = []
                     end_index = []
-                    # if True in start_seq:
                     for start_ind in range(len(start_seq)):
                         if start_seq[start_ind]:
                             start_index.append(start_ind)
-                            # print("label:", args.labels[li], "start:", start_ind)
-                    # if True in end_seq:
                     for end_ind in range(len(end_seq)):
                         if end_seq[end_ind]:
                             end_index.append(end_ind)
-                            # print("label:", args.labels[li], "end:", end_ind)
                     if len(start_index) == len(end_index):
                         for start_ind, end_ind in zip(start_index, end_index):
                             entities.append([args.labels[li], sentence[start_ind:end_ind]])
-                            # true_entities.append([labels[bi][0], sentence[labels[bi][1]:labels[bi][2]+1]])
                     else:
                         min_len = min(len(start_index), len(end_index))
                         for mi in range(min_len):
@@ -227,11 +220,6 @@ def main(args):
         f1 = score['f1']
         print("epoch:", e, "  p: {0}, r: {1}, f1: {2}".format(score['acc'], score['recall'], score['f1']))
         pprint(class_info)
-        # ev = evaluate_index(y_pred, y_true)
-        # print("epoch:", e, "  p: {0}, r: {1}, f1: {2}".format(ev[0], ev[1], ev[2]))
-        # score, class_info = metric.result()
-        # f1 = score['f1']
-        # print("epoch:", e, "  p: {0}, r: {1}, f1: {2}".format(score['acc'], score['recall'], score['f1']))
 
         if f1 > best_f1:
             print("f1 score increased  {0}==>{1}".format(best_f1, f1))
@@ -306,7 +294,7 @@ if __name__ == '__main__':
     parser.add_argument("--local_rank", type=int, default=-1, help="For distributed training: local_rank")
     parser.add_argument("--do_train", default=True, type=bool)
     parser.add_argument("--is_inference", default=False, type=bool)
-    parser.add_argument("--model_save_path", default='model/PointerBert/PBert1011_common_all_20sche.pt')
+    parser.add_argument("--model_save_path", default='model/PointerBert/PBert1010_common_all_20sche_aux.pt')
     parser.add_argument("--batch_size", default=8, type=int, help="Batch size per GPU/CPU for training.")
     parser.add_argument("--learning_rate", default=5e-5, type=float, help="The initial learning rate for Adam.")
     parser.add_argument("--train_path", default=None, type=str, help="The path of train set.")
@@ -339,9 +327,11 @@ if __name__ == '__main__':
     # args.dev_path = 'data/cluener/dev.json'
     args.model = 'model/language_model/chinese-roberta-wwm-ext'
     labels, alias2label = read_config_to_label(args)
+    labels_aux, label2new_label = read_config_to_label_aux()
     args.labels = labels
+    args.labels_aux = labels_aux
     pprint(args)
 
     main(args)
     # export PYTHONPATH=$(pwd):$PYTHONPATH
-    # nohup python -u BasicTask/NER/PointerBert/main.py > log/PointerBert/pBert_1011_common_all_20sche.log 2>&1 &
+    # nohup python -u BasicTask/NER/PointerBert/main.py > log/PointerBert/pBert_1010_common_all_20sche_aux.log 2>&1 &

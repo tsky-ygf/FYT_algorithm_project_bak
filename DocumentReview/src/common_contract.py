@@ -90,6 +90,7 @@ class BasicPBAcknowledgement(BasicUIEAcknowledgement):
             self.logger.debug(self.data)
             self.common2alias = self.common2alias_dict[self.contract_type]
             res = self.predictor_dict[self.contract_type].predict([self.data])
+            print("uie predict result", res[0])
             res_common = self._get_common_result()
             print("common predict result", len(res_common))
             print(res_common)
@@ -178,7 +179,7 @@ class BasicPBAcknowledgement(BasicUIEAcknowledgement):
 if __name__ == "__main__":
     import time
 
-    contract_type = "fangwuzulin"
+    contract_type = "laowu"
 
     os.environ['CUDA_VISIBLE_DEVICES'] = "1"
 
@@ -202,7 +203,7 @@ if __name__ == "__main__":
                                              device="cpu")
     print('=' * 50, '开始预测', '=' * 50)
     localtime = time.time()
-    acknowledgement.review_main(content="data/DocData/{}/fwzl1.docx".format(contract_type), mode="docx",
+    acknowledgement.review_main(content="data/DocData/{}/laowu1.docx".format(contract_type), mode="docx",
                                 contract_type=contract_type, usr="Part B")
     print('=' * 50, '结束', '=' * 50)
     print('use time: {}'.format(time.time() - localtime))

@@ -44,6 +44,48 @@ class PointerNERBERT(nn.Module):
         # return start_logits, end_logits
 
 
+class PointerNERBERT2(nn.Module):
+    def __init__(self, args):
+        super(PointerNERBERT2, self).__init__()
+
+        self.bert = BertModel.from_pretrained(args.model)
+        # self.bert = BertModel(args.bert_config)
+        self.num_labels = len(args.labels)
+        self.num_labels_aux = len(args.labels_aux)
+        self.linear_hidden = nn.Linear(args.bert_emb_size, args.hidden_size)
+        self.linear_start_aux = nn.Linear(args.hidden_size, self.num_labels_aux)
+        self.linear_end_aux = nn.Linear(args.hidden_size, self.num_labels_aux)
+        self.linear_start = nn.Linear(args.hidden_size+self.num_labels_aux, self.num_labels)
+        self.linear_end = nn.Linear(args.hidden_size+self.num_labels_aux, self.num_labels)
+        self.sigmoid = nn.Sigmoid()
+        self.gelu = nn.GELU()
+        self.dropout = nn.Dropout(0.15)
+        self.softmax = nn.Softmax(dim=-1)
+
+    def forward(self, inputs):
+        bert_emb = self.bert(**inputs)
+        bert_out, bert_pool = bert_emb[0], bert_emb[1]
+
+        hidden = self.linear_hidden(bert_out)
+
+        start_logits_aux = self.linear_start_aux(self.gelu(hidden))
+        end_logits_aux = self.linear_end_aux(self.gelu(hidden))
+
+        start_logits = self.linear_start(self.gelu(torch.cat([hidden,start_logits_aux], dim=-1)))
+        end_logits = self.linear_end(self.gelu(torch.cat([hidden, end_logits_aux],dim=-1)))
+        # delete cls and sep
+        start_logits = start_logits[:, 1:-1]
+        end_logits = end_logits[:, 1:-1]
+        start_prob = self.sigmoid(start_logits)
+        end_prob = self.sigmoid(end_logits)
+
+        start_logits_aux = start_logits_aux[:,1:-1]
+        end_logits_aux = end_logits_aux[:,1:-1]
+        start_prob2 = self.sigmoid(start_logits_aux)
+        end_prob2 = self.sigmoid(end_logits_aux)
+        return start_prob, end_prob, start_prob2, end_prob2
+
+
 class PointerNERBERT_softmax(nn.Module):
     def __init__(self, args):
         super(PointerNERBERT_softmax, self).__init__()
