@@ -8,7 +8,7 @@ import os
 # from transformers import WEIGHTS_NAME, BertConfig,get_linear_schedule_with_warmup,AdamW, BertTokenizer
 from BasicTask.NER.BertNer.metrics import SpanEntityScore
 
-os.environ['CUDA_VISIBLE_DEVICES'] = '1'
+os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 import torch
 import argparse
 from pprint import pprint
@@ -69,11 +69,14 @@ def train(args, train_loader, model, optimizer):
         optimizer.zero_grad()
         encoded_dicts, starts, ends, labels = samples[0], samples[1], samples[2], samples[3]
         sentences = samples[4]
-        start_prob, end_prob = model(encoded_dicts)
+        starts_aux, ends_aux, _ = samples[5]
+        start_prob, end_prob, start_prob2, end_prob2 = model(encoded_dicts)
         # start_loss = torch.nn.functional.binary_cross_entropy(input=start_prob, target=starts, reduction="sum")
         # end_loss = torch.nn.functional.binary_cross_entropy(input=end_prob, target=ends, reduction="sum")
         start_loss = torch.nn.functional.binary_cross_entropy(input=start_prob, target=starts)
         end_loss = torch.nn.functional.binary_cross_entropy(input=end_prob, target=ends)
+        start_loss_aux = torch.nn.functional.binary_cross_entropy(input=start_prob2, target=starts_aux)
+        end_loss_aux = torch.nn.functional.binary_cross_entropy(input=end_prob2, target=ends_aux)
 
         # start_prob = start_prob.contiguous().view(-1, start_prob.shape[-1])
         # end_prob = end_prob.contiguous().view(-1,end_prob.shape[-1])
@@ -95,7 +98,7 @@ def train(args, train_loader, model, optimizer):
         # ends = ends.view(-1)
         # start_loss = F.cross_entropy(input=start_prob, target=starts)
         # end_loss = F.cross_entropy(input=end_prob, target=ends)
-        loss = torch.sum(start_loss) + torch.sum(end_loss)
+        loss = torch.sum(start_loss) + torch.sum(end_loss) + 0.8 * (torch.sum(start_loss_aux) + torch.sum(end_loss_aux))
         loss.backward()
 
         # total_loss += loss.item()
@@ -115,8 +118,9 @@ def main(args):
     set_seed(args.seed)
 
     model = PointerNERBERT(args).to(args.device)
+    # model = PointerNERBERT2(args).to(args.device)
     # ===============================================================================
-    state = torch.load("model/PointerBert/PBert1011_common_all_20sche.pt")
+    state = torch.load("model/PointerBert/PBert1010_common_all_20sche_aux.pt", map_location="cpu")
     model.load_state_dict(state['model_state'])
     # ===============================================================================
 
@@ -144,8 +148,10 @@ def main(args):
 
             encoded_dicts, starts, ends, labels = samples[0], samples[1], samples[2], samples[3]
             sentences = samples[4]
+            # _, _, labels_aux = samples[5]
 
             start_prob, end_prob = model(encoded_dicts)
+            # start_prob, end_prob, start_prob_aux, end_prob_aux = model(encoded_dicts)
             # bs, seq_len
             '''
             start_pred = torch.argmax(start_prob, dim=-1, keepdim=False)
@@ -194,17 +200,51 @@ def main(args):
                         entities.append([args.labels[li], sentence[start_index[mi]:end_index[mi]]])
             true_entities.extend(labels)
 
+            start_pred_aux = start_prob_aux > thred
+            end_pred_aux = end_prob_aux > thred
+            start_pred_aux = start_pred_aux.transpose(2, 1)
+            end_pred_aux = end_pred_aux.transpose(2, 1)
+
+            for bi in range(len(start_pred_aux)):
+                sentence = sentences[bi]
+                for li in range(len(start_pred_aux[bi])):
+                    start_seq_aux = start_pred_aux[bi][li]
+                    end_seq_aux = end_pred_aux[bi][li]
+                    start_index = []
+                    end_index = []
+                    for start_ind in range(len(start_seq_aux)):
+                        if start_seq_aux[start_ind]:
+                            start_index.append(start_ind)
+                    for end_ind in range(len(end_seq_aux)):
+                        if end_seq_aux[end_ind]:
+                            end_index.append(end_ind)
+                    min_len = min(len(start_index), len(end_index))
+                    for mi in range(min_len):
+                        pred_entities_aux.append([args.labels_aux[li], sentence[start_index[mi]:end_index[mi]]])
+            true_entities_aux.extend(labels_aux)
+
         print('pred entities: ', len(entities))
         if len(entities)>0:
             print(entities[0])
         print('true_entities: ', len(true_entities))
         print(true_entities[0])
+        print('pred entities aux: ', len(pred_entities_aux))
+        if len(pred_entities_aux)>0:
+            print(pred_entities_aux[0])
+        print('true entities aux: ', len(true_entities_aux))
+        print(true_entities_aux[0])
         # precision, recall, f1 = evaluate_entity_wo_category(true_entities, entities)
         cir = SpanEntityScore()
         cir.update(true_entities, entities)
         print('cal...')
         score, class_info = cir.result()
         f1 = score['f1']
+        print("epoch:", e, "  p: {0}, r: {1}, f1: {2}".format(score['acc'], score['recall'], score['f1']))
+        pprint(class_info)
+        cir_aux = SpanEntityScore()
+        cir_aux.update(true_entities_aux, pred_entities_aux)
+        score, class_info = cir_aux.result()
+        f1_aux = score['f1']
         print("epoch:", e, "  p: {0}, r: {1}, f1: {2}".format(score['acc'], score['recall'], score['f1']))
         pprint(class_info)
 
@@ -280,7 +320,7 @@ if __name__ == '__main__':
     parser.add_argument("--local_rank", type=int, default=-1, help="For distributed training: local_rank")
     parser.add_argument("--do_train", default=True, type=bool)
     parser.add_argument("--is_inference", default=False, type=bool)
-    parser.add_argument("--model_save_path", default='model/PointerBert/PBert1011_common_all_20sche_auged.pt')
+    parser.add_argument("--model_save_path", default='model/PointerBert/PBert1011_common_all_20sche_aux.pt')
     parser.add_argument("--batch_size", default=8, type=int, help="Batch size per GPU/CPU for training.")
     parser.add_argument("--learning_rate", default=5e-5, type=float, help="The initial learning rate for Adam.")
     parser.add_argument("--train_path", default=None, type=str, help="The path of train set.")
@@ -304,16 +344,18 @@ if __name__ == '__main__':
                         help="Select the pretrained model for few-shot learning.")
     parser.add_argument("--init_from_ckpt", default=None, type=str,
                         help="The path of model parameters for initialization.")
-    args = parser.parse_args()
 
-    args.train_path = 'data/data_src/common_aug/train.json'
-    args.dev_path = 'data/data_src/common_aug/dev.json'
+
+    args = parser.parse_args()
+    args.train_path = 'data/data_src/common_all/train.json'
+    args.dev_path = 'data/data_src/common_all/dev.json'
     args.model = 'model/language_model/chinese-roberta-wwm-ext'
-    args.num_epochs = 20    # for data augment
     labels, alias2label = read_config_to_label(args)
+    labels_aux, label2new_label = read_config_to_label_aux()
     args.labels = labels
+    args.labels_aux = labels_aux
     pprint(args)
 
     main(args)
     # export PYTHONPATH=$(pwd):$PYTHONPATH
-    # nohup python -u BasicTask/NER/PointerBert/main.py > log/PointerBert/pBert_1011_common_all_20sche_aug.log 2>&1 &
+    # nohup python -u BasicTask/NER/PointerBert/main.py > log/PointerBert/pBert_1011_common_all_20sche_aux.log 2>&1 &
