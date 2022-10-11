@@ -9,7 +9,6 @@
 import pandas as pd
 # from In embed_trainer import EmbedTrainer
 from IntelligentConsultation.src.faq_pipeline.embed_trainer import EmbedTrainer
-from IntelligentConsultation.src.faq_pipeline.core_model.st_losses import RDropLoss
 
 from sentence_transformers import models, losses
 from sentence_transformers import SentenceTransformer, datasets
@@ -65,18 +64,7 @@ class TSDAE(EmbedTrainer):
         return model, train_loss
 
 
-@MODEL_REGISTRY.register()
-class SimCSE_RDRop(SimCSE):
 
-    def init_model(self):
-        word_embedding_model = models.Transformer(self.config.model_name, max_seq_length=self.config.max_seq_length)
-        pooling_model = models.Pooling(word_embedding_model.get_word_embedding_dimension())
-        model = SentenceTransformer(modules=[word_embedding_model, pooling_model])
-        # base_loss = losses.MultipleNegativesRankingLoss(model)
-
-        # kl_loss = RDropLoss(model, self.config.kl_loss_weight)
-        kl_loss = RDropLoss(model)
-        return model, kl_loss
 
 
 if __name__ == "__main__":

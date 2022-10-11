@@ -8,7 +8,7 @@
 import torch
 from tqdm.auto import tqdm
 
-from Utils.logger import get_module_logger
+from Utils.logger import get_logger
 from Tools.parse_argument import parse_config_file
 from torch.utils import data
 
@@ -20,7 +20,7 @@ from pprint import pformat
 class BaseInferTool:
     def __init__(self, config, create_examples):
         self.config = parse_config_file(config)
-        self.logger = get_module_logger(module_name="Infer", level=self.config.get("log_level", "INFO"))
+        self.logger = get_logger(level=self.config.get("log_level", "INFO"))
         if "device" in self.config:
             self.device = torch.device(self.config["device"])
         else:
@@ -45,9 +45,7 @@ class BaseInferTool:
         data_dir_dict = {'test': self.config['test_data_path']}
 
         test_dataset = BaseDataset(data_dir_dict,
-                                   tokenizer=self.tokenizer,
                                    mode='test',
-                                   max_length=self.config['max_len'],
                                    create_examples=self.create_examples,
                                    is_debug=self.config['is_debug'])
         return test_dataset
