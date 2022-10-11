@@ -10,6 +10,9 @@ import uvicorn
 from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import Union
+from ProfessionalSearch.src.similar_case_retrival.similar_case.narrative_similarity_predict import (
+    predict_fn as predict_fn_similar_cases,
+)
 
 from ProfessionalSearch.service_use.relevant_laws.relevant_laws_api import get_filter_conditions, \
     _get_law_result
@@ -49,6 +52,11 @@ class Search_cases_input(BaseModel):
     page_number: int
     page_size: int
 
+class Similar_case_input(BaseModel):
+    fact: str
+    problem: str
+    claim_list: list
+
 
 class Case_id(BaseModel):
     case_id: str
@@ -86,6 +94,10 @@ def search_laws(search_query: Search_cases_input):
 def get_law_document(case_id: Case_id):
     # TODO 待更新
     return {"result": ""}
+
+@app.get('/get_similar_case')
+def get_similar_case(search_query: Similar_case_input):
+    return {"result": predict_fn_similar_cases(search_query.fact, search_query.problem, search_query.claim_list)}
 
 
 if __name__ == "__main__":
