@@ -49,19 +49,28 @@ par_model_path = os.path.join(LTP_DATA_DIR, 'parser.model')  # 依存句法分�
 # 加载模型
 
 # 原初始化方式，在python3.6下运行
-segmentor = Segmentor()
-segmentor.load_with_lexicon(seg_model_path, config_path + 'negative') # TODO:应该是把否定词加入了词汇表
-postagger = Postagger()  # 初始化实例
-postagger.load(pos_model_path)  # 加载模型
-recognizer = NamedEntityRecognizer()  # 初始化实例
-recognizer.load(ner_model_path)  # 加载模型
-parser = Parser()  # 初始化实例
-parser.load(par_model_path)
-# segmentor = Segmentor(seg_model_path, config_path + 'negative')
-# postagger = Postagger(pos_model_path)
-# recognizer = NamedEntityRecognizer(ner_model_path)
-# parser = Parser(par_model_path)
+# segmentor = Segmentor()
+# segmentor.load_with_lexicon(seg_model_path, config_path + 'negative') # TODO:应该是把否定词加入了词汇表
+# postagger = Postagger()  # 初始化实例
+# postagger.load(pos_model_path)  # 加载模型
+# recognizer = NamedEntityRecognizer()  # 初始化实例
+# recognizer.load(ner_model_path)  # 加载模型
+# parser = Parser()  # 初始化实例
+# parser.load(par_model_path)
+segmentor = Segmentor(seg_model_path, config_path + 'negative')
+postagger = Postagger(pos_model_path)
+recognizer = NamedEntityRecognizer(ner_model_path)
+parser = Parser(par_model_path)
 
+
+def _agg_ignore_empty(x):
+    if not x.empty:
+        return list(x)[0]
+
+
+def _agg_split_ignore_empty(x):
+    if not x.empty:
+        list(x)[0].split('|')
 
 ########################################################################################################################
 #
@@ -99,32 +108,32 @@ def _precondition_process(x):
     return result
 
 temp = df_suqiu[~df_suqiu['logic_precondition'].isna()]
-logic_ps_prediction = temp['logic_precondition'].groupby(df_suqiu['logic_ps'], sort=False).agg(lambda x: list(x)[0])
+logic_ps_prediction = temp['logic_precondition'].groupby(df_suqiu['logic_ps'], sort=False).agg(lambda x: _agg_ignore_empty(x))
 logic_ps_prediction = logic_ps_prediction.apply(_precondition_process)
 
 # 评估理由诉求不满足前提的结论
 temp = df_suqiu[~df_suqiu['logic_result'].isna()]
-logic_ps_result = temp['logic_result'].groupby(temp['logic_ps'], sort=False).agg(lambda x: list(x)[0])
+logic_ps_result = temp['logic_result'].groupby(temp['logic_ps'], sort=False).agg(lambda x: _agg_ignore_empty(x))
 
 # 评估理由诉求结论展示条件
 temp = df_suqiu[~df_suqiu['logic_condition'].isna()]
-logic_ps_condition = temp['logic_condition'].groupby(temp['logic_ps'], sort=False).agg(lambda x: list(x)[0])
+logic_ps_condition = temp['logic_condition'].groupby(temp['logic_ps'], sort=False).agg(lambda x: _agg_ignore_empty(x))
 
 # 评估理由诉求默认特征
 temp = df_suqiu[~df_suqiu['logic_suqiu_factor'].isna()]
 # TODO: 这行代码，在python3.6(pandas1.1.5)环境下正常，在python3.9(pandas1.5.0)环境下异常
-logic_ps_factor = temp['logic_suqiu_factor'].groupby(temp['logic_ps'], sort=False).agg(lambda x: list(x)[0])
+logic_ps_factor = temp['logic_suqiu_factor'].groupby(temp['logic_ps'], sort=False).agg(lambda x: _agg_ignore_empty(x))
 logic_ps_factor = logic_ps_factor.apply(lambda x: {s.split(':')[0]: int(s.split(':')[1]) for s in x.split(';')})
 
 # 评估理由诉求默认法律建议
-logic_ps_advice = df_suqiu['logic_suqiu_advice'].groupby(df_suqiu['logic_ps'], sort=False).agg(lambda x: list(x)[0])
+logic_ps_advice = df_suqiu['logic_suqiu_advice'].groupby(df_suqiu['logic_ps'], sort=False).agg(lambda x: _agg_ignore_empty(x))
 
 # 评估理由诉求额外证据
 df_suqiu['logic_suqiu_proof'] = df_suqiu['logic_suqiu_proof'].fillna('')
-logic_ps_proof = df_suqiu['logic_suqiu_proof'].groupby(df_suqiu['logic_ps'], sort=False).agg(lambda x: list(x)[0])
+logic_ps_proof = df_suqiu['logic_suqiu_proof'].groupby(df_suqiu['logic_ps'], sort=False).agg(lambda x: _agg_ignore_empty(x))
 
 # 概率诉求相关描述
-prob_ps_desc = df_suqiu['prob_suqiu_desc'].groupby(df_suqiu['prob_ps'], sort=False).agg(lambda x: list(x)[0])
+prob_ps_desc = df_suqiu['prob_suqiu_desc'].groupby(df_suqiu['prob_ps'], sort=False).agg(lambda x: _agg_ignore_empty(x))
 
 # 概率诉求转换关系
 def _repeat_filter(lt):
@@ -156,7 +165,7 @@ label_anyou = label_keyword['anyou'].str.split('|', expand=True).stack().reset_i
 label_keyword = label_keyword.drop('anyou', axis=1).join(label_anyou)
 label_keyword['ps'] = label_keyword['problem']+'_'+label_keyword['suqiu']
 anyou_ps_dict = label_keyword['ps'].groupby(label_keyword['anyou']).agg(lambda x: sorted(set(x)))
-anyou_db_dict = label_keyword['database'].groupby(label_keyword['anyou']).agg(lambda x: list(x)[0])
+anyou_db_dict = label_keyword['database'].groupby(label_keyword['anyou']).agg(lambda x: _agg_ignore_empty(x))
 
 ps_positive_keyword = label_keyword['positive_keywords'].groupby(label_keyword['ps']).agg(lambda x: '('+'|'.join(set(x))+')')
 
@@ -213,7 +222,7 @@ for problem, suqius in logic_ps.items():
         question_multiple_dict[problem + '_' + suqiu] = temp['question_answer'].values
 
         # 问题对应的所有答案
-        question_answer_dict[problem + '_' + suqiu] = df['answer'].groupby(df['question_answer'], sort=False).agg(lambda x: list(x)[0].split('|'))
+        question_answer_dict[problem + '_' + suqiu] = df['answer'].groupby(df['question_answer'], sort=False).agg(lambda x: _agg_split_ignore_empty(x))
 
         # 父特征替换后的问题对应的原问题
         temp = df[df['question_answer'].str.contains('[FF]')].drop_duplicates(subset=['question_answer'])
@@ -224,14 +233,14 @@ for problem, suqius in logic_ps.items():
         question_father_dict[problem + '_' + suqiu] = temp_dict
 
         # 特征对应的问题
-        factor_question_dict[problem + '_' + suqiu] = df['question_answer'].groupby(df['factor'], sort=False).agg(lambda x: list(x)[0])
+        factor_question_dict[problem + '_' + suqiu] = df['question_answer'].groupby(df['factor'], sort=False).agg(lambda x: _agg_ignore_empty(x))
 
         # 特征对应的答案
-        factor_answer_dict[problem + '_' + suqiu] = df['factor_answer'].groupby(df['factor'], sort=False).agg(lambda x: list(x)[0])
+        factor_answer_dict[problem + '_' + suqiu] = df['factor_answer'].groupby(df['factor'], sort=False).agg(lambda x: _agg_ignore_empty(x))
 
         # 特征对应的证据
         temp = df[~df['proof'].isna()]
-        factor_proof_dict[problem + '_' + suqiu] = temp['proof'].groupby(temp['factor'], sort=False).agg(lambda x: list(x)[0])
+        factor_proof_dict[problem + '_' + suqiu] = temp['proof'].groupby(temp['factor'], sort=False).agg(lambda x: _agg_ignore_empty(x))
 
         # 不重要的特征（路径不支持继续提问）
         temp = df[df['factor_unimportant']==1]
@@ -239,11 +248,11 @@ for problem, suqius in logic_ps.items():
 
         # 特征对应的前置特征
         temp = df[~df['pre_factor'].isna()]
-        factor_pre_dict[problem + '_' + suqiu] = temp['pre_factor'].groupby(df['factor'], sort=False).agg(lambda x: list(x)[0].split('|'))
+        factor_pre_dict[problem + '_' + suqiu] = temp['pre_factor'].groupby(df['factor'], sort=False).agg(lambda x: _agg_split_ignore_empty(x))
 
         # 特征对应的子特征
         temp = df[~df['son_factor'].isna()]
-        factor_son_dict[problem + '_' + suqiu] = temp['son_factor'].groupby(df['factor'], sort=False).agg(lambda x: list(x)[0].split('|'))
+        factor_son_dict[problem + '_' + suqiu] = temp['son_factor'].groupby(df['factor'], sort=False).agg(lambda x: _agg_split_ignore_empty(x))
 
         # 特征互斥关系
         temp = df[~df['group_id'].isna()]
@@ -271,9 +280,9 @@ def _encoding_correct(keyword):
 
 
 df_keyword = pd.read_csv(config_path + '句式关键词.csv', encoding='utf-8')
-sentence_keyword_dict = df_keyword['keyword'].groupby(df_keyword['sentence'], sort=False).agg(lambda x: list(x)[0])
+sentence_keyword_dict = df_keyword['keyword'].groupby(df_keyword['sentence'], sort=False).agg(lambda x: _agg_ignore_empty(x))
 sentence_keyword_dict = sentence_keyword_dict.apply(_encoding_correct)
-sentence_has_neg_dict = df_keyword['has_negative'].groupby(df_keyword['sentence'], sort=False).agg(lambda x: list(x)[0])
+sentence_has_neg_dict = df_keyword['has_negative'].groupby(df_keyword['sentence'], sort=False).agg(lambda x: _agg_ignore_empty(x))
 
 # 对于多个【[xx][yy][zz]】和【[xx][yy]】【[zz]】相同，输出[fx, fy, fz]
 def get_factor_base_keyword(sentences):
@@ -363,14 +372,14 @@ for problem, suqius in logic_ps.items():
     df_sentence['bkw'] = df_sentence['sentences'].apply(get_factor_base_keyword)
     df_sentence['pkw'] = df_sentence['sentences'].apply(get_factor_positive_keyword)
     df_sentence['nkw'] = df_sentence['sentences'].apply(get_factor_negative_keyword)
-    problem_bkw_dict[problem] = df_sentence['bkw'].groupby(df_sentence['factor'], sort=False).agg(lambda x: list(x)[0])
-    problem_pkw_dict[problem] = df_sentence['pkw'].groupby(df_sentence['factor'], sort=False).agg(lambda x: list(x)[0])
-    problem_nkw_dict[problem] = df_sentence['nkw'].groupby(df_sentence['factor'], sort=False).agg(lambda x: list(x)[0])
+    problem_bkw_dict[problem] = df_sentence['bkw'].groupby(df_sentence['factor'], sort=False).agg(lambda x: _agg_ignore_empty(x))
+    problem_pkw_dict[problem] = df_sentence['pkw'].groupby(df_sentence['factor'], sort=False).agg(lambda x: _agg_ignore_empty(x))
+    problem_nkw_dict[problem] = df_sentence['nkw'].groupby(df_sentence['factor'], sort=False).agg(lambda x: _agg_ignore_empty(x))
     for suqiu in suqius:
         df = df_sentence[df_sentence['suqiu']==suqiu]
-        suqiu_bkw_dict[problem + '_' + suqiu] = df['bkw'].groupby(df['factor'], sort=False).agg(lambda x: list(x)[0])
-        suqiu_pkw_dict[problem + '_' + suqiu] = df['pkw'].groupby(df['factor'], sort=False).agg(lambda x: list(x)[0])
-        suqiu_nkw_dict[problem + '_' + suqiu] = df['nkw'].groupby(df['factor'], sort=False).agg(lambda x: list(x)[0])
+        suqiu_bkw_dict[problem + '_' + suqiu] = df['bkw'].groupby(df['factor'], sort=False).agg(lambda x: _agg_ignore_empty(x))
+        suqiu_pkw_dict[problem + '_' + suqiu] = df['pkw'].groupby(df['factor'], sort=False).agg(lambda x: _agg_ignore_empty(x))
+        suqiu_nkw_dict[problem + '_' + suqiu] = df['nkw'].groupby(df['factor'], sort=False).agg(lambda x: _agg_ignore_empty(x))
 
 
 
@@ -390,7 +399,7 @@ for problem, suqius in logic_ps.items():
     for suqiu in suqius:
         df = df_question[df_question['suqiu'] == suqiu]
         candidate_question_dict[problem + '_' + suqiu] = df['question_answer'].drop_duplicates().values[0]
-        candidate_factor_dict[problem + '_' + suqiu] = df['factor_answer'].groupby(df['factor'], sort=False).agg(lambda x: list(x)[0])
+        candidate_factor_dict[problem + '_' + suqiu] = df['factor_answer'].groupby(df['factor'], sort=False).agg(lambda x: _agg_ignore_empty(x))
         # 多选问题
         temp = df[df['multiple_choice'] == 1]
         candidate_multiple_dict[problem + '_' + suqiu] = temp['question_answer'].values
@@ -408,4 +417,4 @@ for problem, suqius in logic_ps.items():
     for suqiu in suqius:
         df = df_weight[(df_weight['suqiu']==suqiu)]
         # 特征对应频率
-        factor_weight_dict[problem + '_' + suqiu] = df['weight'].groupby(df['factor'], sort=False).agg(lambda x: list(x)[0])
+        factor_weight_dict[problem + '_' + suqiu] = df['weight'].groupby(df['factor'], sort=False).agg(lambda x: _agg_ignore_empty(x))
