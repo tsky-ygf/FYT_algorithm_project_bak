@@ -6,6 +6,9 @@
 @Desc    : None
 """
 import requests
+
+from LawsuitPrejudgment.src.civil.lawsuit_prejudgment.api.data_transfer_object.prejudgment_report_dto import \
+    CriminalReportDTO
 from LawsuitPrejudgment.src.criminal.criminal_prejudgment import CriminalPrejudgment
 
 criminal_config = {
@@ -16,7 +19,7 @@ criminal_config = {
 criminal_pre_judgment = CriminalPrejudgment(**criminal_config)
 
 
-def get_criminal_result(fact, question_answers):
+def _get_criminal_result(fact, question_answers):
     if question_answers == {}:
         criminal_pre_judgment.init_content()
     # 改变question_answers的格式：将情形作为键值。这样CriminalPrejudgment才能处理。
@@ -30,8 +33,16 @@ def get_criminal_result(fact, question_answers):
 
     while "report_result" not in criminal_pre_judgment.content:
         next_question = criminal_pre_judgment.get_next_question()
-        return next_question
-    return criminal_pre_judgment.content["report_result"]
+        return {"next_question": next_question}
+    return {"result": criminal_pre_judgment.content["report_result"]}
+
+
+def get_criminal_result(fact, question_answers):
+    result = _get_criminal_result(fact, question_answers)
+    middle_layer = CriminalResultMiddleLayer(fact, question_answers)
+    middle_layer.response_from_criminal_server = result
+    result = middle_layer.get_criminal_result()
+    return CriminalReportDTO(result).to_dict()
 
 
 class CriminalResultMiddleLayer:
@@ -42,11 +53,10 @@ class CriminalResultMiddleLayer:
 
     def __init__(self, fact, question_answers):
         self.body = {"fact": fact, "question_answers": question_answers}
-        self.criminal_server_url = "http://127.0.0.1:5081/criminal_prejudgment"
         self.response_from_criminal_server = None
 
-    def _get_response_from_criminal_server(self):
-        self.response_from_criminal_server = requests.post(url=self.criminal_server_url, json=self.body).json()
+    # def _get_response_from_criminal_server(self):
+    #     self.response_from_criminal_server = requests.post(url=self.criminal_server_url, json=self.body).json()
 
     def _have_next_question(self):
         return "result" not in self.response_from_criminal_server
@@ -96,12 +106,13 @@ class CriminalResultMiddleLayer:
         return criminal_result
 
     def get_criminal_result(self):
-        self._get_response_from_criminal_server()
+        # self._get_response_from_criminal_server()
+        print(self.response_from_criminal_server)
         return self._generate_criminal_result()
 
 
 if __name__ == "__main__":
     res = get_criminal_result(fact="我偷了邻居3000元怎么办？",
                               question_answers={}, )
-                              # question_answers={"盗窃人年龄未满十六周岁或者精神状态不正常？:是;否": "否"})
+    # question_answers={"盗窃人年龄未满十六周岁或者精神状态不正常？:是;否": "否"})
     print(res)
