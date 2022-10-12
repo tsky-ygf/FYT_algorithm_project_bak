@@ -19,56 +19,16 @@ from torch.utils.data import DataLoader
 
 from BasicTask.NER.PointerBert.utils import load_data, set_seed, ReaderDataset, batchify, read_config_to_label, \
     evaluate_index, batchify_cluener, evaluate_entity_wo_category, bert_extract_item, read_config_to_label_aux
-from BasicTask.NER.PointerBert.model_NER import PointerNERBERT,  PointerNERBERT2
-
-
-def compute_kl_loss(self, p, q, pad_mask=None):
-    p_loss = F.kl_div(F.log_softmax(p, dim=-1), F.softmax(q, dim=-1), reduction='none')
-    q_loss = F.kl_div(F.log_softmax(q, dim=-1), F.softmax(p, dim=-1), reduction='none')
-
-    # pad_mask is for seq-level tasks
-    if pad_mask is not None:
-        p_loss.masked_fill_(pad_mask, 0.)
-        q_loss.masked_fill_(pad_mask, 0.)
-
-    # You can choose whether to use function "sum" and "mean" depending on your task
-    p_loss = p_loss.sum()
-    q_loss = q_loss.sum()
-
-    loss = (p_loss + q_loss) / 2
-    return loss
-
-
-def multilabel_categorical_crossentropy(y_true, y_pred):
-    """多标签分类的交叉熵
-    说明：y_true和y_pred的shape一致，y_true的元素非0即1，
-         1表示对应的类为目标类，0表示对应的类为非目标类。
-    警告：请保证y_pred的值域是全体实数，换言之一般情况下y_pred
-         不用加激活函数，尤其是不能加sigmoid或者softmax！预测
-         阶段则输出y_pred大于0的类。如有疑问，请仔细阅读并理解
-         本文。
-    """
-    y_pred = (1 - 2 * y_true) * y_pred
-    y_pred_neg = y_pred - y_true * 1e12
-    y_pred_pos = y_pred - (1 - y_true) * 1e12
-    zeros = torch.zeros_like(y_pred[..., :1])
-    y_pred_neg = torch.concat([y_pred_neg, zeros], dim=-1)
-    y_pred_pos = torch.concat([y_pred_pos, zeros], dim=-1)
-    neg_loss = torch.logsumexp(y_pred_neg, dim=-1)
-    pos_loss = torch.logsumexp(y_pred_pos, dim=-1)
-    return neg_loss + pos_loss
-
+from BasicTask.NER.PointerBert.model_NER import PointerNERBERT
 
 
 def train(args, train_loader, model, optimizer):
     print('-' * 50 + 'training' + '-' * 50)
     total_loss = 0
     num_samples = 0
-    entities = []
     for i, samples in enumerate(train_loader):
         optimizer.zero_grad()
         encoded_dicts, starts, ends, labels = samples[0], samples[1], samples[2], samples[3]
-        sentences = samples[4]
         start_prob, end_prob = model(encoded_dicts)
         # start_loss = torch.nn.functional.binary_cross_entropy(input=start_prob, target=starts, reduction="sum")
         # end_loss = torch.nn.functional.binary_cross_entropy(input=end_prob, target=ends, reduction="sum")
@@ -108,7 +68,6 @@ def train(args, train_loader, model, optimizer):
 
 
 def main(args):
-
     train_data = load_data(args.train_path)
     dev_data = load_data(args.dev_path)
 
@@ -116,8 +75,8 @@ def main(args):
 
     model = PointerNERBERT(args).to(args.device)
     # ===============================================================================
-    state = torch.load("model/PointerBert/PBert1011_common_all_20sche.pt")
-    model.load_state_dict(state['model_state'])
+    # state = torch.load("model/PointerBert/PBert1011_common_all_20sche.pt")
+    # model.load_state_dict(state['model_state'])
     # ===============================================================================
 
     optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate)
@@ -137,8 +96,6 @@ def main(args):
         print('-' * 50 + 'evaluating' + '-' * 50)
         entities = []
         true_entities = []
-        pred_entities_aux =[]
-        true_entities_aux = []
 
         for i, samples in enumerate(dev_loader):
 
@@ -146,30 +103,6 @@ def main(args):
             sentences = samples[4]
 
             start_prob, end_prob = model(encoded_dicts)
-            # bs, seq_len
-            '''
-            start_pred = torch.argmax(start_prob, dim=-1, keepdim=False)
-            end_pred = torch.argmax(end_prob, dim=-1, keepdim=False)
-            for bi in range(len(start_pred)):
-                sentence = sentences[bi]
-                for label_index in range(len(args.labels)):
-                    if label_index == 0:
-                        continue
-                    start_index = []
-                    end_index = []
-                    for ti in range(len((start_pred[bi]))):
-                        if start_pred[bi][ti] == label_index:
-                            start_index.append(ti)
-                        if end_pred[bi][ti] == label_index:
-                            end_index.append(ti)
-                    if len(start_index) == len(end_index):
-                        for s_index, e_index in zip(start_index, end_index):
-                            entities.append([args.label(label_index), sentence[s_index:e_index]])
-                    else:
-                        minnum = min(len(start_index), len(end_index))
-                        for k in range(minnum):
-                            entities.append([args.labels[label_index], sentence[start_index[k]:end_index[k]]])
-            '''
             thred = torch.FloatTensor([0.5]).to(args.device)
             start_pred = start_prob > thred
             end_pred = end_prob > thred
@@ -195,11 +128,10 @@ def main(args):
             true_entities.extend(labels)
 
         print('pred entities: ', len(entities))
-        if len(entities)>0:
+        if len(entities) > 0:
             print(entities[0])
         print('true_entities: ', len(true_entities))
         print(true_entities[0])
-        # precision, recall, f1 = evaluate_entity_wo_category(true_entities, entities)
         cir = SpanEntityScore()
         cir.update(true_entities, entities)
         print('cal...')
@@ -219,56 +151,7 @@ def main(args):
             # state = torch.load(PATH, map_location="cpu")
             # model.load_state_dict(state['model_state'])
             # optimizer.load_state_dict(state['optimizer'])
-        '''
-        if args.is_inference:
-            entities = []
-            true_entities = []
-            for i, samples in enumerate(dev_loader):
-                encoded_dicts, starts, ends, labels = samples[0], samples[1], samples[2], samples[3]
-                sentences = samples[4]
-                start_prob, end_prob = model(encoded_dicts)
-                print(start_prob.shape)
-                thred = torch.FloatTensor([0.5]).to(args.device)
-                start_pred = start_prob > thred
-                end_pred = end_prob > thred
-                # batch_size, number_of_label, sentence_length
-                start_pred = start_pred.transpose(2, 1)
-                end_pred = end_pred.transpose(2, 1)
-                if True in start_pred:
-                    print("true in start_pred")
-                if True in end_pred:
-                    print("true in end_pred")
-                # 0-1 seq to entity
-                for bi in range(len(start_pred)):
-                    index_bias = 0
-                    sentence = sentences[bi]
-                    for li in range(len(start_pred[bi])):
-                        start_seq = start_pred[bi][li]
-                        end_seq = end_pred[bi][li]
-                        start_index = []
-                        end_index = []
-                        if True in start_seq:
-                            for start_ind in range(len(start_seq)):
-                                if start_seq[start_ind]:
-                                    start_index.append(start_ind)
-                                    print("label:", args.labels[li], "start:", start_ind + index_bias)
-                        if True in end_seq:
-                            for end_ind in range(len(end_seq)):
-                                if end_seq[end_ind]:
-                                    end_index.append(end_ind)
-                                    print("label:", args.labels[li], "end:", end_ind + index_bias)
-                        if len(start_index) == len(end_index):
-                            for start_ind, end_ind in zip(start_index, end_index):
-                                entities.append({'start': start_ind + index_bias, 'end': end_ind + index_bias,
-                                                 'entity': sentence[start_ind:end_ind]})
-                        else:
-                            min_len = min(len(start_index), len(end_index))
-                            for mi in range(min_len):
-                                entities.append(
-                                    {'start': start_index[mi] + index_bias, 'end': end_index[mi] + index_bias,
-                                     'entity': sentence[start_index[mi]:end_index[mi]]})
-            print("entities", entities)
-        '''
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -280,7 +163,7 @@ if __name__ == '__main__':
     parser.add_argument("--local_rank", type=int, default=-1, help="For distributed training: local_rank")
     parser.add_argument("--do_train", default=True, type=bool)
     parser.add_argument("--is_inference", default=False, type=bool)
-    parser.add_argument("--model_save_path", default='model/PointerBert/PBert1011_common_all_20sche_auged.pt')
+    parser.add_argument("--model_save_path", default='model/PointerBert/PBert1011_common_long.pt')
     parser.add_argument("--batch_size", default=8, type=int, help="Batch size per GPU/CPU for training.")
     parser.add_argument("--learning_rate", default=5e-5, type=float, help="The initial learning rate for Adam.")
     parser.add_argument("--train_path", default=None, type=str, help="The path of train set.")
@@ -306,14 +189,13 @@ if __name__ == '__main__':
                         help="The path of model parameters for initialization.")
     args = parser.parse_args()
 
-    args.train_path = 'data/data_src/common_aug/train.json'
-    args.dev_path = 'data/data_src/common_aug/dev.json'
+    args.train_path = 'data/data_src/common_long/train.json'
+    args.dev_path = 'data/data_src/common_long/dev.json'
     args.model = 'model/language_model/chinese-roberta-wwm-ext'
-    args.num_epochs = 20    # for data augment
-    labels, alias2label = read_config_to_label(args)
+    labels, alias2label = read_config_to_label(args, is_long=True)
     args.labels = labels
     pprint(args)
 
     main(args)
     # export PYTHONPATH=$(pwd):$PYTHONPATH
-    # nohup python -u BasicTask/NER/PointerBert/main.py > log/PointerBert/pBert_1011_common_all_20sche_aug.log 2>&1 &
+    # nohup python -u BasicTask/NER/PointerBert/main.py > log/PointerBert/pBert_1011_common_long.log 2>&1 &
