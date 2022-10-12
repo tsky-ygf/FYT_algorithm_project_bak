@@ -68,7 +68,7 @@ class PrejudgmentPipeline:
     def generate_report(self, *args, **kwargs):
         raise NotImplemented
 
-    @print_run_time
+    # @print_run_time
     def __call__(self, **kwargs):
         self.content.update(kwargs)
         if "question_answers" not in self.content:

@@ -8,7 +8,8 @@ Building blocks for Transformer
 '''
 
 import numpy as np
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
 
 
 def ln(inputs, epsilon=1e-8, scope="layer_norm"):
@@ -236,7 +237,8 @@ def label_smoothing(inputs, epsilon=0.1):
     For example,
 
     ```
-    import tensorflow as tf
+    import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
     inputs = tf.convert_to_tensor([[[0, 0, 1],
        [0, 1, 0],
        [1, 0, 0]],

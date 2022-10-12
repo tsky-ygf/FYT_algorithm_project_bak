@@ -49,18 +49,18 @@ par_model_path = os.path.join(LTP_DATA_DIR, 'parser.model')  # 依存句法分�
 # 加载模型
 
 # 原初始化方式，在python3.6下运行
-segmentor = Segmentor()
-segmentor.load_with_lexicon(seg_model_path, config_path + 'negative') # TODO:应该是把否定词加入了词汇表
-postagger = Postagger()  # 初始化实例
-postagger.load(pos_model_path)  # 加载模型
-recognizer = NamedEntityRecognizer()  # 初始化实例
-recognizer.load(ner_model_path)  # 加载模型
-parser = Parser()  # 初始化实例
-parser.load(par_model_path)
-# segmentor = Segmentor(seg_model_path, config_path + 'negative')
-# postagger = Postagger(pos_model_path)
-# recognizer = NamedEntityRecognizer(ner_model_path)
-# parser = Parser(par_model_path)
+# segmentor = Segmentor()
+# segmentor.load_with_lexicon(seg_model_path, config_path + 'negative') # TODO:应该是把否定词加入了词汇表
+# postagger = Postagger()  # 初始化实例
+# postagger.load(pos_model_path)  # 加载模型
+# recognizer = NamedEntityRecognizer()  # 初始化实例
+# recognizer.load(ner_model_path)  # 加载模型
+# parser = Parser()  # 初始化实例
+# parser.load(par_model_path)
+segmentor = Segmentor(seg_model_path, config_path + 'negative')
+postagger = Postagger(pos_model_path)
+recognizer = NamedEntityRecognizer(ner_model_path)
+parser = Parser(par_model_path)
 
 
 ########################################################################################################################

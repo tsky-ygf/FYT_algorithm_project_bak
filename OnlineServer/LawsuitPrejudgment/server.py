@@ -81,4 +81,4 @@ def _reasoning_graph_result(param: GetCivilResultParam):
 
 
 if __name__ == '__main__':
-    uvicorn.run('OnlineServer.LawsuitPrejudgment.server:app', host="0.0.0.0", port=8105, reload=True, workers=1)
+    uvicorn.run('OnlineServer.LawsuitPrejudgment.server:app', host="0.0.0.0", port=8105, reload=False, workers=1)
