@@ -148,7 +148,6 @@ class BaseESTool:
             if not success:
                 raise RuntimeError(f"Error indexando query a ES: {info}")
 
-    # 多线程更新
     def update_es_parall(self, df_data, *args, **kwargs):
         for index, row in df_data.iterrows():
             data_ori = row.to_dict()
@@ -173,8 +172,6 @@ class BaseESTool:
         ):
             if not success:
                 raise RuntimeError(f"Error indexando query a ES: {info}")
-
-    # TODO 多线程删除
 
     def __call__(self):
         self.es_init()

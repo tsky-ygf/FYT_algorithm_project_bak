@@ -7,7 +7,7 @@
 # @Software: PyCharm
 import os
 import pandas as pd
-from init_faq_tools import *
+from IntelligentConsultation.src.faq_pipeline.init_faq_tools import *
 from IntelligentConsultation.src.faq_pipeline.core_model.common_model import MODEL_REGISTRY
 from loguru import logger
 from IntelligentConsultation.src.FAQ_predict import FAQPredict
@@ -39,8 +39,8 @@ def insert_data(data_path="data/fyt_train_use_data/QA/pro_qa.csv",
 def test_acc(index_name, model_name):
     faq = FAQPredict(level="warning", index_name=index_name, model_name=model_name)
 
-    test_data_path = "data/fyt_train_use_data/QA/test_qa.xlsx"
-    df = pd.read_excel(test_data_path)
+    test_data_path = "data/fyt_train_use_data/QA/test_qa.csv"
+    df = pd.read_csv(test_data_path)
 
     acc_count = 0
 
@@ -57,7 +57,9 @@ def test_acc(index_name, model_name):
         correct_query_list.append(row["query"])
         result_query_list.append(result)
 
-        if result == row["query"]:
+        query_list = row["query"].split("|")
+
+        if result == row["query"] or result in query_list:
             # print("right")
             acc_count += 1
             is_correct.append(1)
@@ -84,49 +86,45 @@ def test_acc(index_name, model_name):
     return accuracy, test_result_df
 
 
-def main(config):
+def faq_main(config):
+    model = MODEL_REGISTRY.get(config["model_type"])(config["train_config"])
+    model.train()
+
+    insert_data(data_path=config["train_config"]["train_data_path"],
+                index_name=config["index_name"],
+                model_name=config["train_config"]["model_output_path"])
+
+    acc, res_df = test_acc(index_name=config["index_name"],
+                           model_name=config["train_config"]["model_output_path"])
+
+    return acc, res_df
+
+
+def param_optim(config):
     best_acc = 0
-    for lr in [3e-5, 4e-5, 5e-5]:
+    for lr in [1e-5, 2e-5]:
         for train_batch_size in [32, 64, 128]:
             for max_seq_length in [64, 128]:
                 for num_epochs in [1, 2, 3, 4, 5, 6, 7, 8]:
 
                     print("lr: {} ===> train_batch_size: {} ===> max_seq_length: {} ===> num_epochs: {}".
                           format(lr, train_batch_size, max_seq_length, num_epochs))
-                    try:
-                        config["train_config"]["lr"] = lr
-                        config['train_config']['train_batch_size'] = train_batch_size
-                        config['train_config']['max_seq_length'] = max_seq_length
-                        config['train_config']['num_epochs'] = num_epochs
 
-                        model = MODEL_REGISTRY.get(config["model_type"])(config["train_config"])
-                        model.train()
+                    config["train_config"]["lr"] = lr
+                    config['train_config']['train_batch_size'] = train_batch_size
+                    config['train_config']['max_seq_length'] = max_seq_length
+                    config['train_config']['num_epochs'] = num_epochs
 
-                        insert_data(data_path=config["train_config"]["train_data_path"],
-                                    index_name=config["index_name"],
-                                    model_name=config["train_config"]["model_output_path"])
+                    acc, res_df = faq_main(config=config)
+                    if acc > best_acc:
+                        best_acc = acc
+                        best_lr = lr
+                        best_train_batch_size = train_batch_size
+                        best_max_seq_length = max_seq_length
+                        best_num_epochs = num_epochs
 
-                        acc, res_df = test_acc(index_name=config["index_name"],
-                                               model_name=config["train_config"]["model_output_path"])
-
-                        if acc > best_acc:
-                            best_acc = acc
-                            best_lr = lr
-                            best_train_batch_size = train_batch_size
-                            best_max_seq_length = max_seq_length
-                            best_num_epochs = num_epochs
-
-                    except:
-                        pass
-
-                    # logger.success("best accuracy: {}".format(best_acc))
-                    # logger.success("lr: {}".format(lr))
-                    # logger.success("train_batch_size: {}".format(train_batch_size))
-                    # logger.success("max_seq_length: {}".format(max_seq_length))
-                    # logger.success("num_epochs: {}".format(num_epochs))
-                    res_df.to_csv("IntelligentConsultation/src/faq_pipeline/result.csv", index=False)
-
-                    print("acc:{}".format(acc))
+                        res_df.to_csv("IntelligentConsultation/src/faq_pipeline/result.csv", index=False)
+                        print("acc:{}".format(acc))
 
                     print("best accuracy: {}".format(best_acc))
                     print("best lr: {}".format(best_lr))
@@ -136,16 +134,19 @@ def main(config):
 
 
 if __name__ == '__main__':
-    use_config = {
-        "model_type": "SimCSE",
-        "index_name": "topic_qa_test",
-        "train_config": {
-            "model_name": "model/language_model/chinese-roberta-wwm-ext",
-            "model_output_path": "model/similarity_model/simcse-model-top-32",
-            "train_data_path": "data/fyt_train_use_data/QA/pro_qa.csv",
-            "lr": 5e-5,
-            "train_batch_size": 128,
-            "max_seq_length": 32,
-            "num_epochs": 1}
-    }
-    main(use_config)
+    # use_config = {
+    #     "model_type": "SimCSE",
+    #     "index_name": "topic_qa_test",
+    #     "train_config": {
+    #         "model_name": "model/language_model/chinese-roberta-wwm-ext",
+    #         "model_output_path": "model/similarity_model/simcse-model-top-32",
+    #         "train_data_path": "data/fyt_train_use_data/QA/pro_qa.csv",
+    #         "lr": 5e-5,
+    #         "train_batch_size": 128,
+    #         "max_seq_length": 32,
+    #         "num_epochs": 1}
+    # }
+    # param_optim(use_config)
+
+    acc, res_df = test_acc(index_name="topic_qa_test_v2", model_name="model/similarity_model/simcse-model-optim")
+    print(acc)

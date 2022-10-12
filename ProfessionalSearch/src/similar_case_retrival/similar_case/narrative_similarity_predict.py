@@ -236,10 +236,10 @@ def candidate_list_q2q_rank(original_question, candidate_list):
             problem_type,
             suqiu_type,
             # suqiu_label,
-            yg_sc_sentences,
+            sucheng_sentences,
             chaming,
             benyuan_renwei,
-            # tags,
+            tags,
         ) = element
         candidate = pseg_txt(chaming).replace(" ", "")  # 过滤一部分数据
         print(
@@ -261,7 +261,7 @@ def candidate_list_q2q_rank(original_question, candidate_list):
         # win_los = 1 if "1" in suqiu_label else 0  # TODO 有一个诉求得到支持，暂时任务就是支持的。
         logging.info("cos_i:"+ str(cos_i))
         candidate_list_new.append(
-            (uq_id, cos_i, problem_type, suqiu_type)
+            (uq_id, cos_i, problem_type, suqiu_type, tags)
         )
 
     candidate_list_new = sorted(
@@ -450,15 +450,22 @@ def search_similar_case(
     candidate_list = []
     for hit in res["hits"]["hits"]:
         _source = hit["_source"]
-        yg_sc_sentences = _source["yg_sc"]
-        bg_sc_sentences = _source["bg_sc"]
-        chaming = _source["jslcm"]
-        benyuan_renwei = _source["byrw"]
+        sucheng_sentences = _source["sucheng_sentences"]
+        chaming = _source["chaming"]
+        benyuan_renwei = _source["benyuan_renwei"]
         problem_type = _source["jfType"]
         # suqiu_type = _source["suqiu_type"]
         # suqiu_label = _source["suqiu_label"]
         doc_id = _source["uq_id"]
-        # tags_ = hit["_source"]["tags"]
+        tags_ = hit["_source"]["tags"]
+        if not sucheng_sentences:
+            sucheng_sentences = ""
+        if not chaming:
+            chaming = ""
+        if not benyuan_renwei:
+            benyuan_renwei = ""
+        if not problem_type:
+            problem_type = ""
         if count < NUM_MAX_CANDIDATES:
             logging.info(
                 count,
@@ -470,8 +477,8 @@ def search_similar_case(
                 # suqiu_type,
                 # ";suqiu_label:",
                 # suqiu_label,
-                # ";tags_:",
-                # tags_,
+                ";tags_:",
+                tags_,
             )
             logging.info(
                 str(doc_id)
@@ -481,13 +488,13 @@ def search_similar_case(
                 # + suqiu_type
                 # + ";suqiu_label:"
                 # + suqiu_label
-                # + ";tags_:"
-                # + tags_
+                + ";tags_:"
+                + tags_
             )
             print(
                 count,
                 "suqing_sentences:",
-                yg_sc_sentences,
+                sucheng_sentences,
                 ";chaming:",
                 chaming,
                 ";benyuan_renwei:",
@@ -495,7 +502,7 @@ def search_similar_case(
             )
             logging.info(
                 "suqing_sentences:"
-                + yg_sc_sentences
+                + sucheng_sentences
                 + ";chaming:"
                 + chaming
                 + ";benyuan_renwei:"
@@ -555,10 +562,10 @@ def search_similar_case(
                 problem_type,
                 suqiu_type,
                 # suqiu_label,
-                yg_sc_sentences,
+                sucheng_sentences,
                 chaming,
                 benyuan_renwei,
-                # tags_,
+                tags_,
             )
         )  # did_temp,score_temp,question_temp,answer_temp,question_short_temp
         #
@@ -587,8 +594,8 @@ def get_search_body(problem, suqiu_type, query_search, tags):
     if (
         problem is not None
         and problem != ""
-        and suqiu_type is not None
-        and suqiu_type != ""
+        # and suqiu_type is not None
+        # and suqiu_type != ""
     ):
         body = {
             "query": {
@@ -599,11 +606,11 @@ def get_search_body(problem, suqiu_type, query_search, tags):
                         {
                             "bool": {
                                 "should": [
-                                    {"match": {"jslcm": query_search}},
-                                    {"match": {"byrw": query_search}},
-                                    {"match": {"yg_sc": query_search}},
-                                    {"match": {"bg_sc": query_search}},
-                                    # {"match": {"tags": tags}},
+                                    {"match": {"chaming": query_search}},
+                                    {"match": {"benyuan_renwei": query_search}},
+                                    {"match": {"sucheng_sentences": query_search}},
+                                    # {"match": {"bg_sc": query_search}},
+                                    {"match": {"tags": tags}},
                                 ]
                             }
                         },
@@ -616,16 +623,16 @@ def get_search_body(problem, suqiu_type, query_search, tags):
             "query": {
                 "bool": {
                     "should": [
-                        {"match": {"jslcm": query_search}},
-                        {"match": {"byrw": query_search}},
-                        {"match": {"yg_sc": query_search}},
-                        {"match": {"bg_sc": query_search}},
-                        # {"match": {"tags": tags}},
+                        {"match": {"chaming": query_search}},
+                        {"match": {"benyuan_renwei": query_search}},
+                        {"match": {"sucheng_sentences": query_search}},
+                        # {"match": {"bg_sc": query_search}},
+                        {"match": {"tags": tags}},
                     ]
                 }
             }
         }
-
+    logging.info(body)
     return body
 
 
@@ -645,8 +652,8 @@ def organize_result(similiar_list, is_consult_flag, fact, keywords, top_k=50):
         tags_list,
     ) = ([], [], [], [], [], [])
     for i, element in enumerate(similiar_list):
-        doc_id, cos_i, problem_type, suqiu_type = element
-        # tags = tags.replace("本院", "判定")
+        doc_id, cos_i, problem_type, suqiu_type, tags = element
+        tags = tags.replace("本院", "判定")
         threshold = (
             similiar_threshold_consult if is_consult_flag else similiar_threshold
         )  # similiar_threshold_consult
@@ -656,7 +663,7 @@ def organize_result(similiar_list, is_consult_flag, fact, keywords, top_k=50):
             # win_los_list.append(win_los)
             reason_name_list.append(str(problem_type))
             appeal_name_list.append(str(suqiu_type))
-            # tags_list.append(tags)
+            tags_list.append(tags)
 
     tags1 = jieba.analyse.extract_tags(fact, topK=20)
     tags2 = jieba.analyse.textrank(
@@ -669,7 +676,7 @@ def organize_result(similiar_list, is_consult_flag, fact, keywords, top_k=50):
         # win_los_list,
         reason_name_list,
         appeal_name_list,
-        # tags_list,
+        tags_list,
         keywords,
     )
 

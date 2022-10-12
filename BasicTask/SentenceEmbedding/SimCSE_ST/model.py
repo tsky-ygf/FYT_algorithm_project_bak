@@ -15,21 +15,21 @@ from typing import Iterable, Dict, List
 
 
 class MultipleNegativesRankingLoss(nn.Module):
-    def __init__(self, model: nn.Module, scale: float = 20.0, similarity_fct=util.cos_sim):
+    def __init__(self, scale: float = 20.0, similarity_fct=util.cos_sim):
         super(MultipleNegativesRankingLoss, self).__init__()
-        self.model = model
         self.scale = scale
         self.similarity_fct = similarity_fct
         self.cross_entropy_loss = nn.CrossEntropyLoss()
 
-    def forward(self, sentence_features: Iterable[Dict[str, Tensor]]):
-        reps = [self.model(sentence_feature)['sentence_embedding'] for sentence_feature in sentence_features]
+    # def forward(self, sentence_features: Iterable[Dict[str, Tensor]]):
+    def forward(self, reps):
+        # reps = [self.model(sentence_feature)['sentence_embedding'] for sentence_feature in sentence_features]
         embeddings_a = reps[0]
         embeddings_b = torch.cat(reps[1:])
 
         scores = self.similarity_fct(embeddings_a, embeddings_b) * self.scale
         labels = torch.tensor(range(len(scores)), dtype=torch.long, device=scores.device)
-        return reps, self.cross_entropy_loss(scores, labels)
+        return self.cross_entropy_loss(scores, labels)
 
     def get_config_dict(self):
         return {'scale': self.scale, 'similarity_fct': self.similarity_fct.__name__}
@@ -43,16 +43,14 @@ class SimCSE(nn.Module):
         pooling_model = models.Pooling(word_embedding_model.get_word_embedding_dimension())
         # self.model = SentenceTransformer(modules=[word_embedding_model, pooling_model])
         self.model = nn.Sequential(word_embedding_model, pooling_model)
-        self.loss = MultipleNegativesRankingLoss(self.model)
+        self.loss = MultipleNegativesRankingLoss()
 
     def forward(self, input_ids_a: Tensor, attention_mask_a: Tensor, input_ids_b: Tensor, attention_mask_b: Tensor):
-        # reps_a = self.model(input_ids=input_ids_a, attention_mask=attention_mask_a)
-        # reps_b = self.model(input_ids=input_ids_b, attention_mask=attention_mask_b)
         feature_a = {"input_ids": input_ids_a, "attention_mask": attention_mask_a}
         feature_b = {"input_ids": input_ids_b, "attention_mask": attention_mask_b}
-        sentence_feature = [feature_a, feature_b]
-        # reps = [self.model(sentence_feature)['sentence_embedding'] for sentence_feature in sentence_features]
-        reps, train_loss = self.loss(sentence_feature)
+        sentence_features = [feature_a, feature_b]
+        reps = [self.model(sentence_feature)['sentence_embedding'] for sentence_feature in sentence_features]
+        train_loss = self.loss(reps)
 
         return reps, train_loss
 

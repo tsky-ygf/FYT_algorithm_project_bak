@@ -15,8 +15,7 @@ import torch.nn.functional as F
 
 class RDropLoss(nn.Module):
 
-    def __init__(self, model: SentenceTransformer, reduction: str = 'none', scale: float = 20.0,
-                 similarity_fct=util.cos_sim):
+    def __init__(self, model: SentenceTransformer, reduction: str = 'none'):
         """
         R-Drop Loss implementation
         For more information about R-drop please refer to this paper: https://arxiv.org/abs/2106.14448
@@ -38,37 +37,21 @@ class RDropLoss(nn.Module):
                 "'reduction' in 'RDropLoss' should be 'sum', 'mean' 'batchmean', or 'none', "
                 "but received {}.".format(reduction))
         self.reduction = reduction
+        self.pad_mask = None
 
-        self.scale = scale
-        self.similarity_fct = similarity_fct
-        self.cross_entropy_loss = nn.CrossEntropyLoss()
-
-    def forward(self, p, q, pad_mask=None):
-        """
-        Args:
-            p(Tensor): the first forward logits of training examples.
-            q(Tensor): the second forward logits of training examples.
-            pad_mask(Tensor, optional): The Tensor containing the binary mask to index with, it's data type is bool.
-
-        Returns:
-            Tensor: Returns tensor `loss`, the rdrop loss of p and q.
-        """
+    def forward(self, sentence_features: Iterable[Dict[str, Tensor]], labels: Tensor = None):
         reps = [self.model(sentence_feature)['sentence_embedding'] for sentence_feature in sentence_features]
 
-        rep_anchor, rep_pos, rep_neg = reps
-        # distance_pos = self.distance_metric(rep_anchor, rep_pos)
-        # distance_neg = self.distance_metric(rep_anchor, rep_neg)
-
-        # losses = F.relu(distance_pos - distance_neg + self.triplet_margin)
-        # return losses.mean()
+        p = reps[0]
+        q = reps[1]
 
         p_loss = F.kl_div(F.log_softmax(p, dim=-1), F.softmax(q, dim=-1), reduction=self.reduction)
         q_loss = F.kl_div(F.log_softmax(q, dim=-1), F.softmax(p, dim=-1), reduction=self.reduction)
 
         # pad_mask is for seq-level tasks
-        if pad_mask is not None:
-            p_loss.masked_fill_(pad_mask, 0.)
-            q_loss.masked_fill_(pad_mask, 0.)
+        if self.pad_mask is not None:
+            p_loss.masked_fill_(self.pad_mask, 0.)
+            q_loss.masked_fill_(self.pad_mask, 0.)
 
         # You can choose whether to use function "sum" and "mean" depending on your task
         p_loss = p_loss.sum()
@@ -78,3 +61,60 @@ class RDropLoss(nn.Module):
 
     def get_config_dict(self):
         return {'reduction': self.reduction}
+
+
+class MNRRDropLoss(nn.Module):
+
+    def __init__(self,
+                 model: SentenceTransformer,
+                 scale: float = 20.0,
+                 similarity_fct=util.cos_sim,
+                 reduction: str = 'none',
+                 kl_weight: float = 0.1):
+        super().__init__()
+        self.model = model
+
+        self.scale = scale
+        self.similarity_fct = similarity_fct
+        self.cross_entropy_loss = nn.CrossEntropyLoss()
+
+        self.pad_mask = None
+
+        self.reduction = reduction
+        self.kl_weight = kl_weight
+
+    def forward(self, sentence_features: Iterable[Dict[str, Tensor]], labels: Tensor = None):
+        reps = [self.model(sentence_feature)['sentence_embedding'] for sentence_feature in sentence_features]
+        multi_neg_loss = self.cal_multi_neg_loss(reps[0], torch.cat(reps[1:]))
+        kl_loss = self.cal_kl_loss(reps[0], torch.cat(reps[1:]))
+
+        # return multi_neg_loss
+        return multi_neg_loss + kl_loss * self.kl_weight
+
+    def cal_multi_neg_loss(self, embeddings_a, embeddings_b):
+        scores = self.similarity_fct(embeddings_a, embeddings_b) * self.scale
+        labels = torch.tensor(range(len(scores)), dtype=torch.long,
+                              device=scores.device)  # Example a[i] should match with b[i]
+        multi_neg_loss = self.cross_entropy_loss(scores, labels)
+        return multi_neg_loss
+
+    def cal_kl_loss(self, p, q):
+        p_loss = F.kl_div(F.log_softmax(p, dim=-1), F.softmax(q, dim=-1),
+                          reduction=self.reduction)
+        q_loss = F.kl_div(F.log_softmax(q, dim=-1), F.softmax(p, dim=-1),
+                          reduction=self.reduction)
+
+        # pad_mask is for seq-level tasks
+        if self.pad_mask is not None:
+            p_loss.masked_fill_(self.pad_mask, 0.)
+            q_loss.masked_fill_(self.pad_mask, 0.)
+
+        # You can choose whether to use function "sum" and "mean" depending on your task
+        p_loss = p_loss.sum()
+        q_loss = q_loss.sum()
+        kl_loss = (p_loss + q_loss) / 2
+
+        return kl_loss
+
+    def get_config_dict(self):
+        return {"scale": self.scale, "similarity_fct": self.similarity_fct.__name__, "kl_weight": self.kl_weight}

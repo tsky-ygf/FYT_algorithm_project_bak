@@ -7,6 +7,8 @@
 # @Software: PyCharm
 import requests
 import streamlit as st
+
+# from ProfessionalSearch.src.similar_case_retrival.similar_case.util import get_civil_law_documents_by_id_list
 from Utils.logger import Logger
 
 
@@ -410,6 +412,97 @@ def relevant_laws_side_review():
             st.write(res_dict)
             st.write("-" * 20 + "我是分割线" + "-" * 20)
 
+import logging
+from typing import List, Dict
+import pymysql
+
+def get_civil_law_documents_by_id_list(id_list: List[str], table_name) -> List[Dict]:
+    # 打开数据库连接
+    db = pymysql.connect(host='172.19.82.227',
+                         user='root',
+                         password='Nblh@2022',
+                         database='judgments_data')
+
+    # 使用cursor()方法获取操作游标
+    cursor = db.cursor()
+
+    # SQL 查询语句
+    try:
+        format_strings = ','.join(['%s'] * len(id_list))
+        # 执行SQL语句
+        cursor.execute("SELECT uq_id, jslcm FROM " + table_name + " WHERE uq_id in (%s)" % format_strings,
+                       tuple(id_list))
+        # 获取所有记录列表
+        fetched_data = cursor.fetchall()
+        law_documents = [{
+            "uq_id": row[0],
+            "jslcm": row[1]
+        } for row in fetched_data]
+    except:
+        logging.error("Error: unable to fetch data")
+        law_documents = []
+    # 关闭数据库连接
+    db.close()
+    return law_documents
+
+def similar_case_retrieval_review():
+    # 初始化
+    logger = Logger(name="law-lib", level="debug").logger
+    url_similar_case = "http://127.0.0.1:8163/top_k_similar_narrative"
+    url_jfType = "http://101.69.229.138:7100/get_civil_problem_summary"
+    url_suqiu = "http://101.69.229.138:7100/get_claim_list_by_problem_id"
+    jfType_list = requests.get(url_jfType).json()
+    suqiu_req = {"problem_id": "", "fact": ""}
+    suqiu_res = requests.post(url_suqiu, json=suqiu_req).json()
+    # 获取相似案例
+    groupName_list = []
+    for value_item in jfType_list["value"]:
+        groupName_list.append(value_item["groupName"])
+    groupName = st.sidebar.selectbox(
+        "请选择一级纠纷类型", groupName_list, key="legal_type"
+    )
+    groupList, problem_list = [], []
+    for value_item in jfType_list["value"]:
+        if groupName == value_item["groupName"]:
+            groupList = value_item["groupList"]
+    for problem_item in groupList:
+        problem_list.append(problem_item['problem'])
+    jfType = st.sidebar.selectbox(
+        "请选择二级纠纷类型", problem_list, key="text"
+    )
+    fact = st.text_input("请输入事实内容", value="", key="text")
+    similar_case_req = {"problem": jfType, "claim_list": [], "fact": fact}
+    run = st.button("查询", key="run_law")
+
+    if run:
+        suqiu_res = requests.post(url_similar_case, json=similar_case_req).json()
+        print(suqiu_res)
+        # 组织结果返回
+        doc_id_list, sim_list, reason_name_list, tags_list = suqiu_res["dids"], suqiu_res["sims"], suqiu_res["reasonNames"], suqiu_res["tags"]
+        detail = "http://101.69.229.138:7145/get_law_document?doc_id=judgment_minshi_data_SEP_"
+        if doc_id_list:
+            jslcm_list = get_civil_law_documents_by_id_list(doc_id_list, "judgment_minshi_data_cc")
+            for index, uq_id in enumerate(doc_id_list):
+                logger.info(reason_name_list[index])
+                jslcm = ""
+                for jslcm_item in jslcm_list:
+                    if uq_id == jslcm_item['uq_id']:
+                        jslcm = jslcm_item['jslcm']
+                link = "[link]"+"(" + detail + uq_id+")"
+                res_dict = {
+                    "标号": index,
+                    "唯一ID": uq_id,
+                    "经审理查明": jslcm,
+                    "相似率": sim_list[index],
+                    "纠纷类型": reason_name_list[index],
+                    "关键词": tags_list[index],
+                }
+
+                st.write(res_dict)
+                st.write("裁判文书详情", link)
+                st.write("-" * 20 + "我是分割线" + "-" * 20)
+
+
 def _tabs(tabs_data={}, default_active_tab=0):
     tab_titles = list(tabs_data.keys())
     if not tab_titles:
@@ -421,7 +514,8 @@ def _tabs(tabs_data={}, default_active_tab=0):
 def do_tabs():
     tab_content = _tabs({
         "案例检索": similar_case_side_review,
-        "法条检索": relevant_laws_side_review
+        "法条检索": relevant_laws_side_review,
+        "相似案例检索": similar_case_retrieval_review,
     })
     if callable(tab_content):
         tab_content()

@@ -15,6 +15,7 @@ from Utils.logger import get_logger
 
 @dataclass
 class TrainerConfig:
+    log_level: str = "INFO"
     model_name: str = "model/language_model/chinese-roberta-wwm-ext"
     model_output_path: str = "model/similarity_model/simcse-model-top-32"
 
@@ -29,7 +30,7 @@ class TrainerConfig:
 class EmbedTrainer:
     def __init__(self, config_json) -> None:
         self.config = TrainerConfig(**config_json)
-        self.logger = get_logger()
+        self.logger = get_logger(level=self.config.log_level)
 
         self.logger.info(self.config)
         self.model, self.train_loss = self.init_model()

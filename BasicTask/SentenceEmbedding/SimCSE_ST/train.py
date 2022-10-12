@@ -14,13 +14,12 @@ from BasicTask.SentenceEmbedding.SimCSE_ST.model import SimCSE
 import os
 import pandas as pd
 
-os.environ['CUDA_VISIBLE_DEVICES'] = '1'
+os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
 
 class TrainSimCSE(BaseTrainTool):
     def init_model(self):
         tokenizer = AutoTokenizer.from_pretrained(self.model_args.tokenizer_name)
-        # model = MultiLabelClsModel(self.config)
         model = SimCSE(model_name=self.model_args.model_name_or_path, max_seq_length=self.data_train_args.max_length)
         return tokenizer, model
 

@@ -39,11 +39,11 @@ def get_user_standpoint():
 
 @dataclass
 class CommonModelArgs:
-    model_load_path = "model/PointerBert/PBert1009_common_all_20sche_tr.pt"
+    model_load_path = "model/PointerBert/PBert1011_common_all_20sche_aug.pt"
     model = "model/language_model/chinese-roberta-wwm-ext"
     common_schema_path = "DocumentReview/Config/config_common.csv"
     bert_emb_size = 768
-    hidden_size = 100
+    hidden_size = 200
 
 
 def init_model():

@@ -324,7 +324,16 @@ class BaseTrainTool:
     def save_model(self, model_path):
         self.accelerator.wait_for_everyone()
         unwrapped_model = self.accelerator.unwrap_model(self.model)
-        unwrapped_model.save_pretrained(model_path, save_function=self.accelerator.save)
+        try:
+            unwrapped_model.save_pretrained(model_path, save_function=self.accelerator.save)
+
+        # For models having a custom save_pretrained method
+        except Exception as e:
+            self.logger.error(e)
+            torch.save(self.model, model_path)
+            torch.save(self.model.state_dict(), model_path+"/pytorch_model.bin")
+            # self.model.config.to_json_file(model_path)
+
         if self.accelerator.is_main_process:
             self.tokenizer.save_pretrained(model_path)
 
@@ -358,6 +367,8 @@ class BaseTrainTool:
                                self.data_train_args.output_dir + "/epoch_{}_score_{:.4f}.bin".format(epoch, eval_loss))
                     best_eval_loss = eval_loss
                     patience = 0
-                    self.save_model(model_path=self.data_train_args.output_dir + "/final")
+                    self.save_model(model_path=self.data_train_args.output_dir + "/best")
                 else:
                     patience += 1
+
+        self.save_model(model_path=self.data_train_args.output_dir + "/final")
