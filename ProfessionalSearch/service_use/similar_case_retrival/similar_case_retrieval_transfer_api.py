@@ -37,6 +37,7 @@ def hello_world():
                     appeal_name_list,
                     tags_list,
                     keywords,
+                    pubDate_list,
                 ) = predict_fn_similar_cases(fact, problem, claim_list)
 
                 return json.dumps(
@@ -47,6 +48,7 @@ def hello_world():
                         "reasonNames": reason_name_list,
                         "appealNames": appeal_name_list,
                         "tags": tags_list,
+                        "pubDates": pubDate_list,
                         "keywords": keywords,
                         "error_msg": "",
                         "status": 0,

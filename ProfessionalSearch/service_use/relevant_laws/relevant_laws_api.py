@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """ 
-@Author  : inamori1932
+@Author  :
 @Time    : 2022/8/17 11:53 
 @Desc    : 法条检索模块的接口
 """
@@ -10,9 +10,6 @@ from typing import List
 from flask import Flask
 from flask import request
 
-from LawsuitPrejudgment.src.civil.lawsuit_prejudgment.core import (
-    CivilRelevantLaw,
-)
 from ProfessionalSearch.src.relevant_laws.process_by_es.laws_search import (
     get_law_search_result,
 )
@@ -107,23 +104,6 @@ def search_laws():
     except Exception as e:
         return response_failed_result("error:" + repr(e))
 
-
-@app.route("/get_law_by_law_id", methods=["get"])  # 目前由后端查询，方法废弃
-def get_law_by_law_id():
-    try:
-        raw_law_id = request.args.get("law_id")
-        result = CivilRelevantLaw.get_law_in_memory(raw_law_id)
-        if result:
-            return response_successful_result(result)
-
-        pair = str(raw_law_id).split("_SEP_")
-        if len(pair) != 2:
-            return response_successful_result(dict())
-
-        table_name = pair[0]
-        law_id = pair[1]
-    except Exception as e:
-        return response_failed_result("error:" + repr(e))
 
 
 if __name__ == "__main__":

@@ -1,4 +1,6 @@
 import random
+import re
+
 from elasticsearch import Elasticsearch
 import jieba
 import logging
@@ -28,11 +30,11 @@ print("abc2...")
 ip = "192.168.1.254"
 es = Elasticsearch()  # [ip],http_auth=('elastic', 'password'),port=9200
 # ES_IDX_NAME = "narrative_similarity_v2"  # 'narrative_similarity_v2'
-ES_IDX_NAME = "case_index_minshi"  # 'narrative_similarity_v2'
+ES_IDX_NAME = "case_index_minshi_v2"  # 'narrative_similarity_v2'
 print("end...")
 # Predefine pos scope
 NOT_FOUND = "没有相似案件"
-similiar_threshold = 0.65  # 0.2 #80
+similiar_threshold = 0.50  # 0.2 #80
 similiar_threshold_consult = 0.65
 NUM_MAX_CANDIDATES = 30  # 50
 NUM_MAX_CANDIDATES_CONSULT = 10
@@ -240,7 +242,9 @@ def candidate_list_q2q_rank(original_question, candidate_list):
             chaming,
             benyuan_renwei,
             tags,
+            event_num,
         ) = element
+        eventDate = re.findall("(?<=\（)(.+?)(?=\）)", event_num)
         candidate = pseg_txt(chaming).replace(" ", "")  # 过滤一部分数据
         print(
             "narrative_similarity_predict.candidate_list_q2q_rank.",
@@ -261,11 +265,11 @@ def candidate_list_q2q_rank(original_question, candidate_list):
         # win_los = 1 if "1" in suqiu_label else 0  # TODO 有一个诉求得到支持，暂时任务就是支持的。
         logging.info("cos_i:"+ str(cos_i))
         candidate_list_new.append(
-            (uq_id, cos_i, problem_type, suqiu_type, tags)
+            (uq_id, cos_i, problem_type, suqiu_type, tags, eventDate)
         )
 
     candidate_list_new = sorted(
-        candidate_list_new, key=lambda element: element[1], reverse=True
+        candidate_list_new, key=lambda element: (element[5], -element[1]), reverse=True
     )  # 排序
     logging.info(
         "narrative_similarity_predict.candidate_list_q2q_rank.candidate_list_new:"
@@ -457,6 +461,7 @@ def search_similar_case(
         # suqiu_type = _source["suqiu_type"]
         # suqiu_label = _source["suqiu_label"]
         doc_id = _source["uq_id"]
+        event_num = _source["event_num"]
         tags_ = hit["_source"]["tags"]
         if not sucheng_sentences:
             sucheng_sentences = ""
@@ -479,6 +484,8 @@ def search_similar_case(
                 # suqiu_label,
                 ";tags_:",
                 tags_,
+                ";event_num:",
+                event_num,
             )
             logging.info(
                 str(doc_id)
@@ -490,6 +497,8 @@ def search_similar_case(
                 # + suqiu_label
                 + ";tags_:"
                 + tags_
+                +";event_num:"
+                +event_num
             )
             print(
                 count,
@@ -566,6 +575,7 @@ def search_similar_case(
                 chaming,
                 benyuan_renwei,
                 tags_,
+                event_num,
             )
         )  # did_temp,score_temp,question_temp,answer_temp,question_short_temp
         #
@@ -610,7 +620,7 @@ def get_search_body(problem, suqiu_type, query_search, tags):
                                     {"match": {"benyuan_renwei": query_search}},
                                     {"match": {"sucheng_sentences": query_search}},
                                     # {"match": {"bg_sc": query_search}},
-                                    {"match": {"tags": tags}},
+                                    # {"match": {"tags": tags}},
                                 ]
                             }
                         },
@@ -627,7 +637,7 @@ def get_search_body(problem, suqiu_type, query_search, tags):
                         {"match": {"benyuan_renwei": query_search}},
                         {"match": {"sucheng_sentences": query_search}},
                         # {"match": {"bg_sc": query_search}},
-                        {"match": {"tags": tags}},
+                        # {"match": {"tags": tags}},
                     ]
                 }
             }
@@ -650,9 +660,10 @@ def organize_result(similiar_list, is_consult_flag, fact, keywords, top_k=50):
         reason_name_list,
         appeal_name_list,
         tags_list,
-    ) = ([], [], [], [], [], [])
+        date_list
+    ) = ([], [], [], [], [], [], [])
     for i, element in enumerate(similiar_list):
-        doc_id, cos_i, problem_type, suqiu_type, tags = element
+        doc_id, cos_i, problem_type, suqiu_type, tags, pubDate = element
         tags = tags.replace("本院", "判定")
         threshold = (
             similiar_threshold_consult if is_consult_flag else similiar_threshold
@@ -664,6 +675,7 @@ def organize_result(similiar_list, is_consult_flag, fact, keywords, top_k=50):
             reason_name_list.append(str(problem_type))
             appeal_name_list.append(str(suqiu_type))
             tags_list.append(tags)
+            date_list.append(pubDate)
 
     tags1 = jieba.analyse.extract_tags(fact, topK=20)
     tags2 = jieba.analyse.textrank(
@@ -678,6 +690,7 @@ def organize_result(similiar_list, is_consult_flag, fact, keywords, top_k=50):
         appeal_name_list,
         tags_list,
         keywords,
+        date_list,
     )
 
 
