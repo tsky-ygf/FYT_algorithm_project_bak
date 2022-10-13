@@ -81,6 +81,7 @@ class BaseTrainTool:
         :param config_path: config file path
         """
         self.config = parse_config_file(config_path)
+
         # self.create_examples = data_func
         # self.prepare_input = prepare_input
 

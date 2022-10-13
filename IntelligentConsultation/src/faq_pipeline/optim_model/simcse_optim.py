@@ -10,7 +10,7 @@ import random
 import os
 import pandas as pd
 
-from data_aug import word_repetition
+from data_aug import word_repetition, random_reverse_order
 from IntelligentConsultation.src.faq_pipeline.core_model.common_model import MODEL_REGISTRY, SimCSE
 from IntelligentConsultation.src.faq_pipeline.main import faq_main
 from IntelligentConsultation.src.faq_pipeline.core_model.st_losses import MNRRDropLoss
@@ -23,6 +23,7 @@ from sentence_transformers import InputExample
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 random.seed(290)
+
 
 # aug = WordSubstitute('synonym', create_n=1, aug_percent=0.3)
 
@@ -39,20 +40,14 @@ class SimCSE_RDRop(SimCSE):
 
             # TODO 使用同义词进行数据增强
             # paddlenlp的同义词替换，降低了准确率5个点。
-            # self.logger.debug(query2)
-            # self.logger.debug(aug.augment(query2))
-            # try:
-            #     query2 = aug.augment(query2)[0]
-            # except Exception as e:
-            #     self.logger.warning(e)
-            #     pass
+
+            # if random.random() > 0.8:
+            #     query1 = random_reverse_order(query1)
+            #     query2 = random_reverse_order(query2)
 
             if random.random() < 0.2:
                 query1 = word_repetition(query1)
                 query2 = word_repetition(query2)
-
-                self.logger.debug(f"query1: {query1}")
-                self.logger.debug(f"query2: {query2}")
 
             train_data.append(InputExample(texts=[query1, query2]))
 
@@ -63,7 +58,7 @@ class SimCSE_RDRop(SimCSE):
         pooling_model = models.Pooling(word_embedding_model.get_word_embedding_dimension())
         model = SentenceTransformer(modules=[word_embedding_model, pooling_model])
         loss = losses.MultipleNegativesRankingLoss(model)
-        # loss = MNRRDropLoss(model, kl_weight=0.3)
+        # loss = MNRRDropLoss(model, kl_weight=0.1)
         return model, loss
 
 

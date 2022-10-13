@@ -7,16 +7,16 @@
 # @Software: PyCharm
 import os
 import pandas as pd
-from IntelligentConsultation.src.faq_pipeline.init_faq_tools import *
+from IntelligentConsultation.src.faq_pipeline.init_faq_tools import init_retriever, init_document_store
 from IntelligentConsultation.src.faq_pipeline.core_model.common_model import MODEL_REGISTRY
 from loguru import logger
-from IntelligentConsultation.src.FAQ_predict import FAQPredict
+from IntelligentConsultation.src.faq_pipeline.infer import FAQPredict
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "3"
 
 
 def insert_data(data_path="data/fyt_train_use_data/QA/pro_qa.csv",
-                index_name="topic_qa_test",
+                index_name="topic_qa_test_v2",
                 model_name="model/similarity_model/simcse-model-top-32"):
     document_store = init_document_store(index_name=index_name)
     retriever = init_retriever(document_store, model_name=model_name)
@@ -105,7 +105,7 @@ def param_optim(config):
     for lr in [1e-5, 2e-5]:
         for train_batch_size in [32, 64, 128]:
             for max_seq_length in [64, 128]:
-                for num_epochs in [1, 2, 3, 4, 5, 6, 7, 8]:
+                for num_epochs in [1, 2, 3, 4]:
 
                     print("lr: {} ===> train_batch_size: {} ===> max_seq_length: {} ===> num_epochs: {}".
                           format(lr, train_batch_size, max_seq_length, num_epochs))
@@ -147,6 +147,6 @@ if __name__ == '__main__':
     #         "num_epochs": 1}
     # }
     # param_optim(use_config)
-
+    #
     acc, res_df = test_acc(index_name="topic_qa_test_v2", model_name="model/similarity_model/simcse-model-optim")
     print(acc)
