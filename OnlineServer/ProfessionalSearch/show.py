@@ -7,7 +7,7 @@
 # @Software: PyCharm
 import requests
 import streamlit as st
-
+import streamlit.components.v1 as components
 # from ProfessionalSearch.src.similar_case_retrival.similar_case.util import get_civil_law_documents_by_id_list
 from Utils.logger import Logger
 
@@ -430,13 +430,18 @@ def get_civil_law_documents_by_id_list(id_list: List[str], table_name) -> List[D
     try:
         format_strings = ','.join(['%s'] * len(id_list))
         # 执行SQL语句
-        cursor.execute("SELECT uq_id, jslcm FROM " + table_name + " WHERE uq_id in (%s)" % format_strings,
+        cursor.execute("SELECT uq_id, jslcm, source_txt,yg_sc,bg_sc, byrw, pubDate FROM " + table_name + " WHERE uq_id in (%s)" % format_strings,
                        tuple(id_list))
         # 获取所有记录列表
         fetched_data = cursor.fetchall()
         law_documents = [{
             "uq_id": row[0],
-            "jslcm": row[1]
+            "jslcm": row[1],
+            "source_txt": row[2],
+            "yg_sc": row[3],
+            "bg_sc": row[4],
+            "byrw": row[5],
+            "pubDate": row[6]
         } for row in fetched_data]
     except:
         logging.error("Error: unable to fetch data")
@@ -479,27 +484,38 @@ def similar_case_retrieval_review():
         print(suqiu_res)
         # 组织结果返回
         doc_id_list, sim_list, reason_name_list, tags_list = suqiu_res["dids"], suqiu_res["sims"], suqiu_res["reasonNames"], suqiu_res["tags"]
-        detail = "http://101.69.229.138:7145/get_law_document?doc_id=judgment_minshi_data_SEP_"
+        detail_link = "http://101.69.229.138:7145/get_law_document?doc_id=judgment_minshi_data_SEP_"
         if doc_id_list:
-            jslcm_list = get_civil_law_documents_by_id_list(doc_id_list, "judgment_minshi_data_cc")
+            jslcm_list = get_civil_law_documents_by_id_list(doc_id_list, "judgment_minshi_data")
             for index, uq_id in enumerate(doc_id_list):
                 logger.info(reason_name_list[index])
-                jslcm = ""
+                jslcm, detail, yg_sc, bg_sc, byrw, date = "", "", "", "", "", ""
                 for jslcm_item in jslcm_list:
                     if uq_id == jslcm_item['uq_id']:
                         jslcm = jslcm_item['jslcm']
-                link = "[link]"+"(" + detail + uq_id+")"
+                        detail = jslcm_item['source_txt']
+                        date = jslcm_item['pubDate']
+                        # yg_sc = jslcm_item['yg_sc']
+                        # bg_sc = jslcm_item['bg_sc']
+                        # byrw = jslcm_item['byrw']
+                        link = "[link]"+"(" + detail_link + uq_id+")"
                 res_dict = {
                     "标号": index,
                     "唯一ID": uq_id,
+                    # "原告诉称": yg_sc,
+                    # "被告诉称": bg_sc,
+                    # "本院认为": byrw,
                     "经审理查明": jslcm,
                     "相似率": sim_list[index],
                     "纠纷类型": reason_name_list[index],
                     "关键词": tags_list[index],
+                    "时间": date
+                    # "裁判文书详情": detail
                 }
 
                 st.write(res_dict)
-                st.write("裁判文书详情", link)
+                components.html(detail, scrolling=True)
+                # st.write("裁判文书详情", link)
                 st.write("-" * 20 + "我是分割线" + "-" * 20)
 
 

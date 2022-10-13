@@ -81,6 +81,7 @@ class BaseTrainTool:
         :param config_path: config file path
         """
         self.config = parse_config_file(config_path)
+
         # self.create_examples = data_func
         # self.prepare_input = prepare_input
 
@@ -94,9 +95,9 @@ class BaseTrainTool:
         self.logger.info(self.config)
         # exit()
 
-        if self.log_args.log_file is not None and os.path.exists(self.log_args.log_file):
-            shutil.rmtree(self.log_args.log_file)
-            self.writer = SummaryWriter(log_dir=self.log_args.log_file)
+        if self.log_args.tensorboard_log_dir is not None and os.path.exists(self.log_args.tensorboard_log_dir):
+            shutil.rmtree(self.log_args.tensorboard_log_dir)
+            self.writer = SummaryWriter(log_dir=self.log_args.tensorboard_log_dir)
 
         self.accelerator = self.init_accelerator()
 
@@ -330,7 +331,7 @@ class BaseTrainTool:
         # For models having a custom save_pretrained method
         except Exception as e:
             self.logger.error(e)
-            torch.save(self.model, model_path)
+            # torch.save(self.model, model_path)
             torch.save(self.model.state_dict(), model_path+"/pytorch_model.bin")
             # self.model.config.to_json_file(model_path)
 

@@ -7,7 +7,7 @@
 # @Software: PyCharm
 import requests
 import pandas as pd
-from IntelligentConsultation.src.FAQ_predict import FAQPredict
+from IntelligentConsultation.src.faq_pipeline.infer import FAQPredict
 
 df_individual = pd.read_csv("IntelligentConsultation/config/个人端热门标签问答.csv", encoding="utf-8")
 df_company = pd.read_csv("IntelligentConsultation/config/企业端热门标签问答.csv", encoding="utf-8")
@@ -41,9 +41,22 @@ def get_query_answer(question: str):
     }
 
 
-faq_predict = FAQPredict(level="INFO", console=True, logger_file="log/intelligent_consultation/model.log")
+faq_predict = FAQPredict(level="INFO",
+                         console=True,
+                         logger_file="log/intelligent_consultation/model.log",
+                         index_name="topic_qa",
+                         model_name="model/similarity_model/simcse-model-topic_qa")
 
 
-def get_query_answer_with_source(question: str):
-    answer, similarity_question = faq_predict(question)
+def get_query_answer_with_source(question: str, query_type: str):
+    if query_type == "专题":
+        answer, similarity_question = faq_predict(question)
+    else:
+        answer, similarity_question = faq_predict(question, query_type)
+
     return {"answer": answer, "similarity_question": similarity_question}
+
+
+if __name__ == '__main__':
+    _question = "七查七看是什么"
+    print(get_query_answer_with_source(_question, "市场监管"))
