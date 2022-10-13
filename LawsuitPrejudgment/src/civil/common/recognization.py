@@ -131,28 +131,30 @@ def match_sentence_by_keyword(sentence, key_word):
         # print(pattern)
         # print(words)
         # print(postags)
-        # print([arc.head for arc in arcs])
-        # print([arc.relation for arc in arcs])
+        # print([arc[0] for arc in arcs])
+        # print([arc[1] for arc in arcs])
         for i in range(len(arcs)):
-            if words[i] in negative_word_list and arcs[i].relation != 'HED':
-                if words[arcs[i].head - 1] in pattern:
+            print("Debug Recognization:")
+            print(arcs[i])
+            if words[i] in negative_word_list and arcs[i][1] != 'HED':
+                if words[arcs[i][0] - 1] in pattern:
                     return result, 1
-                if arcs[arcs[i].head - 1].relation == 'VOB' and words[arcs[arcs[i].head - 1].head - 1] in pattern:
+                if arcs[arcs[i][0] - 1][1] == 'VOB' and words[arcs[arcs[i][0] - 1][0] - 1] in pattern:
                     return result, 1
-                if len(pattern) == 1 and (pattern in words[arcs[i].head - 1] or pattern in words[arcs[arcs[i].head - 1].head - 1]):
+                if len(pattern) == 1 and (pattern in words[arcs[i][0] - 1] or pattern in words[arcs[arcs[i][0] - 1][0] - 1]):
                     return result, 1
-                if words[arcs[i].head - 1] in ['按照']:
+                if words[arcs[i][0] - 1] in ['按照']:
                     return result, 1
-            if words[i] in negative_word_list and arcs[i].relation == 'HED':
+            if words[i] in negative_word_list and arcs[i][1] == 'HED':
                 for k, arc in enumerate(arcs):
-                    if arc.relation in ['SBV', 'VOB'] and arc.head == i + 1:
+                    if arc[1] in ['SBV', 'VOB'] and arc[0] == i + 1:
                         if words[k] in pattern or words[k] in ['证据', '证明']:
                             return result, 1
                         if len(pattern) == 1 and pattern in words[k]:
                             return result, 1
-            if words[i] in negative_word_list and arcs[arcs[i].head - 1].relation == 'HED' and len(words) > 3:
+            if words[i] in negative_word_list and arcs[arcs[i][0] - 1][1] == 'HED' and len(words) > 3:
                 for k, arc in enumerate(arcs):
-                    if arc.relation in ['SBV', 'VOB'] and arc.head == arcs[i].head:
+                    if arc[1] in ['SBV', 'VOB'] and arc[0] == arcs[i][0]:
                         if words[k] in pattern or words[k] in ['证据', '证明']:
                             return result, 1
                         if len(pattern) == 1 and pattern in words[k]:
@@ -241,5 +243,5 @@ if __name__ == '__main__':
     # arcs = parser.parse(words, postags)  # 句法分析
     # print('\t'.join(words))
     # print('\t'.join(postags))
-    # print('\t'.join([str(arc.head) for arc in arcs]))
-    # print('\t'.join([str(arc.relation) for arc in arcs]))
+    # print('\t'.join([str(arc[0]) for arc in arcs]))
+    # print('\t'.join([str(arc[1]) for arc in arcs]))

@@ -217,6 +217,7 @@ class BaseTrainTool:
                 "weight_decay": 0.0,
             },
         ]
+        self.train_args.learning_rate = float(self.train_args.learning_rate)
         optimizer = torch.optim.AdamW(optimizer_grouped_parameters, lr=self.train_args.learning_rate)
 
         return optimizer

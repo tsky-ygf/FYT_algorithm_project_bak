@@ -23,7 +23,8 @@ import os
 import sys
 import numpy as np
 import pandas as pd
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
 from sklearn.metrics import f1_score, classification_report, accuracy_score, confusion_matrix
 from LawsuitPrejudgment.src.civil.common import prob_ps, prob_ps_desc, chaming_fact_extract
 from LawsuitPrejudgment.src.civil.modules import optimization, tokenization, bert_modeling

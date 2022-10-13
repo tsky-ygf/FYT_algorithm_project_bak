@@ -1,0 +1,25 @@
+LogArguments:
+  is_debug: False
+  log_level: "DEBUG"
+
+TrainingArguments:
+  train_batch_size: 8
+  eval_batch_size: 4
+  lr_scheduler_type: "linear"
+  learning_rate: 5e-5
+  num_train_epochs: 100
+  accelerator_params:
+    fp16: True
+  early_stopping_patience: 10
+
+ModelArguments:
+  model_name_or_path: 'model/language_model/chinese-roberta-wwm-ext'
+  hidden_size: 200
+  bert_emb_size: 768
+
+DataTrainingArguments:
+  train_data_path: "data/data_src/common_all/train.json"
+  dev_data_path: "data/data_src/common_all/dev.json"
+  test_data_path: "data/data_src/common_all/dev.json"
+  output_dir: "model/PointerBert/framework/"
+  max_length: 512

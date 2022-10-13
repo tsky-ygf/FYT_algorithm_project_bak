@@ -60,13 +60,12 @@ def administrative_prejudgment_testing_page():
 def get_criminal_result(fact, question_answers, factor_sentence_list, anyou, event):
     body = {
         "fact": fact,
-        "question_answers": question_answers,
-        "factor_sentence_list": factor_sentence_list,
-        "anyou": anyou,
-        "event": event
+        "question_answers": question_answers
+        # "factor_sentence_list": factor_sentence_list,
+        # "anyou": anyou,
+        # "event": event
     }
     resp_json = requests.post(url="http://127.0.0.1:8105/get_criminal_result", json=body).json()
-
     if resp_json.get("success") is False:
         raise Exception("刑事预判接口返还异常: {}".format(resp_json.get("error_msg")))
 
@@ -117,9 +116,9 @@ def show_criminal_next_qa(_user_input, _question_answers, _factor_sentence_list,
             st.session_state[btn_click_key] = True
         if btn_click_key in st.session_state:
             _question_answers[next_question + ":" + ";".join(answers)] = ";".join(selected_answers)
-            _factor_sentence_list = next_question_info['factor_sentence_list']
-            _anyou = next_question_info['anyou']
-            _event = next_question_info['event']
+            _factor_sentence_list = next_question_info.get('factor_sentence_list')
+            _anyou = next_question_info.get('anyou')
+            _event = next_question_info.get('event')
             _count += 1
             show_criminal_next_qa(_user_input, _question_answers, _factor_sentence_list, _anyou, _event, _count)
     else:
