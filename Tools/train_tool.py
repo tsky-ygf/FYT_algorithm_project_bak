@@ -288,7 +288,7 @@ class BaseTrainTool:
 
             if step % int(self.num_update_steps_per_epoch / 3) == 0:
                 self.logger.info(
-                    f"Train epoch:{epoch}======> epoch_setps:{self.num_update_steps_per_epoch}"
+                    f"\nTrain epoch:{epoch}======> epoch_setps:{self.num_update_steps_per_epoch}"
                     f"======> step:{step}"
                     # f"epoch:{self.completed_steps / self.num_update_steps_per_epoch}"
                     f"======> loss: {loss.item():.4f}"
@@ -326,15 +326,7 @@ class BaseTrainTool:
     def save_model(self, model_path):
         self.accelerator.wait_for_everyone()
         unwrapped_model = self.accelerator.unwrap_model(self.model)
-        try:
-            unwrapped_model.save_pretrained(model_path, save_function=self.accelerator.save)
-
-        # For models having a custom save_pretrained method
-        except Exception as e:
-            self.logger.error(e)
-            # torch.save(self.model, model_path)
-            torch.save(self.model.state_dict(), model_path+"/pytorch_model.bin")
-            # self.model.config.to_json_file(model_path)
+        unwrapped_model.save_pretrained(model_path, save_function=self.accelerator.save)
 
         if self.accelerator.is_main_process:
             self.tokenizer.save_pretrained(model_path)
@@ -356,7 +348,6 @@ class BaseTrainTool:
             self.train_epoch(epoch)
             torch.cuda.empty_cache()
             if epoch % self.train_args.early_stopping_patience == 0 and self.train_args.eval_ever_epoch:  # and epoch > 0:
-                # torch.cuda.empty_cache()
                 eval_loss = self.eval_epoch()
                 self.logger.info("epoch:{}======>eval_loss: {}".format(epoch, eval_loss))
                 if hasattr(self, 'writer'):
