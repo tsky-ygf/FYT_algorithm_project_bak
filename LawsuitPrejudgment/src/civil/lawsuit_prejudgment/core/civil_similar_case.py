@@ -93,6 +93,7 @@ id2table = {
 import logging
 from typing import List, Dict
 import pymysql
+import re
 
 
 def _get_civil_law_documents_by_id_list(id_list: List[str], table_name) -> List[Dict]:
@@ -159,12 +160,18 @@ def _is_valid_string(test_string):
     return True
 
 
+def _is_having_number_in_string(test_string):
+    return bool(re.search(r"\d", test_string))
+
+
 def sort_similar_cases(similar_cases):
-    return sorted(similar_cases, key=lambda x: x.get("case_number") if _is_valid_string(x.get("case_number")) else "", reverse=True)
+    return sorted(similar_cases, key=lambda x: x.get("case_number") if _is_valid_string(x.get("case_number")) else "",
+                  reverse=True)
 
 
 class CivilSimilarCase:
     """ 算法匹配的民事相似案例 """
+
     def __init__(self, fact, problem, claim_list, problem_id):
         self.fact = fact
         self.problem = problem
@@ -173,7 +180,7 @@ class CivilSimilarCase:
         self.table_name = id2table.get(str(self.problem_id), "case_list_original_hetong")
 
     def get_similar_cases(self):
-        url = "http://172.19.82.198:5011/top_k_similar_narrative"
+        url = "http://127.0.0.1:5011/top_k_similar_narrative"
         body = {
             "fact": str(self.fact) + " " + self.problem + " " + "".join(self.claim_list),
             "problem": self.problem,
@@ -192,7 +199,8 @@ class CivilSimilarCase:
         return [
             {
                 "doc_id": CIVIL_SIMILAR_CASE_ID_PREFIX + str(item["doc_id"]),
-                "similar_rate": next((sim for idx, sim in enumerate(sim_list) if str(doc_ids[idx]) == str(item["doc_id"])), 0.6),
+                "similar_rate": next(
+                    (sim for idx, sim in enumerate(sim_list) if str(doc_ids[idx]) == str(item["doc_id"])), 0.6),
                 "title": item["doc_title"],
                 "court": item["court"],
                 "judge_date": item["judge_date"],
@@ -204,8 +212,99 @@ class CivilSimilarCase:
         ]
 
 
+def get_recent_civil_law_documents_by_id_list(id_list: List[str], table_name) -> List[Dict]:
+    # 打开数据库连接
+    db = pymysql.connect(host='172.19.82.227',
+                         user='root',
+                         password='Nblh@2022',
+                         database='judgments_data')
+
+    # 使用cursor()方法获取操作游标
+    cursor = db.cursor()
+
+    # SQL 查询语句
+    try:
+        format_strings = ','.join(['%s'] * len(id_list))
+        # 执行SQL语句
+        cursor.execute(
+            "SELECT uq_id, wsTitle, event_num, pubDate, province, faYuan_name FROM " + table_name + " WHERE uq_id in (%s)" % format_strings,
+            tuple(id_list))
+        # 获取所有记录列表
+        fetched_data = cursor.fetchall()
+        law_documents = [{
+            "doc_id": row[0],
+            "doc_title": row[1],
+            "case_number": row[2],
+            "judge_date": row[3],
+            "province": row[4],
+            "court": row[5],
+            "raw_content": ""
+        } for row in fetched_data]
+    except:
+        logging.error("Error: unable to fetch data")
+        law_documents = []
+    # 关闭数据库连接
+    db.close()
+    return law_documents
+
+
+class RecentCivilSimilarCase:
+    """ 算法匹配的民事相似案例，使用的是近年的裁判文书 """
+
+    def __init__(self, fact, problem, claim_list, problem_id):
+        self.fact = fact
+        self.problem = problem
+        self.claim_list = claim_list
+        self.problem_id = problem_id
+        self.table_name = "judgment_minshi_data"
+
+    def get_similar_cases(self):
+        url = "http://127.0.0.1:5011/top_k_similar_narrative"
+        body = {
+            "fact": str(self.fact) + " " + self.problem + " " + "".join(self.claim_list),
+            "problem": self.problem,
+            "claim_list": self.claim_list
+        }
+        resp_json = requests.post(url, json=body).json()
+        return self._get_short_document(resp_json)
+
+    def _sort_documents_by_original_order(self, doc_ids, documents):
+        result = []
+        for doc_id in doc_ids:
+            document = next((item for item in documents if item["doc_id"] == self.table_name + "_SEP_" + str(doc_id)),
+                            None)
+            if document:
+                result.append(document)
+        return result
+
+    def _get_short_document(self, resp_json, top_k=30):
+        doc_ids = resp_json["dids"][:top_k]
+        sim_list = resp_json["sims"][:top_k]
+        tags_list = resp_json["tags"][:top_k]
+        law_documents = get_recent_civil_law_documents_by_id_list(doc_ids, self.table_name)
+        if not law_documents:
+            return []
+        documents = [
+            {
+                "doc_id": self.table_name + "_SEP_" + str(item["doc_id"]),
+                "similar_rate": next(
+                    (sim for idx, sim in enumerate(sim_list) if str(doc_ids[idx]) == str(item["doc_id"])), 0.6),
+                "title": item["doc_title"],
+                "court": item["court"],
+                "judge_date": item["judge_date"],
+                "case_number": str(item["case_number"]).strip(),
+                "tag": next((tag for idx, tag in enumerate(tags_list) if str(doc_ids[idx]) == str(item["doc_id"])), ""),
+                "is_guiding_case": False
+            }
+            for item in law_documents if
+            _is_valid_string(item["doc_title"]) and not _is_having_number_in_string(item["doc_title"])
+        ]
+        return self._sort_documents_by_original_order(doc_ids, documents)
+
+
 class ManuallySelectedCivilSimilarCase:
     """ 人工精选的民事相似案例 """
+
     def __init__(self, problem, claim, situation):
         self.problem = str(problem)
         self.claim = str(claim)
@@ -223,11 +322,13 @@ class ManuallySelectedCivilSimilarCase:
         return "" if str(string_value).strip().lower() == "nan" else str(string_value).strip()
 
     def _is_valid_row(self, row):
-        return row["纠纷"] == self.problem and row["诉求"] == self.claim and row["情形"] == self.situation and str(row["doc_id"]) != 'nan'
+        return row["纠纷"] == self.problem and row["诉求"] == self.claim and row["情形"] == self.situation and str(
+            row["doc_id"]) != 'nan'
 
     def get_similar_cases(self):
         try:
-            df = pd.read_csv("data/LawsuitPrejudgment/manually_selected_cases/" + self.problem + ".csv", encoding="utf-8")
+            df = pd.read_csv("data/LawsuitPrejudgment/manually_selected_cases/" + self.problem + ".csv",
+                             encoding="utf-8")
         except Exception:
             return []
 
@@ -241,7 +342,7 @@ class ManuallySelectedCivilSimilarCase:
                         "court": self._ignore_nan(row["court"]),
                         "judge_date": _transfer_date_format(self._ignore_nan(row["judge_date"])),
                         "case_number": self._ignore_nan(row["case_number"]),
-                        "tag": "",
+                        "tag": "精选类案",
                         "is_guiding_case": True
                     }
                 ]
