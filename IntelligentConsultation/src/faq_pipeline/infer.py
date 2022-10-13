@@ -35,6 +35,9 @@ class FAQPredict:
 
     def pre_process_text(self, text):
         self.logger.info(f"text:{text}")
+        if text in self.proper_noun_config:
+            text += "是什么"
+
         keywords = self.tfidf(text, allowPOS=["n", "v", "a", "d"])
         keywords_text = "".join(keywords)
         text += keywords_text * 3
@@ -45,7 +48,7 @@ class FAQPredict:
         similarity_question_info = [{"question": p.meta["query"], "score": p.to_dict()["score"]} for p in predictions]
         self.logger.info(f"similarity_question:{similarity_question_info}")
 
-        match_answer = "您的问题法域通暂时还理解不了，请您换个说法。"
+        final_answer = "您的问题法域通暂时还理解不了，请您换个说法。"
         for prediction in predictions:
             score = prediction.to_dict()["score"]
             meta = prediction.meta
@@ -55,12 +58,21 @@ class FAQPredict:
             self.logger.success(f"query:{match_query},score:{score},source:{match_source}")
             if query_type and match_source != query_type:
                 continue
-            # for proper_noun in self.proper_noun_config.items():
-            #     if proper_noun[0] in query and proper_noun[1] != match_source:
-            # continue
+
+            proper_noun_missing = False
+
+            for proper_noun, noun_type in self.proper_noun_config.items():
+                if proper_noun in query and proper_noun not in match_query:
+                    proper_noun_missing = True
+
+            if proper_noun_missing:
+                continue
+
+            similarity_question.insert(0, {"question": match_query, "answer": match_answer})
+            final_answer = match_answer
             break
 
-        return match_answer, similarity_question
+        return final_answer, similarity_question
 
     def __call__(self, query, query_type=None):
         query = self.pre_process_text(query)
@@ -74,4 +86,6 @@ class FAQPredict:
 
 if __name__ == '__main__':
     m = FAQPredict(level="DEBUG")
-    m("公司交不起税怎么办")
+    _answer, _similarity_question = m("不需要缴税的事情有哪些")
+
+    print(_answer)

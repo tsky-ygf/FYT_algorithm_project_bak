@@ -15,8 +15,8 @@ app = FastAPI()
 
 class QueryInput(BaseModel):
     question: str = Field(default="公司交不起税怎么办", description="用户输入的问题")
-    source_end: str = Field(default=None, description="用户输入的问题")
-    query_type: str = Field(default=None, description="选择用户输入的问题类型")
+    source_end: str = Field(default=None, description="用户使用的客户端")
+    query_type: str = Field(default="专题", description="选择用户输入的问题类型")
 
 
 @app.post("/get_query_answer")
