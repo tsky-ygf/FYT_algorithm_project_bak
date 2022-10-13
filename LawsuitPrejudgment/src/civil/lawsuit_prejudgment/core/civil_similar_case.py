@@ -93,6 +93,7 @@ id2table = {
 import logging
 from typing import List, Dict
 import pymysql
+import re
 
 
 def _get_civil_law_documents_by_id_list(id_list: List[str], table_name) -> List[Dict]:
@@ -157,6 +158,10 @@ def _is_valid_string(test_string):
     if test_string == "none" or test_string == "nan" or test_string == "":
         return False
     return True
+
+
+def _is_having_number_in_string(test_string):
+    return bool(re.search(r"\d", test_string))
 
 
 def sort_similar_cases(similar_cases):
@@ -291,7 +296,8 @@ class RecentCivilSimilarCase:
                 "tag": next((tag for idx, tag in enumerate(tags_list) if str(doc_ids[idx]) == str(item["doc_id"])), ""),
                 "is_guiding_case": False
             }
-            for item in law_documents if _is_valid_string(item["doc_title"])
+            for item in law_documents if
+            _is_valid_string(item["doc_title"]) and not _is_having_number_in_string(item["doc_title"])
         ]
         return self._sort_documents_by_original_order(doc_ids, documents)
 
@@ -336,7 +342,7 @@ class ManuallySelectedCivilSimilarCase:
                         "court": self._ignore_nan(row["court"]),
                         "judge_date": _transfer_date_format(self._ignore_nan(row["judge_date"])),
                         "case_number": self._ignore_nan(row["case_number"]),
-                        "tag": "",
+                        "tag": "精选类案",
                         "is_guiding_case": True
                     }
                 ]
