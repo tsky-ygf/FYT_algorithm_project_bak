@@ -39,14 +39,14 @@ def _get_query_answer_with_source(query_input: QueryInput):
     参数设定；
     @question: 用户的问题输入
     @source_end: 个人端/企业端/律师端
-    @query_type: old/topic/market
+    @query_type: 旧版/专题/市场
     """
     print("input:")
     print("question{}:".format(query_input.question))
     print("source_end{}:".format(query_input.source_end))
     print("query_type{}:".format(query_input.query_type))
 
-    if query_input.query_type == "old":
+    if query_input.query_type == "旧版":
         return consultation_service.get_query_answer(query_input.question)
 
     else:
@@ -56,5 +56,5 @@ def _get_query_answer_with_source(query_input: QueryInput):
 
 if __name__ == '__main__':
     # 真实使用8130端口。测试使用8131端口
-    # uvicorn.run('OnlineServer.IntelligentConsultation.server:app', host="0.0.0.0", port=8130, reload=False, workers=2)
-    uvicorn.run('OnlineServer.IntelligentConsultation.server:app', host="0.0.0.0", port=8131, reload=True, workers=4)
+    uvicorn.run('OnlineServer.IntelligentConsultation.server:app', host="0.0.0.0", port=8130, reload=False, workers=2)
+    # uvicorn.run('OnlineServer.IntelligentConsultation.server:app', host="0.0.0.0", port=8131, reload=True, workers=4)

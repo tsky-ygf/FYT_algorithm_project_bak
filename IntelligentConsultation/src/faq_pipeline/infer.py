@@ -5,6 +5,7 @@
 # @Site    : 
 # @File    : infer.py
 # @Software: PyCharm
+import pandas as pd
 from jieba import analyse
 
 from IntelligentConsultation.src.faq_pipeline.init_faq_tools import init_haystack_fqa_pipe
@@ -23,6 +24,16 @@ class FAQPredict:
 
         self.tfidf = analyse.extract_tags
 
+        self.proper_noun_config = self.get_base_config()
+
+    def get_base_config(self):
+        proper_noun_df = pd.read_csv("IntelligentConsultation/config/专有名词.csv")
+        self.logger.debug(proper_noun_df)
+        proper_noun_config = dict(zip(proper_noun_df['专有名词'],proper_noun_df['type']))
+        self.logger.debug(proper_noun_config)
+        exit()
+        return proper_noun_df
+
     def pre_process_text(self, text):
         self.logger.info(f"text:{text}")
         keywords = self.tfidf(text, allowPOS=["n", "v", "a", "d"])
@@ -31,6 +42,10 @@ class FAQPredict:
         return text
 
     def post_process_result(self, predictions, query_type=None):
+        similarity_question = [{"question": p.meta["query"], "answer": p.meta["answer"]} for p in predictions]
+        similarity_question_info = [{"question": p.meta["query"], "score": p.to_dict()["score"]} for p in predictions]
+        self.logger.info(f"similarity_question:{similarity_question_info}")
+
         answer = "您的问题法域通暂时还理解不了，请您换个说法。"
         for prediction in predictions:
             score = prediction.to_dict()["score"]
@@ -39,11 +54,10 @@ class FAQPredict:
             answer = meta["answer"]
             source = meta["type"]
             self.logger.success(f"query:{query},score:{score},source:{source}")
-            break
+            if query_type and source != query_type:
+                continue
 
-        similarity_question = [{"question": p.meta["query"], "answer": p.meta["answer"]} for p in predictions]
-        similarity_question_info = [{"question": p.meta["query"], "score": p.to_dict()["score"]} for p in predictions]
-        self.logger.info(f"similarity_question:{similarity_question_info}")
+            break
 
         return answer, similarity_question
 
@@ -59,4 +73,4 @@ class FAQPredict:
 
 if __name__ == '__main__':
     m = FAQPredict(level="DEBUG")
-    m("信用卡信用卡补办补办")
+    m("公司交不起税怎么办")

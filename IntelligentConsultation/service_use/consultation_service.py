@@ -49,5 +49,14 @@ faq_predict = FAQPredict(level="INFO",
 
 
 def get_query_answer_with_source(question: str, query_type: str):
-    answer, similarity_question = faq_predict(question, query_type)
+    if query_type == "专题":
+        answer, similarity_question = faq_predict(question)
+    else:
+        answer, similarity_question = faq_predict(question, query_type)
+
     return {"answer": answer, "similarity_question": similarity_question}
+
+
+if __name__ == '__main__':
+    _question = "七查七看是什么"
+    print(get_query_answer_with_source(_question, "市场监管"))
