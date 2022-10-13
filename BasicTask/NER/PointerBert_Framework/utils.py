@@ -37,21 +37,23 @@ def read_config_to_label(config_path, is_long=False):
     config_list.remove('未尽事宜')
     config_list.remove('金额')
 
+    schema2id = dict()
+    id2schema = dict()
 
-    config_dict = dict()
     if is_long:
-        config_list =['争议解决', '合同生效', '未尽事宜', '通知与送达', '鉴于条款', '附件', '甲方解除合同', '乙方解除合同']
+        config_list = ['争议解决', '合同生效', '未尽事宜', '通知与送达', '鉴于条款', '附件', '甲方解除合同', '乙方解除合同']
 
     for i, c in enumerate(config_list):
-        config_dict[c] = i
+        schema2id[c] = i
+        id2schema[i] = c
 
     num_labels = len(config_list)
 
-    for key, value in _alias2label.items():
-        config_dict[key] = _alias2label[key]
+    # for key, value in _alias2label.items():
+    #     if _alias2label[key] in schema2id:
+    #         schema2id[key] = schema2id[_alias2label[key]]
 
-    return config_dict, num_labels
-
+    return schema2id, id2schema, num_labels
 
 
 if __name__ == "__main__":
