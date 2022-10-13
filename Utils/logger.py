@@ -244,10 +244,10 @@ def get_logger(level="INFO", console=True, logger_file=None):
 def print_run_time(func):
     def wrapper(*args, **kw):
         local_time = time.time()
-        func(*args, **kw)
+        res = func(*args, **kw)
         print(
             "current Function [%s] run time is %.2f s"
             % (func.__name__, time.time() - local_time)
         )
-
+        return res
     return wrapper

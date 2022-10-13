@@ -45,10 +45,16 @@ faq_predict = FAQPredict(level="INFO",
                          console=True,
                          logger_file="log/intelligent_consultation/model.log",
                          index_name="topic_qa",
-                         model_name="model/similarity_model/simcse-model-topic_qa")
+                         model_name="model/similarity_model/simcse-model-topic-qa")
 
 
 def get_query_answer_with_source(question: str, query_type: str):
+    """
+    目前支持的类型有市场监管、税务、司法、金融
+    :param question:
+    :param query_type:
+    :return:
+    """
     if query_type == "专题":
         answer, similarity_question = faq_predict(question)
     else:

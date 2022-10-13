@@ -28,11 +28,10 @@ class FAQPredict:
 
     def get_base_config(self):
         proper_noun_df = pd.read_csv("IntelligentConsultation/config/专有名词.csv")
-        self.logger.debug(proper_noun_df)
-        proper_noun_config = dict(zip(proper_noun_df['专有名词'],proper_noun_df['type']))
+        # self.logger.debug(proper_noun_df)
+        proper_noun_config = dict(zip(proper_noun_df['专有名词'], proper_noun_df['type']))
         self.logger.debug(proper_noun_config)
-        exit()
-        return proper_noun_df
+        return proper_noun_config
 
     def pre_process_text(self, text):
         self.logger.info(f"text:{text}")
@@ -41,32 +40,34 @@ class FAQPredict:
         text += keywords_text * 3
         return text
 
-    def post_process_result(self, predictions, query_type=None):
+    def post_process_result(self, query, predictions, query_type=None):
         similarity_question = [{"question": p.meta["query"], "answer": p.meta["answer"]} for p in predictions]
         similarity_question_info = [{"question": p.meta["query"], "score": p.to_dict()["score"]} for p in predictions]
         self.logger.info(f"similarity_question:{similarity_question_info}")
 
-        answer = "您的问题法域通暂时还理解不了，请您换个说法。"
+        match_answer = "您的问题法域通暂时还理解不了，请您换个说法。"
         for prediction in predictions:
             score = prediction.to_dict()["score"]
             meta = prediction.meta
-            query = meta["query"]
-            answer = meta["answer"]
-            source = meta["type"]
-            self.logger.success(f"query:{query},score:{score},source:{source}")
-            if query_type and source != query_type:
+            match_query = meta["query"]
+            match_answer = meta["answer"]
+            match_source = meta["type"]
+            self.logger.success(f"query:{match_query},score:{score},source:{match_source}")
+            if query_type and match_source != query_type:
                 continue
-
+            # for proper_noun in self.proper_noun_config.items():
+            #     if proper_noun[0] in query and proper_noun[1] != match_source:
+            # continue
             break
 
-        return answer, similarity_question
+        return match_answer, similarity_question
 
-    def __call__(self, text, query_type=None):
-        text = self.pre_process_text(text)
+    def __call__(self, query, query_type=None):
+        query = self.pre_process_text(query)
 
-        predictions = self.pipe.run(query=text, params={"Retriever": {"top_k": 10}})["answers"]
+        predictions = self.pipe.run(query=query, params={"Retriever": {"top_k": 10}})["answers"]
 
-        answer, similarity_question = self.post_process_result(predictions, query_type)
+        answer, similarity_question = self.post_process_result(query, predictions, query_type)
 
         return answer, similarity_question
 
