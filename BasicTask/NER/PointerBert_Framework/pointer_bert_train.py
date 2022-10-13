@@ -6,7 +6,7 @@
 # @Software: PyCharm
 import json
 import os
-from pprint import pprint
+from pprint import pprint, pformat
 
 import torch
 from transformers import BertTokenizer
@@ -18,6 +18,7 @@ from Tools.train_tool import BaseTrainTool
 from BasicTask.NER.PointerBert_Framework.utils import read_config_to_label
 
 os.environ['CUDA_VISIBLE_DEVICES'] = '0'
+os.environ['OPENBLAS_NUM_THREADS'] = '1'
 
 
 class TrainPointerBert(BaseTrainTool):
@@ -119,10 +120,17 @@ class TrainPointerBert(BaseTrainTool):
 
                 true_entities, pred_entities = self.post_process_function(batch, output)
                 cir.update(true_entities, pred_entities)
+        self.logger.info("number of true_entities " + str(len(cir.origins)))
+        if len(cir.origins)>0:
+            self.logger.info(cir.origins[0])
+        self.logger.info("number of pred_entities" + str(len(cir.founds)))
+        if len(cir.founds)>0:
+            self.logger.info(cir.founds[0])
         score, class_info = cir.result()
         f1 = score['f1']
-        print("p: {0}, r: {1}, f1: {2}".format(score['acc'], score['recall'], score['f1']))
-        pprint(class_info)
+        self.logger.info("p: {0}, r: {1}, f1: {2}".format(score['acc'], score['recall'], score['f1']))
+        self.logger.info(pformat(class_info))
+
 
         eval_loss_res /= len(self.eval_dataloader)
         return eval_loss_res
@@ -163,7 +171,8 @@ class TrainPointerBert(BaseTrainTool):
 
     def save_model(self, model_path):
         self.accelerator.wait_for_everyone()
-
+        if not os.path.exists(model_path):
+            os.makedirs(model_path)
         state = {'model_state': self.model.state_dict()}
         torch.save(state, model_path+"/pytorch_model.bin")
 

@@ -326,14 +326,7 @@ class BaseTrainTool:
     def save_model(self, model_path):
         self.accelerator.wait_for_everyone()
         unwrapped_model = self.accelerator.unwrap_model(self.model)
-        try:
-            unwrapped_model.save_pretrained(model_path, save_function=self.accelerator.save)
-        # For models having a custom save_pretrained method
-        except Exception as e:
-            self.logger.error(e)
-            # torch.save(self.model, model_path)
-            torch.save(self.model.state_dict(), model_path+"/pytorch_model.bin")
-            # self.model.config.to_json_file(model_path)
+        unwrapped_model.save_pretrained(model_path, save_function=self.accelerator.save)
 
         if self.accelerator.is_main_process:
             self.tokenizer.save_pretrained(model_path)
