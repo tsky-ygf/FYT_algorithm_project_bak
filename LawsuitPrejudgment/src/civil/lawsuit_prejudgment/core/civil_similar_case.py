@@ -263,6 +263,15 @@ class RecentCivilSimilarCase:
         resp_json = requests.post(url, json=body).json()
         return self._get_short_document(resp_json)
 
+    def _sort_documents_by_original_order(self, doc_ids, documents):
+        result = []
+        for doc_id in doc_ids:
+            document = next((item for item in documents if item["doc_id"] == self.table_name + "_SEP_" + str(doc_id)),
+                            None)
+            if document:
+                result.append(document)
+        return result
+
     def _get_short_document(self, resp_json, top_k=30):
         doc_ids = resp_json["dids"][:top_k]
         sim_list = resp_json["sims"][:top_k]
@@ -270,7 +279,7 @@ class RecentCivilSimilarCase:
         law_documents = get_recent_civil_law_documents_by_id_list(doc_ids, self.table_name)
         if not law_documents:
             return []
-        return [
+        documents = [
             {
                 "doc_id": self.table_name + "_SEP_" + str(item["doc_id"]),
                 "similar_rate": next(
@@ -284,6 +293,7 @@ class RecentCivilSimilarCase:
             }
             for item in law_documents if _is_valid_string(item["doc_title"])
         ]
+        return self._sort_documents_by_original_order(doc_ids, documents)
 
 
 class ManuallySelectedCivilSimilarCase:
