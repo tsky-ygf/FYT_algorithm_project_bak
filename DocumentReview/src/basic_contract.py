@@ -113,6 +113,30 @@ class InferArgs:
     device_id = "-1"
     schema = []
 
+def _read_common_schema(path, contract_type_list):
+    schema_df = pd.read_csv(path)
+    schemas = schema_df['schema'].values
+    common2alias_dict = dict()
+    for cont_type in contract_type_list:
+        columns = schema_df[cont_type].values
+        common2alias = dict()
+        for sche, alias in zip(schemas, columns):
+            if sche in ['争议解决', '通知与送达', '甲方解除合同', '乙方解除合同', '未尽事宜', '金额']:
+                continue
+            sche = sche.strip()
+            alias = alias.strip()
+            common2alias[sche] = alias
+        common2alias_dict[cont_type] = common2alias
+
+    schemas = schemas.tolist()
+    schemas.remove('争议解决')
+    schemas.remove('通知与送达')
+    schemas.remove('甲方解除合同')
+    schemas.remove('乙方解除合同')
+    schemas.remove('未尽事宜')
+    schemas.remove('金额')
+
+    return schemas, common2alias_dict
 
 class BasicUIEAcknowledgement(BasicAcknowledgement):
 
@@ -122,8 +146,23 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
         self.device = device
         self.data = ""
         self.schema_dict = dict()
+        # =================================
+        _labels, _common2alias_dict = _read_common_schema('DocumentReview/Config/config_common.csv', self.contract_type_list)
+        # =================================
         for contract_type in self.contract_type_list:
             schema = self.config_dict[contract_type]['schema'].tolist()
+            # ================================================
+            # remove common schema from uie schemas
+            # note: 如果要运行basic_contract.py 需要注释以下代码
+            common2alias = _common2alias_dict[contract_type]
+            common_schemas = ["标题",'甲方','甲方身份证号/统一社会信用代码','甲方地址','甲方联系方式','甲方法定代表人/授权代表人',
+              '乙方','乙方身份证号/统一社会信用代码','乙方地址','乙方联系方式','乙方法定代表人/授权代表',
+              '开户名称','账号','开户行','鉴于条款','合同生效','附件','签字和盖章','签订日期','签订地点']
+            common_schemas = [common2alias[csche] for csche in common_schemas]
+            for csche in common_schemas:
+                if csche in schema:
+                    schema.remove(csche)
+            # ================================================
             self.schema_dict[contract_type] = [sche for sche in schema if sche != ""]
 
         if self.device == "cpu":
@@ -150,7 +189,9 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
     def check_data_func(self):
         if self.device == "cpu":
             self.logger.debug(self.data)
+            localtime = time.time()
             res = self.predictor_dict[self.contract_type].predict([self.data])
+            print('uie all use time', time.time()-localtime)
         else:
             res = self.ie(self.data)
 
@@ -348,7 +389,8 @@ if __name__ == '__main__':
     print("## First Time ##")
     localtime = time.time()
 
-    acknowledgement.review_main(content="data/DocData/fangwuzulin/fwzl1.docx", mode="docx", contract_type=contract_type,
+    acknowledgement.review_main(content="data/DocData/fangwuzulin/fwzl1.docx", mode="docx",
+                                contract_type=contract_type,
                                 usr="Part B")
     pprint(acknowledgement.review_result, sort_dicts=False)
     print('use time: {}'.format(time.time() - localtime))
@@ -356,3 +398,4 @@ if __name__ == '__main__':
     # print("## Second Time ##")
     # acknowledgement.review_main(content="data/DocData/{}/test.docx".format(contract_type), mode="docx", usr="Part A")
     # pprint(acknowledgement.review_result, sort_dicts=False)
+    # !!!!!!!!!!!! 如需运行， 需注释, 见154行代码
