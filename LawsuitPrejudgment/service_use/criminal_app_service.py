@@ -8,7 +8,7 @@
 
 from LawsuitPrejudgment.src.common.data_transfer_object.prejudgment_report_dto import \
     CriminalReportDTO
-from LawsuitPrejudgment.src.criminal.criminal_prejudgment import CriminalPrejudgment
+from LawsuitPrejudgment.src.criminal.pipeline import CriminalPrejudgment
 
 criminal_config = {
     "log_level": "info",

@@ -8,19 +8,19 @@
 # from pprint import pprint, pformat
 # from extraction.feature_extraction import init_extract
 from pathlib import Path
-from LawsuitPrejudgment.src.criminal.basic_prejudgment import PrejudgmentPipeline
-import time
+from LawsuitPrejudgment.src.common.basic_prejudgment import PrejudgmentPipeline
 from autogluon.text import TextPredictor
 import re
 import os
 import cn2an
+import time
 
 # from xmindparser import xmind_to_dict
-from LawsuitPrejudgment.src.criminal.parse_xmind import deal_xmind_to_dict
+from LawsuitPrejudgment.src.criminal.utils.parse_xmind import deal_xmind_to_dict
 import pandas as pd
 from pprint import pprint
 
-from LawsuitPrejudgment.src.criminal.extraction.feature_extraction import (
+from LawsuitPrejudgment.src.criminal.nlu.feature_extraction import (
     init_extract,
     post_process_uie_results,
 )

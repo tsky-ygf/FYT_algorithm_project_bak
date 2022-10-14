@@ -5,7 +5,7 @@
 @Time    : 30/9/2022 17:47 
 @Desc    : None
 """
-from LawsuitPrejudgment.src.administrative.administrative_prejudgment import get_administrative_prejudgment_situation, \
+from LawsuitPrejudgment.src.administrative.pipeline import get_administrative_prejudgment_situation, \
     get_administrative_prejudgment_result
 from LawsuitPrejudgment.src.common.data_transfer_object.prejudgment_report_dto import \
     AdministrativeReportDTO
