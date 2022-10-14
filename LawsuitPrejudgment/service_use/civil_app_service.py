@@ -13,8 +13,7 @@ from LawsuitPrejudgment.src.civil.lawsuit_prejudgment.constants import CIVIL_PRO
 from LawsuitPrejudgment.src.civil.common import user_ps
 from LawsuitPrejudgment.src.civil.lawsuit_prejudgment.core.civil_juding_rule import CivilJudgingRule
 from LawsuitPrejudgment.src.civil.lawsuit_prejudgment.core.civil_relevant_law import CivilRelevantLaw
-from LawsuitPrejudgment.src.civil.lawsuit_prejudgment.core.civil_similar_case import ManuallySelectedCivilSimilarCase, \
-    CivilSimilarCase, sort_similar_cases
+from LawsuitPrejudgment.src.civil.lawsuit_prejudgment.core.civil_similar_case import ManuallySelectedCivilSimilarCase, RecentCivilSimilarCase
 from LawsuitPrejudgment.src.civil.lawsuit_prejudgment.feature_toggles import FeatureToggles
 from Utils.io import read_json_attribute_value
 from LawsuitPrejudgment.src.civil.main.reasoning_graph_predict import predict_fn
@@ -118,9 +117,8 @@ def reasoning_graph_result(problem, claim_list, fact, question_answers, factor_s
                                                                                     problem_claim.split("_")[1],
                                                                                     logic_tree.get_situation())
             similar_case.extend(manually_selected_civil_similar_case.get_similar_cases())
-        civilSimilarCase = CivilSimilarCase(fact, problem_name_for_search, claim_list, mapped_problem_id)
+        civilSimilarCase = RecentCivilSimilarCase(fact, problem_name_for_search, claim_list, mapped_problem_id)
         similar_case.extend(civilSimilarCase.get_similar_cases())
-        similar_case = sort_similar_cases(similar_case)
 
         # 获取裁判规则
         civil_judging_rule = CivilJudgingRule(fact, problem)
