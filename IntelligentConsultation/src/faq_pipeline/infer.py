@@ -86,6 +86,6 @@ class FAQPredict:
 
 if __name__ == '__main__':
     m = FAQPredict(level="DEBUG")
-    _answer, _similarity_question = m("不需要缴税的事情有哪些")
+    _answer, _similarity_question = m("信用卡分期停息的方法是什么")
 
     print(_answer)

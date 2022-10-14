@@ -22,12 +22,14 @@ from paddle.utils.download import get_path_from_url
 from paddlenlp.datasets import load_dataset
 from paddlenlp.transformers import AutoTokenizer
 from paddlenlp.metrics import SpanEvaluator
-from paddlenlp.utils.log import logger
+# from paddlenlp.utils.log import logger
+from Utils.logger import get_logger
 
 from model import UIE
 from evaluate import evaluate
 from utils import set_seed, convert_example, reader, MODEL_MAP, create_data_loader
 
+logger = get_logger(logger_file="")
 
 def do_train():
     paddle.set_device(args.device)
