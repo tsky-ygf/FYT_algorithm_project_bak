@@ -10,5 +10,15 @@
 # 3. 部署
 
 ### 3.1 部署环境
-- 安装python环境```conda create -n consult python=3.9```
-- 安装相关依赖包```pip install -r deploy_requirements.txt```
+3.1.1 安装python环境```conda create -n consult python=3.9```
+
+3.1.2 安装相关依赖包```pip install -r deploy_requirements.txt```
+
+3.1.3 配置相关需求文件
+
+- 需要插入到es的数据文件 ```data/fyt_train_use_data/QA/pro_qa.csv```
+- 使用到的模型文件 ```model/similarity_model/simcse-model-topic-qa```
+
+3.1.4 将数据导入到es库中
+- export PYTHONPATH=$(pwd):$PYTHONPATH
+- python IntelligentConsultation/insert_data_to_es.py
