@@ -29,7 +29,7 @@ from model import UIE
 from evaluate import evaluate
 from utils import set_seed, convert_example, reader, MODEL_MAP, create_data_loader
 
-logger = get_logger(logger_file="")
+
 
 def do_train():
     paddle.set_device(args.device)
@@ -147,7 +147,8 @@ def do_train():
 if __name__ == "__main__":
     # yapf: disable
     parser = argparse.ArgumentParser()
-
+    time_now = time.strftime('%Y-%m-%d-%H-%M-%S', time.localtime())
+    logger = get_logger(logger_file="log/uie/{}.log".format(time_now))
     parser.add_argument("--batch_size", default=16, type=int, help="Batch size per GPU/CPU for training.")
     parser.add_argument("--learning_rate", default=1e-5, type=float, help="The initial learning rate for Adam.")
     parser.add_argument("--train_path", default=None, type=str, help="The path of train set.")
@@ -165,5 +166,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     # yapf: enable
+    logger.info(args)
+
 
     do_train()
