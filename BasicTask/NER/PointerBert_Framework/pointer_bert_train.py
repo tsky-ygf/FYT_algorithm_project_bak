@@ -44,17 +44,20 @@ class TrainPointerBert(BaseTrainTool):
                 # -2 for cls and sep
                 start_seq = [[0] * (self.data_train_args.max_length-2) for _ in range(self.num_labels)]
                 end_seq = [[0] * (self.data_train_args.max_length-2) for _ in range(self.num_labels)]
+                entities = []
+                text = line['text']
                 for entity in line['entities']:
                     label_id = self.schema2id[entity['label']]
                     start = entity['start_offset']
                     end = entity['end_offset']
-                    text = line['text']
                     if start is not None:
                         start_seq[label_id][start] = 1
                     if end is not None:
                         end_seq[label_id][end] = 1
+                    if start is not None and end is not None:
+                        entities.append([entity['label'], text[start:end]])
                 examples.append(InputExample(guid=line["id"], texts=[text],
-                                             label={'entity': [entity['label'], text[start:end]],
+                                             label={'entity': entities,
                                                     'start_seq': start_seq,
                                                     'end_seq': end_seq,
                                                     'sentence': text
@@ -90,7 +93,7 @@ class TrainPointerBert(BaseTrainTool):
             attention_mask.append(b['attention_mask'])
             start_seqs.append(b['label']['start_seq'])
             end_seqs.append(b['label']['end_seq'])
-            labels.append(b['label']['entity'])
+            labels.extend(b['label']['entity'])
             sentences.append(b['label']['sentence'])
         encoded_dict = {
             'input_ids': torch.cat(input_ids),

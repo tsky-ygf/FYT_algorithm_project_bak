@@ -9,16 +9,14 @@ from Tools.train_tool import BaseTrainTool
 
 
 class TrainClassification(BaseTrainTool):
-    def __init__(self, config, create_examples):
-        super(TrainClassification, self).__init__(
-            config=config, create_examples=create_examples
-        )
-        self.criterion = torch.nn.CrossEntropyLoss
-
     def init_model(self):
         model = Model(self.config)
         self.logger.debug(model)
+        self.criterion = torch.nn.CrossEntropyLoss
         return model
+
+    def create_examples(self):
+        pass
 
     def cal_loss(self, batch):
         self.logger.debug(batch)
@@ -32,44 +30,28 @@ class TrainClassification(BaseTrainTool):
         return loss
 
 
-class CaseClsTrainer(TrainClassification):
-    def __init__(self, config):
-        super(CaseClsTrainer, self).__init__(config, create_examples=create_examples)
-        # self.criterion = FocalLoss()
-        self.label_t = []
-        self.pre_p = []
-        self.text_train = []
-        self.text_dev = []
-        self.epoch_num = 0
-        self.train_batch_num = 0
-        self.eval_batch_num = 0
-
-    def cal_loss(self, batch):
-        self.logger.debug(batch)
-
-
 class Model(nn.Module):
     def __init__(self, config):
         super(Model, self).__init__()
         self.config = parse_config_file(config)
-        dataset = config["dataset"]
-        embedding = config["embedding"]
+        data_training_arguments = config["DataTrainingArguments"]
+        dataset = data_training_arguments.dataset
+        embedding_path = data_training_arguments.embedding_path
         self.model_name = "TextCNN"
-        self.train_path = dataset + "/data/train.txt"  # 训练集
-        self.dev_path = dataset + "/data/dev.txt"  # 验证集
-        self.test_path = dataset + "/data/test.txt"  # 测试集
+        self.train_path = dataset + "/train_dev/train/train.txt"  # 训练集
+        self.dev_path = dataset + "/train_dev/dev/dev.txt"  # 验证集
         self.class_list = [
             x.strip()
-            for x in open(dataset + "/data/class.txt", encoding="utf-8").readlines()
+            for x in open(dataset + "/train_dev/class.txt", encoding="utf-8").readlines()
         ]  # 类别名单
-        self.vocab_path = dataset + "/data/vocab.pkl"  # 词表
+        self.vocab_path = dataset + "/train_dev/vocab.pkl"  # 词表
         self.save_path = dataset + "/saved_dict/" + self.model_name + ".ckpt"  # 模型训练结果
         self.log_path = dataset + "/log/" + self.model_name
         self.embedding_pretrained = (
             torch.tensor(
-                np.load(dataset + "/data/" + embedding)["embeddings"].astype("float32")
+                np.load(embedding_path)["embeddings"].astype("float32")
             )
-            if embedding != "random"
+            if embedding_path != "random"
             else None
         )  # 预训练词向量
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  # 设备
@@ -92,7 +74,7 @@ class Model(nn.Module):
 
         if config.embedding_pretrained is not None:
             self.embedding = nn.Embedding.from_pretrained(
-                config.embedding_pretrained, freeze=False
+                data_training_arguments.embedding_path, freeze=False
             )
         else:
             self.embedding = nn.Embedding(
@@ -125,6 +107,6 @@ class Model(nn.Module):
 
 
 if __name__ == "__main__":
-    CaseClsTrainer(
+    TrainClassification(
         config="ProfessionalSearch/config/similar_case_retrival/text_cnn_cls.yaml"
     ).run()
