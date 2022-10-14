@@ -97,7 +97,7 @@ def merge_all_data4common():
     # for long
     # labels2id = ['争议解决','合同生效','未尽事宜','通知与送达','鉴于条款','附件']
     print("label number", len(labels2id))
-    file_path = 'data/data_src/common_1008'
+    file_path = 'data/data_src/common_1013'
     data_all = []
     to_file = 'data/data_src/common_all/common_all.json'
     w = open(to_file, 'w', encoding='utf-8')

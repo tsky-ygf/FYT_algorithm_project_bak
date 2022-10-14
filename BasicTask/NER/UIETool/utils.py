@@ -208,10 +208,13 @@ def reader(data_path, max_seq_len=512):
     read json
     """
     with open(data_path, 'r', encoding='utf-8') as f:
-        for line in f:
+        for index, line in enumerate(f):
             json_line = json.loads(line)
             content = json_line['content'].strip()
             prompt = json_line['prompt']
+            print(index)
+            # if index == 246 or index == 365:
+            #     continue
             # Model Input is aslike: [CLS] Prompt [SEP] Content [SEP]
             # It include three summary tokens.
             if max_seq_len <= len(prompt) + 3:
