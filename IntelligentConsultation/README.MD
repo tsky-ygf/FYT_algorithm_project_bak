@@ -24,3 +24,6 @@
 3.1.4 将数据导入到es库中
 - export PYTHONPATH=$(pwd):$PYTHONPATH
 - python IntelligentConsultation/service_use/insert_data_to_es.py
+
+3.1.5 启动服务
+``` nohup python -m OnlineServer.IntelligentConsultation.server >log/intelligent_consultation/server.log 2>&1 & ```
