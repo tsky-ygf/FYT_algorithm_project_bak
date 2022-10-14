@@ -5,9 +5,8 @@
 @Time    : 30/9/2022 17:45 
 @Desc    : None
 """
-import requests
 
-from LawsuitPrejudgment.src.civil.lawsuit_prejudgment.api.data_transfer_object.prejudgment_report_dto import \
+from LawsuitPrejudgment.src.common.data_transfer_object.prejudgment_report_dto import \
     CriminalReportDTO
 from LawsuitPrejudgment.src.criminal.criminal_prejudgment import CriminalPrejudgment
 

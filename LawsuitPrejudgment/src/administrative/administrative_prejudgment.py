@@ -9,9 +9,9 @@ import json
 # import pandas as pd
 from pprint import pprint
 
-from LawsuitPrejudgment.src.civil.lawsuit_prejudgment.api.data_transfer_object.applicable_law_dto import \
+from LawsuitPrejudgment.src.common.data_transfer_object.applicable_law_dto import \
     AdministrativeApplicableLawDictCreator
-from LawsuitPrejudgment.src.civil.lawsuit_prejudgment.api.data_transfer_object.similar_case_dto import \
+from LawsuitPrejudgment.src.common.data_transfer_object.similar_case_dto import \
     AdministrativeSimilarCaseDictCreator
 
 

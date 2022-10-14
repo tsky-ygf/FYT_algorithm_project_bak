@@ -7,16 +7,16 @@
 """
 import pandas as pd
 
-from LawsuitPrejudgment.src.civil.lawsuit_prejudgment.api.data_transfer_object.prejudgment_report_dto import CivilReportDTO
-from LawsuitPrejudgment.src.civil.lawsuit_prejudgment.constants import CIVIL_PROBLEM_ID_MAPPING_CONFIG_PATH, \
+from LawsuitPrejudgment.src.common.data_transfer_object.prejudgment_report_dto import CivilReportDTO
+from LawsuitPrejudgment.config.civil.constants import CIVIL_PROBLEM_ID_MAPPING_CONFIG_PATH, \
     CIVIL_PROBLEM_TEMPLATE_CONFIG_PATH, CIVIL_PROBLEM_SUMMARY_CONFIG_PATH, FEATURE_TOGGLES_CONFIG_PATH
-from LawsuitPrejudgment.src.civil.common import user_ps
-from LawsuitPrejudgment.src.civil.lawsuit_prejudgment.core.civil_juding_rule import CivilJudgingRule
-from LawsuitPrejudgment.src.civil.lawsuit_prejudgment.core.civil_relevant_law import CivilRelevantLaw
-from LawsuitPrejudgment.src.civil.lawsuit_prejudgment.core.civil_similar_case import ManuallySelectedCivilSimilarCase, RecentCivilSimilarCase
-from LawsuitPrejudgment.src.civil.lawsuit_prejudgment.feature_toggles import FeatureToggles
+from LawsuitPrejudgment.src.civil.utils.config_loader import user_ps
+from LawsuitPrejudgment.src.civil.nlg.civil_juding_rule import CivilJudgingRule
+from LawsuitPrejudgment.src.civil.nlg.civil_relevant_law import CivilRelevantLaw
+from LawsuitPrejudgment.src.civil.nlg.civil_similar_case import ManuallySelectedCivilSimilarCase, RecentCivilSimilarCase
+from LawsuitPrejudgment.src.civil.utils.feature_toggle.feature_toggles import FeatureToggles
 from Utils.io import read_json_attribute_value
-from LawsuitPrejudgment.src.civil.main.reasoning_graph_predict import predict_fn
+from LawsuitPrejudgment.src.civil.pipeline import predict_fn
 
 
 def get_civil_problem_summary():

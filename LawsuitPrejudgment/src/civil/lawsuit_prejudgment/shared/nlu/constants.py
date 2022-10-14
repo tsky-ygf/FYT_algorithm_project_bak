@@ -1,5 +1,0 @@
-FACTOR_TYPE = "factor"
-FACTOR_MENTION = "mention"
-FACTOR_START = "start"
-FACTOR_END = "end"
-FACTOR_CONFIDENCE = "confidence"
