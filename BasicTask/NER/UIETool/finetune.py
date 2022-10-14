@@ -170,4 +170,4 @@ if __name__ == "__main__":
     logger.info(args.train_path)
 
     do_train()
-    logger.infor('=====================finished!!!=======================================')
+    logger.info('=====================finished!!!=======================================')

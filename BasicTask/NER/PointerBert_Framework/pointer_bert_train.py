@@ -17,8 +17,7 @@ from Tools.data_pipeline import InputExample
 from Tools.train_tool import BaseTrainTool
 from BasicTask.NER.PointerBert_Framework.utils import read_config_to_label
 
-os.environ['CUDA_VISIBLE_DEVICES'] = '0'
-os.environ['OPENBLAS_NUM_THREADS'] = '1'
+os.environ['CUDA_VISIBLE_DEVICES'] = '2'
 
 
 class TrainPointerBert(BaseTrainTool):
