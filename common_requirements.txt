@@ -5,3 +5,5 @@ fastapi[all]
 streamlit
 st-annotated-text
 pymysql
+black
+pytest

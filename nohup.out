@@ -1,0 +1,389 @@
+
+Collecting usage statistics. To deactivate, set browser.gatherUsageStats to False.
+
+
+  Git integration is disabled.
+
+  Streamlit requires Git 2.7.0 or later, but you have 1.8.3.1.
+  Git is used by Streamlit Cloud (https://streamlit.io/cloud).
+  To enable this feature, please update Git.
+
+  You can now view your Streamlit app in your browser.
+
+  Network URL: http://172.19.82.227:8132
+  External URL: http://154.198.215.65:8132
+
+2022-10-14 15:10:05.737 Uncaught app exception
+Traceback (most recent call last):
+  File "/root/miniconda3/envs/consult/lib/python3.9/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 562, in _run_script
+    exec(code, module.__dict__)
+  File "/home/fyt/FYT_algorithm_project/OnlineServer/show_page.py", line 9, in <module>
+    from OnlineServer.ContractReview.show import contract_review_main
+  File "/home/fyt/FYT_algorithm_project/OnlineServer/ContractReview/show.py", line 11, in <module>
+    from annotated_text import annotated_text
+ModuleNotFoundError: No module named 'annotated_text'
+2022-10-14 15:11:07.162 Uncaught app exception
+Traceback (most recent call last):
+  File "/root/miniconda3/envs/consult/lib/python3.9/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 562, in _run_script
+    exec(code, module.__dict__)
+  File "/home/fyt/FYT_algorithm_project/OnlineServer/show_page.py", line 11, in <module>
+    from OnlineServer.ProfessionalSearch.show import do_tabs
+  File "/home/fyt/FYT_algorithm_project/OnlineServer/ProfessionalSearch/show.py", line 417, in <module>
+    import pymysql
+ModuleNotFoundError: No module named 'pymysql'
+2022-10-14 15:12:00.630 Uncaught app exception
+Traceback (most recent call last):
+  File "/root/miniconda3/envs/consult/lib/python3.9/site-packages/requests/models.py", line 971, in json
+    return complexjson.loads(self.text, **kwargs)
+  File "/root/miniconda3/envs/consult/lib/python3.9/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+  File "/root/miniconda3/envs/consult/lib/python3.9/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+  File "/root/miniconda3/envs/consult/lib/python3.9/json/decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/root/miniconda3/envs/consult/lib/python3.9/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 562, in _run_script
+    exec(code, module.__dict__)
+  File "/home/fyt/FYT_algorithm_project/OnlineServer/show_page.py", line 70, in <module>
+    app.run()
+  File "/home/fyt/FYT_algorithm_project/OnlineServer/show_page.py", line 57, in run
+    app['function']()
+  File "/home/fyt/FYT_algorithm_project/OnlineServer/ContractReview/show.py", line 43, in contract_review_main
+    contract_type_list = requests.get("http://127.0.0.1:8112/get_contract_type").json()["result"]
+  File "/root/miniconda3/envs/consult/lib/python3.9/site-packages/requests/models.py", line 975, in json
+    raise RequestsJSONDecodeError(e.msg, e.doc, e.pos)
+requests.exceptions.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+2022-10-14 15:12:00.989 `label` got an empty value. This is discouraged for accessibility reasons and may be disallowed in the future by raising an exception. Please provide a non-empty label and hide it with label_visibility if needed.
+2022-10-14 15:12:00.997 Uncaught app exception
+Traceback (most recent call last):
+  File "/root/miniconda3/envs/consult/lib/python3.9/site-packages/requests/models.py", line 971, in json
+    return complexjson.loads(self.text, **kwargs)
+  File "/root/miniconda3/envs/consult/lib/python3.9/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+  File "/root/miniconda3/envs/consult/lib/python3.9/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+  File "/root/miniconda3/envs/consult/lib/python3.9/json/decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/root/miniconda3/envs/consult/lib/python3.9/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 562, in _run_script
+    exec(code, module.__dict__)
+  File "/home/fyt/FYT_algorithm_project/OnlineServer/show_page.py", line 70, in <module>
+    app.run()
+  File "/home/fyt/FYT_algorithm_project/OnlineServer/show_page.py", line 57, in run
+    app['function']()
+  File "/home/fyt/FYT_algorithm_project/OnlineServer/ProfessionalSearch/show.py", line 537, in do_tabs
+    tab_content()
+  File "/home/fyt/FYT_algorithm_project/OnlineServer/ProfessionalSearch/show.py", line 222, in similar_case_side_review
+    resp_case_json = requests.get(url_case_conditions).json()
+  File "/root/miniconda3/envs/consult/lib/python3.9/site-packages/requests/models.py", line 975, in json
+    raise RequestsJSONDecodeError(e.msg, e.doc, e.pos)
+requests.exceptions.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+2022-10-14 15:12:06.130 Uncaught app exception
+Traceback (most recent call last):
+  File "/root/miniconda3/envs/consult/lib/python3.9/site-packages/requests/models.py", line 971, in json
+    return complexjson.loads(self.text, **kwargs)
+  File "/root/miniconda3/envs/consult/lib/python3.9/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+  File "/root/miniconda3/envs/consult/lib/python3.9/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+  File "/root/miniconda3/envs/consult/lib/python3.9/json/decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/root/miniconda3/envs/consult/lib/python3.9/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 562, in _run_script
+    exec(code, module.__dict__)
+  File "/home/fyt/FYT_algorithm_project/OnlineServer/show_page.py", line 70, in <module>
+    app.run()
+  File "/home/fyt/FYT_algorithm_project/OnlineServer/show_page.py", line 57, in run
+    app['function']()
+  File "/home/fyt/FYT_algorithm_project/OnlineServer/ContractReview/show.py", line 43, in contract_review_main
+    contract_type_list = requests.get("http://127.0.0.1:8112/get_contract_type").json()["result"]
+  File "/root/miniconda3/envs/consult/lib/python3.9/site-packages/requests/models.py", line 975, in json
+    raise RequestsJSONDecodeError(e.msg, e.doc, e.pos)
+requests.exceptions.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+2022-10-14 15:12:08.601 `label` got an empty value. This is discouraged for accessibility reasons and may be disallowed in the future by raising an exception. Please provide a non-empty label and hide it with label_visibility if needed.
+2022-10-14 15:12:08.609 Uncaught app exception
+Traceback (most recent call last):
+  File "/root/miniconda3/envs/consult/lib/python3.9/site-packages/requests/models.py", line 971, in json
+    return complexjson.loads(self.text, **kwargs)
+  File "/root/miniconda3/envs/consult/lib/python3.9/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+  File "/root/miniconda3/envs/consult/lib/python3.9/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+  File "/root/miniconda3/envs/consult/lib/python3.9/json/decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/root/miniconda3/envs/consult/lib/python3.9/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 562, in _run_script
+    exec(code, module.__dict__)
+  File "/home/fyt/FYT_algorithm_project/OnlineServer/show_page.py", line 70, in <module>
+    app.run()
+  File "/home/fyt/FYT_algorithm_project/OnlineServer/show_page.py", line 57, in run
+    app['function']()
+  File "/home/fyt/FYT_algorithm_project/OnlineServer/ProfessionalSearch/show.py", line 537, in do_tabs
+    tab_content()
+  File "/home/fyt/FYT_algorithm_project/OnlineServer/ProfessionalSearch/show.py", line 222, in similar_case_side_review
+    resp_case_json = requests.get(url_case_conditions).json()
+  File "/root/miniconda3/envs/consult/lib/python3.9/site-packages/requests/models.py", line 975, in json
+    raise RequestsJSONDecodeError(e.msg, e.doc, e.pos)
+requests.exceptions.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+2022-10-14 15:12:10.171 `label` got an empty value. This is discouraged for accessibility reasons and may be disallowed in the future by raising an exception. Please provide a non-empty label and hide it with label_visibility if needed.
+2022-10-14 15:12:10.186 `label` got an empty value. This is discouraged for accessibility reasons and may be disallowed in the future by raising an exception. Please provide a non-empty label and hide it with label_visibility if needed.
+2022-10-14 15:12:10.196 Uncaught app exception
+Traceback (most recent call last):
+  File "/root/miniconda3/envs/consult/lib/python3.9/site-packages/requests/models.py", line 971, in json
+    return complexjson.loads(self.text, **kwargs)
+  File "/root/miniconda3/envs/consult/lib/python3.9/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+  File "/root/miniconda3/envs/consult/lib/python3.9/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+  File "/root/miniconda3/envs/consult/lib/python3.9/json/decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/root/miniconda3/envs/consult/lib/python3.9/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 562, in _run_script
+    exec(code, module.__dict__)
+  File "/home/fyt/FYT_algorithm_project/OnlineServer/show_page.py", line 70, in <module>
+    app.run()
+  File "/home/fyt/FYT_algorithm_project/OnlineServer/show_page.py", line 57, in run
+    app['function']()
+  File "/home/fyt/FYT_algorithm_project/OnlineServer/LawsuitPrejudgment/show.py", line 356, in lawsuit_prejudgment_testing_page
+    administrative_prejudgment_testing_page()
+  File "/home/fyt/FYT_algorithm_project/OnlineServer/LawsuitPrejudgment/show.py", line 40, in administrative_prejudgment_testing_page
+    supported_administrative_list = requests.get(url=URL + "/get_administrative_type").json().get("result")
+  File "/root/miniconda3/envs/consult/lib/python3.9/site-packages/requests/models.py", line 975, in json
+    raise RequestsJSONDecodeError(e.msg, e.doc, e.pos)
+requests.exceptions.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+2022-10-14 15:12:11.639 Uncaught app exception
+Traceback (most recent call last):
+  File "/root/miniconda3/envs/consult/lib/python3.9/site-packages/requests/models.py", line 971, in json
+    return complexjson.loads(self.text, **kwargs)
+  File "/root/miniconda3/envs/consult/lib/python3.9/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+  File "/root/miniconda3/envs/consult/lib/python3.9/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+  File "/root/miniconda3/envs/consult/lib/python3.9/json/decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/root/miniconda3/envs/consult/lib/python3.9/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 562, in _run_script
+    exec(code, module.__dict__)
+  File "/home/fyt/FYT_algorithm_project/OnlineServer/show_page.py", line 70, in <module>
+    app.run()
+  File "/home/fyt/FYT_algorithm_project/OnlineServer/show_page.py", line 57, in run
+    app['function']()
+  File "/home/fyt/FYT_algorithm_project/OnlineServer/IntelligentConsultation/show.py", line 17, in intelligent_consultation_main
+    res = requests.post("http://127.0.0.1:8130/get_query_answer_with_source",
+  File "/root/miniconda3/envs/consult/lib/python3.9/site-packages/requests/models.py", line 975, in json
+    raise RequestsJSONDecodeError(e.msg, e.doc, e.pos)
+requests.exceptions.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+2022-10-14 15:14:38.064 Uncaught app exception
+Traceback (most recent call last):
+  File "/root/miniconda3/envs/consult/lib/python3.9/site-packages/requests/models.py", line 971, in json
+    return complexjson.loads(self.text, **kwargs)
+  File "/root/miniconda3/envs/consult/lib/python3.9/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+  File "/root/miniconda3/envs/consult/lib/python3.9/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+  File "/root/miniconda3/envs/consult/lib/python3.9/json/decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/root/miniconda3/envs/consult/lib/python3.9/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 562, in _run_script
+    exec(code, module.__dict__)
+  File "/home/fyt/FYT_algorithm_project/OnlineServer/show_page.py", line 70, in <module>
+    app.run()
+  File "/home/fyt/FYT_algorithm_project/OnlineServer/show_page.py", line 57, in run
+    app['function']()
+  File "/home/fyt/FYT_algorithm_project/OnlineServer/IntelligentConsultation/show.py", line 17, in intelligent_consultation_main
+    res = requests.post("http://127.0.0.1:8130/get_query_answer_with_source",
+  File "/root/miniconda3/envs/consult/lib/python3.9/site-packages/requests/models.py", line 975, in json
+    raise RequestsJSONDecodeError(e.msg, e.doc, e.pos)
+requests.exceptions.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+2022-10-14 15:34:47.708 Uncaught app exception
+Traceback (most recent call last):
+  File "/root/miniconda3/envs/consult/lib/python3.9/site-packages/requests/models.py", line 971, in json
+    return complexjson.loads(self.text, **kwargs)
+  File "/root/miniconda3/envs/consult/lib/python3.9/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+  File "/root/miniconda3/envs/consult/lib/python3.9/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+  File "/root/miniconda3/envs/consult/lib/python3.9/json/decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/root/miniconda3/envs/consult/lib/python3.9/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 562, in _run_script
+    exec(code, module.__dict__)
+  File "/home/fyt/FYT_algorithm_project/OnlineServer/show_page.py", line 70, in <module>
+    app.run()
+  File "/home/fyt/FYT_algorithm_project/OnlineServer/show_page.py", line 57, in run
+    app['function']()
+  File "/home/fyt/FYT_algorithm_project/OnlineServer/IntelligentConsultation/show.py", line 17, in intelligent_consultation_main
+    res = requests.post("http://127.0.0.1:8130/get_query_answer_with_source",
+  File "/root/miniconda3/envs/consult/lib/python3.9/site-packages/requests/models.py", line 975, in json
+    raise RequestsJSONDecodeError(e.msg, e.doc, e.pos)
+requests.exceptions.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+2022-10-14 15:35:31.430 Uncaught app exception
+Traceback (most recent call last):
+  File "/root/miniconda3/envs/consult/lib/python3.9/site-packages/requests/models.py", line 971, in json
+    return complexjson.loads(self.text, **kwargs)
+  File "/root/miniconda3/envs/consult/lib/python3.9/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+  File "/root/miniconda3/envs/consult/lib/python3.9/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+  File "/root/miniconda3/envs/consult/lib/python3.9/json/decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/root/miniconda3/envs/consult/lib/python3.9/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 562, in _run_script
+    exec(code, module.__dict__)
+  File "/home/fyt/FYT_algorithm_project/OnlineServer/show_page.py", line 70, in <module>
+    app.run()
+  File "/home/fyt/FYT_algorithm_project/OnlineServer/show_page.py", line 57, in run
+    app['function']()
+  File "/home/fyt/FYT_algorithm_project/OnlineServer/IntelligentConsultation/show.py", line 17, in intelligent_consultation_main
+    res = requests.post("http://127.0.0.1:8130/get_query_answer_with_source",
+  File "/root/miniconda3/envs/consult/lib/python3.9/site-packages/requests/models.py", line 975, in json
+    raise RequestsJSONDecodeError(e.msg, e.doc, e.pos)
+requests.exceptions.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+2022-10-14 15:35:34.390 Uncaught app exception
+Traceback (most recent call last):
+  File "/root/miniconda3/envs/consult/lib/python3.9/site-packages/requests/models.py", line 971, in json
+    return complexjson.loads(self.text, **kwargs)
+  File "/root/miniconda3/envs/consult/lib/python3.9/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+  File "/root/miniconda3/envs/consult/lib/python3.9/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+  File "/root/miniconda3/envs/consult/lib/python3.9/json/decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/root/miniconda3/envs/consult/lib/python3.9/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 562, in _run_script
+    exec(code, module.__dict__)
+  File "/home/fyt/FYT_algorithm_project/OnlineServer/show_page.py", line 70, in <module>
+    app.run()
+  File "/home/fyt/FYT_algorithm_project/OnlineServer/show_page.py", line 57, in run
+    app['function']()
+  File "/home/fyt/FYT_algorithm_project/OnlineServer/IntelligentConsultation/show.py", line 17, in intelligent_consultation_main
+    res = requests.post("http://127.0.0.1:8130/get_query_answer_with_source",
+  File "/root/miniconda3/envs/consult/lib/python3.9/site-packages/requests/models.py", line 975, in json
+    raise RequestsJSONDecodeError(e.msg, e.doc, e.pos)
+requests.exceptions.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+2022-10-14 15:38:08.429 Uncaught app exception
+Traceback (most recent call last):
+  File "/root/miniconda3/envs/consult/lib/python3.9/site-packages/requests/models.py", line 971, in json
+    return complexjson.loads(self.text, **kwargs)
+  File "/root/miniconda3/envs/consult/lib/python3.9/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+  File "/root/miniconda3/envs/consult/lib/python3.9/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+  File "/root/miniconda3/envs/consult/lib/python3.9/json/decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/root/miniconda3/envs/consult/lib/python3.9/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 562, in _run_script
+    exec(code, module.__dict__)
+  File "/home/fyt/FYT_algorithm_project/OnlineServer/show_page.py", line 70, in <module>
+    app.run()
+  File "/home/fyt/FYT_algorithm_project/OnlineServer/show_page.py", line 57, in run
+    app['function']()
+  File "/home/fyt/FYT_algorithm_project/OnlineServer/IntelligentConsultation/show.py", line 17, in intelligent_consultation_main
+    res = requests.post("http://127.0.0.1:8130/get_query_answer_with_source",
+  File "/root/miniconda3/envs/consult/lib/python3.9/site-packages/requests/models.py", line 975, in json
+    raise RequestsJSONDecodeError(e.msg, e.doc, e.pos)
+requests.exceptions.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+Collecting usage statistics. To deactivate, set browser.gatherUsageStats to False.
+
+
+  Git integration is disabled.
+
+  Streamlit requires Git 2.7.0 or later, but you have 1.8.3.1.
+  Git is used by Streamlit Cloud (https://streamlit.io/cloud).
+  To enable this feature, please update Git.
+
+  You can now view your Streamlit app in your browser.
+
+  Network URL: http://172.19.82.227:8132
+  External URL: http://101.69.229.138:8132
+
+2022-10-14 15:39:10.323 Uncaught app exception
+Traceback (most recent call last):
+  File "/root/miniconda3/envs/consult/lib/python3.9/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 562, in _run_script
+    exec(code, module.__dict__)
+  File "/home/fyt/FYT_algorithm_project/OnlineServer/show_page.py", line 9, in <module>
+    from OnlineServer.ContractReview.show import contract_review_main
+ModuleNotFoundError: No module named 'OnlineServer'
+
+Collecting usage statistics. To deactivate, set browser.gatherUsageStats to False.
+
+
+  Git integration is disabled.
+
+  Streamlit requires Git 2.7.0 or later, but you have 1.8.3.1.
+  Git is used by Streamlit Cloud (https://streamlit.io/cloud).
+  To enable this feature, please update Git.
+
+  You can now view your Streamlit app in your browser.
+
+  Network URL: http://172.19.82.227:8132
+  External URL: http://101.69.229.138:8132
+
+Exception in thread ScriptRunner.scriptThread:
+Traceback (most recent call last):
+  File "/root/miniconda3/envs/consult/lib/python3.9/threading.py", line 980, in _bootstrap_inner
+    self.run()
+  File "/root/miniconda3/envs/consult/lib/python3.9/threading.py", line 917, in run
+    self._target(*self._args, **self._kwargs)
+  File "/root/miniconda3/envs/consult/lib/python3.9/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 309, in _run_script_thread
+    widget_states = self._session_state.get_widget_states()
+  File "/root/miniconda3/envs/consult/lib/python3.9/site-packages/streamlit/runtime/state/safe_session_state.py", line 88, in get_widget_states
+    return self._state.get_widget_states()
+  File "/root/miniconda3/envs/consult/lib/python3.9/site-packages/streamlit/runtime/state/session_state.py", line 617, in get_widget_states
+    return self._new_widget_state.as_widget_states()
+  File "/root/miniconda3/envs/consult/lib/python3.9/site-packages/streamlit/runtime/state/session_state.py", line 256, in as_widget_states
+    states = [
+  File "/root/miniconda3/envs/consult/lib/python3.9/site-packages/streamlit/runtime/state/session_state.py", line 259, in <listcomp>
+    if self.get_serialized(widget_id)
+  File "/root/miniconda3/envs/consult/lib/python3.9/site-packages/streamlit/runtime/state/session_state.py", line 241, in get_serialized
+    serialized = metadata.serializer(item.value)
+  File "/root/miniconda3/envs/consult/lib/python3.9/site-packages/streamlit/elements/radio.py", line 60, in serialize
+    return index_(self.options, v)
+  File "/root/miniconda3/envs/consult/lib/python3.9/site-packages/streamlit/util.py", line 140, in index_
+    raise ValueError("{} is not in iterable".format(str(x)))
+ValueError: {'title': '智能咨询', 'function': <function intelligent_consultation_main at 0x7f8f37e6e670>} is not in iterable

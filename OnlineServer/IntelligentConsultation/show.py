@@ -25,6 +25,8 @@ def intelligent_consultation_main():
         res = requests.post("http://127.0.0.1:8130/get_query_answer_with_source",
                             json={"question": question, "query_type": "专题"}).json()
 
+        
+        # st.write(res)
         st.write(res["answer"])
 
         for similarity_question in res["similarity_question"]:
