@@ -5,28 +5,32 @@
 # @Site    : 
 # @File    : server.py
 # @Software: PyCharm
-import _io
-import time
+# import _io
+# import time
 
 import uvicorn
 from fastapi import FastAPI
 from pydantic import BaseModel
 
-from DocumentReview.server_use.contract_for_server import get_support_contract_types, init_model, get_user_standpoint, \
-    get_text_from_file_link_path
-
+from DocumentReview.server_use.contract_for_server import get_support_contract_types, get_user_standpoint, \
+    get_text_from_file_link_path, get_contract_review_result
 app = FastAPI()
 
-acknowledgement = init_model()
 
 
 @app.get('/get_contract_type')
 async def _get_support_contract_types():
+    """
+    获取能审核的合同类型
+    """
     return {"result": get_support_contract_types()}
 
 
 @app.get('/get_user_standpoint')
 async def _get_user_standpoint():
+    """
+    获取甲乙方代表
+    """
     return {"result": get_user_standpoint()}
 
 
@@ -65,11 +69,13 @@ class ContractInput(BaseModel):
 
 @app.post("/get_contract_review_result")
 async def _get_contract_review_result(contract_input: ContractInput):
-    acknowledgement.review_main(content=contract_input.contract_content, mode="text",
-                                      contract_type=contract_input.contract_type_id, usr=contract_input.usr)
-    # print("review_result review_result",time.localtime(), acknowledgement.review_result)
-    # print("resresres", time.localtime() ,res)
-    return {"result": acknowledgement.return_result}
+    """
+    获取模型
+    """
+    result = get_contract_review_result(content=contract_input.contract_content, mode="text",
+                                                            contract_type=contract_input.contract_type_id,
+                                                            usr=contract_input.usr)
+    return {"result": result}
 
 
 class FileLinkInput(BaseModel):

@@ -45,7 +45,7 @@ def infer_onnx_example(lang_model_path, onnx_model_path, content_test):
 if __name__ == "__main__":
     model_ckpt_path = "model/onnx_model/test/ckpt/reuters_chinese-roberta-wwm-ext_FL_json_epoch3para_ckpt"
     out_model_path = "model/onnx_model/test/output/test_model.onnx"
-    in_shape = (1, 512) # (bathsize, max_length)
+    in_shape = (1, 512)  # (bathsize, max_length)
 
     onnx_model_path = "model/onnx_model/test_model.onnx"
     lang_model_path = "model/language_model/chinese-roberta-wwm-ext"

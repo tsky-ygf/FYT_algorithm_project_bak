@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """ 
-@Author  : inamori1932
+@Author  :
 @Time    : 2022/8/10 13:14 
 @Desc    : None
 """
@@ -9,7 +9,6 @@ import json
 
 from flask import Flask, request
 
-from LawsuitPrejudgment.src.civil.nlg import civil_similar_case
 from Utils.http_response import response_successful_result, response_failed_result
 from ProfessionalSearch.src.similar_case_retrival.process_by_es.cases_search import (
     get_case_search_result,
@@ -104,27 +103,6 @@ def search_cases():
     except Exception as e:
         return response_failed_result("error:" + repr(e))
 
-
-@app.route("/get_case_document", methods=["get"])  # 目前由后端查询，方法废弃
-def get_law_document():
-    # doc_id = request.args.get("doc_id")
-    input_json = request.get_data()
-    if input_json is not None:
-        input_dict = json.loads(input_json.decode("utf-8"))
-        doc_id = input_dict["doc_id"]
-        result = ""  # 留出
-        if result:
-            return response_successful_result(result)
-
-        law_documents = civil_similar_case.get_civil_law_documents_by_id_list([doc_id])
-        if law_documents:
-            result = {
-                "doc_id": law_documents[0]["doc_id"],
-                "html_content": law_documents[0]["raw_content"],
-            }
-        else:
-            result = None
-        return response_successful_result(result)
 
 
 def containenglish(str0):

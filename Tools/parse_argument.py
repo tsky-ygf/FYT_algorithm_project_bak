@@ -42,6 +42,11 @@ class LogArguments:
         metadata={"help": "The file of the log."},
     )
 
+    tensorboard_log_dir: Optional[str] = field(
+        default=None,
+        metadata={"help": "The directory to store tensorboard logs."},
+    )
+
 
 @dataclass
 class ModelArguments:

@@ -350,5 +350,5 @@ if __name__ == "__main__":
     pass
 
 else:
-    labels2id, alias2label = read_config_to_label(None, is_long=True)
+    labels2id, alias2label = read_config_to_label(None, is_long=False)
     # labels2id_aux, label2new_label = read_config_to_label_aux()

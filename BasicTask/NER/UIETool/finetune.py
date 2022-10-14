@@ -22,11 +22,13 @@ from paddle.utils.download import get_path_from_url
 from paddlenlp.datasets import load_dataset
 from paddlenlp.transformers import AutoTokenizer
 from paddlenlp.metrics import SpanEvaluator
-from paddlenlp.utils.log import logger
+# from paddlenlp.utils.log import logger
+from Utils.logger import get_logger
 
 from model import UIE
 from evaluate import evaluate
 from utils import set_seed, convert_example, reader, MODEL_MAP, create_data_loader
+
 
 
 def do_train():
@@ -119,9 +121,9 @@ def do_train():
                 model_to_save = model._layers if isinstance(
                     model, paddle.DataParallel) else model
                 model_to_save.save_pretrained(save_dir)
-                logger.disable()
+                # logger.disable()
                 tokenizer.save_pretrained(save_dir)
-                logger.enable()
+                # logger.enable()
 
                 precision, recall, f1 = evaluate(model, metric, dev_data_loader)
                 logger.info(
@@ -136,16 +138,17 @@ def do_train():
                     model_to_save = model._layers if isinstance(
                         model, paddle.DataParallel) else model
                     model_to_save.save_pretrained(save_dir)
-                    logger.disable()
+                    # logger.disable()
                     tokenizer.save_pretrained(save_dir)
-                    logger.enable()
+                    # logger.enable()
                 tic_train = time.time()
 
 
 if __name__ == "__main__":
     # yapf: disable
     parser = argparse.ArgumentParser()
-
+    time_now = time.strftime('%Y-%m-%d-%H-%M-%S', time.localtime())
+    logger = get_logger(logger_file="log/uie/{}.log".format(time_now))
     parser.add_argument("--batch_size", default=16, type=int, help="Batch size per GPU/CPU for training.")
     parser.add_argument("--learning_rate", default=1e-5, type=float, help="The initial learning rate for Adam.")
     parser.add_argument("--train_path", default=None, type=str, help="The path of train set.")
@@ -163,5 +166,8 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     # yapf: enable
+    logger.info(args)
+    logger.info(args.train_path)
 
     do_train()
+    logger.info('=====================finished!!!=======================================')

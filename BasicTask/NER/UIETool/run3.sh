@@ -1,8 +1,8 @@
 #export PYTHONPATH=$(pwd):$PYTHONPATH
-#nohup sh BasicTask/NER/UIETool/run.sh  > log/uie/run.log 2>&1 &
+#nohup sh BasicTask/NER/UIETool/run3.sh  > log/uie/run3.log 2>&1 &
 export CUDA_VISIBLE_DEVICES=0
 echo $CUDA_VISIBLE_DEVICES
-export contract_type=fangwuzulin
+export contract_type=jiekuan
 python BasicTask/NER/UIETool/doccano.py --doccano_file data/data_src/common_1013/${contract_type}.jsonl \
       --task_type "ext" --save_dir data/doccano_data/${contract_type}/ --splits 0.8 0.2 0
 
@@ -20,7 +20,7 @@ python BasicTask/NER/UIETool/finetune.py \
     --valid_steps 500 \
     --device "gpu"
 
-export contract_type=maimai
+export contract_type=shangyebaomi
 python BasicTask/NER/UIETool/doccano.py --doccano_file data/data_src/common_1013/${contract_type}.jsonl \
       --task_type "ext" --save_dir data/doccano_data/${contract_type}/ --splits 0.8 0.2 0
 
@@ -38,7 +38,7 @@ python BasicTask/NER/UIETool/finetune.py \
     --valid_steps 500 \
     --device "gpu"
 
-export contract_type=caigou
+export contract_type=laodongbaomi
 python BasicTask/NER/UIETool/doccano.py --doccano_file data/data_src/common_1013/${contract_type}.jsonl \
       --task_type "ext" --save_dir data/doccano_data/${contract_type}/ --splits 0.8 0.2 0
 
@@ -55,5 +55,3 @@ python BasicTask/NER/UIETool/finetune.py \
     --logging_steps 100 \
     --valid_steps 500 \
     --device "gpu"
-
-

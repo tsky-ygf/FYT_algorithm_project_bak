@@ -24,8 +24,10 @@ class PointerNERBERTInFramework(nn.Module):
         self.dropout = nn.Dropout(0.15)
         self.softmax = nn.Softmax(dim=-1)
 
-    def forward(self, inputs):
-        bert_emb = self.bert(**inputs)
+    def forward(self, batch):
+        encoded_dict, [starts, ends, _, _] = batch
+
+        bert_emb = self.bert(**encoded_dict)
         bert_out, bert_pool = bert_emb[0], bert_emb[1]
 
         hidden = self.linear_hidden(bert_out)
@@ -36,5 +38,10 @@ class PointerNERBERTInFramework(nn.Module):
         end_logits = end_logits[:, 1:-1]
         start_prob = self.sigmoid(start_logits)
         end_prob = self.sigmoid(end_logits)
-        return start_prob, end_prob
+
+        start_loss = F.binary_cross_entropy_with_logits(input=start_logits, target=starts)
+        end_loss = F.binary_cross_entropy_with_logits(input=end_logits, target=ends)
+        loss = torch.sum(start_loss) + torch.sum(end_loss)
+
+        return [start_prob, end_prob], loss
 

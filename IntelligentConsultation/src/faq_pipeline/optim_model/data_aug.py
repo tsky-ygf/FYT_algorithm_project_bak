@@ -10,6 +10,7 @@ import requests
 
 import pandas as pd
 from jieba import analyse
+from googletrans import Translator
 
 
 def word_repetition(text, dup_rate=0.32):
@@ -50,16 +51,13 @@ def get_all_keywords():
     for query in questions:
         keywords = tfidf(query, allowPOS=["n", "v", "a", "d"])
         print(f"query:{query} ======> keywords:{keywords}")
+        keywords_text = "".join(keywords)
+        query += keywords_text
+        print(f"query:{query}")
+        break
 
 
 def get_keywords_and_synonym():
-    # tfidf = analyse.extract_tags
-    # keywords = tfidf(text)
-    # print(keywords)
-    # for word in keywords:
-    #     res = requests.get(f"https://kmcha.com/api/similar/{word}").json()
-    #     print(res)
-
     train_data_path = "data/fyt_train_use_data/QA/pro_qa.csv"
     data = pd.read_csv(train_data_path)
     questions = data.question.tolist()
@@ -107,6 +105,17 @@ def filter_similar_word():
     similar_df.to_csv("data/fyt_train_use_data/QA/word_similar.csv", index=False)
 
 
+# 回译的效果不太行，目前谨慎使用
+def get_translate_result():
+    translator = Translator(service_urls=['translate.google.com'])
+    text = "公司交不起税了怎么办"
+
+    translation_en = translator.translate(text, src='zh-cn', dest='en')
+    # print(translation_en.text)
+    translation_cn = translator.translate(translation_en.text, src='en', dest='zh-cn')
+    print(translation_cn.text)
+
+
 if __name__ == '__main__':
     _text = "公司交不起税了怎么办"
     # WR_res = word_repetition(text="公司交不起税了怎么办", dup_rate=0.3)
@@ -115,4 +124,5 @@ if __name__ == '__main__':
     # rest = random_reverse_order(text=_text)
     # print(rest)
     # filter_similar_word()
-    get_all_keywords()
+    # get_all_keywords()
+    get_translate_result()

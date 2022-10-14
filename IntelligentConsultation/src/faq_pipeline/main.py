@@ -148,5 +148,6 @@ if __name__ == '__main__':
     # }
     # param_optim(use_config)
     #
-    acc, res_df = test_acc(index_name="topic_qa_test_v2", model_name="model/similarity_model/simcse-model-optim")
+    acc, res_df = test_acc(index_name="topic_qa", model_name="model/similarity_model/simcse-model-topic-qa")
+    res_df.to_csv("data/fyt_train_use_data/QA/pro_qa_res.csv", index=False)
     print(acc)
