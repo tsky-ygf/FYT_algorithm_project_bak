@@ -10,4 +10,5 @@
 # 3. 部署
 
 ### 3.1 部署环境
-- python 3.9 ```conda create -n consult python=3.9```
+- 安装python环境```conda create -n consult python=3.9```
+- 安装相关依赖包```pip install -r deploy_requirements.txt```
