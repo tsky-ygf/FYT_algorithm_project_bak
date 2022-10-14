@@ -89,7 +89,6 @@ id2table = {
     "99": "case_list_original_zhishichanquan",
     "100": "case_list_original_zhishichanquan"
 }
-
 import logging
 from typing import List, Dict
 import pymysql
@@ -259,14 +258,19 @@ class RecentCivilSimilarCase:
         self.table_name = "judgment_minshi_data"
 
     def get_similar_cases(self):
-        url = "http://127.0.0.1:5011/top_k_similar_narrative"
-        body = {
-            "fact": str(self.fact) + " " + self.problem + " " + "".join(self.claim_list),
-            "problem": self.problem,
-            "claim_list": self.claim_list
-        }
-        resp_json = requests.post(url, json=body).json()
-        return self._get_short_document(resp_json)
+        try:
+            url = "http://127.0.0.1:5011/top_k_similar_narrative"
+            body = {
+                "fact": str(self.fact) + " " + self.problem + " " + "".join(self.claim_list),
+                "problem": self.problem,
+                "claim_list": self.claim_list
+            }
+            resp_json = requests.post(url, json=body).json()
+            return self._get_short_document(resp_json)
+        except Exception as e:
+            logging.exception(repr(e))
+            print("[exception]get_similar_cases:" + repr(e))
+            return []
 
     def _sort_documents_by_original_order(self, doc_ids, documents):
         result = []
