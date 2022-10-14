@@ -1,6 +1,7 @@
 #export PYTHONPATH=$(pwd):$PYTHONPATH
-#nohup sh BasicTask/NER/UIETool/run.sh  > log/uie/run1.log 2>&1 &
-export CUDA_VISIBLE_DEVICES=1;
+#nohup sh BasicTask/NER/UIETool/run1.sh  > log/uie/run1.log 2>&1 &
+export CUDA_VISIBLE_DEVICES=1
+echo $CUDA_VISIBLE_DEVICES
 export contract_type=yibanzulin
 python BasicTask/NER/UIETool/doccano.py --doccano_file data/data_src/common_1013/${contract_type}.jsonl \
       --task_type "ext" --save_dir data/doccano_data/${contract_type}/ --splits 0.8 0.2 0
