@@ -5,22 +5,33 @@
 # @Site    : 
 # @File    : app_test.py
 # @Software: PyCharm
+from pip import main
 import requests
 
 URL = "http://127.0.0.1:8130"
 
 
-def test_get_query_answer():
+def test_get_query_answer_with_source():
     # 准备测试数据
     body = {
-        "question": "争议解决",
+        "question": "公司交不起税怎么办",
+        "query_type": "专题"
         # "source_end": "personal"
     }
 
     # 执行被测试程序
-    resp_json = requests.post(URL + "/get_query_answer", json=body).json()
+    resp_json = requests.post(URL + "/get_query_answer_with_source", json=body).json()
     answer = resp_json.get("answer")
 
+    print(answer)
     # 验证测试条件
-    assert answer == "【争议解决】\n1.双方发生合同纠纷，可以先协商解决，也可以向当地人民调解委员会申请调解；若协商不成，约定了争议解决条款的，也可以根据合同约定进行仲裁或诉讼；若合同没有约定争议解决条款，可以向合同履行地、被告住所地人民法院起诉。\n2.双方发生劳动纠纷，优先协商解决，也可以请工会或者第三方共同与用人单位协商；若协商不成，可以向劳动合同履行地或者用人单位所在地的劳动争议仲裁委员会申请仲裁，对仲裁结果不服的，可以向人民法院起诉。"
-    pass
+    # assert answer == """依法纳税是每个企业和公民的基本义务，如：\n
+    # 1.纳税人因有特殊困难，不能按期缴纳税款的，经省、自治区、直辖市国家税务局、地方税务局批准，可以延期缴纳税款，但是最长不得超过三个月。\n
+    # 2.纳税人交不出税，遇到自然灾害或者生产经营恶化时可以向税务部门申请减免税务或申请延期分批缴税；当无法经营下去时可以申请破产，清算抵税。\n
+    # 3.对欠缴税款的，税务机关有权进行催缴，同时按日加收滞纳税款万分之五的滞纳金。纳税人欠缴应纳税款，采取转移或者隐匿财产的手段，妨碍税务机关
+    # 追缴欠缴的税款的，由税务机关追缴欠缴的税款、滞纳金，并处欠缴税款百分之五十以上五倍以下的罚款；构成犯罪的，依法追究刑事责任。纳税人欠缴应
+    # 纳税款，采取转移或者隐匿财产的手段，致使税务机关无法追缴欠缴的税款，数额在一万元以上不满十万元的，处三年以下有期徒刑或者拘役，并处或者
+    # 单处欠缴税款一倍以上五倍以下罚金;数额在十万元以上的，处三年以上七年以下有期徒刑，并处欠缴税款一倍以上五倍以下罚金。"""
+
+if __name__ == '__main__':
+    test_get_query_answer_with_source()

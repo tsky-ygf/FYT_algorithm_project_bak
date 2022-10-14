@@ -25,6 +25,7 @@ class FAQPredict:
         self.tfidf = analyse.extract_tags
 
         self.proper_noun_config = self.get_base_config()
+        self.logger.success("加载服务完成......")
 
     def get_base_config(self):
         proper_noun_df = pd.read_csv("IntelligentConsultation/config/专有名词.csv")

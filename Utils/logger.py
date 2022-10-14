@@ -235,7 +235,7 @@ def get_logger(level="INFO", console=True, logger_file=None):
         logger.add(sys.stderr, level=level.upper())
 
     if logger_file is not None:
-        logger.add(logger_file, enqueue=True)  # 添加一个文件输出的内容
+        logger.add(logger_file, enqueue=True, level=level.upper())  # 添加一个文件输出的内容
 
     return logger
 
@@ -250,4 +250,5 @@ def print_run_time(func):
             % (func.__name__, time.time() - local_time)
         )
         return res
+
     return wrapper
