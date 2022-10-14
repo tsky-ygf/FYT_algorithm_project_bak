@@ -8,7 +8,7 @@ import os
 # from transformers import WEIGHTS_NAME, BertConfig,get_linear_schedule_with_warmup,AdamW, BertTokenizer
 from BasicTask.NER.BertNer.metrics import SpanEntityScore
 
-os.environ['CUDA_VISIBLE_DEVICES'] = '1'
+os.environ['CUDA_VISIBLE_DEVICES'] = '3'
 import torch
 import argparse
 from pprint import pprint
@@ -189,13 +189,13 @@ if __name__ == '__main__':
                         help="The path of model parameters for initialization.")
     args = parser.parse_args()
 
-    args.train_path = 'data/data_src/common_long/train.json'
-    args.dev_path = 'data/data_src/common_long/dev.json'
+    args.train_path = 'data/data_src/common_all/train.json'
+    args.dev_path = 'data/data_src/common_all/dev.json'
     args.model = 'model/language_model/chinese-roberta-wwm-ext'
-    labels, alias2label = read_config_to_label(args, is_long=True)
+    labels, alias2label = read_config_to_label(args, is_long=False)
     args.labels = labels
     pprint(args)
 
     main(args)
     # export PYTHONPATH=$(pwd):$PYTHONPATH
-    # nohup python -u BasicTask/NER/PointerBert/main.py > log/PointerBert/pBert_1013_common_all_20sche.log 2>&1 &
+    # nohup python -u BasicTask/NER/PointerBert/main.py > log/PointerBert/pBert_1014_common_all_20sche.log 2>&1 &

@@ -121,9 +121,9 @@ def do_train():
                 model_to_save = model._layers if isinstance(
                     model, paddle.DataParallel) else model
                 model_to_save.save_pretrained(save_dir)
-                logger.disable()
+                # logger.disable()
                 tokenizer.save_pretrained(save_dir)
-                logger.enable()
+                # logger.enable()
 
                 precision, recall, f1 = evaluate(model, metric, dev_data_loader)
                 logger.info(
@@ -138,9 +138,9 @@ def do_train():
                     model_to_save = model._layers if isinstance(
                         model, paddle.DataParallel) else model
                     model_to_save.save_pretrained(save_dir)
-                    logger.disable()
+                    # logger.disable()
                     tokenizer.save_pretrained(save_dir)
-                    logger.enable()
+                    # logger.enable()
                 tic_train = time.time()
 
 
@@ -167,6 +167,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     # yapf: enable
     logger.info(args)
-
+    logger.info(args.train_path)
 
     do_train()
+    logger.infor('=====================finished!!!=======================================')
