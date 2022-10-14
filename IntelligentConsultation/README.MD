@@ -12,7 +12,9 @@
 ### 3.1 部署环境
 3.1.1 安装python环境```conda create -n consult python=3.9```
 
-3.1.2 安装相关依赖包```pip install -r deploy_requirements.txt```
+3.1.2 安装相关依赖包
+- ```pip install -r common_requirements.txt```
+- ```pip install -r IntelligentConsultation/deploy_requirements.txt```
 
 3.1.3 配置相关需求文件
 
@@ -21,4 +23,4 @@
 
 3.1.4 将数据导入到es库中
 - export PYTHONPATH=$(pwd):$PYTHONPATH
-- python IntelligentConsultation/insert_data_to_es.py
+- python IntelligentConsultation/service_use/insert_data_to_es.py

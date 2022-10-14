@@ -42,7 +42,7 @@ def get_query_answer(question: str):
 
 
 faq_predict = FAQPredict(level="INFO",
-                         console=True,
+                         console=False,
                          logger_file="log/intelligent_consultation/model.log",
                          index_name="topic_qa",
                          model_name="model/similarity_model/simcse-model-topic-qa")
