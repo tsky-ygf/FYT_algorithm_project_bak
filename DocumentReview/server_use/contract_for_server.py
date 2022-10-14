@@ -69,6 +69,7 @@ def get_contract_review_result(content, mode,
     return acknowledgement.return_result
 
 
+
 def get_text_from_file_link_path(file_link):
     os.system('cd data/uploads && wget ' + file_link)
     filename = file_link.split('/')[-1]

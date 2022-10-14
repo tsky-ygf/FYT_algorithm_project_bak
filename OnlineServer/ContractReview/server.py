@@ -5,8 +5,8 @@
 # @Site    : 
 # @File    : server.py
 # @Software: PyCharm
-import _io
-import time
+# import _io
+# import time
 
 import uvicorn
 from fastapi import FastAPI
@@ -14,8 +14,8 @@ from pydantic import BaseModel
 
 from DocumentReview.server_use.contract_for_server import get_support_contract_types, get_user_standpoint, \
     get_text_from_file_link_path, get_contract_review_result
-
 app = FastAPI()
+
 
 
 @app.get('/get_contract_type')

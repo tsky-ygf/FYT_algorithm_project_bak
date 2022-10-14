@@ -29,7 +29,7 @@ def do_convert():
 
     tic_time = time.time()
     if not os.path.exists(args.doccano_file):
-        raise ValueError("Please input the correct path of doccano file.")
+        raise ValueError("Please input the correct path of doccano file. "+str(args.doccano_file))
 
     if not os.path.exists(args.save_dir):
         os.makedirs(args.save_dir)

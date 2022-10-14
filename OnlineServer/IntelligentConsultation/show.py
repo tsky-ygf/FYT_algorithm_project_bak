@@ -15,7 +15,7 @@ def intelligent_consultation_main():
     with tab1:
         question = st.text_input("请输入您的问题", value="公司交不起税怎么办", key="问题1")
         res = requests.post("http://127.0.0.1:8130/get_query_answer_with_source",
-                            json={"question": question, "query_type": "old"}).json()
+                            json={"question": question, "query_type": "旧版"}).json()
 
         # st.write(res)
         st.write(res["answer"])
@@ -23,7 +23,7 @@ def intelligent_consultation_main():
     with tab2:
         question = st.text_input("请输入您的问题", value="公司交不起税怎么办", key="问题2")
         res = requests.post("http://127.0.0.1:8130/get_query_answer_with_source",
-                            json={"question": question, "query_type": "topic"}).json()
+                            json={"question": question, "query_type": "专题"}).json()
 
         st.write(res["answer"])
 

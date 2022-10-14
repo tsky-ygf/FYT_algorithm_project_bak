@@ -212,9 +212,13 @@ def reader(data_path, max_seq_len=512):
             json_line = json.loads(line)
             content = json_line['content'].strip()
             prompt = json_line['prompt']
-            print(index)
-            # if index == 246 or index == 365:
-            #     continue
+            result_list = json_line['result_list']
+            is_continue = False
+            for res_ in result_list:
+                if res_['end']-res_['start']>=max_seq_len:
+                    is_continue = True
+            if is_continue:
+                continue
             # Model Input is aslike: [CLS] Prompt [SEP] Content [SEP]
             # It include three summary tokens.
             if max_seq_len <= len(prompt) + 3:
@@ -230,7 +234,6 @@ def reader(data_path, max_seq_len=512):
                 accumulate = 0
                 while True:
                     cur_result_list = []
-
                     for result in result_list:
                         if result['start'] + 1 <= max_content_len < result[
                                 'end']:

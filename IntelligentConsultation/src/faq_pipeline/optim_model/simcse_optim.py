@@ -80,7 +80,7 @@ if __name__ == '__main__':
         "train_config": {
             "log_level": "INFO",
             "model_name": "model/language_model/chinese-roberta-wwm-ext",
-            "model_output_path": "model/similarity_model/simcse-model-topic_qa",
+            "model_output_path": "model/similarity_model/simcse-model-topic-qa",
             "train_data_path": "data/fyt_train_use_data/QA/pro_qa.csv",
             "lr": 1e-5,
             "train_batch_size": 128,

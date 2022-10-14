@@ -1,6 +1,3 @@
-python BasicTask/NER/UIETool/doccano.py --doccano_file data/data_src/common_1013/maimai.jsonl \
-      --task_type "ext" --save_dir data/doccano_data/maimai/ --splits 0.8 0.2 0
-
 export CUDA_VISIBLE_DEVICES=0;
 python  BasicTask/NER/UIETool/finetune.py \
     --train_path "data/doccano_data/maimai/train.txt" \

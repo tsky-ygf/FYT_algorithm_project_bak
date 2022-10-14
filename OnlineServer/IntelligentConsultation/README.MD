@@ -22,3 +22,5 @@
 ## 4. 结束服务
 kill进程: `ps -ef | grep IntelligentConsultation.server | awk {'print $2'} |xargs kill -9`
 
+kill进程: `lsof -i:8130 | awk {'print $2'} |xargs kill -9`
+
