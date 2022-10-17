@@ -88,6 +88,7 @@ def reasoning_graph_result(problem, claim_list, fact, question_answers, factor_s
     question_next = result_dict['question_next']  # 下一个要问的问题
     question_type = result_dict['question_type']
     factor_sentence_list = result_dict['factor_sentence_list']  # 匹配到短语的列表
+    debug_info = result_dict['debug_info']
     result = result_dict['result']
     if len(result) == 0:
         result = None
@@ -132,6 +133,7 @@ def reasoning_graph_result(problem, claim_list, fact, question_answers, factor_s
         "question_next": question_next,
         "question_type": question_type,
         "factor_sentence_list": factor_sentence_list,
+        "debug_info": debug_info,
         "result": {
             "applicable_law": applicable_law,
             "similar_case": similar_case,
