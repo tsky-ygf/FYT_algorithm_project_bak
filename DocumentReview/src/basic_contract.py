@@ -55,23 +55,40 @@ class BasicAcknowledgement:
         extraction_res = self.check_data_func()
         self.usr = usr
         self.rule_judge(extraction_res)
-        self.review_result = {key: value for key, value in self.review_result.items() if value != {}}
-
+        # self.review_result = {key: value for key, value in self.review_result.items() if value != {}}
+        _schemas = self.config_dict[contract_type]['schema'].tolist()
         return_result = []
         self.logger.success("review_result: {}".format(pformat(self.review_result)))
-        for review_point, review_result in self.review_result.items():
-            return_result.append({
-                "review_point": review_point,
-                "show_name": review_result.get("show name") if review_result.get("show name") else review_point,
-                "review_result": review_result.get("审核结果", ""),
-                "review_content": review_result.get("内容", ""),
-                "review_content_start": review_result.get("start", -1),
-                "review_content_end": review_result.get("end", -1),
-                "legal_advice": review_result.get("法律建议", ""),
-                "legal_basis": review_result.get("法律依据", ""),
-                "risk_level": review_result.get("风险等级", ""),
-                "risk_point": review_result.get("风险点", "")
-            })
+        for _schema in _schemas:
+            if self.review_result.get(_schema, {}) !={}:
+                review_point = _schema
+                review_result = self.review_result.get(_schema)
+                return_result.append({
+                    "review_point": review_point,
+                    "show_name": review_result.get("show name") if review_result.get("show name") else review_point,
+                    "review_result": review_result.get("审核结果", ""),
+                    "review_content": review_result.get("内容", ""),
+                    "review_content_start": review_result.get("start", -1),
+                    "review_content_end": review_result.get("end", -1),
+                    "legal_advice": review_result.get("法律建议", ""),
+                    "legal_basis": review_result.get("法律依据", ""),
+                    "risk_level": review_result.get("风险等级", ""),
+                    "risk_point": review_result.get("风险点", "")
+                })
+
+        # for review_point, review_result in self.review_result.items():
+        #     return_result.append({
+        #         "review_point": review_point,
+        #         "show_name": review_result.get("show name") if review_result.get("show name") else review_point,
+        #         "review_result": review_result.get("审核结果", ""),
+        #         "review_content": review_result.get("内容", ""),
+        #         "review_content_start": review_result.get("start", -1),
+        #         "review_content_end": review_result.get("end", -1),
+        #         "legal_advice": review_result.get("法律建议", ""),
+        #         "legal_basis": review_result.get("法律依据", ""),
+        #         "risk_level": review_result.get("风险等级", ""),
+        #         "risk_point": review_result.get("风险点", "")
+        #     })
 
         self.logger.success(return_result)
         self.return_result = return_result

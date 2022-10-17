@@ -13,20 +13,22 @@
 # limitations under the License.
 
 import argparse
+import json
 import os
 
 import paddle
 
 from model import UIE
 
-# yapf: disable
-parser = argparse.ArgumentParser()
-parser.add_argument("--model_path", type=str, required=True, default='./checkpoint/model_best', help="The path to model parameters to be loaded.")
-parser.add_argument("--output_path", type=str, default='./export', help="The path of model parameter in static graph to be saved.")
-args = parser.parse_args()
-# yapf: enable
+# # yapf: disable
+# parser = argparse.ArgumentParser()
+# parser.add_argument("--model_path", type=str, required=True, default='./checkpoint/model_best', help="The path to model parameters to be loaded.")
+# parser.add_argument("--output_path", type=str, default='./export', help="The path of model parameter in static graph to be saved.")
+# args = parser.parse_args()
+# # yapf: enable
 
-if __name__ == "__main__":
+
+def convert(args):
     model = UIE.from_pretrained(args.model_path)
     model.eval()
 
@@ -50,3 +52,33 @@ if __name__ == "__main__":
     # Save in static graph model.
     save_path = os.path.join(args.output_path, "inference")
     paddle.jit.save(model, save_path)
+
+
+CONTRACT_SERVER_DATA_PATH = "DocumentReview/Config/schema/contract_server_data.json"
+
+def get_support_contract_types():
+    with open(CONTRACT_SERVER_DATA_PATH, "r", encoding="utf-8") as f:
+        return json.load(f).get("support_contract_types")
+
+
+def get_contract_type_list():
+    support_contract_types = get_support_contract_types()
+    return [item.get("type_id") for item in support_contract_types]
+
+
+
+if __name__ == "__main__":
+    types = get_contract_type_list()
+
+    for typ in types:
+        print(typ)
+        # yapf: disable
+        parser = argparse.ArgumentParser()
+        parser.add_argument("--model_path", type=str, default='model/uie_model/new/{}/model_best'.format(typ), help="The path to model parameters to be loaded.")
+        parser.add_argument("--output_path", type=str, default='model/uie_model/export_cpu/{}'.format(typ), help="The path of model parameter in static graph to be saved.")
+        args = parser.parse_args()
+        # yapf: enable
+        if not os.path.exists(args.output_path):
+            os.makedirs(args.output_path)
+
+        convert(args)

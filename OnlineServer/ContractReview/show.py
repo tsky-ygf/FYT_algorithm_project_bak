@@ -136,7 +136,8 @@ def contract_review_main():
             value['内容'] = value_en.get('review_content', '')
             value['风险等级'] = value_en.get('risk_level', '')
             value['风险点'] = value_en.get('risk_point', '')
-            value['法律建议'] = value_en.get('legal_basis', '')
+            value['法律建议'] = value_en.get('legal_advice', '')
+            value['法律依据'] = value_en.get('legal_basis', '')
             value['start'] = value_en.get('review_content_start', '')
             value['end'] = value_en.get('review_content_end', '')
 
