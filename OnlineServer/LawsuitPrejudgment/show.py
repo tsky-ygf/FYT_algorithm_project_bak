@@ -287,16 +287,30 @@ def show_next_qa(_selected_anyou, _selected_suqiu_list, _user_input, _question_a
 
 def show_report(result):
     st.subheader("产生评估报告")
-    for report in result["report"]:
-        for item in report:
-            st.markdown("#### {}".format(item["title"]))
-            if item["type"] == "TYPE_TEXT":
-                st.markdown(item["content"], unsafe_allow_html=True)
-            elif item["type"] == "TYPE_LIST_OF_TEXT":
-                for every_content in item["content"]:
-                    st.markdown(every_content, unsafe_allow_html=True)
-            elif item["type"] == "TYPE_GRAPH_OF_PROB":
-                st.markdown("{}%".format(int(item["content"] * 100)))
+    with st.expander("预判结果"):
+        for report in result["report"]:
+            for item in report:
+                st.markdown("#### {}".format(item["title"]))
+                if item["type"] == "TYPE_TEXT":
+                    st.markdown(item["content"], unsafe_allow_html=True)
+                elif item["type"] == "TYPE_LIST_OF_TEXT":
+                    for every_content in item["content"]:
+                        st.markdown(every_content, unsafe_allow_html=True)
+                elif item["type"] == "TYPE_GRAPH_OF_PROB":
+                    st.markdown("{}%".format(int(item["content"] * 100)))
+    with st.expander("相似类案"):
+        similar_cases = result["similar_case"]
+        for case in similar_cases:
+            st.markdown("**{}**".format(case["title"]))
+            st.markdown("{}/ {}".format(case["court"], case["case_number"]))
+            for tag in str(case["tag"]).split(" "):
+                st.markdown("*{}*".format(case["tag"]))
+    with st.expander("相关法条"):
+        relevant_laws = result["applicable_law"]
+        for law in relevant_laws:
+            st.markdown("**{}**".format(law["law_name"]))
+            st.markdown(law["law_content"])
+        pass
     pass
 
 
