@@ -153,7 +153,7 @@ if __name__ == "__main__":
     # print("wefwefwfe"[1:4])
     # print("wefwefwfe"[1:None]) # efwefwfe
     # fun1()  # 查看标注
-    fun2()  # 验证连续的标签
+    # fun2()  # 验证连续的标签
     # fun3() # 检查重叠
     # from transformers import AutoTokenizer
     # t = AutoTokenizer.from_pretrained('model/language_model/chinese-roberta-wwm-ext')
@@ -167,4 +167,8 @@ if __name__ == "__main__":
     #     #         padding="max_length")
     # print(len(res['input_ids'][0]), len(res['input_ids'][1]),len(res['input_ids'][2]))
     # print(res)
+
+    # uie result
+    # t = [0.56731,0.58847,0.68158,0.59454,0.76901,0.72313,0.74951,0.65434,0.86831,0.78641]
+    # print(sum(t))
     pass
