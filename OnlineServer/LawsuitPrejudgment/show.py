@@ -303,8 +303,7 @@ def show_report(result):
         for case in similar_cases:
             st.markdown("**{}**".format(case["title"]))
             st.markdown("{}/ {}".format(case["court"], case["case_number"]))
-            for tag in str(case["tag"]).split(" "):
-                st.markdown("*{}*".format(case["tag"]))
+            st.markdown("*{}*".format(case["tag"]))
     with st.expander("相关法条"):
         relevant_laws = result["applicable_law"]
         for law in relevant_laws:
