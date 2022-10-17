@@ -12,6 +12,8 @@ from loguru import logger
 import torch
 from transformers import BertTokenizer, BertForMaskedLM
 
+# import os
+# os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 class MacbertCorrected:
     def __init__(self):
@@ -22,7 +24,7 @@ class MacbertCorrected:
         self.model.to(self.device)
 
     @staticmethod
-    def get_errors(corrected_text, origin_text):
+    def get_errors(corrected_text, origin_text):#纠错细节
         sub_details = []
         for i, ori_char in enumerate(origin_text):
             if ori_char in [' ', '“', '”', '‘', '’', '琊', '\n', '…', '—', '擤']:
@@ -43,58 +45,26 @@ class MacbertCorrected:
     def __call__(self, ori_text):
         logger.debug(len(ori_text))
         text_length = 256
-        if len(ori_text) > text_length:
-            # texts = re.findall(r'.{5}', ori_text)
-            # texts = re.findall('.{' + str(text_length) + '}|.+', ori_text)
-            # result_list = re.split("[，|。|？|！]", ori_text)
+        if len(ori_text) > text_length:#分句子
             result_list = re.split("[。|\n]", ori_text)
             texts = result_list
-            # texts = []
-            # tmp_text = ""
-            # for sen in result_list:
-            #     if len(tmp_text) < text_length:
-            #         tmp_text += sen + ","
-            #     else:
-            #         texts.append(tmp_text)
-            #         tmp_text = sen + ","
         else:
             texts = [ori_text]
 
-        # texts = [re.sub('[^\u4e00-\u9fa5]+', '', s) for s in texts]
-        cop = re.compile("[^\u4e00-\u9fa5^a-z^A-Z^0-9]")  # 匹配不是中文、大小写、数字的其他字符
-        texts = [cop.sub('', s) for s in texts]  # 将string1中匹配到的字符替换成空字符
         logger.info(texts)
         result = []
-
         with torch.no_grad():
             outputs = self.model(**self.tokenizer(texts, padding=True, return_tensors='pt').to(self.device))
 
         for ids, text in zip(outputs.logits, texts):
             _text = self.tokenizer.decode(torch.argmax(ids, dim=-1), skip_special_tokens=True).replace(' ', '')
             corrected_text = _text[:len(text)]
-            # corrected_text = _text
-            # logger.debug(text)
-            # logger.debug(corrected_text)
-            # exit()
+
             corrected_text, details = self.get_errors(corrected_text, text)
-            # logger.info(text, ' => ', corrected_text, details)
-            # logger.info(details)
             result.append((text, corrected_text, details))
         logger.debug(result)
+        return corrected_text, details
 
-        return result
-        # finally_result = []
-        # for index, details in enumerate(result):
-        #     if len(details[1]) > 0:
-        #         # logger.debug(details[1])
-        #         for one_detail in details[1]:
-        #             one_detail = list(one_detail)
-        #             logger.debug(one_detail)
-        #             one_detail[2] += index * text_length
-        #             one_detail[3] += index * text_length
-        #             finally_result.append(one_detail)
-        # logger.info(finally_result)
-        # return finally_result
 
 
 if __name__ == '__main__':
