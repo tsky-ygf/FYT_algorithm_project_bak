@@ -36,4 +36,5 @@ similar_case_retrival: `相似类案测试`
      * 替换方法3: `ernie, pair-wise方式`
 - [ ] 统一索引库（narrative_similarity_v2 和 case_index_v2）;
 - [ ] tag关键词的计算
+- [ ] index（or database）的数据清洗（例如，文书标题含有李某、李某1，过滤掉1）
 

@@ -42,6 +42,11 @@ class LogArguments:
         metadata={"help": "The file of the log."},
     )
 
+    tensorboard_log_dir: Optional[str] = field(
+        default=None,
+        metadata={"help": "The directory to store tensorboard logs."},
+    )
+
 
 @dataclass
 class ModelArguments:
@@ -80,6 +85,10 @@ class ModelArguments:
 
     feature_dim: Optional[int] = field(
         default=128, metadata={"help": "Feature dim."})
+
+    bert_emb_size: Optional[int] = field(
+        default=768, metadata={"help": "bert embedding size"}
+    )
 
     def __post_init__(self):
         if self.config_name is None:

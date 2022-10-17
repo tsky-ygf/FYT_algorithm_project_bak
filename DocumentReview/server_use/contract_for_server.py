@@ -39,7 +39,7 @@ def get_user_standpoint():
 
 @dataclass
 class CommonModelArgs:
-    model_load_path = "model/PointerBert/PBert1011_common_all_20sche_aug.pt"
+    model_load_path = "model/PointerBert/PBert1014_common_all_20sche_auged.pt"
     model = "model/language_model/chinese-roberta-wwm-ext"
     common_schema_path = "DocumentReview/Config/config_common.csv"
     bert_emb_size = 768
@@ -57,6 +57,17 @@ def init_model():
                                              log_level="INFO",
                                              device="cpu")
     return acknowledgement
+
+
+acknowledgement = init_model()
+
+
+def get_contract_review_result(content, mode,
+                               contract_type, usr):
+    acknowledgement.review_main(content=content, mode=mode,
+                                contract_type=contract_type, usr=usr)
+    return acknowledgement.return_result
+
 
 
 def get_text_from_file_link_path(file_link):

@@ -14,7 +14,6 @@ from torch.utils.data import Dataset
 from transformers import BertTokenizer
 
 tokenizer = BertTokenizer.from_pretrained('model/language_model/chinese-roberta-wwm-ext')
-# tokenizer = BertTokenizer.from_pretrained('model/language_model/bert-base-chinese')
 
 
 def read_config(config_path):
@@ -36,7 +35,7 @@ def read_config(config_path):
 
 
 # 生成所有的通用label， 包含别称
-def read_config_to_label(args):
+def read_config_to_label(args, is_long=False):
     config_path = 'data/data_src/config.csv'
     # 读取config，将别称也读为schema
     config_list, _alias2label = read_config(config_path)
@@ -49,12 +48,14 @@ def read_config_to_label(args):
     # config_list.remove('附件')
     config_list.remove('金额')
 
-    # config_list = ['争议解决','合同生效','未尽事宜','通知与送达','鉴于条款','附件']
-    # config_list.insert(0, 'O') # ============ for softmax
-    return config_list, _alias2label
-    # return ['争议解决','合同生效','未尽事宜','通知与送达','鉴于条款','附件'], _alias2label
+    if not is_long:
+        return config_list, _alias2label
+    else:
+        return ['争议解决', '合同生效', '未尽事宜', '通知与送达', '鉴于条款', '附件', '甲方解除合同', '乙方解除合同'],\
+               _alias2label
 
-#
+
+# 读取schemas, 辅助loss的标签映射
 def read_config_to_label_aux():
     config_path = 'data/data_src/config_aux.csv'
     config_data = pd.read_csv(config_path, encoding='utf-8', na_values=' ', keep_default_na=False)
@@ -99,7 +100,7 @@ class ReaderDataset(Dataset):
     def __len__(self):
         return len(self.data)
 
-
+# cluener 数据集
 def batchify_cluener(batch):
     sentences = []
     labels = []
@@ -149,7 +150,8 @@ def batchify_cluener(batch):
     return encoded_dict, start_seqs, end_seqs, labels, sentences
 
 
-def batchify(batch):
+# 添加了辅助loss的dataloader
+def batchify_aux(batch):
     # 在doccano_data_preprocess中，已经做过最大长度截断了。
     sentences = []
     labels = []
@@ -219,12 +221,79 @@ def batchify(batch):
     # no sense for softmax method
     start_seqs = torch.FloatTensor(start_seqs).transpose(1, 2).to('cuda')
     end_seqs = torch.FloatTensor(end_seqs).transpose(1, 2).to('cuda')
-    start_seqs_aux = torch.FloatTensor(start_seqs_aux).transpose(1,2).cuda()
-    end_seqs_aux = torch.FloatTensor(end_seqs_aux).transpose(1,2).cuda()
+    start_seqs_aux = torch.FloatTensor(start_seqs_aux).transpose(1, 2).cuda()
+    end_seqs_aux = torch.FloatTensor(end_seqs_aux).transpose(1, 2).cuda()
 
     # same batch
     assert len(input_ids) == len(start_seqs), [len(input_ids), len(start_seqs)]
     return encoded_dict, start_seqs, end_seqs, labels, sentences, [start_seqs_aux, end_seqs_aux, labels_aux]
+
+
+def batchify(batch):
+    # 在doccano_data_preprocess中，已经做过最大长度截断了。
+    sentences = []
+    labels = []
+    input_ids = []
+    attention_mask = []
+    token_type_ids = []
+    window_length = 510  # add 101 102 to 512
+    start_seqs = []
+    end_seqs = []
+    start_seqs_aux = []
+    end_seqs_aux = []
+    labels_aux = []
+
+    for b in batch:
+        text = b['text']
+        res_list = b['entities']
+        start_seq = [[0] * window_length for _ in range(len(labels2id))]
+        end_seq = [[0] * window_length for _ in range(len(labels2id))]
+        sentences.append(text)
+        if not res_list:
+            start_seqs.append(start_seq)
+            end_seqs.append(end_seq)
+        else:
+            for res in res_list:
+                label = res['label']
+                if label not in labels2id:
+                    continue
+                start = res['start_offset']
+                end = res['end_offset']
+                label_id = labels2id.index(label)
+                if start is not None and end is not None:
+                    entity_text = text[start:end]
+                    labels.append([label, entity_text])
+                if start is not None:
+                    start_seq[label_id][start] = 1
+                if end is not None:
+                    end_seq[label_id][end] = 1
+
+            start_seqs.append(start_seq)
+            end_seqs.append(end_seq)
+
+        input_i = [101] + tokenizer.convert_tokens_to_ids(list(text)) + [102]
+        input_id = input_i.copy() + [0] * (512 - len(input_i))
+        atten_mask = [1] * len(input_i) + [0] * (512 - len(input_i))
+        token_type_id = [0] * 512
+        assert len(input_id) == 512, len(input_id)
+
+        input_ids.append(input_id)
+        attention_mask.append(atten_mask)
+        token_type_ids.append(token_type_id)
+
+    encoded_dict = {
+        'input_ids': torch.LongTensor(input_ids).to('cuda'),
+        'attention_mask': torch.LongTensor(attention_mask).to('cuda'),
+        'token_type_ids': torch.LongTensor(token_type_ids).to('cuda')
+    }
+
+    # no sense for softmax method
+    start_seqs = torch.FloatTensor(start_seqs).transpose(1, 2).to('cuda')
+    end_seqs = torch.FloatTensor(end_seqs).transpose(1, 2).to('cuda')
+
+    # same batch
+    assert len(input_ids) == len(start_seqs), [len(input_ids), len(start_seqs)]
+    return encoded_dict, start_seqs, end_seqs, labels, sentences, []
 
 
 def evaluate_entity_wo_category(true_entities, pred_entities):
@@ -281,5 +350,5 @@ if __name__ == "__main__":
     pass
 
 else:
-    labels2id, alias2label = read_config_to_label(None)
-    labels2id_aux, label2new_label = read_config_to_label_aux()
+    labels2id, alias2label = read_config_to_label(None, is_long=False)
+    # labels2id_aux, label2new_label = read_config_to_label_aux()

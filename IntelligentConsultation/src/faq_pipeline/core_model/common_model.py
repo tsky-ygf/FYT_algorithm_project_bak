@@ -8,7 +8,7 @@
 """
 import pandas as pd
 # from In embed_trainer import EmbedTrainer
-from IntelligentConsultation.src.faq_pipeline.embed_trainer import EmbedTrainer
+from IntelligentConsultation.src.faq_pipeline.core_model.embed_trainer import EmbedTrainer
 
 from sentence_transformers import models, losses
 from sentence_transformers import SentenceTransformer, datasets

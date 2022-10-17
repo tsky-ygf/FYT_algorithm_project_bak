@@ -5,14 +5,14 @@
 @Time    : 30/9/2022 17:47 
 @Desc    : None
 """
-from LawsuitPrejudgment.src.administrative.administrative_api_v1 import get_administrative_prejudgment_situation, \
+from LawsuitPrejudgment.src.administrative.pipeline import get_administrative_prejudgment_situation, \
     get_administrative_prejudgment_result
-from LawsuitPrejudgment.src.civil.lawsuit_prejudgment.api.data_transfer_object.prejudgment_report_dto import \
+from LawsuitPrejudgment.src.common.data_transfer_object.prejudgment_report_dto import \
     AdministrativeReportDTO
-from LawsuitPrejudgment.src.civil.lawsuit_prejudgment.constants import SUPPORTED_ADMINISTRATIVE_TYPES_CONFIG_PATH, \
+from LawsuitPrejudgment.config.civil.constants import SUPPORTED_ADMINISTRATIVE_TYPES_CONFIG_PATH, \
     FEATURE_TOGGLES_CONFIG_PATH
 from LawsuitPrejudgment.service_use.utils import successful_response
-from LawsuitPrejudgment.src.civil.lawsuit_prejudgment.feature_toggles import FeatureToggles
+from LawsuitPrejudgment.src.civil.utils.feature_toggle.feature_toggles import FeatureToggles
 from Utils.io import read_json_attribute_value
 
 

@@ -11,7 +11,7 @@ from pprint import pprint
 
 import numpy
 
-# from DocumentReview.PointerBert.utils import read_config_to_label
+from BasicTask.NER.PointerBert.utils import read_config_to_label
 
 
 def fun1():
@@ -38,19 +38,19 @@ def fun2():
     labels2id, alias2label = read_config_to_label(None)
 
     print("label number", len(labels2id))
-    file_path = 'data/data_src/common_0926'
+    file_path = 'data/data_src/common_1013'
     data_all = []
     to_file = 'data/data_src/common_all/common_all.json'
     w = open(to_file, 'w', encoding='utf-8')
     for file in os.listdir(file_path):
         print(file)
-        file = os.path.join('data/data_src/common_0926', file)
+        file = os.path.join('data/data_src/common_1013', file)
         with open(file, 'r', encoding='utf-8') as f:
             for line in f.readlines():
                 line = json.loads(line.strip())
                 idd = line['id']
                 text = line['text'].replace('\xa0', ' ')
-                if 'caigou' in file or 'common.jsonl' in file or 'jietiao' in file:
+                if 'entities' in line:
                     labels = line['entities']
                     new_labels = defaultdict(list)
                     for lab in labels:
@@ -59,16 +59,22 @@ def fun2():
                         label = alias2label[lab['label']]
                         if label not in labels2id:
                             continue
-                        new_labels[lab['label']].append([lab['start_offset'], lab['end_offset']])
-                    for lab, indexs in new_labels.items():
-                        if len(indexs) == 1:
-                            continue
-                        indexs.sort()
-                        for ii in range(1, len(indexs)):
-                            if indexs[ii][0] == indexs[ii][1]:
-                                print("there are", new_labels)
-                                print("id:", idd)
-                                print("text ", text)
+                        if lab['end_offset']-lab['start_offset']>500:
+                            print('-'*50)
+                            print('id',idd)
+                            print(text)
+                            print(lab)
+
+                        # new_labels[lab['label']].append([lab['start_offset'], lab['end_offset']])
+                    # for lab, indexs in new_labels.items():
+                    #     if len(indexs) == 1:
+                    #         continue
+                    #     indexs.sort()
+                    #     for ii in range(1, len(indexs)):
+                    #         if indexs[ii][0] == indexs[ii][1]:
+                    #             print("there are", new_labels)
+                    #             print("id:", idd)
+                    #             print("text ", text)
 
                 else:
                     labels = line['label']
@@ -79,17 +85,22 @@ def fun2():
                         label = alias2label[lab[2]]
                         if label not in labels2id:
                             continue
-                        new_labels[label].append([lab[0],lab[1]])
+                        if lab[1]-lab[0]>500:
+                            print('-'*50)
+                            print(line['id'])
+                            print(line['text'])
+                            print(lab)
 
-                    for lab, indexs in new_labels.items():
-                        if len(indexs) == 1:
-                            continue
-                        indexs.sort()
-                        for ii in range(1, len(indexs)):
-                            if indexs[ii-1][1] == indexs[ii][0]:
-                                print("there are", new_labels)
-                                print("id:", idd)
-                                print("text ", text)
+                    #     new_labels[label].append([lab[0],lab[1]])
+                    # for lab, indexs in new_labels.items():
+                    #     if len(indexs) == 1:
+                    #         continue
+                    #     indexs.sort()
+                    #     for ii in range(1, len(indexs)):
+                    #         if indexs[ii-1][1] == indexs[ii][0]:
+                    #             print("there are", new_labels)
+                    #             print("id:", idd)
+                    #             print("text ", text)
 
 
 def fun3():
@@ -138,9 +149,6 @@ def fun3():
                             print(l, text[_[0]:_[1]])
 
 
-
-
-
 if __name__ == "__main__":
     # print("wefwefwfe"[1:4])
     # print("wefwefwfe"[1:None]) # efwefwfe
@@ -159,5 +167,8 @@ if __name__ == "__main__":
     #     #         padding="max_length")
     # print(len(res['input_ids'][0]), len(res['input_ids'][1]),len(res['input_ids'][2]))
     # print(res)
-    print({1:8} in [{1:8}])
+
+    # uie result
+    # t = [0.56731,0.58847,0.68158,0.59454,0.76901,0.72313,0.74951,0.65434,0.86831,0.78641]
+    # print(sum(t))
     pass

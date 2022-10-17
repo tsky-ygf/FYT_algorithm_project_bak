@@ -6,6 +6,7 @@
 # @Software: PyCharm
 import argparse
 import os
+import time
 from collections import defaultdict
 
 import torch
@@ -89,9 +90,13 @@ class BasicPBAcknowledgement(BasicUIEAcknowledgement):
         if self.device == "cpu":
             self.logger.debug(self.data)
             self.common2alias = self.common2alias_dict[self.contract_type]
+            localtime = time.time()
             res = self.predictor_dict[self.contract_type].predict([self.data])
+            print('uie use time: ', time.time()-localtime)
             print("uie predict result", res[0])
+            localtime = time.time()
             res_common = self._get_common_result()
+            print('PB use time', time.time()-localtime)
             print("common predict result", len(res_common))
             print(res_common)
             # note: res 外多套了层list
@@ -103,6 +108,13 @@ class BasicPBAcknowledgement(BasicUIEAcknowledgement):
         self.logger.debug(pformat(res_final))
 
         return res_final
+
+    def init_review_result(self):
+        review_result_dict = {schema: {} for schema in self.schema_dict[self.contract_type]}
+        for _, value in self.common2alias_dict[self.contract_type].items():
+            review_result_dict[value] = {}
+
+        return review_result_dict
 
     def _merge_result(self, uies, commons):
         for common in commons:
@@ -181,13 +193,13 @@ class BasicPBAcknowledgement(BasicUIEAcknowledgement):
 if __name__ == "__main__":
     import time
 
-    contract_type = "maimai"
+    contract_type = "laowu"
 
     os.environ['CUDA_VISIBLE_DEVICES'] = "1"
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--model_load_path", default='model/PointerBert/PBert1011_common_all_20sche_auged.pt', type=str)
+    parser.add_argument("--model_load_path", default='model/PointerBert/PBert1014_common_all_20sche_auged.pt', type=str)
     parser.add_argument("--model", default='model/language_model/chinese-roberta-wwm-ext', type=str)
     parser.add_argument("--common_schema_path", default='DocumentReview/Config/config_common.csv', type=str,
                         help="The hidden size of model")
@@ -205,7 +217,7 @@ if __name__ == "__main__":
                                              device="cpu")
     print('=' * 50, '开始预测', '=' * 50)
     localtime = time.time()
-    acknowledgement.review_main(content="data/DocData/{}/maimai3.docx".format(contract_type), mode="docx",
+    acknowledgement.review_main(content="data/DocData/{}/laowu1.docx".format(contract_type), mode="docx",
                                 contract_type=contract_type, usr="Part B")
     print('=' * 50, '结束', '=' * 50)
     print('use time: {}'.format(time.time() - localtime))

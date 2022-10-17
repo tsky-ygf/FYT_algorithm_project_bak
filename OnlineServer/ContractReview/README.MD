@@ -22,3 +22,4 @@ kill进程: `ps -ef | grep ContractReview.server | awk {'print $2'} |xargs kill 
 pass
 
 ## 6. 测试页面
+http://172.19.82.199:8132/
