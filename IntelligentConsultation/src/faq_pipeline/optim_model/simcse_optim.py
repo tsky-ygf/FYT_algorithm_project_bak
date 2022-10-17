@@ -63,25 +63,24 @@ class SimCSE_RDRop(SimCSE):
 
         return train_data
 
-
-def init_model(self):
-    word_embedding_model = models.Transformer(self.config.model_name, max_seq_length=self.config.max_seq_length)
-    pooling_model = models.Pooling(word_embedding_model.get_word_embedding_dimension())
-    model = SentenceTransformer(modules=[word_embedding_model, pooling_model])
-    loss = losses.MultipleNegativesRankingLoss(model)
-    # loss = MNRRDropLoss(model, kl_weight=0.1)
-    return model, loss
+    def init_model(self):
+        word_embedding_model = models.Transformer(self.config.model_name, max_seq_length=self.config.max_seq_length)
+        pooling_model = models.Pooling(word_embedding_model.get_word_embedding_dimension())
+        model = SentenceTransformer(modules=[word_embedding_model, pooling_model])
+        loss = losses.MultipleNegativesRankingLoss(model)
+        # loss = MNRRDropLoss(model, kl_weight=0.1)
+        return model, loss
 
 
 if __name__ == '__main__':
     use_config = {
         "model_type": "SimCSE_RDRop",
-        "index_name": "topic_qa",
+        "index_name": "topic_qa_test",
         "train_config": {
             "log_level": "INFO",
             "model_name": "model/language_model/chinese-roberta-wwm-ext",
-            "model_output_path": "model/similarity_model/simcse-model-topic-qa",
-            "train_data_path": "data/fyt_train_use_data/QA/pro_qa.csv",
+            "model_output_path": "model/similarity_model/simcse-model-all",
+            "train_data_path": "data/fyt_train_use_data/QA/origin_data.csv",
             "lr": 1e-5,
             "train_batch_size": 128,
             "max_seq_length": 64,

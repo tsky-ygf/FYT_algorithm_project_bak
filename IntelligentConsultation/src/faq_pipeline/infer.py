@@ -55,10 +55,12 @@ class FAQPredict:
             meta = prediction.meta
             match_query = meta["query"]
             match_answer = meta["answer"]
-            match_source = meta["type"]
-            self.logger.success(f"query:{match_query},score:{score},source:{match_source}")
-            if query_type and match_source != query_type:
-                continue
+            match_source = meta["source"]
+            match_sub_source = meta["sub_source"]
+            self.logger.success(
+                f"query:{match_query},score:{score},source:{match_source},sub_source:{match_sub_source}")
+            # if query_type and match_source != query_type:
+            #     continue
 
             proper_noun_missing = False
 
