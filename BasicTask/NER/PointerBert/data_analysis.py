@@ -10,6 +10,7 @@ from collections import defaultdict
 from pprint import pprint
 
 import numpy
+from transformers import BertTokenizer
 
 from BasicTask.NER.PointerBert.utils import read_config_to_label
 
@@ -171,4 +172,44 @@ if __name__ == "__main__":
     # uie result
     # t = [0.56731,0.58847,0.68158,0.59454,0.76901,0.72313,0.74951,0.65434,0.86831,0.78641]
     # print(sum(t))
+
+#     text = """第二十一条乙方不办理或者拖延办理工作交接和离职手续，或者因乙方责任造成甲方的法律（诉讼）纠纷损害甲方利益的，应当承担由此而产生的一切法律责任。
+# 第二十二条乙方在本合同首页填写的通知送达地发生变化，应在一周内以书面形式通知甲方。如乙方未按规定及时通知甲方，甲方寄送的有关文书到达上述通知送达地，即视为送达，由乙方承担后果和相应的法律责任。
+# 第二十三条双方因履行本合同发生争议，当事人可以向甲方劳动争议调解委员会申请调解；调解不成的，可以向劳动争议仲裁委员会申请仲裁。当事人一方也可以直接向劳动争议仲裁委员会申请仲裁。
+# 第二十四条本合同一式两份，甲乙双方各执一份。
+# 甲方：（盖章）乙方：（签名）
+# 法定代表人或（委托代理人）：
+# 2022年1月1日2022年1月1日"""
+#     print(len(text))
+    tokenizer = BertTokenizer.from_pretrained('model/language_model/chinese-roberta-wwm-ext')
+    # inputs = tokenizer(text,
+    #                         add_special_tokens=True,
+    #                         max_length=512,
+    #                         padding="max_length",
+    #                         truncation=True,
+    #                         return_offsets_mapping=False,
+    #                         return_tensors="pt")
+    # print(sum(inputs['attention_mask'][0]))
+    #
+    # print(tokenizer.convert_ids_to_tokens(inputs['input_ids'][0]))
+    #
+    # token_ids = tokenizer.convert_tokens_to_ids(list(text))
+    # print(len(token_ids))
+    # print(list(text))
+    # print('----')
+    # print(token_ids)
+
+    tokenizer.add_special_tokens({'additional_special_tokens':["\n", " "]})
+    text = "2022年我赚了23423425325"
+    inputs = tokenizer(text,
+                       add_special_tokens=True,
+                       max_length=512,
+                       padding="max_length",
+                       truncation=True,
+                       return_offsets_mapping=False,
+                       return_tensors="pt")
+    tokenizer.convert_tokens_to_ids()
+    print(tokenizer.convert_ids_to_tokens(inputs['input_ids'][0]))
+    print(len(text), sum(inputs['attention_mask'][0]))
+    print(list(text))
     pass
