@@ -1,7 +1,7 @@
 LogArguments:
   is_debug: False
   log_level: "DEBUG"
-  log_file: "log/PointerBert/framework/PB_1013.log"
+  log_file: "log/PointerBert/framework/PB_1017.log"
 
 TrainingArguments:
   train_batch_size: 8
