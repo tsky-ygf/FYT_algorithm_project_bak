@@ -78,7 +78,7 @@ def contract_review_main():
         import pandas as pd
 
         # st.write(text)
-        r = requests.post("http://172.19.82.199:6598/macbert_correct", json={"text": text})
+        r = requests.post("http://127.0.0.1:6598/get_corrected_contract_result", json={"text": text})
         result = r.json()
         if result['success']:
             result = result['result']
