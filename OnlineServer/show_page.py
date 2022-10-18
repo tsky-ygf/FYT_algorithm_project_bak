@@ -10,6 +10,7 @@ from OnlineServer.ContractReview.show import contract_review_main
 from OnlineServer.LawsuitPrejudgment.show import lawsuit_prejudgment_testing_page
 from OnlineServer.ProfessionalSearch.show import do_tabs
 from OnlineServer.IntelligentConsultation.show import intelligent_consultation_main
+from OnlineServer.ContractCorrector.show import corrector_main
 
 
 class MultiApp:
