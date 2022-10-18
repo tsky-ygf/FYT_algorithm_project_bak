@@ -17,9 +17,9 @@ app = FastAPI()
 
 class QueryInput(BaseModel):
     question: str = Field(default="公司交不起税怎么办", description="用户输入的问题")
-    source_end: Optional[str] = Field(default=None, description="用户使用的客户端")
+    source_end: str = Field(default="通用", description="用户使用的客户端")
     query_source: str = Field(default="专题", description="选择用户输入的问题类型")
-    query_sub_source: Optional[str] = Field(default=None, description="选择用户输入的问题子类型")
+    query_sub_source: str = Field(default="通用", description="选择用户输入的问题子类型")
 
 
 @app.post("/get_query_answer_with_source")
@@ -47,7 +47,11 @@ def _get_query_answer_with_source(query_input: QueryInput):
         return consultation_service.get_query_answer(query_input.question)
 
     else:
-        return consultation_service.get_query_answer_with_source(query_input.question,
+        if query_input.query_sub_source == "通用":
+            return consultation_service.get_query_answer_with_source(question=query_input.question,
+                                                                     source=query_input.query_source)
+
+        return consultation_service.get_query_answer_with_source(question=query_input.question,
                                                                  source=query_input.query_source,
                                                                  sub_source=query_input.query_sub_source)
 
