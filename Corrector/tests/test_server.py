@@ -1,6 +1,6 @@
-import requests
-import json
-
+import sys
+sys.path.append('./')
+from Corrector.server_use.server import get_corrected_contract_result
 error_sentences = [
         '真麻烦你了。希望你们好好的跳无',
         '少先队员因该为老人让坐',
@@ -24,11 +24,5 @@ error_sentences = [
 
 
     ]
-for sentence in error_sentences:
-    url = 'http://0.0.0.0:6598/get_corrected_contract_result'
-    payload = json.dumps({
-    "text": sentence,
-    })
-    headers = {'Content-Type': 'application/json'}
-    result = requests.request("POST", url, headers=headers, data=payload).json()
-    print(result)
+for text in error_sentences:
+    print(get_corrected_contract_result(text))

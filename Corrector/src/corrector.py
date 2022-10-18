@@ -3,8 +3,6 @@ import torch
 import re
 from transformers import BertTokenizer, BertForMaskedLM
 import operator
-import json
-
 unk_tokens = [' ', '“', '”', '‘', '’', '琊', '\n', '…', '—', '擤', '\t', '֍', '玕', '']
 
 def get_errors(corrected_text, origin_text):
@@ -60,7 +58,7 @@ class Model:
         # pycorrector.set_custom_confusion_dict('./data/text_corrector/custom_confusion.txt')
         # pycorrector.correct('老是较书。')#激活相关配置, 初始化
 
-    def model_process(self, text, threshold = 0.9, verbose = False):
+    def model_process(self, text, threshold = 0.7, verbose = False):
         text_new = ''
         details = []
         
