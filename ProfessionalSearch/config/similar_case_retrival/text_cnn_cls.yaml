@@ -3,10 +3,10 @@ LogArguments:
   log_level: "DEBUG"
 
 DataTrainingArguments:
-  embedding_path: "data/bxh_search_data/textCNN/vector/wiki_vec_pad.pt"
-  dataset: "data/bxh_search_data/textCNN"
-  train_data_path: "data/bxh_search_data/textCNN/train_dev/train/train.json"
-  dev_data_path: "data/bxh_search_data/textCNN/train_dev/dev/dev.json"
+  embedding_path: "data/search/textCNN/vector/wiki_vec_pad.pt"
+  dataset: "data/search/textCNN"
+  train_data_path: "data/search/textCNN/train_dev/train/train.json"
+  dev_data_path: "data/search/textCNN/train_dev/dev/dev.json"
   test_data_path: ""
-  output_dir: "model/bxh_search_model/textCNN/"
+  output_dir: "model/search/textCNN/"
   max_length: 512
