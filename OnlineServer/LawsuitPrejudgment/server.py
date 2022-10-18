@@ -10,7 +10,7 @@ import typing
 import uvicorn
 from fastapi import FastAPI
 from pydantic import BaseModel
-from LawsuitPrejudgment.service_use import administrative_app_service, civil_app_service
+from LawsuitPrejudgment.service_use import administrative_app_service, civil_app_service, criminal_app_service
 from LawsuitPrejudgment.src.common.dialouge_management_parameter import DialogueHistory, DialogueState
 
 app = FastAPI()
@@ -36,14 +36,14 @@ def _get_administrative_result(param: AdministrativeInput):
     return administrative_app_service.get_administrative_result(param.type_id, param.situation)
 
 
-# class CriminalInput(BaseModel):
-#     fact: str = "我偷了同事的3000元"
-#     question_answers: typing.Dict
-#
-#
-# @app.post("/get_criminal_result")
-# def _get_criminal_result(param: CriminalInput):
-#     return criminal_app_service.get_criminal_result(param.fact, param.question_answers)
+class CriminalInput(BaseModel):
+    fact: str = "我偷了同事的3000元"
+    question_answers: typing.Dict
+
+
+@app.post("/get_criminal_result")
+def _get_criminal_result(param: CriminalInput):
+    return criminal_app_service.get_criminal_result(param.fact, param.question_answers)
 
 
 @app.get("/get_civil_problem_summary")
@@ -88,8 +88,8 @@ class DialogueInput(BaseModel):
 @app.post("/lawsuit_prejudgment")
 def _lawsuit_prejudgment(param: DialogueInput):
     domain = param.dialogue_state.domain
-    # if domain == "criminal":
-    #     return criminal_app_service.lawsuit_prejudgment(param.dialogue_history, param.dialogue_state)
+    if domain == "criminal":
+        return criminal_app_service.lawsuit_prejudgment(param.dialogue_history, param.dialogue_state)
     if domain == "civil":
         return civil_app_service.lawsuit_prejudgment(param.dialogue_history, param.dialogue_state)
     if domain == "administrative":
