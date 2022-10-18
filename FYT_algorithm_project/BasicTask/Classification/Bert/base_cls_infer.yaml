@@ -1,0 +1,10 @@
+log_level: "INFO"
+
+infer_tokenizer: "model/ThuLawsCls_freeze/final"
+infer_model: "model/ThuLawsCls_freeze/final"
+
+test_data_path: "data/fyt_train_use_data/CAIL-Long/civil/test.json"
+label_mapping_path: "data/fyt_train_use_data/CAIL-Long/civil/label_mapping.csv"
+
+batch_size: 16
+max_len: 512

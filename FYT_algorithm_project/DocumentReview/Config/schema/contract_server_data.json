@@ -1,0 +1,53 @@
+{
+	"support_contract_types": [{
+			"type_id": "jietiao",
+			"contract_type": "借条"
+		},
+		{
+			"type_id": "jiekuan",
+			"contract_type": "借款"
+		},
+		{
+			"type_id": "laodong",
+			"contract_type": "劳动"
+		},
+		{
+			"type_id": "fangwuzulin",
+			"contract_type": "房屋租赁"
+		},
+		{
+			"type_id": "maimai",
+			"contract_type": "买卖"
+		},
+		{
+			"type_id": "laowu",
+			"contract_type": "劳务"
+		},
+		{
+			"type_id": "shangyebaomi",
+			"contract_type": "商业保密"
+		},
+		{
+			"type_id": "laodongbaomi",
+			"contract_type": "劳动保密"
+		},
+		{
+			"type_id": "caigou",
+			"contract_type": "采购"
+		},
+		{
+			"type_id": "yibanzulin",
+			"contract_type": "一般租赁"
+		}
+	],
+	"user_standpoints": [
+		{
+			"id": "party_a",
+			"standpoint": "甲方"
+		},
+		{
+			"id": "party_b",
+			"standpoint": "乙方"
+		}
+	]
+}

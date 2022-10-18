@@ -1,0 +1,59 @@
+#log_level:
+is_debug: Fasle
+log_level: "INFO"
+log_path: "log/tensorboard_log/law_entity_extraction/bert_ner_test"
+
+#training_args:
+train_batch_size: 24 # 24
+eval_batch_size: 24
+learning_rate: 0.00001
+start_learning_rate: 0.001
+end_learning_rate: 0.001
+crf_learning_rate: 0.001
+num_train_epochs: 50 # 8
+early_stop_patience: 50
+
+lr_scheduler_type: "cosine" # "linear", "cosine", "cosine_with_restarts", "polynomial", "constant", "constant_with_warmup"
+warmup_ratio: 0.1
+#num_warmup_steps: 100
+gradient_accumulation_steps: 1
+max_grad_norm: 1.0
+weight_decay: 0.01
+eval_every_number_of_epoch: 1
+
+accelerator_params:
+  fp16: False  #原先为True
+do_adv: False
+adv_name: "word_embeddings"
+adv_epsilon: 1.0
+
+#model args:
+#num_labels: 11
+max_length: 512
+dropout: 0.1
+soft_label: True
+loss_type: "ce"
+
+pre_train_tokenizer: "model/language_model/bert-base-chinese"
+pre_train_model: "model/language_model/bert-base-chinese"
+
+#pre_train_tokenizer: "C:/document/work/software/model/language_model/bert-base-chinese"
+#pre_train_model: "C:/document/work/software/model/language_model/bert-base-chinese"
+
+#train_data_path: "data/fyt_train_use_data/CAIL-Long/civil/train.json"
+#dev_data_path: "data/fyt_train_use_data/CAIL-Long/civil/dev.json"
+#test_data_path: "data/fyt_train_use_data/CAIL-Long/civil/test.json"
+
+dataset_name: "Loanner"
+train_data_dir: "BasicTask/NER/data/loan_dis/train_num10.json"
+dev_data_dir: "BasicTask/NER/data/loan_dis/dev_num10.json"
+
+#dataset_name: "cluener"
+#train_data_dir: "data/cluener/train.json"
+#dev_data_dir: "data/cluener/dev.json"
+
+
+# test_data_dir: "huangyulin/project/fyt/BasicTask/NER/data/loan_dis/test.json"
+
+# output model path
+output_dir: "model/laws_ner_clue/test1/"
