@@ -10,14 +10,16 @@ from fastapi import FastAPI
 from pydantic import BaseModel, Field
 from IntelligentConsultation.service_use import consultation_service
 
+from typing import Optional
+
 app = FastAPI()
 
 
 class QueryInput(BaseModel):
     question: str = Field(default="公司交不起税怎么办", description="用户输入的问题")
-    source_end: str = Field(default=None, description="用户使用的客户端")
+    source_end: Optional[str] = Field(default=None, description="用户使用的客户端")
     query_source: str = Field(default="专题", description="选择用户输入的问题类型")
-    query_sub_source: str = Field(default=None, description="选择用户输入的问题子类型")
+    query_sub_source: Optional[str] = Field(default=None, description="选择用户输入的问题子类型")
 
 
 @app.post("/get_query_answer_with_source")
