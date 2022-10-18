@@ -5,10 +5,6 @@
 @Time    : 22/8/2022 15:39 
 @Desc    : None
 """
-import requests
-
-from LawsuitPrejudgment.config.civil.constants import CRIMINAL_SIMILIARITY_URL
-from ProfessionalSearch.SimilarCaseRetrieval.core import similar_case_retrieval_service
 
 
 class SimilarCaseDTO:
@@ -49,25 +45,3 @@ class AdministrativeSimilarCaseDictCreator:
             "is_guiding_case": data.get("is_guiding_case", True)
         }
         return SimilarCaseDTO(similar_case).to_dict()
-
-
-class CriminalSimilarCaseListCreator:
-    @staticmethod
-    def create(question):
-        resp_json = requests.post(url=CRIMINAL_SIMILIARITY_URL, json={"question": question}).json()
-        law_documents = similar_case_retrieval_service.get_criminal_law_document_list(resp_json.get("did_list"))
-        if not law_documents:
-            return []
-
-        return [
-            {
-                "doc_id": document["doc_id"],
-                "similar_rate": resp_json["sim_list"][idx],
-                "title": document["doc_title"],
-                "court": document["court"],
-                "judge_date": str(document["judge_date"]).replace("发布日期：", ""),
-                "case_number": document["case_number"],
-                "tag": " ".join(resp_json["tag_list"][idx]),
-                "is_guiding_case": True
-            } for idx, document in enumerate(law_documents[:10])
-        ]
