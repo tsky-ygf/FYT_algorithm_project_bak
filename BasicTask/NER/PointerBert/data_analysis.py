@@ -198,18 +198,4 @@ if __name__ == "__main__":
     # print(list(text))
     # print('----')
     # print(token_ids)
-
-    tokenizer.add_special_tokens({'additional_special_tokens':["\n", " "]})
-    text = "2022年我赚了23423425325"
-    inputs = tokenizer(text,
-                       add_special_tokens=True,
-                       max_length=512,
-                       padding="max_length",
-                       truncation=True,
-                       return_offsets_mapping=False,
-                       return_tensors="pt")
-    tokenizer.convert_tokens_to_ids()
-    print(tokenizer.convert_ids_to_tokens(inputs['input_ids'][0]))
-    print(len(text), sum(inputs['attention_mask'][0]))
-    print(list(text))
     pass
