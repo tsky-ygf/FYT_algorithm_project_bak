@@ -17,8 +17,11 @@ from pydantic import BaseModel, Field
 from Corrector.server_use.server import get_corrected_contract_result
 
 app = FastAPI()
+
+
 class TextInput(BaseModel):
     text: str = Field(default="", description="输入的文本")
+
 
 @app.post("/get_corrected_contract_result")
 async def _get_corrected_contract_result(text_input: TextInput):
@@ -29,7 +32,7 @@ async def _get_corrected_contract_result(text_input: TextInput):
 
     @text: 输入文本
     """
-    result = {'corrected_pred':'', 'detail_info': [], 'msg': '', 'success': 0}
+    result = {'corrected_pred': '', 'detail_info': [], 'msg': '', 'success': 0}
     try:
         tgt_pred, pred_detail_list = get_corrected_contract_result(text_input.text)
         result['corrected_pred'] = tgt_pred
@@ -40,7 +43,6 @@ async def _get_corrected_contract_result(text_input: TextInput):
 
     result = json.dumps(result, ensure_ascii=False)
     return result
-
 
 
 if __name__ == "__main__":
