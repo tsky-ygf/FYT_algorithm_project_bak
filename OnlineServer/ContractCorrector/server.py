@@ -32,14 +32,14 @@ async def _get_corrected_contract_result(text_input: TextInput):
 
     @text: 输入文本
     """
-    result = {'corrected_pred': '', 'detail_info': [], 'msg': '', 'success': 0}
+    result = {'corrected_pred': '', 'detail_info': [], 'msg': '', 'success': True}
     try:
         tgt_pred, pred_detail_list = get_corrected_contract_result(text_input.text)
         result['corrected_pred'] = tgt_pred
         result['detail_info'] = pred_detail_list
     except:
         result['msg'] = traceback.format_exc()
-        result['success'] = 1
+        result['success'] = False
 
     result = json.dumps(result, ensure_ascii=False)
     return result
