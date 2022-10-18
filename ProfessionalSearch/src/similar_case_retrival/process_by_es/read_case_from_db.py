@@ -1,11 +1,12 @@
 import pandas as pd
 from elasticsearch import Elasticsearch
 
+
 def search_data_from_es(
     query_body, _index_name="case_index_v2", _es_hosts="127.0.0.1:9200"
 ):
     # 查询数据
-    es = Elasticsearch(hosts=_es_hosts)
+    es = Elasticsearch(timeout=30, max_retries=10, retry_on_timeout=True, hosts=_es_hosts)
     res = es.search(index=_index_name, body=query_body)
     print(res)
     res_list = [hit["_source"] for hit in res["hits"]["hits"]]
@@ -256,6 +257,70 @@ if __name__ == "__main__":
             }
         },
     }
+
+    query_dict = {
+        "explain": True,
+        "query": {
+            "bool": {
+                "should": [
+                    {"match": {"jfType": {"query": "婚姻家庭", "boost": 10}}},
+                    {
+                        "bool": {
+                            "should": [
+                                {
+                                    "match": {
+                                        "chaming": "利 息   存 在   签 订   借 贷   借 款   支 付   约 定 果   请 具体 描述    借贷 纠纷   还本付息 双方 自愿 自愿 签订 签订 借款 协议 欠条 收据 通过 转账 现金 方式 支付 支付 借款 钱款 用于 用途 借款人 到期 足额 偿还 支付 本金 利息 利息 存在 存在 人为 担保人 约定 约定 借款 利息 借款 期限 利息 年利率 借贷 过程 存在 行为 导致 后果 具体 描述 借贷 纠纷 还本付息"
+                                    }
+                                },
+                                {
+                                    "match": {
+                                        "benyuan_renwei": "利 息   存 在   签 订   借 贷   借 款   支 付   约 定 果  请 具体 描述    借贷 纠纷   还本付息 双方 自愿 自愿 签订 签订 借款 协议 欠条 收据 通过 转账 现金 方式 支付 支付 借款 钱款 用于 用途 借款人 到期 足额 偿还 支付 本金 利息 利息 存在 存在 人为 担保人 约定 约定 借款 利息 借款 期限 利息 年利率 借贷 过程 存在 行为 导致 后果 具体 描述 借贷 纠纷 还本付息"
+                                    }
+                                },
+                                {
+                                    "match": {
+                                        "sucheng_sentences": "利 息   存 在   签 订   借 贷   借 款   支 付   约 定 果  请 具体 描述    借贷 纠纷   还本付息 双方 自愿 自愿 签订 签订 借款 协议 欠条 收据 通过 转账 现金 方式 支付 支付 借款 钱款 用于 用途 借款人 到期 足额 偿还 支付 本金 利息 利息 存在 存在 人为 担保人 约定 约定 借款 利息 借款 期限 利息 年利率 借贷 过程 存在 行为 导致 后果 具体 描述 借贷 纠纷 还本付息"
+                                    }
+                                },
+                            ]
+                        }
+                    },
+                ]
+            }
+        }
+    }
+
+    # query_dict = {
+    #     "query": {
+    #         "bool": {
+    #             "should": [
+    #                 {"match": {"jfType": {"query": "婚姻家庭", "boost": 10}}},
+    #                 {
+    #                     "bool": {
+    #                         "should": [
+    #                             {
+    #                                 "match": {
+    #                                     "chaming": "还本付息"
+    #                                 }
+    #                             },
+    #                             {
+    #                                 "match": {
+    #                                     "benyuan_renwei": "还本付息"
+    #                                 }
+    #                             },
+    #                             {
+    #                                 "match": {
+    #                                     "sucheng_sentences": "还本付息"
+    #                                 }
+    #                             },
+    #                         ]
+    #                     }
+    #                 },
+    #             ]
+    #         }
+    #     }
+    # }
+
     res_df, total_num = search_data_from_es(query_dict)
     # res_df = pd.DataFrame(columns=[''])
     # res = _construct_result_format(res_df)

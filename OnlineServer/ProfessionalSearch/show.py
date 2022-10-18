@@ -362,17 +362,17 @@ def relevant_laws_side_review():
         "请选择法条种类", resp_conditions_json["result"].get("types_of_law").get("value"), key="legal_type"
     )
     isValid_type = st.sidebar.selectbox(
-        "请选择法律时效性", resp_conditions_json["result"].get("timeliness").get("value"), key="text"
+        "请选择法律时效性", resp_conditions_json["result"].get("timeliness").get("value"), key="text_time"
     )
     prov_type = st.sidebar.selectbox(
         "请选择使用范围",
         resp_conditions_json["result"].get("scope_of_use").get("value"),
-        key="text",
+        key="text_region",
     )
     size = st.sidebar.number_input(
         "搜索结果展示条数", value=10, key="size_law", min_value=1, max_value=100
     )
-    text = st.text_input("请输入法条内容", value="", key="text")
+    text = st.text_input("请输入法条内容", value="", key="text_input")
     run = st.button("查询", key="run_law")
 
     if run:
@@ -475,7 +475,7 @@ def similar_case_retrieval_review():
     jfType = st.sidebar.selectbox(
         "请选择二级纠纷类型", problem_list, key="text"
     )
-    fact = st.text_input("请输入事实内容", value="", key="text")
+    fact = st.text_input("请输入事实内容", value="", key="text_simi_retri")
     similar_case_req = {"problem": jfType, "claim_list": [], "fact": fact}
     run = st.button("查询", key="run_law")
 

@@ -150,17 +150,67 @@ class BasicPBAcknowledgement(BasicUIEAcknowledgement):
                     for end_ind in range(len(end_seq)):
                         if end_seq[end_ind]:
                             end_index.append(end_ind)
-                    min_len = min(len(start_index), len(end_index))
-                    for mi in range(min_len):
-                        # 针对具体合同类型， 转换schema名称。
-                        new_label = self.common2alias[self.common_labels[li]]
-                        if new_label == "无":
-                            continue
-                        tmp_entity = {'text': sentence[start_index[mi]:end_index[mi]],
-                         'start': start_index[mi] + index_bias,
-                         'end': end_index[mi] + index_bias}
-                        if tmp_entity not in entities[new_label]:
-                            entities[new_label].append(tmp_entity)
+
+                    if len(start_index) == len(end_index):
+                        for _start, _end in zip(start_index, end_index):
+                            new_label = self.common2alias[self.common_labels[li]]
+                            if new_label == "无":
+                                continue
+                            tmp_entity = {'text': sentence[_start:_end],
+                                          'start': _start + index_bias,
+                                          'end': _end + index_bias}
+                            if tmp_entity not in entities[new_label]:
+                                entities[new_label].append(tmp_entity)
+                    elif not start_index:
+                        continue
+                    elif not end_index:
+                        continue
+                    elif start_index[0] > end_index[-1]:
+                        continue
+                    else:
+                        while start_index and end_index and start_index[0]>end_index[0]:
+                            end_index = end_index[1:]
+                        while start_index and end_index and start_index[-1]>end_index[-1]:
+                            start_index = start_index[:-1]
+                        # 1. 数量相等
+                        if len(start_index) == len(end_index):
+                            pass
+                        # 2. 数量不等, 删去置信度最低的
+                        else:
+                            diff = abs(len(start_index)-len(end_index))
+                            if len(start_index) > len(end_index):
+                                start_index_wt_prob = [[_start, start_prob[bi][_start][li].item()] for _start in start_index]
+                                start_index_wt_prob.sort(key=lambda x:x[1])
+                                start_index_wt_prob = start_index_wt_prob[diff:]
+                                start_index = [_[0] for _ in start_index_wt_prob]
+                                start_index.sort()
+                            elif len(start_index) < len(end_index):
+                                end_index_wt_prob = [[_end, end_prob[bi][_end][li].item()] for _end in end_index]
+                                end_index_wt_prob.sort(key=lambda x:x[1])
+                                end_index_wt_prob = end_index_wt_prob[diff:]
+                                end_index = [_[0] for _ in end_index_wt_prob]
+                                end_index.sort()
+                        for _start, _end in zip(start_index, end_index):
+                            new_label = self.common2alias[self.common_labels[li]]
+                            if new_label == "无":
+                                continue
+                            tmp_entity = {'text': sentence[_start:_end],
+                                          'start': _start + index_bias,
+                                          'end': _end + index_bias}
+                            if tmp_entity not in entities[new_label]:
+                                entities[new_label].append(tmp_entity)
+
+                    # min_len = min(len(start_index), len(end_index))
+                    # for mi in range(min_len):
+                    #     # 针对具体合同类型， 转换schema名称。
+                    #     new_label = self.common2alias[self.common_labels[li]]
+                    #     if new_label == "无":
+                    #         continue
+                    #     tmp_entity = {'text': sentence[start_index[mi]:end_index[mi]],
+                    #      'start': start_index[mi] + index_bias,
+                    #      'end': end_index[mi] + index_bias}
+                    #     if tmp_entity not in entities[new_label]:
+                    #         entities[new_label].append(tmp_entity)
 
         return entities
 
@@ -193,7 +243,7 @@ class BasicPBAcknowledgement(BasicUIEAcknowledgement):
 if __name__ == "__main__":
     import time
 
-    contract_type = "laowu"
+    contract_type = "maimai"
 
     os.environ['CUDA_VISIBLE_DEVICES'] = "1"
 
@@ -217,7 +267,7 @@ if __name__ == "__main__":
                                              device="cpu")
     print('=' * 50, '开始预测', '=' * 50)
     localtime = time.time()
-    acknowledgement.review_main(content="data/DocData/{}/laowu1.docx".format(contract_type), mode="docx",
+    acknowledgement.review_main(content="data/DocData/{}/maimai3.docx".format(contract_type), mode="docx",
                                 contract_type=contract_type, usr="Part B")
     print('=' * 50, '结束', '=' * 50)
     print('use time: {}'.format(time.time() - localtime))

@@ -18,7 +18,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "3"
 def insert_data(data_path="data/fyt_train_use_data/QA/pro_qa.csv",
                 index_name="topic_qa_test_v2",
                 model_name="model/similarity_model/simcse-model-top-32"):
-    document_store = init_document_store(index_name=index_name)
+    document_store = init_document_store(index_name=index_name, recreate_index=True)
     retriever = init_retriever(document_store, model_name=model_name)
 
     logger.info("start insert data")
@@ -36,14 +36,16 @@ def insert_data(data_path="data/fyt_train_use_data/QA/pro_qa.csv",
     logger.success("insert data success")
 
 
-def test_acc(index_name, model_name):
-    faq = FAQPredict(level="warning", index_name=index_name, model_name=model_name)
+def test_acc(index_name, model_name, level="INFO"):
+    faq = FAQPredict(level=level, index_name=index_name, model_name=model_name)
 
     test_data_path = "data/fyt_train_use_data/QA/test_qa.csv"
     df = pd.read_csv(test_data_path)
 
     acc_count = 0
 
+    source_list = []
+    sub_source_list = []
     test_question_list = []
     correct_query_list = []
     result_query_list = []
@@ -53,6 +55,9 @@ def test_acc(index_name, model_name):
         answer, similarity_question = faq(row["测试问题"])
         result = similarity_question[0]["question"]
         # break
+        source_list.append(row["source"])
+        sub_source_list.append(row["sub_source"])
+
         test_question_list.append(row["测试问题"])
         correct_query_list.append(row["query"])
         result_query_list.append(result)
@@ -64,15 +69,17 @@ def test_acc(index_name, model_name):
             acc_count += 1
             is_correct.append(1)
         else:
-            logger.warning("question: {}".format(row["测试问题"]))
+            print("question: {}".format(row["测试问题"]))
 
-            logger.warning("正确答案:{}".format(row["query"]))
-            logger.warning("result:{}".format(result))
+            print("正确答案:{}".format(row["query"]))
+            print("result:{}".format(result))
 
             is_correct.append(0)
         # break
 
     test_result = {
+        "主题": source_list,
+        "二级主题": sub_source_list,
         "测试问题": test_question_list,
         "正确问题": correct_query_list,
         "返回问题": result_query_list,
@@ -147,7 +154,16 @@ if __name__ == '__main__':
     #         "num_epochs": 1}
     # }
     # param_optim(use_config)
-    #
-    acc, res_df = test_acc(index_name="topic_qa", model_name="model/similarity_model/simcse-model-topic-qa")
+
+    # _data_path = "data/fyt_train_use_data/QA/pro_qa.csv"
+    _model_name = "model/similarity_model/simcse-model-topic-qa"
+    _index_name = "topic_qa"
+
+    # _data_path = "data/fyt_train_use_data/QA/origin_data.csv"
+    # _model_name = "model/similarity_model/simcse-model-all"
+    # _index_name = "topic_qa_test"
+    # #
+    # insert_data(data_path=_data_path, model_name=_model_name, index_name=_index_name)
+    acc, res_df = test_acc(index_name=_index_name, model_name=_model_name)  # , level="DEBUG")
     res_df.to_csv("data/fyt_train_use_data/QA/pro_qa_res.csv", index=False)
     print(acc)

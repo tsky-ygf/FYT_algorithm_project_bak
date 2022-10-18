@@ -139,7 +139,7 @@ class LawItemsESTool(BaseESTool):
             }
 
 
-if __name__ == "__main__":
+def insert_law_to_es():
     laws_es = LawItemsESTool(**case_es_tools)
     laws_es()
 

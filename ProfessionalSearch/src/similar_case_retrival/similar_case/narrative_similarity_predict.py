@@ -7,28 +7,32 @@ import logging
 import jieba.analyse
 import time
 
-from ProfessionalSearch.src.similar_case_retrival.similar_case.text_cnn_predict import get_feature
-from ProfessionalSearch.src.similar_case_retrival.similar_case.question_answering_ask_type_predict import (
-    get_question_feature_label_prob,
-    get_appeal_by_rules,
-)
-from ProfessionalSearch.src.similar_case_retrival.similar_case.identify_problem_suqiu import (
-    predict_problem_suqiu,
-)
-
+# from ProfessionalSearch.src.similar_case_retrival.similar_case.question_answering_ask_type_predict import (
+#     get_question_feature_label_prob,
+#     get_appeal_by_rules,
+# )
+# from ProfessionalSearch.src.similar_case_retrival.similar_case.identify_problem_suqiu import (
+#     predict_problem_suqiu,
+# )
 
 
 from ProfessionalSearch.src.similar_case_retrival.similar_case.rank_util import (
     pseg_txt,
     compute_sentence_embedding,
     cosine_similiarity,
-    as_num, load_vocab_embedding_idf,
+    as_num,
+    load_vocab_embedding_idf,
+)
+from ProfessionalSearch.src.similar_case_retrival.similar_case.text_cnn import (
+    Model,
 )
 
 print("abc2...")
 
 ip = "192.168.1.254"
-es = Elasticsearch()  # [ip],http_auth=('elastic', 'password'),port=9200
+es = Elasticsearch(
+    timeout=30, max_retries=10, retry_on_timeout=True
+)  # [ip],http_auth=('elastic', 'password'),port=9200
 # ES_IDX_NAME = "narrative_similarity_v2"  # 'narrative_similarity_v2'
 ES_IDX_NAME = "case_index_minshi_v2"  # 'narrative_similarity_v2'
 print("end...")
@@ -162,36 +166,36 @@ def predict_fn(fact, problem="", claim_list=[]):
         + str(claim_list)
     )
     # 1.预测问题类型、诉求、问题类型的置信区间
-    if problem == "" and claim_list == []:  # 如果问题类型和诉求都为空的话，那么先做意图识别
-        problem_suqiu_type_dict = predict_problem_suqiu(fact)
-        problem = problem_suqiu_type_dict.get("case_reason", "")
-        case_reason_confidence = str(
-            problem_suqiu_type_dict.get("case_reason_confidence", "")
-        )
-        claim_list = problem_suqiu_type_dict.get("appeal", [])
-        logging.info(
-            "case_reason:{}, appeal:{}, confidence:{},".format(
-                problem, str(claim_list), case_reason_confidence
-            )
-        )
-        _, label, p = get_question_feature_label_prob(fact)
-        label_1 = label_convert.get(label, label)
-        label, my_appeal = get_appeal_by_rules(fact, label_1)
-
-        logging.info("label:{}".format(label))
-        print("label:{}".format(label))
-        if (label != "other" and p > 0.85) or (label == "other" and p > 0.95):
-            if problem != label:
-                claim_list = my_appeal
-            problem = label
-            case_reason_confidence = p
-
-        problem, claim_list = case_old2new(problem, claim_list)
-        logging.info(
-            "problem:{}, appeal:{}, confidence:{},".format(
-                problem, str(claim_list), case_reason_confidence
-            )
-        )
+    # if problem == "" and claim_list == []:  # 如果问题类型和诉求都为空的话，那么先做意图识别
+    #     problem_suqiu_type_dict = predict_problem_suqiu(fact)
+    #     problem = problem_suqiu_type_dict.get("case_reason", "")
+    #     case_reason_confidence = str(
+    #         problem_suqiu_type_dict.get("case_reason_confidence", "")
+    #     )
+    #     claim_list = problem_suqiu_type_dict.get("appeal", [])
+    #     logging.info(
+    #         "case_reason:{}, appeal:{}, confidence:{},".format(
+    #             problem, str(claim_list), case_reason_confidence
+    #         )
+    #     )
+    #     _, label, p = get_question_feature_label_prob(fact)
+    #     label_1 = label_convert.get(label, label)
+    #     label, my_appeal = get_appeal_by_rules(fact, label_1)
+    #
+    #     logging.info("label:{}".format(label))
+    #     print("label:{}".format(label))
+    #     if (label != "other" and p > 0.85) or (label == "other" and p > 0.95):
+    #         if problem != label:
+    #             claim_list = my_appeal
+    #         problem = label
+    #         case_reason_confidence = p
+    #
+    #     problem, claim_list = case_old2new(problem, claim_list)
+    #     logging.info(
+    #         "problem:{}, appeal:{}, confidence:{},".format(
+    #             problem, str(claim_list), case_reason_confidence
+    #         )
+    #     )
 
     # 2. 召回
     t1 = time.time()
@@ -221,6 +225,9 @@ def candidate_list_q2q_rank(original_question, candidate_list):
     :param candidate_list:
     :return: a new candidate_list. each element should contain: (doc_id, cos_i, win_los, problem_type, suqiu_type, tags)
     """
+    textCNN = Model(
+        config="ProfessionalSearch/config/similar_case_retrival/text_cnn_cls.yaml"
+    )
     original_question = pseg_txt(original_question).replace(" ", "")  # 过滤一部分数据
     # original_question=original_question[0:77]
     logging.info(
@@ -229,7 +236,7 @@ def candidate_list_q2q_rank(original_question, candidate_list):
         + original_question
     )
     # feature_q,_,_=predict_online_q2type(original_question) todo replace temp 2019.05.15 bright.xu
-    feature_q = get_feature(original_question)
+    feature_q = textCNN.get_mid_feature(original_question)
 
     candidate_list_new = []
     for i, element in enumerate(candidate_list):
@@ -259,17 +266,17 @@ def candidate_list_q2q_rank(original_question, candidate_list):
             + candidate
         )
         # feature_c, label_predict_c, possibility_c=predict_online_q2type(candidate) todo replace temp 2019.05.15 bright.xu
-        feature_c = get_feature(candidate)
+        feature_c = textCNN.get_mid_feature(candidate)
 
-        cos_i = cosine_similiarity(feature_q, feature_c)
+        cos_i = cosine_similiarity(feature_q[0], feature_c[0])
         # win_los = 1 if "1" in suqiu_label else 0  # TODO 有一个诉求得到支持，暂时任务就是支持的。
-        logging.info("cos_i:"+ str(cos_i))
+        logging.info("cos_i:" + str(cos_i))
         candidate_list_new.append(
             (uq_id, cos_i, problem_type, suqiu_type, tags, eventDate)
         )
 
     candidate_list_new = sorted(
-        candidate_list_new, key=lambda element: (element[5], -element[1]), reverse=True
+        candidate_list_new, key=lambda element: (element[5], element[1]), reverse=True
     )  # 排序
     logging.info(
         "narrative_similarity_predict.candidate_list_q2q_rank.candidate_list_new:"
@@ -497,8 +504,8 @@ def search_similar_case(
                 # + suqiu_label
                 + ";tags_:"
                 + tags_
-                +";event_num:"
-                +event_num
+                + ";event_num:"
+                + event_num
             )
             print(
                 count,
@@ -642,6 +649,7 @@ def get_search_body(problem, suqiu_type, query_search, tags):
                 }
             }
         }
+    print("body:", body)
     logging.info(body)
     return body
 
@@ -660,7 +668,7 @@ def organize_result(similiar_list, is_consult_flag, fact, keywords, top_k=50):
         reason_name_list,
         appeal_name_list,
         tags_list,
-        date_list
+        date_list,
     ) = ([], [], [], [], [], [], [])
     for i, element in enumerate(similiar_list):
         doc_id, cos_i, problem_type, suqiu_type, tags, pubDate = element

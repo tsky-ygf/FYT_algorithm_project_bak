@@ -22,7 +22,6 @@ class PointerNERBERTInFramework(nn.Module):
         self.sigmoid = nn.Sigmoid()
         self.gelu = nn.GELU()
         self.dropout = nn.Dropout(0.15)
-        self.softmax = nn.Softmax(dim=-1)
 
     def forward(self, batch):
         encoded_dict, [starts, ends, _, _] = batch

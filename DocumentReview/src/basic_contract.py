@@ -324,8 +324,8 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
                         res_dict["end"] = ''
                         for con in extraction_con:
                             res_dict["内容"] += con['text'] + '#'
-                            res_dict["start"] = str(con['start']) + "#"
-                            res_dict["end"] = str(con['end']) + '#'
+                            res_dict["start"] += str(con['start']) + "#"
+                            res_dict["end"] += str(con['end']) + '#'
 
                 # model cannot recognize
                 if ('甲方' == row['schema'] or '甲方联系方式' == row['schema'] or '甲方地址' == row['schema']

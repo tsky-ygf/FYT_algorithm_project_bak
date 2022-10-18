@@ -15,7 +15,7 @@ def test_get_query_answer_with_source():
     # 准备测试数据
     body = {
         "question": "公司交不起税怎么办",
-        "query_type": "专题"
+        "query_source": "专题"
         # "source_end": "personal"
     }
 
@@ -32,6 +32,7 @@ def test_get_query_answer_with_source():
     # 追缴欠缴的税款的，由税务机关追缴欠缴的税款、滞纳金，并处欠缴税款百分之五十以上五倍以下的罚款；构成犯罪的，依法追究刑事责任。纳税人欠缴应
     # 纳税款，采取转移或者隐匿财产的手段，致使税务机关无法追缴欠缴的税款，数额在一万元以上不满十万元的，处三年以下有期徒刑或者拘役，并处或者
     # 单处欠缴税款一倍以上五倍以下罚金;数额在十万元以上的，处三年以上七年以下有期徒刑，并处欠缴税款一倍以上五倍以下罚金。"""
+
 
 if __name__ == '__main__':
     test_get_query_answer_with_source()
