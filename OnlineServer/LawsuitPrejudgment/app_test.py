@@ -105,7 +105,7 @@ def test_should_ask_next_question_when_reasoning_graph_result():
     }
 
     # 执行被测试程序
-    resp_json = requests.post(URL+"/reasoning_graph_result", json=body).json()
+    resp_json = requests.post(URL + "/reasoning_graph_result", json=body).json()
     print(resp_json)
 
     # 验证测试条件
@@ -130,7 +130,7 @@ def test_show_have_report_when_reasoning_graph_result():
     }
 
     # 执行被测试程序
-    resp_json = requests.post(URL+"/reasoning_graph_result", json=body).json()
+    resp_json = requests.post(URL + "/reasoning_graph_result", json=body).json()
     print(resp_json)
 
     # 验证测试条件
@@ -138,3 +138,30 @@ def test_show_have_report_when_reasoning_graph_result():
     assert resp_json.get("success")
     assert resp_json.get("question_next") is None
     assert resp_json.get("result")
+
+
+def test_criminal_judgment():
+    # 准备测试数据
+    body = {
+        "dialogue_history": {
+            "user_input": "我偷了舍友500块。",
+            "question_answers": None
+        },
+        "dialogue_state": {
+            "domain": "criminal",
+            "problem": None,
+            "claim_list": None,
+            "other": None
+        }
+    }
+
+    # 执行被测试程序
+    resp_json = requests.post(URL + "/lawsuit_prejudgment", json=body).json()
+    print(resp_json)
+
+    # 验证测试条件
+    assert resp_json
+    assert resp_json.get("success")
+    assert resp_json.get("next_action")
+    assert resp_json["next_action"]["action_type"] == "ask"
+    assert resp_json["next_action"]["content"]["question"] == "盗窃人年龄未满十六周岁或者精神状态不正常？"

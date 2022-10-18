@@ -8,6 +8,7 @@
 
 from LawsuitPrejudgment.src.common.data_transfer_object.prejudgment_report_dto import \
     CriminalReportDTO
+from LawsuitPrejudgment.src.common.dialouge_management_parameter import DialogueHistory, DialogueState
 from LawsuitPrejudgment.src.criminal.pipeline import CriminalPrejudgment
 
 criminal_config = {
@@ -108,6 +109,10 @@ class CriminalResultMiddleLayer:
         # self._get_response_from_criminal_server()
         print(self.response_from_criminal_server)
         return self._generate_criminal_result()
+
+
+def lawsuit_prejudgment(dialogue_history: DialogueHistory, dialogue_state: DialogueState):
+    pass
 
 
 if __name__ == "__main__":
