@@ -13,12 +13,15 @@ def intelligent_consultation_main():
     tab1, tab2 = st.tabs(["民、商、刑", "专题"])
 
     with tab1:
-        question = st.text_input("请输入您的问题", value="公司交不起税怎么办", key="问题1")
-        res = requests.post("http://127.0.0.1:8130/get_query_answer_with_source",
-                            json={"question": question, "query_source": "旧版"}).json()
+        try:
+            question = st.text_input("请输入您的问题", value="公司交不起税怎么办", key="问题1")
+            res = requests.post("http://127.0.0.1:8130/get_query_answer_with_source",
+                                json={"question": question, "query_source": "旧版"}).json()
 
         # st.write(res)
-        st.write(res["answer"])
+            st.write(res["answer"])
+        except:
+            st.write("旧版接口存在问题！！！")
 
     with tab2:
         question = st.text_input("请输入您的问题", value="公司交不起税怎么办", key="问题2")
