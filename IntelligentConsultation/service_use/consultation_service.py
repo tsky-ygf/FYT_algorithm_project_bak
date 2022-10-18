@@ -58,11 +58,15 @@ def get_query_answer_with_source(question: str, source=None, sub_source=None):
     :param sub_source: 二级主题
     :return:
     """
+    print("question:{}".format(question))
+    print("query_source:{}".format(source))
+    print("query_sub_source:{}".format(sub_source))
+
     answer, similarity_question = faq_predict(question, source, sub_source)
 
     return {"answer": answer, "similarity_question": similarity_question}
 
 
 if __name__ == '__main__':
-    _question = "七查七看是什么"
-    print(get_query_answer_with_source(question=_question, source="专题", sub_source="市场监管"))
+    _question = "公司交不起税怎么办"
+    print(get_query_answer_with_source(question=_question, source="专题"))
