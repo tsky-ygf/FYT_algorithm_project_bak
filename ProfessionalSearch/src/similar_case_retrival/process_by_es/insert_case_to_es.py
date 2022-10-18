@@ -6,6 +6,7 @@
 # @File    : insert_case_to_es.py
 # @Software: PyCharm
 import jieba
+import pandas as pd
 from elasticsearch import Elasticsearch, helpers
 from jieba import analyse
 
@@ -24,7 +25,7 @@ case_es_tools = {
         # "judgment_xingzheng_data",
         # "judgment_xingshi_data",
         # "judgment_zhixing_data",
-        "judgment_minshi_data_cc",
+        "judgment_minshi_data",
     ],
     "index_name": "case_index_minshi_v2",
     "debug": False,
@@ -42,7 +43,7 @@ class CaseESTool(BaseESTool):
                 table_name
             )
         else:
-            query = "select id,uq_id,event_num,jfType,yg_sc,bg_sc,jslcm,byrw,pubDate from {} where pubDate > '2019-01-01' limit {},{}".format(
+            query = "select id,uq_id,event_num,jfType,yg_sc,bg_sc,jslcm,byrw,pubDate,wsTitle from {} where pubDate > '2019-01-01' limit {},{}".format(
                 table_name, start, end
             )
         logger.info(query)
@@ -126,7 +127,7 @@ class CaseESTool(BaseESTool):
             }
 
     def __call__(self):
-        self.es_init()
+        # self.es_init()
         start_end_mingshi = [
             [0, 2000000],
             [2000000, 2000000],
@@ -150,7 +151,7 @@ class CaseESTool(BaseESTool):
             #     start_end_df = pd.DataFrame(start_end_xingzheng)
             # elif table_name == "judgment_zhixing_data":
             #     start_end_df = pd.DataFrame(start_end_zhixing)
-            if table_name == "judgment_minshi_data_cc":
+            if table_name == "judgment_minshi_data":
                 start_end_df = pd.DataFrame(start_end_mingshi)
             # elif table_name == "judgment_xingshi_data":
             #     start_end_df = pd.DataFrame(start_end_xingshi)
@@ -159,9 +160,7 @@ class CaseESTool(BaseESTool):
                 df_data = self.get_df_data_from_db(
                     table_name, start_and_end[0], start_and_end[1]
                 )
-                if table_name == "judgment_minshi_data_cc":
-                    table_name == "judgment_minshi_data"
-                self.insert_data_from_es_parall(6, 1000, df_data, table_name)
+                self.update_data_from_es_parall(6, 1000, df_data, table_name)
 
     # def handle_es_parall(self, df_data, table_name):
     #     for index, row in df_data.iterrows():
@@ -293,24 +292,97 @@ class CaseESTool(BaseESTool):
             }
 
     def update_es_parall(self, df_data, table_name):
+        count = 0
         for index, row in df_data.iterrows():
             data_ori = row.to_dict()
             use_data = [
-                # "id",
+                "id",
                 "uq_id",
-                "content",
+                # "content",
                 "event_num",
                 "faYuan_name",
                 "jfType",
-                "event_type",
-                "province",
-                "wsTitle",
+                # "event_type",
+                # "province",
+                # "yg_sc",
+                # "bg_sc",
+                # "jslcm",
+                # "byrw",
+                "pubDate",
+                "wsTitle"
             ]
             data_body = {
                 key: value for key, value in data_ori.items() if key in use_data
             }
-            data_body["db_name"] = self.db_name
-            data_body["table_name"] = table_name
+            yg_sc_sentences, bg_sc_sentences = '', ''
+            if row["yg_sc"]:
+                yg_sc_sentences = bytes.decode(row["yg_sc"]).strip()
+                yg_sc_sentences = yg_sc_sentences[0:400]
+                yg_sc_sentences = pseg_txt(yg_sc_sentences)
+            else:
+                yg_sc_sentences = ""
+
+            if row["bg_sc"]:
+                bg_sc_sentences = bytes.decode(row["bg_sc"]).strip()
+                bg_sc_sentences = bg_sc_sentences[0:400]
+                bg_sc_sentences = pseg_txt(bg_sc_sentences)
+            else:
+                bg_sc_sentences = ""
+
+            if bg_sc_sentences or yg_sc_sentences:
+                sucheng_sentences = bg_sc_sentences + " " + yg_sc_sentences
+                sucheng_sentences = sucheng_sentences[0:400]
+                sucheng_sentences = pseg_txt(sucheng_sentences)
+                data_body["sucheng_sentences"] = sucheng_sentences
+            else:
+                data_body["sucheng_sentences"] = bg_sc_sentences + " " + yg_sc_sentences
+
+            if row["jslcm"]:
+                chaming = bytes.decode(row["jslcm"]).strip()
+                chaming = chaming[0:400]
+                chaming = pseg_txt(chaming)
+                data_body["chaming"] = chaming
+            else:
+                data_body["chaming"] = row["jslcm"]
+
+            if row["byrw"]:
+                benyuan_renwei = bytes.decode(row["byrw"]).strip()  # 本院认为
+                benyuan_renwei = benyuan_renwei[0:400]
+                benyuan_renwei = pseg_txt(benyuan_renwei)
+                data_body["benyuan_renwei"] = benyuan_renwei
+            else:
+                data_body["benyuan_renwei"] = row["byrw"]
+
+            sucheng_sentences = data_body["sucheng_sentences"]
+            if not sucheng_sentences:
+                sucheng_sentences = ""
+            chaming = data_body["chaming"]
+            if not chaming:
+                chaming = ""
+            benyuan_renwei = data_body["benyuan_renwei"]
+            if not benyuan_renwei:
+                benyuan_renwei = ""
+            query_all = sucheng_sentences + " " + chaming + " " + benyuan_renwei
+            tags1 = analyse.extract_tags(query_all, topK=15)
+            tags2 = analyse.textrank(
+                query_all, topK=15, withWeight=False, allowPOS=("ns", "n", "vn", "v")
+            )
+            tags = list(set(tags1).intersection(set(tags2)))
+            tags = [tag for tag in tags if tag not in ["原告", "被告", "双方", "诉至", "判决"]]
+            tags = " ".join(tags)
+
+            if count < 30:
+                print("doc_id:", row["uq_id"], ";problem_type:", row["jfType"])
+                print("suqing_sentences:", sucheng_sentences)
+                print("chaming:", chaming)
+                print("benyuan_renwei:", benyuan_renwei)
+                print("tags:", tags)
+                print("==============================")
+            if count % 10000 == 0:
+                print(count)
+            count = count + 1
+
+            data_body["tags"] = tags
             yield {
                 "_op_type": "update",
                 "_index": self.index_name,
@@ -320,7 +392,7 @@ class CaseESTool(BaseESTool):
             }
 
 
-if __name__ == "__main__":
+def insert_case_to_es():
     import pandas as pd
 
     pd.set_option("display.max_columns", None)
@@ -332,3 +404,7 @@ if __name__ == "__main__":
     res = case_es.search_data_from_es(query_body=query_dict)
 
     print(res)
+
+
+if __name__ == '__main__':
+    insert_case_to_es()
