@@ -8,9 +8,11 @@
 # import _io
 # import time
 
+import traceback
 import uvicorn
 from fastapi import FastAPI
 from pydantic import BaseModel
+import json
 
 from Corrector.server_use.server import get_corrected_contract_result
 
@@ -54,8 +56,17 @@ async def _get_corrected_contract_result(text: str):
     """
     获取模型
     """
-    result = get_corrected_contract_result(text)
-    return {"result": result}
+    result = {'corrected_pred':'', 'detail_info': [], 'msg': '', 'success': 0}
+    try:
+        tgt_pred, pred_detail_list = get_corrected_contract_result(text)
+        result['corrected_pred'] = tgt_pred
+        result['detail_info'] = pred_detail_list
+    except:
+        result['msg'] = traceback.format_exc()
+        result['success'] = 1
+
+    result = json.dumps(result, ensure_ascii=False)
+    return result
 
 
 

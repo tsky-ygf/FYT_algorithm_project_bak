@@ -1,9 +1,9 @@
 from loguru import logger
-import pycorrector
 import torch
 import re
 from transformers import BertTokenizer, BertForMaskedLM
 import operator
+import json
 
 unk_tokens = [' ', '“', '”', '‘', '’', '琊', '\n', '…', '—', '擤', '\t', '֍', '玕', '']
 
@@ -57,8 +57,8 @@ class Model:
         self.model.to(self.device)
         
         #领域混淆字典初始化
-        pycorrector.set_custom_confusion_dict('./data/text_corrector/custom_confusion.txt')
-        pycorrector.correct('老是较书。')#激活相关配置, 初始化
+        # pycorrector.set_custom_confusion_dict('./data/text_corrector/custom_confusion.txt')
+        # pycorrector.correct('老是较书。')#激活相关配置, 初始化
 
     def model_process(self, text, threshold = 0.9, verbose = False):
         text_new = ''
@@ -90,7 +90,7 @@ class Model:
             text_new = text_new + corrected_text
             details.extend(tmp_details)
 
-        if len(text_new) != len(text):#如果长度对不齐，说明漏字等情况，以原文为准
+        if len(text_new) != len(text):#如果长度对不齐，说明漏字等情况，即以原文为准
             text_new = text
             details = []
 
@@ -98,7 +98,7 @@ class Model:
 
 
     def process(self, ori_text):
-        logger.debug(f'初始化文本:{ori_text}')
+        logger.info(f'初始化文本:{ori_text}')
 
         #句子切分
         segment_pattern = r'(。|，|\s|、)\s*'
@@ -133,7 +133,8 @@ class Model:
             pred_detail_list.extend(tmp_pred_detail)
         
         #结果记录
-        logger.debug(tgt_pred, pred_detail_list)
+        logger.info(tgt_pred, pred_detail_list)
+
         return tgt_pred, pred_detail_list
 
 
