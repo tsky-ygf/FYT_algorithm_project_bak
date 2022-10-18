@@ -59,6 +59,17 @@ class MultiApp:
 
 def welcome():
     st.title("欢迎来到法域通测试页面！")
+    st.markdown("#### 合同智审")
+    st.markdown("* [测试接口文档](http://172.19.82.227:8112/docs)")
+
+    st.markdown("#### 检索")
+    st.markdown("* [测试接口文档](http://172.19.82.227:8135/docs)")
+
+    st.markdown("#### 诉讼预判")
+    st.markdown("* [测试接口文档](http://172.19.82.227:8105/docs)")
+
+    st.markdown("#### 智能咨询")
+    st.markdown("* [测试接口文档](http://172.19.82.227:8130/docs)")
 
 
 app = MultiApp()

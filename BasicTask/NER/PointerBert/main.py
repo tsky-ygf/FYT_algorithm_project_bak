@@ -89,8 +89,8 @@ def main(args):
     best_f1 = 0
     for e in range(args.num_epochs):
         # train
-        model.train()
-        train(args, train_loader, model, optimizer)
+        # model.train()
+        # train(args, train_loader, model, optimizer)
         # evaluate
         model.eval()
         print('-' * 50 + 'evaluating' + '-' * 50)
@@ -122,9 +122,42 @@ def main(args):
                     for end_ind in range(len(end_seq)):
                         if end_seq[end_ind]:
                             end_index.append(end_ind)
-                    min_len = min(len(start_index), len(end_index))
-                    for mi in range(min_len):
-                        entities.append([args.labels[li], sentence[start_index[mi]:end_index[mi]]])
+
+                    if len(start_index) == len(end_index):
+                        for _start, _end in zip(start_index, end_index):
+                            entities.append([args.labels[li], sentence[_start:_end]])
+                    elif not start_index:
+                        continue
+                    elif not end_index:
+                        continue
+                    elif start_index[0] > end_index[-1]:
+                        continue
+                    else:
+                        while start_index and end_index and start_index[0]>end_index[0]:
+                            end_index = end_index[1:]
+                        while start_index and end_index and start_index[-1]>end_index[-1]:
+                            start_index = start_index[:-1]
+                        # 1. 数量相等
+                        if len(start_index) == len(end_index):
+                            pass
+                        # 2. 数量不等, 删去置信度最低的
+                        else:
+                            diff = abs(len(start_index)-len(end_index))
+                            if len(start_index) > len(end_index):
+                                start_index_wt_prob = [[_start, start_prob[bi][_start][li].item()] for _start in start_index]
+                                start_index_wt_prob.sort(key=lambda x:x[1])
+                                start_index_wt_prob = start_index_wt_prob[diff:]
+                                start_index = [_[0] for _ in start_index_wt_prob]
+                                start_index.sort()
+                            elif len(start_index) < len(end_index):
+                                end_index_wt_prob = [[_end, end_prob[bi][_end][li].item()] for _end in end_index]
+                                end_index_wt_prob.sort(key=lambda x:x[1])
+                                end_index_wt_prob = end_index_wt_prob[diff:]
+                                end_index = [_[0] for _ in end_index_wt_prob]
+                                end_index.sort()
+                        for _start, _end in zip(start_index, end_index):
+                            entities.append([args.labels[li], sentence[_start:_end]])
+
             true_entities.extend(labels)
 
         print('pred entities: ', len(entities))
@@ -139,13 +172,13 @@ def main(args):
         f1 = score['f1']
         print("epoch:", e, "  p: {0}, r: {1}, f1: {2}".format(score['acc'], score['recall'], score['f1']))
         pprint(class_info)
-
+        assert False
         if f1 > best_f1:
             print("f1 score increased  {0}==>{1}".format(best_f1, f1))
             best_f1 = f1
             PATH = args.model_save_path
             state = {'model_state': model.state_dict(), 'e': e, 'optimizer': optimizer.state_dict()}
-            torch.save(state, PATH)
+            # torch.save(state, PATH)
             # 加载
             # PATH = './model.pth'  # 定义模型保存路径
             # state = torch.load(PATH, map_location="cpu")
@@ -189,8 +222,8 @@ if __name__ == '__main__':
                         help="The path of model parameters for initialization.")
     args = parser.parse_args()
 
-    args.train_path = 'data/data_src/common_aug/train.json'
-    args.dev_path = 'data/data_src/common_aug/dev.json'
+    args.train_path = 'data/data_src/common_all/train.json'
+    args.dev_path = 'data/data_src/common_all/dev.json'
     args.model = 'model/language_model/chinese-roberta-wwm-ext'
     labels, alias2label = read_config_to_label(args, is_long=False)
     args.labels = labels

@@ -27,9 +27,11 @@ class TrainPointerBert(BaseTrainTool):
 
     def init_model(self, *args, **kwargs):
         tokenizer = BertTokenizer.from_pretrained(self.model_args.tokenizer_name)
+
         self.model_args.mode = self.model_args.model_name_or_path
         self.model_args.num_labels = self.num_labels
         model = PointerNERBERTInFramework(self.model_args)
+        # model.resize_token_embeddings(len(tokenizer))
         return tokenizer, model
 
     def create_examples(self, data_path, mode="train"):
@@ -67,15 +69,24 @@ class TrainPointerBert(BaseTrainTool):
         text = example.texts[0]
         label = example.label
 
-        inputs = self.tokenizer(text,
-                                add_special_tokens=True,
-                                max_length=self.data_train_args.max_length,
-                                padding="max_length",
-                                truncation=True,
-                                return_offsets_mapping=False,
-                                return_tensors="pt")
-        inputs['label'] = label
+        # inputs = self.tokenizer(text,
+        #                         add_special_tokens=True,
+        #                         max_length=self.data_train_args.max_length,
+        #                         padding="max_length",
+        #                         truncation=True,
+        #                         return_offsets_mapping=False,
+        #                         return_tensors="pt")
+        token_ids = self.tokenizer.convert_tokens_to_ids(list(text))
+        input_ids = [101]+token_ids+[102]+[0]*(512-len(token_ids)-2)
+        attention_mask = [1]*(len(token_ids)+2)+[0]*(512-len(token_ids)-2)
+        token_type_ids = [0] * 512
+        inputs = {'input_ids': torch.LongTensor([input_ids]),
+                  'attention_mask': torch.LongTensor([attention_mask]),
+                  'token_type_ids': torch.LongTensor([token_type_ids]),
+                  'label': label}
 
+        assert sum(inputs['attention_mask'][0]) == len(text)+2, text
+        assert len(inputs['input_ids'][0]) == len(inputs['attention_mask'][0]) == 512
         return inputs
 
     def data_collator(self, batch):
@@ -187,3 +198,6 @@ if __name__ == "__main__":
                          config_schema='data/data_src/config.csv', is_long=False)
     t.run()
     pass
+    # export PYTHONPATH=$(pwd):$PYTHONPATH
+    # nohup python -u BasicTask/NER/PointerBert_Framework/pointer_bert_train.py > log/PointerBert/framework/pb_1017_nohup.log 2>&1 &
+

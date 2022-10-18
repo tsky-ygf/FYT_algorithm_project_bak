@@ -22,7 +22,7 @@
 - 需要插入到es的数据文件 ```无```
 - 使用到的模型文件 
 ```
-model/PointerBert/PBert1014_common_all_20sche.pt
+model/PointerBert/PBert1014_common_all_20sche_auged.pt
 model/uie_model/export_cpu/caigou/
 model/uie_model/export_cpu/fangwuzulin/
 model/uie_model/export_cpu/jiekuan/

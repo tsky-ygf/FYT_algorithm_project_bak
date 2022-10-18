@@ -28,27 +28,6 @@ class CivilRelevantLaw:
     #         lazy_pinyin(str(law_item).strip()))
 
     @staticmethod
-    def get_law_in_memory(law_id):
-        try:
-            url = "http://172.19.82.199:5090/get_law_in_memory"
-            body = {
-                "law_id": law_id
-            }
-            resp_json = requests.post(url, json=body).json()
-            return resp_json.get("result")
-        except Exception:
-            return None
-
-    @staticmethod
-    def store_law_in_memory(law):
-        try:
-            url = "http://172.19.82.199:5090/store_law_in_memroy"
-            resp_json = requests.post(url, json=law).json()
-            return resp_json.get("success")
-        except Exception:
-            return None
-
-    @staticmethod
     def _remove_abandoned_laws(law_name_and_items):
         return [law for law in law_name_and_items if law[0] not in abandoned_laws]
 
@@ -74,7 +53,6 @@ class CivilRelevantLaw:
                 "law_content": str(item[1]) + ":" + str(item[2])
             }
             result.append(content)
-            self.store_law_in_memory(content)
         return result
 
     def get_relevant_laws(self):

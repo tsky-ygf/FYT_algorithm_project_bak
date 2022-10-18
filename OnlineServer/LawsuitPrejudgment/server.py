@@ -10,8 +10,8 @@ import typing
 import uvicorn
 from fastapi import FastAPI
 from pydantic import BaseModel
-
-from LawsuitPrejudgment.service_use import criminal_app_service, administrative_app_service, civil_app_service
+from LawsuitPrejudgment.service_use import administrative_app_service, civil_app_service, criminal_app_service
+from LawsuitPrejudgment.src.common.dialouge_management_parameter import DialogueHistory, DialogueState
 
 app = FastAPI()
 
@@ -78,6 +78,23 @@ class GetCivilResultParam(BaseModel):
 def _reasoning_graph_result(param: GetCivilResultParam):
     return civil_app_service.reasoning_graph_result(param.problem, param.claim_list, param.fact, param.question_answers,
                                                     param.factor_sentence_list)
+
+
+class DialogueInput(BaseModel):
+    dialogue_history: DialogueHistory
+    dialogue_state: DialogueState
+
+
+@app.post("/lawsuit_prejudgment")
+def _lawsuit_prejudgment(param: DialogueInput):
+    domain = param.dialogue_state.domain
+    if domain == "criminal":
+        return criminal_app_service.lawsuit_prejudgment(param.dialogue_history, param.dialogue_state)
+    if domain == "civil":
+        return civil_app_service.lawsuit_prejudgment(param.dialogue_history, param.dialogue_state)
+    if domain == "administrative":
+        return administrative_app_service.lawsuit_prejudgment(param.dialogue_history, param.dialogue_state)
+    raise Exception("传入了不支持的预判类型。")
 
 
 if __name__ == '__main__':

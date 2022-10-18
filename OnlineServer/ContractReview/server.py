@@ -22,6 +22,9 @@ app = FastAPI()
 async def _get_support_contract_types():
     """
     获取能审核的合同类型
+
+    输入参数：
+    无
     """
     return {"result": get_support_contract_types()}
 
@@ -30,6 +33,9 @@ async def _get_support_contract_types():
 async def _get_user_standpoint():
     """
     获取甲乙方代表
+
+    输入参数：
+    无
     """
     return {"result": get_user_standpoint()}
 
@@ -70,7 +76,16 @@ class ContractInput(BaseModel):
 @app.post("/get_contract_review_result")
 async def _get_contract_review_result(contract_input: ContractInput):
     """
-    获取模型
+    获取模型审核结果
+
+    输入参数：
+
+    @contract_type_id：合同类型
+
+    @usr： 甲乙方代表
+
+    @contract_content： 合同内容
+
     """
     result = get_contract_review_result(content=contract_input.contract_content, mode="text",
                                                             contract_type=contract_input.contract_type_id,
@@ -84,6 +99,14 @@ class FileLinkInput(BaseModel):
 
 @app.post("/get_text_from_file_link_path")
 async def _get_text_from_file_link_path(file_link_input: FileLinkInput):
+    """
+    从文件链接获取文件文本内容
+
+    输入参数：
+
+    @file_path: 文件链接
+    """
+
     return {"result": get_text_from_file_link_path(file_link_input.file_path)}
 
 

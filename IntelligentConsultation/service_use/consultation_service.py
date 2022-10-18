@@ -49,21 +49,20 @@ faq_predict = FAQPredict(level="INFO",
                          model_name="model/similarity_model/simcse-model-topic-qa")
 
 
-def get_query_answer_with_source(question: str, query_type: str):
+def get_query_answer_with_source(question: str, source=None, sub_source=None):
     """
-    目前支持的类型有市场监管、税务、司法、金融
-    :param question:
-    :param query_type:
+    目前一级主题支持: 专题
+    二级主题支持: 法院、公安、环保、交通、金融、科技、市场监管、税务、司法、文旅
+    :param question: 用户问题
+    :param source: 一级主题
+    :param sub_source: 二级主题
     :return:
     """
-    if query_type == "专题":
-        answer, similarity_question = faq_predict(question)
-    else:
-        answer, similarity_question = faq_predict(question, query_type)
+    answer, similarity_question = faq_predict(question, source, sub_source)
 
     return {"answer": answer, "similarity_question": similarity_question}
 
 
 if __name__ == '__main__':
     _question = "七查七看是什么"
-    print(get_query_answer_with_source(_question, "市场监管"))
+    print(get_query_answer_with_source(question=_question, source="专题", sub_source="市场监管"))

@@ -14,9 +14,7 @@ URL = "http://127.0.0.1:8105"
 """ 行政预判 """
 
 
-def _show_administrative_report(type_id, selected_situation):
-    result = requests.post(url=URL + "/get_administrative_result",
-                           json={"type_id": type_id, "situation": selected_situation}).json().get("result")
+def _show_administrative_report(result):
     report = result["report"][0]
     for item in report:
         st.markdown("#### {}".format(item["title"]))
@@ -36,22 +34,75 @@ def _show_administrative_report(type_id, selected_situation):
                         st.markdown(value)
 
 
+def _remove_administrative_click_state(_count):
+    while True:
+        key = 'administrative_ask_btn' + str(_count) + '_clicked'
+        if key in st.session_state:
+            del st.session_state[key]
+            _count += 1
+            print("remove key:", key)
+        else:
+            break
+    pass
+
+
+def _show_administrative_next_qa(dialogue_history, dialogue_state, _count):
+    body = {
+        "dialogue_history": dialogue_history,
+        "dialogue_state": dialogue_state
+    }
+    resp_json = requests.post(URL + "/lawsuit_prejudgment", json=body).json()
+    next_action = resp_json["next_action"]
+    if next_action["action_type"] == "ask":
+        btn_key = 'administrative_ask_btn' + str(_count)
+        btn_click_key = btn_key + "_clicked"
+        next_question = next_action["content"]["question"]
+        answers = next_action["content"]["candidate_answers"]
+        single_or_multi = next_action["content"]["question_type"]
+
+        st.markdown('**{}**'.format(next_question))
+        if single_or_multi == "single":
+            selected_answers = [
+                st.radio("", options=answers, key='administrative_aks_' + str(_count), on_change=_remove_administrative_click_state,
+                         args=(_count,))]
+        else:
+            selected_answers = []
+            for idx, option in enumerate(answers):
+                if st.checkbox(option, key='administrative_ask_' + str(_count) + '_item_' + str(idx)):
+                    selected_answers.append(option)
+        st.write(selected_answers)
+        if st.button("确定", key=btn_key):
+            st.session_state[btn_click_key] = True
+        if btn_click_key in st.session_state:
+            last_question_info = next_action["content"]
+            if single_or_multi == "single":
+                last_question_info["user_answer"] = selected_answers[0]
+            else:
+                last_question_info["user_answer"] = selected_answers
+
+            if not dialogue_history["question_answers"]:
+                dialogue_history["question_answers"] = []
+            dialogue_history["question_answers"].append(last_question_info)
+
+            _show_administrative_next_qa(dialogue_history, resp_json["dialogue_state"], _count+1)
+    elif next_action["action_type"] == "report":
+        _show_administrative_report(next_action["content"])
+    pass
+
+
 def administrative_prejudgment_testing_page():
-    supported_administrative_list = requests.get(url=URL + "/get_administrative_type").json().get("result")
-    selected_type_name = st.selectbox("请选择你遇到的纠纷类型", [item["type_name"] for item in supported_administrative_list])
-    type_id = next(
-        (item["type_id"] for item in supported_administrative_list if item["type_name"] == selected_type_name), None)
-
-    problem_and_situation_list = requests.get(url=URL + "/get_administrative_problem_and_situation_by_type_id",
-                                              params={"type_id": type_id}).json().get("result")
-    selected_problem = st.selectbox("请选择你遇到的问题", [item["problem"] for item in problem_and_situation_list], key="一级")
-    selected_situation = st.selectbox("请选择具体的情形", next(
-        (item["situations"] for item in problem_and_situation_list if item["problem"] == selected_problem), None),
-                                      key="情形")
-
-    run = st.button("开始计算", key="run")
-    if run:
-        _show_administrative_report(type_id, selected_situation)
+    dialogue_history = {
+        "user_input": None,
+        "question_answers": None
+    }
+    dialogue_state = {
+        "domain": "administrative",
+        "problem": None,
+        "claim_list": None,
+        "other": None
+    }
+    count = 1
+    _show_administrative_next_qa(dialogue_history, dialogue_state, count)
 
 
 """ 刑事预判 """
@@ -158,38 +209,28 @@ def criminal_prejudgment_testing_page():
 """ 民事预判 """
 
 
-CIVIL_URL = "http://172.19.82.198:6080"
-
-
 def get_anyou_list():
     # return ["借贷纠纷", "劳动社保", "买卖合同", "租赁合同"]
-    url = CIVIL_URL + "/reasoning_graph_testing/get_anyou_list"
-    resp = requests.get(url)
-    resp_json = resp.json()
-    return resp_json.get("anyou_list", [])
+    resp_json = requests.get(URL + "/get_civil_problem_summary").json()
+    return [problem_info for group_info in resp_json["value"] for problem_info in group_info["groupList"]]
 
 
-def get_suqiu_list(anyou):
+def get_suqiu_list(problem_id, fact):
     # return ["支付劳动劳务报酬", "支付加班工资", "支付双倍工资", "经济补偿金或赔偿金", "劳务受损赔偿", "劳动劳务致损赔偿"]
-    url = CIVIL_URL + "/reasoning_graph_testing/get_suqiu_list"
-    resp = requests.get(url, {"anyou": anyou})
-    resp_json = resp.json()
-    return resp_json.get("suqiu_list", [])
+    resp_json = requests.post(URL + "/get_claim_list_by_problem_id", json={"problem_id": problem_id, "fact": fact}).json()
+    return resp_json["value"]
 
 
 def _request(problem, claim_list, fact, question_answers, factor_sentence_list, repeated_question_management):
-    url = CIVIL_URL + "/reasoning_graph_testing/get_result"
+    url = URL + "/reasoning_graph_result"
     body = {
         "problem": problem,
         "claim_list": claim_list,
         "fact": fact,
         "question_answers": question_answers,
-        "factor_sentence_list": factor_sentence_list,
-        "repeated_question_management": repeated_question_management
+        "factor_sentence_list": factor_sentence_list
     }
-    resp = requests.post(url, json=body)
-    resp_json = resp.json()
-    return resp_json
+    return requests.post(url, json=body).json()
 
 
 def get_extracted_features(anyou, suqiu_list, desp):
@@ -203,7 +244,7 @@ def get_extracted_features(anyou, suqiu_list, desp):
     #               '(((给|提供|付|借)[^。；，：,;:？！!?\s]*(款|钱|资金)))',
     #               '(((没有|没|未|不|非|无|未经|怠于)[^。；，：,;:？！!?\s]*(偿还|归还|偿付|清偿|还款|还清|还本付息|偿清|还债|还账|还钱|付清|结清|返还|支付)))']
     # }
-    resp = _request(anyou, suqiu_list, desp, {}, {}, None)
+    resp = _request(anyou, suqiu_list, desp, {}, [], None)
     factor_sentence_list = resp.get("factor_sentence_list", [])
     extracted_features = {
         "特征": [],
@@ -252,7 +293,6 @@ def _remove_click_state(_count):
 
 def show_debug_info(debug_info):
     st.markdown('**中间信息**')
-    st.write(debug_info)
     for k, v in debug_info.items():
         st.markdown(k)
         li = str(v).split('\n')
@@ -296,17 +336,31 @@ def show_next_qa(_selected_anyou, _selected_suqiu_list, _user_input, _question_a
     pass
 
 
-def show_report(results):
+def show_report(result):
     st.subheader("产生评估报告")
-    for suqiu, result in results.items():
-        st.markdown("**诉求**")
-        st.write(suqiu)
-        st.markdown("**评估理由**")
-        st.markdown(result['reason_of_evaluation'], unsafe_allow_html=True)
-        st.markdown("**证据材料**")
-        st.markdown(result['evidence_module'], unsafe_allow_html=True)
-        st.markdown("**法律建议**")
-        st.markdown(result['legal_advice'], unsafe_allow_html=True)
+    with st.expander("预判结果"):
+        for report in result["report"]:
+            for item in report:
+                st.markdown("#### {}".format(item["title"]))
+                if item["type"] == "TYPE_TEXT":
+                    st.markdown(item["content"], unsafe_allow_html=True)
+                elif item["type"] == "TYPE_LIST_OF_TEXT":
+                    for every_content in item["content"]:
+                        st.markdown(every_content, unsafe_allow_html=True)
+                elif item["type"] == "TYPE_GRAPH_OF_PROB":
+                    st.markdown("{}%".format(int(item["content"] * 100)))
+    with st.expander("相似类案"):
+        similar_cases = result["similar_case"]
+        for case in similar_cases:
+            st.markdown("**{}**".format(case["title"]))
+            st.markdown("{}/ {}".format(case["court"], case["case_number"]))
+            st.markdown("*{}*".format(case["tag"]))
+    with st.expander("相关法条"):
+        relevant_laws = result["applicable_law"]
+        for law in relevant_laws:
+            st.markdown("**{}**".format(law["law_name"]))
+            st.markdown(law["law_content"])
+        pass
     pass
 
 
@@ -319,15 +373,17 @@ def show_extracted_features(_selected_anyou, _selected_suqiu_list, _user_input):
 def civil_prejudgment_testing_page():
     # selected_anyou = st.sidebar.selectbox(label="案由", options=get_anyou_list())
     st.subheader("案由")
-    selected_anyou = st.selectbox(label="", options=get_anyou_list())
+    anyou_info_list = get_anyou_list()
+    selected_anyou = st.selectbox(label="", options=(item["problem"] for item in anyou_info_list))
 
 
     st.subheader('描述经过')
     user_input = st.text_area('请描述您的纠纷经过，描述越全面评估越准确', '''''')
     st.subheader("选择诉求")
+    suqiu_info_list = get_suqiu_list(next((item["id"] for item in anyou_info_list if item["problem"]==selected_anyou)), user_input)
     selected_suqiu_list = st.multiselect(
         '',
-        get_suqiu_list(selected_anyou),
+        (item["claim"] for item in suqiu_info_list),
         None)
 
     if st.button("提交评估"):
@@ -337,7 +393,7 @@ def civil_prejudgment_testing_page():
 
         st.subheader("进行提问")
         question_answers = {}
-        factor_sentence_list = {}
+        factor_sentence_list = []
         count = 1
         repeated_question_management = None
         show_next_qa(selected_anyou, selected_suqiu_list, user_input, question_answers, factor_sentence_list, count, repeated_question_management)

@@ -75,7 +75,6 @@ class PrejudgmentPipeline:
             self.content["question_answers"] = dict()
 
         if "anyou" not in self.content:
-            self.logger.debug("父类：预测案由！")
             self.anyou_identify()
 
         if "suqiu" not in self.content:
@@ -85,7 +84,6 @@ class PrejudgmentPipeline:
             self.parse_config_file()
 
         if "event" not in self.content:
-            self.logger.debug("父类：模型抽取！")
             self.situation_identify()
             if "report_result" in self.content:
                 return self.content

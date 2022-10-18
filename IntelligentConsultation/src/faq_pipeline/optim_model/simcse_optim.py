@@ -22,7 +22,7 @@ from sentence_transformers import models, losses
 from sentence_transformers import SentenceTransformer
 from sentence_transformers import InputExample
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 random.seed(290)
 
 # aug = WordSubstitute('synonym', create_n=1, aug_percent=0.3)
@@ -63,14 +63,13 @@ class SimCSE_RDRop(SimCSE):
 
         return train_data
 
-
-def init_model(self):
-    word_embedding_model = models.Transformer(self.config.model_name, max_seq_length=self.config.max_seq_length)
-    pooling_model = models.Pooling(word_embedding_model.get_word_embedding_dimension())
-    model = SentenceTransformer(modules=[word_embedding_model, pooling_model])
-    loss = losses.MultipleNegativesRankingLoss(model)
-    # loss = MNRRDropLoss(model, kl_weight=0.1)
-    return model, loss
+    def init_model(self):
+        word_embedding_model = models.Transformer(self.config.model_name, max_seq_length=self.config.max_seq_length)
+        pooling_model = models.Pooling(word_embedding_model.get_word_embedding_dimension())
+        model = SentenceTransformer(modules=[word_embedding_model, pooling_model])
+        loss = losses.MultipleNegativesRankingLoss(model)
+        # loss = MNRRDropLoss(model, kl_weight=0.1)
+        return model, loss
 
 
 if __name__ == '__main__':
