@@ -131,7 +131,7 @@ class Model:
             pred_detail_list.extend(tmp_pred_detail)
         
         #结果记录
-        logger.info(tgt_pred, pred_detail_list)
+        logger.info(f'结果:{tgt_pred}, {pred_detail_list}')
 
         return tgt_pred, pred_detail_list
 
