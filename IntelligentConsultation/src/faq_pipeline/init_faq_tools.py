@@ -13,7 +13,7 @@ from haystack.pipelines import FAQPipeline
 __all__ = ["init_document_store", "init_retriever"]
 
 
-def init_document_store(index_name):
+def init_document_store(index_name, recreate_index=False):
     document_store = ElasticsearchDocumentStore(
         host="localhost",
         port=9200,
@@ -22,6 +22,7 @@ def init_document_store(index_name):
         embedding_dim=768,
         excluded_meta_data=["query_emb"],
         similarity="cosine",
+        recreate_index=recreate_index,
     )
     return document_store
 

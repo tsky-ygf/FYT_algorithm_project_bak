@@ -22,7 +22,7 @@ from sentence_transformers import models, losses
 from sentence_transformers import SentenceTransformer
 from sentence_transformers import InputExample
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 random.seed(290)
 
 # aug = WordSubstitute('synonym', create_n=1, aug_percent=0.3)
@@ -75,12 +75,12 @@ class SimCSE_RDRop(SimCSE):
 if __name__ == '__main__':
     use_config = {
         "model_type": "SimCSE_RDRop",
-        "index_name": "topic_qa_test",
+        "index_name": "topic_qa",
         "train_config": {
             "log_level": "INFO",
             "model_name": "model/language_model/chinese-roberta-wwm-ext",
-            "model_output_path": "model/similarity_model/simcse-model-all",
-            "train_data_path": "data/fyt_train_use_data/QA/origin_data.csv",
+            "model_output_path": "model/similarity_model/simcse-model-topic_qa",
+            "train_data_path": "data/fyt_train_use_data/QA/pro_qa.csv",
             "lr": 1e-5,
             "train_batch_size": 128,
             "max_seq_length": 64,

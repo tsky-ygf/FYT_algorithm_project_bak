@@ -44,7 +44,7 @@ class FAQPredict:
         text += keywords_text * 3
         return text
 
-    def post_process_result(self, query, predictions, query_type=None):
+    def post_process_result(self, query, predictions, source=None, sub_source=None):
         similarity_question = [{"question": p.meta["query"], "answer": p.meta["answer"]} for p in predictions]
         similarity_question_info = [{"question": p.meta["query"], "score": p.to_dict()["score"]} for p in predictions]
         self.logger.info(f"similarity_question:{similarity_question_info}")
@@ -53,6 +53,7 @@ class FAQPredict:
         for prediction in predictions:
             score = prediction.to_dict()["score"]
             meta = prediction.meta
+            self.logger.debug(meta)
             match_query = meta["query"]
             match_answer = meta["answer"]
             match_source = meta["source"]
@@ -61,6 +62,11 @@ class FAQPredict:
                 f"query:{match_query},score:{score},source:{match_source},sub_source:{match_sub_source}")
             # if query_type and match_source != query_type:
             #     continue
+            if source is not None and match_source != source:
+                continue
+
+            if sub_source is not None and match_sub_source != sub_source:
+                continue
 
             proper_noun_missing = False
 
@@ -77,18 +83,20 @@ class FAQPredict:
 
         return final_answer, similarity_question
 
-    def __call__(self, query, query_type=None):
+    def __call__(self, query, source=None, sub_source=None):
         query = self.pre_process_text(query)
 
         predictions = self.pipe.run(query=query, params={"Retriever": {"top_k": 10}})["answers"]
 
-        answer, similarity_question = self.post_process_result(query, predictions, query_type)
+        answer, similarity_question = self.post_process_result(query, predictions, source, sub_source)
 
         return answer, similarity_question
 
 
 if __name__ == '__main__':
-    m = FAQPredict(level="DEBUG")
-    _answer, _similarity_question = m("信用卡分期停息的方法是什么")
+    m = FAQPredict(level="DEBUG",
+                   model_name="model/similarity_model/simcse-model-topic-qa",
+                   index_name="topic_qa")
+    _answer, _similarity_question = m("怎么进行风险管理")
 
     print(_answer)
