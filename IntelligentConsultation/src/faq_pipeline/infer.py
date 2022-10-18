@@ -97,6 +97,6 @@ if __name__ == '__main__':
     m = FAQPredict(level="DEBUG",
                    model_name="model/similarity_model/simcse-model-topic-qa",
                    index_name="topic_qa")
-    _answer, _similarity_question = m("财产保全的注意事项是什么")
+    _answer, _similarity_question = m("公司交不起税怎么办")
 
     print(_answer)

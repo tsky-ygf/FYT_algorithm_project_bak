@@ -335,7 +335,7 @@ class CaseESTool(BaseESTool):
                 sucheng_sentences = pseg_txt(sucheng_sentences)
                 data_body["sucheng_sentences"] = sucheng_sentences
             else:
-                data_body["sucheng_sentences"] = bg_sc_sentences + " " + yg_sc_sentences
+                data_body["sucheng_sentences"] = str(bg_sc_sentences + " " + yg_sc_sentences, encodings='utf-8')
 
             if row["jslcm"]:
                 chaming = bytes.decode(row["jslcm"]).strip()
@@ -343,7 +343,7 @@ class CaseESTool(BaseESTool):
                 chaming = pseg_txt(chaming)
                 data_body["chaming"] = chaming
             else:
-                data_body["chaming"] = row["jslcm"]
+                data_body["chaming"] = str(row["jslcm"], encodings='utf-8')
 
             if row["byrw"]:
                 benyuan_renwei = bytes.decode(row["byrw"]).strip()  # 本院认为
@@ -351,7 +351,7 @@ class CaseESTool(BaseESTool):
                 benyuan_renwei = pseg_txt(benyuan_renwei)
                 data_body["benyuan_renwei"] = benyuan_renwei
             else:
-                data_body["benyuan_renwei"] = row["byrw"]
+                data_body["benyuan_renwei"] = str(row["byrw"], encodings='utf-8')
 
             sucheng_sentences = data_body["sucheng_sentences"]
             if not sucheng_sentences:
@@ -382,13 +382,13 @@ class CaseESTool(BaseESTool):
                 print(count)
             count = count + 1
 
-            data_body["tags"] = tags
+            data_body["tags"] = str(tags, encodings='utf-8')
             yield {
                 "_op_type": "update",
                 "_index": self.index_name,
                 "_type": "_doc",
                 "_id": row["uq_id"],
-                "doc": data_ori,
+                "doc": data_body,
             }
 
 

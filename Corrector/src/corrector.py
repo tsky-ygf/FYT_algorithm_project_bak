@@ -1,75 +1,146 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# @Time    : 2022/7/25 16:39
-# @Author  : Adolf
-# @Site    : 
-# @File    : predict.py
-# @Software: PyCharm
-import re
-import operator
-
 from loguru import logger
 import torch
+import re
 from transformers import BertTokenizer, BertForMaskedLM
+import operator
+unk_tokens = [' ', '“', '”', '‘', '’', '琊', '\n', '…', '—', '擤', '\t', '֍', '玕', '']
 
-# import os
-# os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+def get_errors(corrected_text, origin_text):
+    sub_details = []
+    for i, ori_char in enumerate(origin_text):
+        if i >= len(corrected_text):
+            continue
+        if ori_char in unk_tokens:
+            # deal with unk word
+            corrected_text = corrected_text[:i] + ori_char + corrected_text[i:]
+            continue
+        if ori_char != corrected_text[i]:
+            if ori_char.lower() == corrected_text[i]:
+                # pass english upper char
+                corrected_text = corrected_text[:i] + ori_char + corrected_text[i + 1:]
+                continue
+            sub_details.append((ori_char, corrected_text[i], i, i + 1))
+    sub_details = sorted(sub_details, key=operator.itemgetter(2))
+    return corrected_text, sub_details
 
-class MacbertCorrected:
-    def __init__(self):
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+def split_text(text, pattern, include_symbol=True):
+    """
+    文本切分为句子，以标点符号切分
+    :param text: str
+    :param pattern: 正则
+    :param include_symbol: bool
+    :return: (sentence, idx)
+    """
+    result = []
+    sentences = re.split(pattern, text)
+    start_idx = 0
+    for sentence in sentences:
+        if not sentence:
+            continue
+        if include_symbol:
+            result.append((sentence, start_idx))
+        else:
+            if re.split(pattern, text):
+                result.append((sentence, start_idx))
+        start_idx += len(sentence)
+    return result
+
+class Model:
+    def __init__(self,):
+        #模型初始化
+        self.device = torch.device("cpu")
         self.tokenizer = BertTokenizer.from_pretrained("model/language_model/macbert4csc-base-chinese")
         self.model = BertForMaskedLM.from_pretrained("model/language_model/macbert4csc-base-chinese")
         self.model.to(self.device)
+        
+        #领域混淆字典初始化
+        # pycorrector.set_custom_confusion_dict('./data/text_corrector/custom_confusion.txt')
+        # pycorrector.correct('老是较书。')#激活相关配置, 初始化
 
-    @staticmethod
-    def get_errors(corrected_text, origin_text):#纠错细节
-        sub_details = []
-        for i, ori_char in enumerate(origin_text):
-            if ori_char in [' ', '“', '”', '‘', '’', '琊', '\n', '…', '—', '擤']:
-                # add unk word
-                corrected_text = corrected_text[:i] + ori_char + corrected_text[i:]
-                continue
-            if i >= len(corrected_text):
-                continue
-            if ori_char != corrected_text[i]:
-                if ori_char.lower() == corrected_text[i]:
-                    # pass english upper char
-                    corrected_text = corrected_text[:i] + ori_char + corrected_text[i + 1:]
-                    continue
-                sub_details.append((ori_char, corrected_text[i], i, i + 1))
-        sub_details = sorted(sub_details, key=operator.itemgetter(2))
-        return corrected_text, sub_details
-
-    def __call__(self, ori_text):
-        logger.debug(len(ori_text))
-        text_length = 256
-        if len(ori_text) > text_length:#分句子
-            result_list = re.split("[。|\n]", ori_text)
-            texts = result_list
-        else:
-            texts = [ori_text]
-
-        logger.info(texts)
-        result = []
+    def model_process(self, text, threshold = 0.7, verbose = False):
+        text_new = ''
+        details = []
+        
+        texts = [text]
+        text_tokens = self.tokenizer(texts, padding=True, return_tensors='pt').to(self.device)
         with torch.no_grad():
-            outputs = self.model(**self.tokenizer(texts, padding=True, return_tensors='pt').to(self.device))
+            outputs = self.model(**text_tokens)
 
-        for ids, text in zip(outputs.logits, texts):
-            _text = self.tokenizer.decode(torch.argmax(ids, dim=-1), skip_special_tokens=True).replace(' ', '')
-            corrected_text = _text[:len(text)]
+        for ids, (i, tmp_text) in zip(outputs.logits, enumerate(texts)):#阈值降低误纠
+            decode_tokens_new = self.tokenizer.decode(torch.argmax(ids, dim=-1), skip_special_tokens=True).split(' ')#有些词编解码不出来
+            decode_tokens_old = self.tokenizer.decode(text_tokens['input_ids'][i], skip_special_tokens=True).split(' ')
+            if len(decode_tokens_new) != len(decode_tokens_old):#如果不等长就以原文为准
+                text_new = text_new + tmp_text
+                continue
+            probs = torch.max(torch.softmax(ids, dim=-1), dim=-1)[0].cpu().numpy()
+            decode_tokens = ''
+            for i in range(len(decode_tokens_old)):
+                if probs[i + 1] >= threshold:
+                    if verbose:
+                        logger.debug(
+                            f"word: {decode_tokens_old[i]}, prob: {probs[i + 1]}, new word: {decode_tokens_new[i]}")
+                    decode_tokens += decode_tokens_new[i]
+                else:
+                    decode_tokens += decode_tokens_old[i]
+            corrected_text = decode_tokens[:len(tmp_text)]
+            corrected_text, tmp_details = get_errors(corrected_text, tmp_text)
+            text_new = text_new + corrected_text
+            details.extend(tmp_details)
 
-            corrected_text, details = self.get_errors(corrected_text, text)
-            result.append((text, corrected_text, details))
-        logger.debug(result)
-        return corrected_text, details
+        if len(text_new) != len(text):#如果长度对不齐，说明漏字等情况，即以原文为准
+            text_new = text
+            details = []
+
+        return text_new, details
+
+
+    def process(self, ori_text):
+        logger.info(f'初始化文本:{ori_text}')
+
+        #句子切分
+        segment_pattern = r'(。|，|\s|、)\s*'
+        sentences = split_text(ori_text, segment_pattern)
+        logger.debug(f'切分的句子结果:{sentences}')
+
+        tgt_pred = ''
+        pred_detail_list = []#纠错结果
+
+        for sentence, start_idx in sentences:#句子位移
+            if re.match(segment_pattern, sentence):
+                tgt_pred = tgt_pred + sentence
+                continue
+
+            #rule_tgt_pred, rule_pred_detail = pycorrector.correct(sentence)#规则 误纠错太多，需要领域迁移
+            model_tgt_pred, model_pred_detail = self.model_process(sentence)#模型
+            
+            tmp_tgt_pred = model_tgt_pred
+            tmp_pred_detail = model_pred_detail
+            # if model_tgt_pred != sentence: #模型融合策略
+            #     pass
+            # else:
+            #     tmp_tgt_pred = rule_tgt_pred
+            #     tmp_pred_detail = rule_pred_detail
+            
+            if tmp_pred_detail:
+                logger.debug(sentence, tmp_tgt_pred, tmp_pred_detail)
+
+            #修正偏移位
+            tmp_pred_detail = [(ele[0], ele[1], ele[2] + start_idx, ele[3] + start_idx) for ele in tmp_pred_detail]            
+            tgt_pred = tgt_pred + tmp_tgt_pred
+            pred_detail_list.extend(tmp_pred_detail)
+        
+        #结果记录
+        logger.info(f'结果:{tgt_pred}, {pred_detail_list}')
+
+        return tgt_pred, pred_detail_list
 
 
 
 if __name__ == '__main__':
-    # textlist = ["今天新情很好", "你找到你最喜欢的工作，我也很高心。"]
-    textlist = "车辆运输租赁合同3 出租⽅：天天租赁公司承租⽅：悟空有限公司 根据《中华⼈民共和国合同法》和交通部有关规章，为明确双⽅" \
+    m = Model()
+
+    text = "车辆运输租赁合同3 出租⽅：天天租赁公司承租⽅：悟空有限公司 根据《中华⼈民共和国合同法》和交通部有关规章，为明确双⽅" \
                "的.权利和义务，经双⽅协商⼀致，签订汽车租赁合同，设定下列条款，共同遵守。 ⼀、出租⽅车辆基本情况车型：大众SUV，车牌号" \
                "：浙ADR0023，必须使⽤92号汽油（柴油）。租赁车辆的车况，以发车的双⽅签字确认的《租赁车辆交接单》为准。车况（附⾏车证" \
                "复印件）：2020年购买，⽆任何⼤修记录及安全⾏驶记录。 ⼆、租⽤期限⾃2022年1⽉1⽇起⾄2023年1⽉1⽇⽌，共计1年。需延长租" \
@@ -104,5 +175,29 @@ if __name__ == '__main__':
                "。⑶从事其他有损出租⽅车辆利益的情况 ⼗⼀、其他1、本合同履⾏期间，双⽅若发⽣争议，双⽅应协商解决，当事⼈不愿通过协商，调解" \
                "解决，或协商调解不成时，可以按照合同约定向浙江省杭州市仲裁委员会申请仲裁。2、其它未尽事项，由双⽅协商，另订附件。3、本" \
                "合同⼀式两份，双⽅各执正本⼀份，副本送有关管理机关备案。 甲⽅：天天租赁公司⼄⽅：悟空有限公司 2022年1⽉1⽇"
-    m = MacbertCorrected()
-    m(textlist)
+    print(m.process(text))
+    # error_sentences = [
+    #     '真麻烦你了。希望你们好好的跳无',
+    #     '少先队员因该为老人让坐',
+    #     '机七学习是人工智能领遇最能体现智能的一个分知',
+    #     '一只小鱼船浮在平净的河面上',
+    #     '我的家乡是有明的渔米之乡',
+    #     '少先队员因该为老人让坐',
+    #     '少 先  队 员 因 该 为 老人让坐',
+    #     '机七学习是人工智能领遇最能体现智能的一个分知',
+    #     '今天心情很好',
+    #     '老是较书。',
+    #     '遇到一位很棒的奴生跟我聊天。',
+    #     '他的语说的很好，法语也不错',
+    #     '他法语说的很好，的语也不错',
+    #     '他们的吵翻很不错，再说他们做的咖喱鸡也好吃',
+    #     '影像小孩子想的快，学习管理的斑法',
+    #     '餐厅的换经费产适合约会',
+    #     '走路真的麻坊，我也没有喝的东西，在家汪了',
+    #     '因为爸爸在看录音机，所以我没得看',
+    #     '不过在许多传统国家，女人向未得到平等',
+
+
+    # ]
+    # for text in error_sentences:
+    #     print(m.process(text))

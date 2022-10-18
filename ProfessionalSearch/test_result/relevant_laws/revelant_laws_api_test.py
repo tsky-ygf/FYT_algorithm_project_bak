@@ -5,26 +5,29 @@
 @Time    : 2022/8/17 14:14 
 @Desc    : None
 """
+import json
+
 import requests
 
 
 def get_filter_conditions():
-    url = "http://172.19.82.199:8161/get_filter_conditions_of_law"
+    url = "http://0.0.0.0:8162/get_filter_conditions_of_law"
     resp_json = requests.get(url).json()
-
+    print(type(resp_json))
     print(resp_json)
-    assert resp_json
-    assert resp_json.get("success")
-    assert resp_json.get("result")
-    assert resp_json["result"].get("types_of_law")
-    assert resp_json["result"].get("timeliness")
-    assert resp_json["result"].get("scope_of_use")
+    print(json.loads(resp_json)["result"])
+    # assert resp_json
+    # assert resp_json.get("success")
+    # assert resp_json.get("result")
+    # assert resp_json["result"].get("types_of_law")
+    # assert resp_json["result"].get("timeliness")
+    # assert resp_json["result"].get("scope_of_use")
     pass
 
 
 def search_laws():
     url = "http://101.69.229.138:8135/search_laws"
-    url = "http://172.19.82.199:8161/search_laws"
+    url = "http://0.0.0.0:8162/search_laws"
     body = {
         "query": "侵权",
         "filter_conditions": {
@@ -40,10 +43,10 @@ def search_laws():
     print(resp_json)
 
     assert resp_json
-    assert resp_json.get("success")
-    assert resp_json.get("result")
-    assert resp_json.get("total_amount")
-    assert "law_name" in resp_json["result"][0]
+    # assert resp_json.get("success")
+    # assert resp_json.get("result")
+    # assert resp_json.get("total_amount")
+    # assert "law_name" in resp_json["result"][0]
 
 
 def get_law_by_law_id():
@@ -62,6 +65,6 @@ def get_law_by_law_id():
 
 
 if __name__ == "__main__":
-    # get_filter_conditions()
+    get_filter_conditions()
     search_laws()
     # get_law_by_law_id()

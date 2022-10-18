@@ -5,6 +5,8 @@
 # @Site    : 
 # @File    : show.py
 # @Software: PyCharm
+import json
+
 import requests
 import streamlit as st
 import streamlit.components.v1 as components
@@ -218,8 +220,9 @@ def similar_case_review():
 
 def similar_case_side_review():
     logger = Logger(name="case-lib", level="debug").logger
-    url_case_conditions = 'http://127.0.0.1:8140/get_filter_conditions_of_case'
-    resp_case_json = requests.get(url_case_conditions).json()
+    url_case_conditions = 'http://127.0.0.1:8162/get_filter_conditions_of_case'
+    resp_case_json = json.loads(requests.get(url_case_conditions).json())
+    logging.info(resp_case_json)
     case_type = st.sidebar.selectbox(
         "请选择案件类型", resp_case_json["result"].get("type_of_case").get("value"), key="case_type"
     )
@@ -242,7 +245,7 @@ def similar_case_side_review():
 
     run = st.button("查询", key="run")
     if run:
-        url_search_case = 'http://127.0.0.1:8140/search_cases'
+        url_search_case = 'http://0.0.0.0:8162/search_cases'
         query = text
         filter_conditions = {
             'type_of_case': [case_type],
@@ -257,7 +260,7 @@ def similar_case_side_review():
             , "filter_conditions": filter_conditions  # 预测诉求时，目前输入参数无效， 预测情形时需要输入
         }
 
-        resp_json = requests.post(url_search_case, json=input_json).json()
+        resp_json = json.loads(requests.post(url_search_case, json=input_json).json())
 
         for index, row in enumerate(resp_json.get("result")):
             logger.info(row)
@@ -356,8 +359,8 @@ def relevant_laws_review():
 
 def relevant_laws_side_review():
     logger = Logger(name="law-lib", level="debug").logger
-    url_law_conditions = "http://127.0.0.1:8139/get_filter_conditions_of_law"
-    resp_conditions_json = requests.get(url_law_conditions).json()
+    url_law_conditions = "http://0.0.0.0:8162/get_filter_conditions_of_law"
+    resp_conditions_json = json.loads(requests.get(url_law_conditions).json())
     legal_type = st.sidebar.selectbox(
         "请选择法条种类", resp_conditions_json["result"].get("types_of_law").get("value"), key="legal_type"
     )
@@ -376,7 +379,7 @@ def relevant_laws_side_review():
     run = st.button("查询", key="run_law")
 
     if run:
-        url = "http://127.0.0.1:8139/search_laws"
+        url = "http://0.0.0.0:8162/search_laws"
         body = {
             "query": text,
             "filter_conditions": {
@@ -393,7 +396,7 @@ def relevant_laws_side_review():
             "page_number": 1,
             "page_size": size
         }
-        resp_json = requests.post(url, json=body).json()
+        resp_json = json.loads(requests.post(url, json=body).json())
 
         for index, row in enumerate(resp_json.get("result")):
             logger.info(row)
@@ -453,7 +456,7 @@ def get_civil_law_documents_by_id_list(id_list: List[str], table_name) -> List[D
 def similar_case_retrieval_review():
     # 初始化
     logger = Logger(name="law-lib", level="debug").logger
-    url_similar_case = "http://127.0.0.1:8163/top_k_similar_narrative"
+    url_similar_case = "http://0.0.0.0:8162/top_k_similar_narrative"
     url_jfType = "http://101.69.229.138:7100/get_civil_problem_summary"
     url_suqiu = "http://101.69.229.138:7100/get_claim_list_by_problem_id"
     jfType_list = requests.get(url_jfType).json()
@@ -480,8 +483,8 @@ def similar_case_retrieval_review():
     run = st.button("查询", key="run_law")
 
     if run:
-        suqiu_res = requests.post(url_similar_case, json=similar_case_req).json()
-        print(suqiu_res)
+        suqiu_res = json.loads(requests.post(url_similar_case, json=similar_case_req).json())
+        logging.info(suqiu_res)
         # 组织结果返回
         doc_id_list, sim_list, reason_name_list, tags_list = suqiu_res["dids"], suqiu_res["sims"], suqiu_res["reasonNames"], suqiu_res["tags"]
         detail_link = "http://101.69.229.138:7145/get_law_document?doc_id=judgment_minshi_data_SEP_"

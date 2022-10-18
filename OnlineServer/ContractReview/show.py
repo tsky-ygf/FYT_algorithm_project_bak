@@ -75,46 +75,12 @@ def contract_review_main():
 
     if correct:
         import requests
-        import pandas as pd
-
-        # st.write(text)
-        r = requests.post("http://172.19.82.199:6598/macbert_correct", json={"text": text})
+        from OnlineServer.ContractCorrector.show import corrector_main
+        st.write("文本纠错start")
+        r = requests.post("http://127.0.0.1:6598/get_corrected_contract_result", json={"text": text})
         result = r.json()
-        if result['success']:
-            result = result['result']
-            # if len(result) > 0:
-            #     st.write(result)
-            # st.write(result)
-            origin_text_list = []
-            correct_text_list = []
-            error_list = []
-            for one_error in result:
-                if len(one_error[2]) == 0:
-                    # st.write("{} ====> 纠错通过".format(one_error[0]))
-                    pass
-                else:
-                    # st.write("{} ====> {}".format(one_error[0], one_error[1]))
-                    # res_dict[one_error[0]] = one_error[1]
-                    origin_text_list.append(one_error[0])
-                    correct_text_list.append(one_error[1])
-                    error_text = ""
-                    # error_list.append(one_error[2][0])
-                    for er in one_error[2]:
-                        error_text += er[0] + "===>" + er[1] + "\n"
-                    st.write(error_text)
-                    error_list.append(error_text)
-                    # for
-            res_dict = {"原始文本": origin_text_list, "纠错后的文本": correct_text_list, "错别字": error_list}
-            # print(res_dict)
-
-            my_df = pd.DataFrame.from_dict(res_dict)
-            st.table(my_df)
-            # my_df.columns = ['纠错后的句子']
-            # st.dataframe(my_df)
-
-        else:
-            logger.error(result['error_msg'])
-            # result = []
+        st.write(result)
+        corrector_main(text, result)
 
     if run:
         url = "http://127.0.0.1:8112/get_contract_review_result"
