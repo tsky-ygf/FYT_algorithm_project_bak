@@ -13,7 +13,7 @@ app = Flask(__name__)
 
 @app.route("/top_k_similar_narrative", methods=["post"])  # "service_type":'ft'
 def hello_world():
-    # try:
+    try:
         if 1 == 1:
             in_json = request.get_data()
             if in_json is not None:
@@ -60,8 +60,8 @@ def hello_world():
                 return json.dumps(
                     {"error_msg": "data is None", "status": 1}, ensure_ascii=False
                 )
-    # except Exception as e:
-    #     return response_failed_result("error:" + repr(e))
+    except Exception as e:
+        return response_failed_result("error:" + repr(e))
 
 
 if __name__ == "__main__":
