@@ -5,6 +5,7 @@ import pandas as pd
 
 
 def corrector_main(text, result):
+    logger.debug(f'text:{text}, result: {result}')
     if result['success']:
         error_list = []
         if len(result['detail_info']) == 0:  # 说明没有错误
