@@ -14,9 +14,7 @@ URL = "http://127.0.0.1:8105"
 """ 行政预判 """
 
 
-def _show_administrative_report(type_id, selected_situation):
-    result = requests.post(url=URL + "/get_administrative_result",
-                           json={"type_id": type_id, "situation": selected_situation}).json().get("result")
+def _show_administrative_report(result):
     report = result["report"][0]
     for item in report:
         st.markdown("#### {}".format(item["title"]))
@@ -36,22 +34,75 @@ def _show_administrative_report(type_id, selected_situation):
                         st.markdown(value)
 
 
+def _remove_administrative_click_state(_count):
+    while True:
+        key = 'administrative_ask_btn' + str(_count) + '_clicked'
+        if key in st.session_state:
+            del st.session_state[key]
+            _count += 1
+            print("remove key:", key)
+        else:
+            break
+    pass
+
+
+def _show_administrative_next_qa(dialogue_history, dialogue_state, _count):
+    body = {
+        "dialogue_history": dialogue_history,
+        "dialogue_state": dialogue_state
+    }
+    resp_json = requests.post(URL + "/lawsuit_prejudgment", json=body).json()
+    next_action = resp_json["next_action"]
+    if next_action["action_type"] == "ask":
+        btn_key = 'administrative_ask_btn' + str(_count)
+        btn_click_key = btn_key + "_clicked"
+        next_question = next_action["content"]["question"]
+        answers = next_action["content"]["candidate_answers"]
+        single_or_multi = next_action["content"]["question_type"]
+
+        st.markdown('**{}**'.format(next_question))
+        if single_or_multi == "single":
+            selected_answers = [
+                st.radio("", options=answers, key='administrative_aks_' + str(_count), on_change=_remove_administrative_click_state,
+                         args=(_count,))]
+        else:
+            selected_answers = []
+            for idx, option in enumerate(answers):
+                if st.checkbox(option, key='administrative_ask_' + str(_count) + '_item_' + str(idx)):
+                    selected_answers.append(option)
+        st.write(selected_answers)
+        if st.button("确定", key=btn_key):
+            st.session_state[btn_click_key] = True
+        if btn_click_key in st.session_state:
+            last_question_info = next_action["content"]
+            if single_or_multi == "single":
+                last_question_info["user_answer"] = selected_answers[0]
+            else:
+                last_question_info["user_answer"] = selected_answers
+
+            if not dialogue_history["question_answers"]:
+                dialogue_history["question_answers"] = []
+            dialogue_history["question_answers"].append(last_question_info)
+
+            _show_administrative_next_qa(dialogue_history, resp_json["dialogue_state"], _count+1)
+    elif next_action["action_type"] == "report":
+        _show_administrative_report(next_action["content"])
+    pass
+
+
 def administrative_prejudgment_testing_page():
-    supported_administrative_list = requests.get(url=URL + "/get_administrative_type").json().get("result")
-    selected_type_name = st.selectbox("请选择你遇到的纠纷类型", [item["type_name"] for item in supported_administrative_list])
-    type_id = next(
-        (item["type_id"] for item in supported_administrative_list if item["type_name"] == selected_type_name), None)
-
-    problem_and_situation_list = requests.get(url=URL + "/get_administrative_problem_and_situation_by_type_id",
-                                              params={"type_id": type_id}).json().get("result")
-    selected_problem = st.selectbox("请选择你遇到的问题", [item["problem"] for item in problem_and_situation_list], key="一级")
-    selected_situation = st.selectbox("请选择具体的情形", next(
-        (item["situations"] for item in problem_and_situation_list if item["problem"] == selected_problem), None),
-                                      key="情形")
-
-    run = st.button("开始计算", key="run")
-    if run:
-        _show_administrative_report(type_id, selected_situation)
+    dialogue_history = {
+        "user_input": None,
+        "question_answers": None
+    }
+    dialogue_state = {
+        "domain": "administrative",
+        "problem": None,
+        "claim_list": None,
+        "other": None
+    }
+    count = 1
+    _show_administrative_next_qa(dialogue_history, dialogue_state, count)
 
 
 """ 刑事预判 """

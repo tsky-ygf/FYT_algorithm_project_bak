@@ -7,12 +7,14 @@
 """
 from LawsuitPrejudgment.src.administrative.pipeline import get_administrative_prejudgment_situation, \
     get_administrative_prejudgment_result
+from LawsuitPrejudgment.src.administrative.pipeline_v2 import AdministrativePrejudgment
 from LawsuitPrejudgment.src.common.data_transfer_object.prejudgment_report_dto import \
     AdministrativeReportDTO
 from LawsuitPrejudgment.config.civil.constants import SUPPORTED_ADMINISTRATIVE_TYPES_CONFIG_PATH, \
     FEATURE_TOGGLES_CONFIG_PATH
 from LawsuitPrejudgment.service_use.utils import successful_response
 from LawsuitPrejudgment.src.civil.utils.feature_toggle.feature_toggles import FeatureToggles
+from LawsuitPrejudgment.src.common.dialouge_management_parameter import DialogueHistory, DialogueState
 from Utils.io import read_json_attribute_value
 
 
@@ -46,3 +48,15 @@ def get_administrative_result(type_id, situation):
     if FeatureToggles(FEATURE_TOGGLES_CONFIG_PATH).reformat_prejudgment_report:
         result = AdministrativeReportDTO(result).to_dict()
     return successful_response(result)
+
+
+def lawsuit_prejudgment(dialogue_history: DialogueHistory, dialogue_state: DialogueState):
+    prejudgment_config = {
+        "log_level": "info",
+        "log_path": "log/lawsuit_prejudgment/",
+        "prejudgment_type": "administrative"
+    }
+    administrative_prejudgment = AdministrativePrejudgment(**prejudgment_config)
+    result = administrative_prejudgment(dialogue_history=dialogue_history, dialogue_state=dialogue_state, context=dialogue_state.other)
+    result["success"] = True
+    return result

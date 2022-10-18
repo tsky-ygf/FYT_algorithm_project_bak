@@ -105,7 +105,7 @@ def test_should_ask_next_question_when_reasoning_graph_result():
     }
 
     # 执行被测试程序
-    resp_json = requests.post(URL+"/reasoning_graph_result", json=body).json()
+    resp_json = requests.post(URL + "/reasoning_graph_result", json=body).json()
     print(resp_json)
 
     # 验证测试条件
@@ -130,7 +130,7 @@ def test_show_have_report_when_reasoning_graph_result():
     }
 
     # 执行被测试程序
-    resp_json = requests.post(URL+"/reasoning_graph_result", json=body).json()
+    resp_json = requests.post(URL + "/reasoning_graph_result", json=body).json()
     print(resp_json)
 
     # 验证测试条件
@@ -138,3 +138,189 @@ def test_show_have_report_when_reasoning_graph_result():
     assert resp_json.get("success")
     assert resp_json.get("question_next") is None
     assert resp_json.get("result")
+
+
+def test_administrative_judgment1():
+    # 准备测试数据
+    body = {
+        "dialogue_history": {
+            "user_input": None,
+            "question_answers": None
+        },
+        "dialogue_state": {
+            "domain": "administrative",
+            "problem": None,
+            "claim_list": None,
+            "other": None
+        }
+    }
+
+    # 执行被测试程序
+    resp_json = requests.post(URL + "/lawsuit_prejudgment", json=body).json()
+    print(resp_json)
+
+    # 验证测试条件
+    assert resp_json
+    assert resp_json.get("success")
+    assert resp_json.get("next_action")
+    assert resp_json["next_action"]["action_type"] == "ask"
+    assert resp_json["next_action"]["content"]["question"] == "请选择你遇到的纠纷类型"
+    assert "税务处罚预判" in resp_json["next_action"]["content"]["candidate_answers"]
+
+
+def test_administrative_judgment2():
+    # 准备测试数据
+    body = {
+        "dialogue_history": {
+            "user_input": None,
+            "question_answers": [
+                {
+                    "question": "请选择你遇到的纠纷类型",
+                    "candidate_answers": ["税务处罚预判","治安处罚预判","交警处罚预判"],
+                    "question_type": "single",
+                    "other": {
+                        "slot": "anyou"
+                    },
+                    "user_answer": "税务处罚预判"
+                }
+            ]
+        },
+        "dialogue_state": {
+            "domain": "administrative",
+            "problem": "税务处罚预判",
+            "claim_list": ["行政预判"],
+            "other": {
+                "slots": {
+                    "anyou": None,
+                    "problem": None,
+                    "situation": None
+                }
+            }
+        }
+    }
+
+    # 执行被测试程序
+    resp_json = requests.post(URL + "/lawsuit_prejudgment", json=body).json()
+    print(resp_json)
+
+    # 验证测试条件
+    assert resp_json
+    assert resp_json.get("success")
+    assert resp_json.get("next_action")
+    assert resp_json["next_action"]["action_type"] == "ask"
+    assert resp_json["next_action"]["content"]["question"] == "请选择你遇到的问题"
+    assert "发票问题" in resp_json["next_action"]["content"]["candidate_answers"]
+
+
+def test_administrative_judgment3():
+    # 准备测试数据
+    body = {
+        "dialogue_history": {
+            "user_input": None,
+            "question_answers": [
+                {
+                    "question": "请选择你遇到的纠纷类型",
+                    "candidate_answers": ["税务处罚预判","治安处罚预判","交警处罚预判"],
+                    "question_type": "single",
+                    "other": {
+                        "slot": "anyou"
+                    },
+                    "user_answer": "税务处罚预判"
+                },
+                {
+                    "question": "请选择你遇到的问题",
+                    "candidate_answers": ["发票问题", "账簿、记账问题", "申报问题", "缴税问题"],
+                    "question_type": "single",
+                    "other": {
+                        "slot": "problem"
+                    },
+                    "user_answer": "发票问题"
+                }
+            ]
+        },
+        "dialogue_state": {
+            "domain": "administrative",
+            "problem": "税务处罚预判",
+            "claim_list": ["行政预判"],
+            "other": {
+                "slots": {
+                    "anyou": "税务处罚预判",
+                    "problem": None,
+                    "situation": None
+                }
+            }
+        }
+    }
+
+    # 执行被测试程序
+    resp_json = requests.post(URL + "/lawsuit_prejudgment", json=body).json()
+    print(resp_json)
+
+    # 验证测试条件
+    assert resp_json
+    assert resp_json.get("success")
+    assert resp_json.get("next_action")
+    assert resp_json["next_action"]["action_type"] == "ask"
+    assert resp_json["next_action"]["content"]["question"] == "请选择具体的情形"
+    assert "虚开增值税发票" in resp_json["next_action"]["content"]["candidate_answers"]
+
+
+def test_administrative_judgment4():
+    # 准备测试数据
+    body = {
+        "dialogue_history": {
+            "user_input": None,
+            "question_answers": [
+                {
+                    "question": "请选择你遇到的纠纷类型",
+                    "candidate_answers": ["税务处罚预判","治安处罚预判","交警处罚预判"],
+                    "question_type": "single",
+                    "other": {
+                        "slot": "anyou"
+                    },
+                    "user_answer": "税务处罚预判"
+                },
+                {
+                    "question": "请选择你遇到的问题",
+                    "candidate_answers": ["发票问题", "账簿、记账问题", "申报问题", "缴税问题"],
+                    "question_type": "single",
+                    "other": {
+                        "slot": "problem"
+                    },
+                    "user_answer": "发票问题"
+                },
+                {
+                    "question": "请选择具体的情形：",
+                    "candidate_answers": ["没有真实的业务、资金往来", "虚开增值税发票"],
+                    "question_type": "single",
+                    "other": {
+                        "slot": "situation"
+                    },
+                    "user_answer": "虚开增值税发票"
+                }
+            ]
+        },
+        "dialogue_state": {
+            "domain": "administrative",
+            "problem": "税务处罚预判",
+            "claim_list": ["行政预判"],
+            "other": {
+                "slots": {
+                    "anyou": "税务处罚预判",
+                    "problem": "发票问题",
+                    "situation": None
+                }
+            }
+        }
+    }
+
+    # 执行被测试程序
+    resp_json = requests.post(URL + "/lawsuit_prejudgment", json=body).json()
+    print(resp_json)
+
+    # 验证测试条件
+    assert resp_json
+    assert resp_json.get("success")
+    assert resp_json.get("next_action")
+    assert resp_json["next_action"]["action_type"] == "report"
+    assert "report" in resp_json["next_action"]["content"]

@@ -15,6 +15,7 @@ from LawsuitPrejudgment.src.civil.nlg.civil_juding_rule import CivilJudgingRule
 from LawsuitPrejudgment.src.civil.nlg.civil_relevant_law import CivilRelevantLaw
 from LawsuitPrejudgment.src.civil.nlg.civil_similar_case import ManuallySelectedCivilSimilarCase, RecentCivilSimilarCase
 from LawsuitPrejudgment.src.civil.utils.feature_toggle.feature_toggles import FeatureToggles
+from LawsuitPrejudgment.src.common.dialouge_management_parameter import DialogueHistory, DialogueState
 from Utils.io import read_json_attribute_value
 from LawsuitPrejudgment.src.civil.pipeline import predict_fn
 
@@ -144,3 +145,7 @@ def reasoning_graph_result(problem, claim_list, fact, question_answers, factor_s
     if FeatureToggles(FEATURE_TOGGLES_CONFIG_PATH).reformat_prejudgment_report:
         response_dict = CivilReportDTO(response_dict).to_dict()
     return response_dict
+
+
+def lawsuit_prejudgment(dialogue_history: DialogueHistory, dialogue_state: DialogueState):
+    pass
