@@ -15,3 +15,10 @@
 3.1.2 安装相关依赖包
 - ```pip install -r common_requirements.txt```
 - ```pip install -r Corrector/deploy_requirements.txt```
+
+# 4. todo list
+### 4.1 领域迁移
+4.1.1 macbert的微调
+4.1.2 基于kenlm的语言模型重新生成
+### 4.2 基于规则和模型结果的合并策略
+

@@ -3,7 +3,6 @@ import pycorrector
 import torch
 import re
 from transformers import BertTokenizer, BertForMaskedLM
-from pycorrector.utils.tokenizer import split_text_by_maxlen
 import operator
 
 unk_tokens = [' ', '“', '”', '‘', '’', '琊', '\n', '…', '—', '擤', '\t', '֍', '玕', '']
@@ -59,47 +58,42 @@ class Model:
         
         #领域混淆字典初始化
         pycorrector.set_custom_confusion_dict('./data/text_corrector/custom_confusion.txt')
-        pycorrector.correct('')#激活相关配置, 初始化
+        pycorrector.correct('老是较书。')#激活相关配置, 初始化
 
-    def model_process(self, text):
+    def model_process(self, text, threshold = 0.9, verbose = False):
         text_new = ''
         details = []
-        # 长句切分为短句
-        blocks = split_text_by_maxlen(text, maxlen=128)
-        block_texts = [block[0] for block in blocks]
-        inputs = self.tokenizer(block_texts, padding=True, return_tensors='pt').to(self.device)
-        with torch.no_grad():
-            outputs = self.model(**inputs)
         
-        for ids, (text, idx) in zip(outputs.logits, blocks):
-            decode_tokens = self.tokenizer.decode(torch.argmax(ids, dim=-1))
-            decode_tokens = decode_tokens[6:-6]# 去掉首尾的[cls]
-            decode_token_list = decode_tokens.split(' ')
+        texts = [text]
+        text_tokens = self.tokenizer(texts, padding=True, return_tensors='pt').to(self.device)
+        with torch.no_grad():
+            outputs = self.model(**text_tokens)
 
-            #[unk]标签替换成原本的文本
-            unk_index_list = []
-            unk_index2next_char = {}
-            for index, token in enumerate(decode_token_list):
-                if '[UNK]' == token:
-                    unk_index_list.append(index)
-                    if index + 1 >= len(decode_token_list):
-                        unk_index2next_char[index] = decode_token_list[index]
-                    else:
-                        unk_index2next_char[index] = decode_token_list[index + 1]
-            for index in unk_index_list:
-                start_index = index
-                end_index = index + 1
-                for idx, char in enumerate(text[index+1:]):
-                    if char == unk_index2next_char[index]:
-                        end_index = end_index + idx
-                        break
-                decode_token_list = decode_token_list[:index] + [text[start_index:end_index]] + decode_token_list[index + 1:]
+        for ids, (i, tmp_text) in zip(outputs.logits, enumerate(texts)):#阈值降低误纠
+            decode_tokens_new = self.tokenizer.decode(torch.argmax(ids, dim=-1), skip_special_tokens=True).split(' ')#有些词编解码不出来
+            decode_tokens_old = self.tokenizer.decode(text_tokens['input_ids'][i], skip_special_tokens=True).split(' ')
+            if len(decode_tokens_new) != len(decode_tokens_old):#如果不等长就以原文为准
+                text_new = text_new + tmp_text
+                continue
+            probs = torch.max(torch.softmax(ids, dim=-1), dim=-1)[0].cpu().numpy()
+            decode_tokens = ''
+            for i in range(len(decode_tokens_old)):
+                if probs[i + 1] >= threshold:
+                    if verbose:
+                        logger.debug(
+                            f"word: {decode_tokens_old[i]}, prob: {probs[i + 1]}, new word: {decode_tokens_new[i]}")
+                    decode_tokens += decode_tokens_new[i]
+                else:
+                    decode_tokens += decode_tokens_old[i]
+            corrected_text = decode_tokens[:len(tmp_text)]
+            corrected_text, tmp_details = get_errors(corrected_text, tmp_text)
+            text_new = text_new + corrected_text
+            details.extend(tmp_details)
 
-            corrected_text = ''.join(decode_token_list[:len(text)])  
-            corrected_text, sub_details = get_errors(corrected_text, text)
-            text_new += corrected_text
-            sub_details = [(i[0], i[1], idx + i[2], idx + i[3]) for i in sub_details]
-            details.extend(sub_details)
+        if len(text_new) != len(text):#如果长度对不齐，说明漏字等情况，以原文为准
+            text_new = text
+            details = []
+
         return text_new, details
 
 
@@ -119,17 +113,20 @@ class Model:
                 tgt_pred = tgt_pred + sentence
                 continue
 
-            rule_tgt_pred, rule_pred_detail = pycorrector.correct(sentence)#规则
+            #rule_tgt_pred, rule_pred_detail = pycorrector.correct(sentence)#规则 误纠错太多，需要领域迁移
             model_tgt_pred, model_pred_detail = self.model_process(sentence)#模型
             
             tmp_tgt_pred = model_tgt_pred
             tmp_pred_detail = model_pred_detail
-            if model_tgt_pred != sentence:#模型融合策略，先模型纠错，如果不存在纠错的情况，再采用规则纠错的结果（kenlm语言模型很多误纠）
-                pass
-            else:
-                tmp_tgt_pred = rule_tgt_pred
-                tmp_pred_detail = rule_pred_detail
+            # if model_tgt_pred != sentence: #模型融合策略
+            #     pass
+            # else:
+            #     tmp_tgt_pred = rule_tgt_pred
+            #     tmp_pred_detail = rule_pred_detail
             
+            if tmp_pred_detail:
+                logger.debug(sentence, tmp_tgt_pred, tmp_pred_detail)
+
             #修正偏移位
             tmp_pred_detail = [(ele[0], ele[1], ele[2] + start_idx, ele[3] + start_idx) for ele in tmp_pred_detail]            
             tgt_pred = tgt_pred + tmp_tgt_pred
@@ -142,6 +139,8 @@ class Model:
 
 
 if __name__ == '__main__':
+    m = Model()
+
     text = "车辆运输租赁合同3 出租⽅：天天租赁公司承租⽅：悟空有限公司 根据《中华⼈民共和国合同法》和交通部有关规章，为明确双⽅" \
                "的.权利和义务，经双⽅协商⼀致，签订汽车租赁合同，设定下列条款，共同遵守。 ⼀、出租⽅车辆基本情况车型：大众SUV，车牌号" \
                "：浙ADR0023，必须使⽤92号汽油（柴油）。租赁车辆的车况，以发车的双⽅签字确认的《租赁车辆交接单》为准。车况（附⾏车证" \
@@ -177,7 +176,29 @@ if __name__ == '__main__':
                "。⑶从事其他有损出租⽅车辆利益的情况 ⼗⼀、其他1、本合同履⾏期间，双⽅若发⽣争议，双⽅应协商解决，当事⼈不愿通过协商，调解" \
                "解决，或协商调解不成时，可以按照合同约定向浙江省杭州市仲裁委员会申请仲裁。2、其它未尽事项，由双⽅协商，另订附件。3、本" \
                "合同⼀式两份，双⽅各执正本⼀份，副本送有关管理机关备案。 甲⽅：天天租赁公司⼄⽅：悟空有限公司 2022年1⽉1⽇"
-    #text = '甲⽅：天天租赁公司⼄⽅：悟空有限公司'
-    #text = '承租⽅⽆故辞退车辆'
-    m = Model()
     print(m.process(text))
+    # error_sentences = [
+    #     '真麻烦你了。希望你们好好的跳无',
+    #     '少先队员因该为老人让坐',
+    #     '机七学习是人工智能领遇最能体现智能的一个分知',
+    #     '一只小鱼船浮在平净的河面上',
+    #     '我的家乡是有明的渔米之乡',
+    #     '少先队员因该为老人让坐',
+    #     '少 先  队 员 因 该 为 老人让坐',
+    #     '机七学习是人工智能领遇最能体现智能的一个分知',
+    #     '今天心情很好',
+    #     '老是较书。',
+    #     '遇到一位很棒的奴生跟我聊天。',
+    #     '他的语说的很好，法语也不错',
+    #     '他法语说的很好，的语也不错',
+    #     '他们的吵翻很不错，再说他们做的咖喱鸡也好吃',
+    #     '影像小孩子想的快，学习管理的斑法',
+    #     '餐厅的换经费产适合约会',
+    #     '走路真的麻坊，我也没有喝的东西，在家汪了',
+    #     '因为爸爸在看录音机，所以我没得看',
+    #     '不过在许多传统国家，女人向未得到平等',
+
+
+    # ]
+    # for text in error_sentences:
+    #     print(m.process(text))
