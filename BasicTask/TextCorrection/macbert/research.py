@@ -17,7 +17,6 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "3"
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-
 def get_errors(corrected_text, origin_text):
     sub_details = []
     for i, ori_char in enumerate(origin_text):
@@ -41,16 +40,13 @@ tokenizer = BertTokenizer.from_pretrained("model/language_model/macbert4csc-base
 model = BertForMaskedLM.from_pretrained("model/language_model/macbert4csc-base-chinese")
 model.to(device)
 
-texts = '谈客户，大家技术基本都差不多，你很难技术去吊打别人。比拼的，就是谁脏活累活干的多，别人懒得做的奇葩需求，你要多做。这些都没啥沉淀和成长。都是成本和负担'
+texts = '想象难以'
+texts = '甲乙双方经平等协商一致，自愿签定本劳务协议，以期共同遵守本协议所列条款。'
 with torch.no_grad():
     outputs = model(**tokenizer(texts, padding=True, return_tensors='pt').to(device))
-
 res = outputs.logits.squeeze()
-# print(res.size())
-# exit()
+print(f'纠错之前的结果:{texts}')
 text = tokenizer.decode(torch.argmax(res, dim=-1), skip_special_tokens=True).replace(' ', '')
-# print(res)
-
-print(text)
+print(f'纠错之后的结果:{text}')
 corrected_text, sub_details = get_errors(text, texts)
-print(sub_details)
+print(f'纠错时对应的位置信息:{sub_details}')
