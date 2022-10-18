@@ -1,9 +1,0 @@
-requests
-colorlog
-loguru
-fastapi[all]
-streamlit
-st-annotated-text
-pymysql
-black
-pytest
