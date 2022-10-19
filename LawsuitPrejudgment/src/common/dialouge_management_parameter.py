@@ -5,22 +5,22 @@
 @Time    : 18/10/2022 9:20 
 @Desc    : None
 """
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Union, List, Dict
 
 
 class DialogueHistory(BaseModel):
-    user_input: Union[str, None]
-    question_answers: Union[List, None]
+    user_input: Union[str, None] = Field(default="", description="用户输入的事实描述")
+    question_answers: Union[List, None] = Field(default=[], description="用户的问答历史")
 
 
 class DialogueState(BaseModel):
-    domain: str
-    problem: Union[str, None]
-    claim_list: Union[List, None]
-    other: Union[Dict, None]
+    domain: str = Field(default="", description="诉讼预判的类型，如'administrative','civil','criminal'")
+    problem: Union[str, None] = Field(default="", description="纠纷类型")
+    claim_list: Union[List, None] = Field(default=[], description="诉求列表")
+    other: Union[Dict, None] = Field(default={}, description="算法的辅助信息，不需要处理")
 
 
 class NextAction(BaseModel):
-    action_type: str
-    content: Dict
+    action_type: str = Field(default="", description="下一次行动的类型，如'ask','report'")
+    content: Dict = Field(default={}, description="下一次行动的内容")
