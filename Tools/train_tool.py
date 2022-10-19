@@ -101,10 +101,9 @@ class BaseTrainTool:
 
         self.accelerator = self.init_accelerator()
 
-        self.tokenizer, self.model = self.init_model()
         self.train_dataset, self.eval_dataset = self.init_dataset()
-
         self.train_dataloader, self.eval_dataloader = self.init_dataloader()
+        self.tokenizer, self.model = self.init_model()
 
         self.num_update_steps_per_epoch = math.ceil(
             len(self.train_dataloader) / self.train_args.gradient_accumulation_steps)
@@ -240,12 +239,14 @@ class BaseTrainTool:
     def cal_output_loss(self, batch, **kwargs):
         for key, value in batch.items():
             batch[key] = value.squeeze()
-        outputs, loss = self.model(**batch)
-        # loss = outputs.loss
+        outputs = self.model(**batch)
+        loss = outputs.loss
         return outputs, loss
 
     def post_process_function(self, batch, outputs):
-        raise NotImplemented
+        self.logger.debug(batch)
+        self.logger.debug(outputs)
+        predictions = outputs.logits.argmax(dim=-1)
 
     def compute_metrics(self):
         raise NotImplemented
@@ -318,7 +319,6 @@ class BaseTrainTool:
                 eval_loss_res += eval_loss.item()
 
                 self.post_process_function(batch, output)
-                # TODO: evaluate
 
         eval_loss_res /= len(self.eval_dataloader)
         return eval_loss_res
