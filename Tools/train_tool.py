@@ -31,6 +31,8 @@ from torch.utils.tensorboard import SummaryWriter
 from Tools.data_pipeline import BaseDataset, InputExample
 from Tools.metrics import Metrics
 
+from pprint import pformat
+
 
 class FGM:
     """
@@ -109,8 +111,8 @@ class BaseTrainTool:
         self.num_update_steps_per_epoch = math.ceil(
             len(self.train_dataloader) / self.train_args.gradient_accumulation_steps)
         self.train_args.max_train_steps = self.train_args.num_train_epochs * self.num_update_steps_per_epoch
-        self.process_bar = tqdm(range(self.train_args.max_train_steps),
-                                disable=not self.accelerator.is_local_main_process)
+        # self.process_bar = tqdm(range(self.train_args.max_train_steps),
+        #                         disable=not self.accelerator.is_local_main_process)
 
         self.optimizer = self.init_optimizer()
         self.lr_scheduler = self.init_lr_scheduler()
@@ -123,7 +125,7 @@ class BaseTrainTool:
         if self.train_args.do_adv:
             self.fgm = FGM(self.model, emb_name=self.train_args.adv_name, epsilon=self.train_args.adv_epsilon)
 
-        self.metric=Metrics.get(self.train_args.metrics_name)()
+        self.metric = Metrics.get(self.train_args.metrics_name)()
         self.completed_steps = 0
 
     # 目前都是使用默认参数
@@ -246,8 +248,8 @@ class BaseTrainTool:
         return outputs, loss
 
     def post_process_function(self, batch, outputs):
-        self.logger.debug(batch)
-        self.logger.debug(outputs)
+        # self.logger.debug(batch)
+        # self.logger.debug(outputs)
         predictions = outputs.logits.argmax(dim=-1)
 
         # 真实值在前，预测值在后
@@ -257,6 +259,8 @@ class BaseTrainTool:
     def train_epoch(self, epoch):
 
         # self.lr_scheduler.step()
+        process_bar = tqdm(range(self.num_update_steps_per_epoch), disable=not self.accelerator.is_local_main_process)
+
         for step, batch in enumerate(self.train_dataloader):
             self.model.train()
             _, loss = self.cal_output_loss(batch)
@@ -287,33 +291,42 @@ class BaseTrainTool:
                 self.lr_scheduler.step()
                 self.optimizer.zero_grad()
 
-                self.process_bar.update(1)
+                #  设置进度条左边显示的信息
+                process_bar.set_description("Train epoch {}".format(epoch))
+                #  设置进度条右边显示的信息
+                process_bar.set_postfix(loss=loss.item(),
+                                        learning_rate=self.optimizer.state_dict()['param_groups'][0]['lr'])
+
+                process_bar.update(1)
                 self.completed_steps += 1
 
-            if step % int(self.num_update_steps_per_epoch / 3) == 0:
-                self.logger.info(
-                    f"\nTrain epoch:{epoch}======> epoch_setps:{self.num_update_steps_per_epoch}"
-                    f"======> step:{step}"
-                    # f"epoch:{self.completed_steps / self.num_update_steps_per_epoch}"
-                    f"======> loss: {loss.item():.4f}"
-                    f"======> learning_rate:{self.optimizer.state_dict()['param_groups'][0]['lr']}")
+            # if step % int(self.num_update_steps_per_epoch / 3) == 0:
+            #     self.logger.info(
+            #         f"\nTrain epoch:{epoch}======> epoch_setps:{self.num_update_steps_per_epoch}"
+            #         f"======> step:{step}"
+            #         # f"epoch:{self.completed_steps / self.num_update_steps_per_epoch}"
+            #         f"======> loss: {loss.item():.4f}"
+            #         f"======> learning_rate:{self.optimizer.state_dict()['param_groups'][0]['lr']}")
 
-                # for name, parms in self.model.named_parameters():
-                #     self.logger.info(
-                #         f'-->name:{name}'
-                #         f'-->grad_requirs:{parms.requires_grad}'
-                #         f'-->weight:{torch.mean(parms.data)}'
-                #         f'-->grad_value:{torch.mean(parms.grad)}'
-                #     )
+            # for name, parms in self.model.named_parameters():
+            #     self.logger.info(
+            #         f'-->name:{name}'
+            #         f'-->grad_requirs:{parms.requires_grad}'
+            #         f'-->weight:{torch.mean(parms.data)}'
+            #         f'-->grad_value:{torch.mean(parms.grad)}'
+            #     )
 
             if self.completed_steps >= self.train_args.max_train_steps:
                 return True
 
+        process_bar.close()
         return False
 
-    def eval_epoch(self):
+    def eval_epoch(self, epoch):
 
         eval_loss_res = 0
+
+        process_bar = tqdm(range(len(self.eval_dataloader)), disable=not self.accelerator.is_local_main_process)
 
         for step, batch in enumerate(self.eval_dataloader):
             self.model.eval()
@@ -323,9 +336,17 @@ class BaseTrainTool:
 
                 self.post_process_function(batch, output)
 
+                #  设置进度条左边显示的信息
+                process_bar.set_description("Train epoch {}".format(epoch))
+                #  设置进度条右边显示的信息
+                process_bar.set_postfix(eval_loss=eval_loss.item())
+
+                process_bar.update(1)
+        process_bar.close()
+
         eval_loss_res /= len(self.eval_dataloader)
         metric_res = self.metric.result()
-        self.logger.info(metric_res)
+        self.logger.info(pformat(metric_res))
         return eval_loss_res
 
     def save_model(self, model_path):
@@ -353,8 +374,8 @@ class BaseTrainTool:
             self.train_epoch(epoch)
             torch.cuda.empty_cache()
             if self.train_args.eval_ever_epoch:
-                eval_loss = self.eval_epoch()
-                self.logger.info("epoch:{}======>eval_loss: {}".format(epoch, eval_loss))
+                eval_loss = self.eval_epoch(epoch)
+                # self.logger.info("epoch:{}======>eval_loss: {}".format(epoch, eval_loss))
                 if hasattr(self, 'writer'):
                     self.writer.add_scalar(tag="eval_loss", scalar_value=eval_loss, global_step=epoch)
 
