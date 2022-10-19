@@ -55,6 +55,5 @@ def _get_query_answer_with_source(query_input: QueryInput):
 
 
 if __name__ == '__main__':
-    # 真实使用8130端口。测试使用8131端口
-    uvicorn.run('OnlineServer.IntelligentConsultation.server:app', host="0.0.0.0", port=8130, reload=False, workers=2)
-    # uvicorn.run('OnlineServer.IntelligentConsultation.server:app', host="0.0.0.0", port=8131, reload=True, workers=4)
+    # 真实使用8134端口
+    uvicorn.run('OnlineServer.IntelligentConsultation.server:app', host="0.0.0.0", port=8134, reload=False, workers=2)

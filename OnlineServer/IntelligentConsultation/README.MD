@@ -9,9 +9,9 @@
 `nohup python -m OnlineServer.IntelligentConsultation.server >log/intelligent_consultation/server.log 2>&1 &`
 
 ## 2. 接口在线文档
-内网地址: "http://172.19.82.227:8130/docs"
+内网地址: "http://172.19.82.227:8134/docs"
 
-外网地址: "http://101.69.229.227:8130/docs"
+外网地址: "http://101.69.229.227:8134/docs"
 
 ## 3. 接口测试
 使用`pytest`进行接口测试，测试文件为`OnlineServer/IntelligentConsultation/app_test.py`
@@ -22,5 +22,5 @@
 ## 4. 结束服务
 kill进程: `ps -ef | grep IntelligentConsultation.server | awk {'print $2'} |xargs kill -9`
 
-kill进程: `lsof -i:8130 | awk {'print $2'} |xargs kill -9`
+kill进程: `lsof -i:8134 | awk {'print $2'} |xargs kill -9`
 
