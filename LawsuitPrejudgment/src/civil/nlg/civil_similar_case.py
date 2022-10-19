@@ -5,6 +5,8 @@
 @Time    : 3/9/2022 12:12 
 @Desc    : None
 """
+import json
+
 import pandas as pd
 import requests
 
@@ -266,6 +268,9 @@ class RecentCivilSimilarCase:
                 "claim_list": self.claim_list
             }
             resp_json = requests.post(url, json=body).json()
+            # 接口返回的是str,所以处理了下。
+            if isinstance(resp_json, str):
+                resp_json = json.loads(resp_json)
             return self._get_short_document(resp_json)
         except Exception as e:
             logging.exception(repr(e))
