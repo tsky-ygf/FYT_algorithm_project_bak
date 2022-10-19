@@ -71,29 +71,33 @@ class Case_id(BaseModel):
 
 
 @app.get("/get_filter_conditions_of_law")
-def _get_filter_conditions():
+def _get_filter_conditions() -> dict:
     """
-    返回法条检索的输入条件
+    Return:
+        @result: dict, 返回法条检索的输入条件
     """
-    return get_filter_conditions()
+    return {"result": get_filter_conditions()}
 
 
 @app.post("/search_laws")
-def search_laws(search_query: Search_laws_input):
+def search_laws(search_query: Search_laws_input) -> dict:
     """
     获取法律检索的结果
 
     参数设定；
+    Parameters:
+        @query: str, 用户输入的查询内容
 
-    @query: 用户输入的查询内容
+        @filter_conditions: dict, 用户输入的条件
+            @timeliness: str, 用户输入的时效性
+            @types_of_law：str, 用户输入的法律种类
+            @scope_of_use：str, 用户输入的使用范围
+        @page_number: int, 第几页
 
-    @filter_conditions: 用户输入的条件
-        @timeliness:  用户输入的时效性
-        @types_of_law： 用户输入的法律种类
-        @scope_of_use： 用户输入的使用范围
-    @page_number: 第几页
-
-    @page_size: 页大小
+        @page_size: int, 页大小
+    Return:
+        @result: list, 搜索返回的结果集合
+        @total_amount: int, 若搜索的结果有200条以上则返回200，小于就返回搜索结果的长度
     """
     try:
         result = _get_law_result(
@@ -102,9 +106,10 @@ def search_laws(search_query: Search_laws_input):
             search_query.page_number,
             search_query.page_size,
         )
+        return result
     except Exception as e:
         return response_failed_result("error:" + repr(e))
-    return result
+
 
 
 @app.get("/get_law_by_law_id")
@@ -114,31 +119,35 @@ def get_law_by_law_id(law_id: Law_id):
 
 
 @app.get("/get_filter_conditions_of_case")
-def _get_filter_conditions():
+def _get_filter_conditions() -> dict:
     """
-    返回案例检索的输入条件
+    Return:
+        @result: dict, 返回案例检索的输入条件
     """
-    return get_filter_conditions_of_case()
+    return {"result": get_filter_conditions_of_case()}
 
 
 @app.post("/search_cases")
-def search_laws(search_query: Search_cases_input):
+def search_laws(search_query: Search_cases_input) -> dict:
     """
     获取法律检索的结果
 
     参数设定；
+    Parameters:
+        @query: str, 用户输入的查询内容
 
-    @query: 用户输入的查询内容
+        @filter_conditions: dict, 用户输入的条件
+            @type_of_case: list, 用户输入的案件类型
+            @court_level: list, 用户输入的法院层级
+            @type_of_document: list, 用户输入的文书类型
+            @region: list, 用户输入的地域
 
-    @filter_conditions: 用户输入的条件
-        @type_of_case:  用户输入的案件类型
-        @court_level:  用户输入的法院层级
-        @type_of_document:  用户输入的文书类型
-        @region:  用户输入的地域
+        @page_number: int, 第几页
 
-    @page_number: 第几页
-
-    @page_size: 页大小
+        @page_size: int, 页大小
+    Return:
+        @result: list, 搜索的返回结果
+        @total_amount: int 若搜索的结果有200条以上则返回200，小于就返回搜索结果的长度
     """
     try:
         if search_query is not None:
@@ -167,11 +176,17 @@ def get_law_document(case_id: Case_id):
 
 
 @app.post("/top_k_similar_narrative")
-def get_similar_case(search_query: Similar_case_input):
+def get_similar_case(search_query: Similar_case_input) -> dict:
     """
-    @fact: 用户输入的事实描述
-    @problem: 用户输入的纠纷类型
-    @claim_list: 诉求类型
+    Parameters:
+        @fact: str, 用户输入的事实描述
+        @problem: str, 用户输入的纠纷类型
+        @claim_list: list, 诉求类型
+    Return:
+        @dids: list, 裁判文书的uq_id
+        @sims: list, 相似类案的相似率
+        @reasonNames: list, 纠纷类型
+        @tags: list, 关键词
     """
     try:
         if search_query is not None:
@@ -189,35 +204,36 @@ def get_similar_case(search_query: Similar_case_input):
                 pubDate_list,
             ) = predict_fn_similar_cases(fact, problem, claim_list)
 
-            return json.dumps(
-                {
+            return {
                     "dids": doc_id_list,
                     "sims": sim_list,
                     # "winLos": win_los_list,
                     "reasonNames": reason_name_list,
-                    "appealNames": appeal_name_list,
+                    # "appealNames": appeal_name_list,
                     "tags": tags_list,
-                    "pubDates": pubDate_list,
-                    "keywords": keywords,
-                    "error_msg": "",
-                    "status": 0,
-                },
-                ensure_ascii=False,
-            )
+                    # "pubDates": pubDate_list,
+                    # "keywords": keywords,
+                    # "error_msg": "",
+                    # "status": 0,
+                    }
 
         else:
-            return json.dumps(
-                {"error_msg": "data is None", "status": 1}, ensure_ascii=False
-            )
+            return {"error_msg": "data is None", "status": 1}
     except Exception as e:
-        return response_failed_result("error:" + repr(e))
+        return {"error_msg:": repr(e), "status": 1}
 
 
 @app.post("/desensitization")
 def get_text_desen(text: str) -> str:
+    """
+    Parameters:
+        @text: str, 待脱敏文本
+    Return:
+        @result: str, 返回脱敏后的结果
+    """
     res = ''
     res = desensitization(text)
-    return res
+    return {"result": res}
 
 
 if __name__ == "__main__":

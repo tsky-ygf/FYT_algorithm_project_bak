@@ -26,7 +26,7 @@ def get_filter_conditions():
             "ProfessionalSearch/config/relevant_laws/filter_conditions.json",
             "filter_conditions",
         )
-        return response_successful_result(filer_conditions)
+        return filer_conditions
     except Exception as e:
         return response_failed_result("error:" + repr(e))
 
@@ -87,9 +87,9 @@ def _get_law_result(query, filter_conditions, page_number, page_size):
         )
     result = _construct_result_format(search_result)
     if total_num >= 200:
-        return response_successful_result(result, {"total_amount": 200})
+        return {"result": result, "total_amount": 200}
     else:
-        return response_successful_result(result, {"total_amount": len(result)})
+        return {"result": result, "total_amount": len(result)}
 
 
 @app.route("/search_laws", methods=["post"])

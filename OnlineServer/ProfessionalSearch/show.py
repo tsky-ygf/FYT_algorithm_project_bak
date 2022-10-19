@@ -221,7 +221,7 @@ def similar_case_review():
 def similar_case_side_review():
     logger = Logger(name="case-lib", level="debug").logger
     url_case_conditions = 'http://127.0.0.1:8132/get_filter_conditions_of_case'
-    resp_case_json = json.loads(requests.get(url_case_conditions).json())
+    resp_case_json = requests.get(url_case_conditions).json()
     logging.info(resp_case_json)
     case_type = st.sidebar.selectbox(
         "请选择案件类型", resp_case_json["result"].get("type_of_case").get("value"), key="case_type"
@@ -260,7 +260,7 @@ def similar_case_side_review():
             , "filter_conditions": filter_conditions  # 预测诉求时，目前输入参数无效， 预测情形时需要输入
         }
 
-        resp_json = json.loads(requests.post(url_search_case, json=input_json).json())
+        resp_json = requests.post(url_search_case, json=input_json).json()
 
         for index, row in enumerate(resp_json.get("result")):
             logger.info(row)
@@ -360,7 +360,7 @@ def relevant_laws_review():
 def relevant_laws_side_review():
     logger = Logger(name="law-lib", level="debug").logger
     url_law_conditions = "http://127.0.0.1:8132/get_filter_conditions_of_law"
-    resp_conditions_json = json.loads(requests.get(url_law_conditions).json())
+    resp_conditions_json = requests.get(url_law_conditions).json()
     legal_type = st.sidebar.selectbox(
         "请选择法条种类", resp_conditions_json["result"].get("types_of_law").get("value"), key="legal_type"
     )
@@ -396,7 +396,7 @@ def relevant_laws_side_review():
             "page_number": 1,
             "page_size": size
         }
-        resp_json = json.loads(requests.post(url, json=body).json())
+        resp_json = requests.post(url, json=body).json()
 
         for index, row in enumerate(resp_json.get("result")):
             logger.info(row)
@@ -483,7 +483,7 @@ def similar_case_retrieval_review():
     run = st.button("查询", key="run_law")
 
     if run:
-        suqiu_res = json.loads(requests.post(url_similar_case, json=similar_case_req).json())
+        suqiu_res = requests.post(url_similar_case, json=similar_case_req).json()
         logging.info(suqiu_res)
         # 组织结果返回
         doc_id_list, sim_list, reason_name_list, tags_list = suqiu_res["dids"], suqiu_res["sims"], suqiu_res["reasonNames"], suqiu_res["tags"]
