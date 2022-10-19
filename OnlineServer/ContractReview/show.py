@@ -115,6 +115,14 @@ def contract_review_main():
                 if value['审核结果'] == "通过" and value["风险等级"] == "低":
                     continue
 
+                # 未识别，不做审核
+                if value['内容'] == '未识别，不做审核' and value['审核结果'] == '通过':
+                    if "风险点" in value and value["风险点"] != "":
+                        st.markdown("风险点：{}".format(value['风险点']))
+                    if "风险等级" in value and value["风险等级"] != "":
+                        st.markdown("风险等级：{}".format(value['风险等级']))
+                    continue
+
                 if "内容" in value and value["内容"] != "":
                     st.markdown("审核内容：{}".format(value['内容']))
                 if "法律建议" in value and value["法律建议"] != "":
