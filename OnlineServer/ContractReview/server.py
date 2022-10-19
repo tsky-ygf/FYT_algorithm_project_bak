@@ -25,6 +25,12 @@ async def _get_support_contract_types():
 
     输入参数：
     无
+
+    输出：
+
+    @result：支持的合同类型
+    type：list 里 包含若干个dict
+
     """
     return {"result": get_support_contract_types()}
 
@@ -36,6 +42,12 @@ async def _get_user_standpoint():
 
     输入参数：
     无
+
+    输出：
+
+    @result：获取双方代表
+    type：list 里包含两个dict
+
     """
     return {"result": get_user_standpoint()}
 
@@ -86,6 +98,11 @@ async def _get_contract_review_result(contract_input: ContractInput):
 
     @contract_content： 合同内容
 
+    输出参数：
+
+    @result：合同审核结果
+    type：list
+
     """
     result = get_contract_review_result(content=contract_input.contract_content, mode="text",
                                                             contract_type=contract_input.contract_type_id,
@@ -105,6 +122,10 @@ async def _get_text_from_file_link_path(file_link_input: FileLinkInput):
     输入参数：
 
     @file_path: 文件链接
+
+    @result:文件文本内容
+    type：str
+
     """
 
     return {"result": get_text_from_file_link_path(file_link_input.file_path)}
