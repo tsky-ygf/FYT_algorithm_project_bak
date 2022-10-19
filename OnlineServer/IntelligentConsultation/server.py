@@ -31,7 +31,7 @@ def _get_query_answer_with_source(query_input: QueryInput):
 
     @question: str , 用户输入的问题
 
-    @query_type: str, 选择一级主题分类，可选项:(选在旧版/专题)
+    @query_type: str, 选择一级主题分类，可选项:(旧版/专题)
 
     @query_sub_type: str, 选择二级主题分类，可选项:(通用/法院/公安/环保/交通/金融/科技/市场监管/税务/司法/文旅)
 
