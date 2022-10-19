@@ -221,14 +221,13 @@ def check_penalty(row, extraction_con, res_dict):
     res_dict["end"] = extraction_con[0]["end"]
     res_dict["内容"] = extraction_con[0]['text']
     if '日' in extraction_con[0]['text'] and '月租金' not in extraction_con[0]['text']:
-        r = re.findall('\d+%',extraction_con[0]['text'])
-        if len(r)>0:
+        r = re.findall('\d+%', extraction_con[0]['text'])
+        if len(r) > 0:
             res_dict["审核结果"] = "不通过"
             res_dict["法律建议"] = row["jiaoyan error advice"]
     elif '月租金' in extraction_con[0]['text']:
         res_dict["审核结果"] = "通过"
         res_dict["法律建议"] = row["jiaoyan error advice"]
-
 
     # print(extraction_con)
     # exit()
@@ -334,7 +333,7 @@ def check_competition_limit(row, extraction_con, res_dict):
     res_dict["end"] = extraction_con[0]["end"]
     # ⾄  至 are different
     length = length.replace('⾄', '至')
-    if len(tmp)>0:
+    if len(tmp) > 0:
         tmp = int(tmp[0])
         if tmp <= 2:
             res_dict["审核结果"] = "通过"
@@ -344,7 +343,7 @@ def check_competition_limit(row, extraction_con, res_dict):
 
     elif '至' in length:
         data_str = length.split('至')
-        if len(data_str)>=2:
+        if len(data_str) >= 2:
             start_str, end_str = data_str[0], data_str[1]
             start_date_list = re.findall(r'\d+', start_str)
             start_date_list = list(map(lambda x: int(x), start_date_list))
@@ -354,7 +353,7 @@ def check_competition_limit(row, extraction_con, res_dict):
             start_date = datetime.datetime(start_date_list[0], start_date_list[1], start_date_list[2])
             end_date = datetime.datetime(end_date_list[0], end_date_list[1], end_date_list[2])
             diff = end_date - start_date
-            if diff.days/365<=2:
+            if diff.days / 365 <= 2:
                 res_dict["审核结果"] = "通过"
             else:
                 res_dict["审核结果"] = "不通过"
@@ -365,6 +364,7 @@ def check_competition_limit(row, extraction_con, res_dict):
         else:
             res_dict["审核结果"] = "不通过"
             res_dict["法律建议"] = row["jiaoyan error advice"]
+
 
 # 房屋租赁期限审核
 def check_house_lease_term(row, extraction_con, res_dict):
@@ -389,7 +389,7 @@ def check_house_lease_term(row, extraction_con, res_dict):
         else:
             res_dict["审核结果"] = "通过"
     else:
-        if len(tmp)>0:
+        if len(tmp) > 0:
             tmp = int(tmp[0])
             if "年" in length and tmp > 20:
                 res_dict["审核结果"] = "不通过"
@@ -404,16 +404,14 @@ def check_house_lease_term(row, extraction_con, res_dict):
             res_dict["法律建议"] = row["jiaoyan error advice"]
 
 
-
 # 预付款审核
 def check_prepayments(row, extraction_con, res_dict):
-
     pass
 
 
 # 产品名审核
 def check_product_name(row, extraction_con, res_dict):
-    match_res = re.match('烟草|农药|化肥|酒|枪支|弹药|石油',extraction_con[0]['text'])
+    match_res = re.match('烟草|农药|化肥|酒|枪支|弹药|石油', extraction_con[0]['text'])
     res_dict["内容"] = extraction_con[0]['text']
     res_dict["start"] = extraction_con[0]["start"]
     res_dict["end"] = extraction_con[0]["end"]
@@ -428,13 +426,13 @@ def check_product_name(row, extraction_con, res_dict):
 # {'text': '3个月', 'start': 368, 'end': 371, 'probability': 0.9199969172275999}
 # {'text': '2022年05月16日起至2022年08月15日', 'start': 342, 'end': 366, 'probability': 0.6343909896642685}
 def check_trial_period(row, extraction_con, res_dict):
-    if len(extraction_con)==2:
-        num_month = re.findall(r'\d+',extraction_con[0]['text'])
+    if len(extraction_con) == 2:
+        num_month = re.findall(r'\d+', extraction_con[0]['text'])
         num_month = int(''.join(num_month))
         res_dict["start"] = extraction_con[0]["start"]
         res_dict["end"] = extraction_con[0]["end"]
         data_string = extraction_con[1]['text'].split('起至')
-        if len(data_string)==2:
+        if len(data_string) == 2:
             start_date_list = re.findall(r'\d+', data_string[0])
             start_date_list = list(map(lambda x: int(x), start_date_list))
             end_date_list = re.findall(r'\d+', data_string[1])
@@ -448,11 +446,11 @@ def check_trial_period(row, extraction_con, res_dict):
                 res_dict["内容"] = extraction_con[0]['text'] + '\n' + extraction_con[1]['text']
                 res_dict["start"] = extraction_con[0]["start"]
                 res_dict["end"] = extraction_con[0]["end"]
-                if 3<= diff.days/30 < 12 and num_month<=1:
+                if 3 <= diff.days / 30 < 12 and num_month <= 1:
                     res_dict["审核结果"] = "通过"
-                elif 12<=diff.days/30 < 36 and num_month<=2:
+                elif 12 <= diff.days / 30 < 36 and num_month <= 2:
                     res_dict["审核结果"] = "通过"
-                elif 36<=diff.days/30 and num_month <= 3:
+                elif 36 <= diff.days / 30 and num_month <= 3:
                     res_dict["审核结果"] = "通过"
                 else:
                     res_dict["审核结果"] = "不通过"
@@ -481,7 +479,7 @@ def compensation_standard_for_non_compete(row, extraction_con, res_dict):
     tmp = re.findall(r'\d+', wage)
     res_dict["start"] = extraction_con[0]["start"]
     res_dict["end"] = extraction_con[0]["end"]
-    if len(tmp)>0:
+    if len(tmp) > 0:
         if int(tmp[0]) > 2000:
             res_dict["审核结果"] = "通过"
             res_dict["内容"] = wage
@@ -537,15 +535,31 @@ def check_once_pay(row, extraction_con, res_dict):
     else:
         res_dict["审核结果"] = "通过"
 
+
 # 房屋租赁押金审核
 def check_deposit(row, extraction_res, res_dict):
-
     return None
 
 
 # 房屋租赁管辖法院审核
 def check_housing_tenancy_court(row, extraction_con, res_dict):
     return None
+
+
+# 违法
+def check_illegal(row, extraction_con, res_dict):
+    text = extraction_con[0]['text']
+    res_dict["内容"] = extraction_con[0]['text']
+    res_dict["start"] = extraction_con[0]['start']
+    res_dict["end"] = extraction_con[0]['end']
+    res_dict['风险等级'] = row['risk level']
+    res_dict["风险点"] = row["risk statement"]
+    if row['pos keywords'] in text:
+        res_dict["审核结果"] = "不通过"
+        res_dict['法律建议'] = row['jiaoyan error advice']
+    else:
+        res_dict["审核结果"] = "通过"
+        res_dict["法律建议"] = ''
 
 
 if __name__ == '__main__':
@@ -556,5 +570,3 @@ if __name__ == '__main__':
     # print(_res_dict)
 
     pass
-
-
