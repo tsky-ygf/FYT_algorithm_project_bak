@@ -178,6 +178,15 @@ def merge_all_data4common():
     pass
 
 
+def merge_all_data4common_wt_bias():
+    """
+    融合所有标注样本 生成用于通用模型训练的数据
+    在滑动窗口切分时，保留bias
+    """
+
+
+
+
 if __name__ == "__main__":
     # split_text('data/data_src/old/origin_oldall.json', 'data/data_src/old/origin_oldall_split.json')
     # t()
@@ -186,9 +195,12 @@ if __name__ == "__main__":
     # convert_format_bmes()
 
     # 先这两条，准备好数据， 再核实schema， 再更改log、model名称， 再运行
-    merge_all_data4common()
-    divided_train_dev('data/data_src/common_all/common_all.json', 'data/data_src/common_all/')
+    # merge_all_data4common()
+    # divided_train_dev('data/data_src/common_all/common_all.json', 'data/data_src/common_all/')
 
     # merge_all_data4common()
     # divided_train_dev('data/data_src/common_long/common_long.json', 'data/data_src/common_long')
+
+    merge_all_data4common_wt_bias()
+
     pass
