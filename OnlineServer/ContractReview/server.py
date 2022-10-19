@@ -26,9 +26,10 @@ async def _get_support_contract_types():
     输入参数：
     无
 
-    输出：
+    输出参数：
 
     @result：支持的合同类型
+
     type：list 里 包含若干个dict
 
     """
@@ -43,9 +44,10 @@ async def _get_user_standpoint():
     输入参数：
     无
 
-    输出：
+    输出参数：
 
     @result：获取双方代表
+
     type：list 里包含两个dict
 
     """
@@ -88,7 +90,7 @@ class ContractInput(BaseModel):
 @app.post("/get_contract_review_result")
 async def _get_contract_review_result(contract_input: ContractInput):
     """
-    获取模型审核结果
+    获取合同审核结果
 
     输入参数：
 
@@ -101,6 +103,7 @@ async def _get_contract_review_result(contract_input: ContractInput):
     输出参数：
 
     @result：合同审核结果
+
     type：list
 
     """
@@ -123,9 +126,11 @@ async def _get_text_from_file_link_path(file_link_input: FileLinkInput):
 
     @file_path: 文件链接
 
-    @result:文件文本内容
-    type：str
+    输出参数：
 
+    @result:文件文本内容
+
+    type：str
     """
 
     return {"result": get_text_from_file_link_path(file_link_input.file_path)}
