@@ -220,7 +220,7 @@ def similar_case_review():
 
 def similar_case_side_review():
     logger = Logger(name="case-lib", level="debug").logger
-    url_case_conditions = 'http://127.0.0.1:8162/get_filter_conditions_of_case'
+    url_case_conditions = 'http://127.0.0.1:8132/get_filter_conditions_of_case'
     resp_case_json = json.loads(requests.get(url_case_conditions).json())
     logging.info(resp_case_json)
     case_type = st.sidebar.selectbox(
@@ -245,7 +245,7 @@ def similar_case_side_review():
 
     run = st.button("查询", key="run")
     if run:
-        url_search_case = 'http://0.0.0.0:8162/search_cases'
+        url_search_case = 'http://0.0.0.0:8132/search_cases'
         query = text
         filter_conditions = {
             'type_of_case': [case_type],
@@ -359,7 +359,7 @@ def relevant_laws_review():
 
 def relevant_laws_side_review():
     logger = Logger(name="law-lib", level="debug").logger
-    url_law_conditions = "http://0.0.0.0:8162/get_filter_conditions_of_law"
+    url_law_conditions = "http://0.0.0.0:8132/get_filter_conditions_of_law"
     resp_conditions_json = json.loads(requests.get(url_law_conditions).json())
     legal_type = st.sidebar.selectbox(
         "请选择法条种类", resp_conditions_json["result"].get("types_of_law").get("value"), key="legal_type"
@@ -379,7 +379,7 @@ def relevant_laws_side_review():
     run = st.button("查询", key="run_law")
 
     if run:
-        url = "http://0.0.0.0:8162/search_laws"
+        url = "http://0.0.0.0:8132/search_laws"
         body = {
             "query": text,
             "filter_conditions": {
@@ -456,7 +456,7 @@ def get_civil_law_documents_by_id_list(id_list: List[str], table_name) -> List[D
 def similar_case_retrieval_review():
     # 初始化
     logger = Logger(name="law-lib", level="debug").logger
-    url_similar_case = "http://0.0.0.0:8162/top_k_similar_narrative"
+    url_similar_case = "http://0.0.0.0:8132/top_k_similar_narrative"
     url_jfType = "http://101.69.229.138:7100/get_civil_problem_summary"
     url_suqiu = "http://101.69.229.138:7100/get_claim_list_by_problem_id"
     jfType_list = requests.get(url_jfType).json()
