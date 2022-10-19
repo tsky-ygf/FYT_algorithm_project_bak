@@ -14,7 +14,6 @@ from sentence_transformers import models, losses
 from sentence_transformers import SentenceTransformer, datasets
 from sentence_transformers import InputExample
 
-
 from Utils.register import Registry
 
 MODEL_REGISTRY = Registry('COMMON_MODEL')
@@ -62,9 +61,6 @@ class TSDAE(EmbedTrainer):
                                                      tie_encoder_decoder=True)
 
         return model, train_loss
-
-
-
 
 
 if __name__ == "__main__":

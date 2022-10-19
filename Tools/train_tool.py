@@ -29,6 +29,7 @@ from Tools.parse_argument import (
 from torch.utils.tensorboard import SummaryWriter
 
 from Tools.data_pipeline import BaseDataset, InputExample
+from Tools.metrics import Metrics
 
 
 class FGM:
@@ -101,10 +102,9 @@ class BaseTrainTool:
 
         self.accelerator = self.init_accelerator()
 
-        self.tokenizer, self.model = self.init_model()
         self.train_dataset, self.eval_dataset = self.init_dataset()
-
         self.train_dataloader, self.eval_dataloader = self.init_dataloader()
+        self.tokenizer, self.model = self.init_model()
 
         self.num_update_steps_per_epoch = math.ceil(
             len(self.train_dataloader) / self.train_args.gradient_accumulation_steps)
@@ -123,6 +123,7 @@ class BaseTrainTool:
         if self.train_args.do_adv:
             self.fgm = FGM(self.model, emb_name=self.train_args.adv_name, epsilon=self.train_args.adv_epsilon)
 
+        self.metric=Metrics.get(self.train_args.metrics_name)()
         self.completed_steps = 0
 
     # 目前都是使用默认参数
@@ -240,15 +241,18 @@ class BaseTrainTool:
     def cal_output_loss(self, batch, **kwargs):
         for key, value in batch.items():
             batch[key] = value.squeeze()
-        outputs, loss = self.model(**batch)
-        # loss = outputs.loss
+        outputs = self.model(**batch)
+        loss = outputs.loss
         return outputs, loss
 
     def post_process_function(self, batch, outputs):
-        raise NotImplemented
+        self.logger.debug(batch)
+        self.logger.debug(outputs)
+        predictions = outputs.logits.argmax(dim=-1)
 
-    def compute_metrics(self):
-        raise NotImplemented
+        # 真实值在前，预测值在后
+        self.metric.update(true_subject=predictions.cpu().numpy(),
+                           pred_subject=batch["labels"].cpu().numpy())
 
     def train_epoch(self, epoch):
 
@@ -318,9 +322,10 @@ class BaseTrainTool:
                 eval_loss_res += eval_loss.item()
 
                 self.post_process_function(batch, output)
-                # TODO: evaluate
 
         eval_loss_res /= len(self.eval_dataloader)
+        metric_res = self.metric.result()
+        self.logger.info(metric_res)
         return eval_loss_res
 
     def save_model(self, model_path):
@@ -347,7 +352,7 @@ class BaseTrainTool:
                 break
             self.train_epoch(epoch)
             torch.cuda.empty_cache()
-            if epoch % self.train_args.early_stopping_patience == 0 and self.train_args.eval_ever_epoch:  # and epoch > 0:
+            if self.train_args.eval_ever_epoch:
                 eval_loss = self.eval_epoch()
                 self.logger.info("epoch:{}======>eval_loss: {}".format(epoch, eval_loss))
                 if hasattr(self, 'writer'):

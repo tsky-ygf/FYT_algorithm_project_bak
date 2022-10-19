@@ -303,12 +303,7 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
                     rule_func.check_house_lease_term(row, extraction_con, res_dict)
 
                 elif "违法" == row["pos rule"]:
-                    res_dict["审核结果"] = "不通过"
-                    res_dict["内容"] = extraction_con[0]['text']
-                    res_dict["start"] = extraction_con[0]['start']
-                    res_dict["end"] = extraction_con[0]['end']
-                    res_dict['风险等级'] = row['risk level']
-                    res_dict["风险点"] = row["risk statement"]
+                    rule_func.check_illegal(row, extraction_con, res_dict)
 
                 else:
                     res_dict["审核结果"] = "通过"

@@ -99,7 +99,7 @@ class Model:
         logger.info(f'初始化文本:{ori_text}')
 
         #句子切分
-        segment_pattern = r'(。|，|\s|、)\s*'
+        segment_pattern = r'([。，、\s+])'
         sentences = split_text(ori_text, segment_pattern)
         logger.debug(f'切分的句子结果:{sentences}')
 

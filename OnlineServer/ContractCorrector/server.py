@@ -47,4 +47,4 @@ async def _get_corrected_contract_result(text_input: TextInput):
 
 if __name__ == "__main__":
     # 日志设置
-    uvicorn.run('OnlineServer.ContractCorrector.server:app', host="0.0.0.0", port=6598, reload=False, workers=1)
+    uvicorn.run('OnlineServer.ContractCorrector.server:app', host="0.0.0.0", port=8150, reload=False, workers=1)

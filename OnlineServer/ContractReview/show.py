@@ -77,7 +77,7 @@ def contract_review_main():
     if correct:
         import requests
         from OnlineServer.ContractCorrector.show import corrector_main
-        r = requests.post("http://127.0.0.1:6598/get_corrected_contract_result", json={"text": text})
+        r = requests.post("http://127.0.0.1:8150/get_corrected_contract_result", json={"text": text})
         result = json.loads(r.json())
         corrector_main(text, result)
 

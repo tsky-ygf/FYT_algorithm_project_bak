@@ -41,6 +41,13 @@ def random_reverse_order(text):
     return text
 
 
+def get_one_keywords(text):
+    tfidf = analyse.extract_tags
+
+    keywords = tfidf(text, allowPOS=["n", "v", "a", "d"])
+    print(f"query:{text} ======> keywords:{keywords}")
+
+
 def get_all_keywords():
     tfidf = analyse.extract_tags
 
@@ -117,7 +124,7 @@ def get_translate_result():
 
 
 if __name__ == '__main__':
-    _text = "公司交不起税了怎么办"
+    _text = "企业贷款要准备什么"
     # WR_res = word_repetition(text="公司交不起税了怎么办", dup_rate=0.3)
     # print(WR_res)
     # get_keywords_and_synonym()
@@ -125,4 +132,5 @@ if __name__ == '__main__':
     # print(rest)
     # filter_similar_word()
     # get_all_keywords()
-    get_translate_result()
+    # get_translate_result()
+    get_one_keywords(text=_text)

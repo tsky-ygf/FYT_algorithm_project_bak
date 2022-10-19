@@ -188,3 +188,6 @@ class TrainingArguments:
 
     accelerator_params: Optional[Dict] = field(
         default=None, metadata={"help": "The accelerator params."})
+
+    metrics_name: Optional[str] = field(
+        default="Accuracy", metadata={"help": "The metrics name."})
