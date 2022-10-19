@@ -259,7 +259,7 @@ class RecentCivilSimilarCase:
 
     def get_similar_cases(self):
         try:
-            url = "http://127.0.0.1:5011/top_k_similar_narrative"
+            url = "http://127.0.0.1:8132/top_k_similar_narrative"
             body = {
                 "fact": str(self.fact) + " " + self.problem + " " + "".join(self.claim_list),
                 "problem": self.problem,

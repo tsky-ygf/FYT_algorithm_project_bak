@@ -9,7 +9,7 @@ import pandas as pd
 import requests
 import streamlit as st
 
-URL = "http://127.0.0.1:8105"
+URL = "http://127.0.0.1:8133"
 
 """ 行政预判 """
 
@@ -116,7 +116,7 @@ def get_criminal_result(fact, question_answers, factor_sentence_list, anyou, eve
         # "anyou": anyou,
         # "event": event
     }
-    resp_json = requests.post(url="http://127.0.0.1:8105/get_criminal_result", json=body).json()
+    resp_json = requests.post(url=URL+"/get_criminal_result", json=body).json()
     if resp_json.get("success") is False:
         raise Exception("刑事预判接口返还异常: {}".format(resp_json.get("error_msg")))
 

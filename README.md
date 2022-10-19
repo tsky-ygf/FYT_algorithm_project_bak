@@ -14,4 +14,4 @@
 
 ### 法域通内部测试项目
 启动服务
-```nohup streamlit run OnlineServer/show_page.py --server.port 8132 &```
+```nohup streamlit run OnlineServer/show_page.py --server.port 8130 &```
