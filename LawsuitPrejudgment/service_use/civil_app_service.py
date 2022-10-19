@@ -187,6 +187,7 @@ def lawsuit_prejudgment(dialogue_history: DialogueHistory, dialogue_state: Dialo
         }
 
     dialogue_state.other = {
+        "debug_info": result["debug_info"],
         "factor_sentence_list": result["factor_sentence_list"]
     }
     return {

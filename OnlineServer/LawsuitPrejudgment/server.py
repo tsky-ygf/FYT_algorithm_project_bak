@@ -117,22 +117,22 @@ def _get_claim_list_by_problem_id(param: GetClaimListParam):
     return civil_app_service.get_claim_list_by_problem_id(param.problem_id, param.fact)
 
 
-class GetCivilResultParam(BaseModel):
-    problem: str
-    claim_list: typing.List
-    fact: str
-    question_answers: typing.Dict
-    factor_sentence_list: typing.List
+# class GetCivilResultParam(BaseModel):
+#     problem: str
+#     claim_list: typing.List
+#     fact: str
+#     question_answers: typing.Dict
+#     factor_sentence_list: typing.List
 
 
-@app.post("/reasoning_graph_result")
-def _reasoning_graph_result(param: GetCivilResultParam):
-    """
-    民事预判的主流程。
-    本接口即将废弃。
-    """
-    return civil_app_service.reasoning_graph_result(param.problem, param.claim_list, param.fact, param.question_answers,
-                                                    param.factor_sentence_list)
+# @app.post("/reasoning_graph_result")
+# def _reasoning_graph_result(param: GetCivilResultParam):
+#     """
+#     民事预判的主流程。
+#     本接口即将废弃。
+#     """
+#     return civil_app_service.reasoning_graph_result(param.problem, param.claim_list, param.fact, param.question_answers,
+#                                                     param.factor_sentence_list)
 
 
 class DialogueInput(BaseModel):

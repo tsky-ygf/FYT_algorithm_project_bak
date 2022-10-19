@@ -230,7 +230,7 @@ def _request(problem, claim_list, fact, question_answers, factor_sentence_list, 
     return requests.post(url, json=body).json()
 
 
-def get_extracted_features(anyou, suqiu_list, desp):
+def get_extracted_features(dialogue_history, dialogue_state):
     # extracted_features = {
     #     "特征": ['无法偿还贷款', '存在借款合同', '不存在借款合同', '出借方未实际提供借款', '借款人逾期未返还借款'],
     #     "对应句子": ['现在公司没有按时还款', '我要求公司按照合同约定', '我要求公司按照合同约定', '返还借款本金130万及利息、违约金、律师费66800元', '现在公司没有按时还款'],
@@ -241,8 +241,12 @@ def get_extracted_features(anyou, suqiu_list, desp):
     #               '(((给|提供|付|借)[^。；，：,;:？！!?\s]*(款|钱|资金)))',
     #               '(((没有|没|未|不|非|无|未经|怠于)[^。；，：,;:？！!?\s]*(偿还|归还|偿付|清偿|还款|还清|还本付息|偿清|还债|还账|还钱|付清|结清|返还|支付)))']
     # }
-    resp = _request(anyou, suqiu_list, desp, {}, [], None)
-    factor_sentence_list = resp.get("factor_sentence_list", [])
+    body = {
+        "dialogue_history": dialogue_history,
+        "dialogue_state": dialogue_state
+    }
+    resp_json = requests.post(URL + "/lawsuit_prejudgment", json=body).json()
+    factor_sentence_list = resp_json["dialogue_state"]["other"]["factor_sentence_list"]
     extracted_features = {
         "特征": [],
         "对应句子": [],
@@ -256,24 +260,6 @@ def get_extracted_features(anyou, suqiu_list, desp):
         extracted_features["正向/负向匹配"].append(flag)
         extracted_features["匹配表达式"].append(expression)
     return extracted_features
-
-
-def get_next_question(anyou, suqiu_list, desp, question_answers, factor_sentence_list, repeated_question_management):
-    resp = _request(anyou, suqiu_list, desp, question_answers, factor_sentence_list, repeated_question_management)
-    next_question_info = resp.get("question_next")
-    if next_question_info:
-        next_question = str(next_question_info).split(":")[0]
-        answers = str(next_question_info).split(":")[1].split(";")
-        if resp.get("question_type") == "1":
-            single_or_multi = "single"
-        else:
-            single_or_multi = "multi"
-        return True, {"next_question": next_question, "answers": answers, "single_or_multi": single_or_multi,
-                      "factor_sentence_list": resp.get("factor_sentence_list"),
-                      "repeated_question_management": resp.get("repeated_question_management"),
-                      "debug_info": resp.get("debug_info")}
-    else:
-        return False, {"result": resp.get("result"), "debug_info": resp.get("debug_info")}
 
 
 def _remove_click_state(_count):
@@ -297,17 +283,21 @@ def show_debug_info(debug_info):
             st.markdown(item)
 
 
-def show_next_qa(_selected_anyou, _selected_suqiu_list, _user_input, _question_answers, _factor_sentence_list, _count, _repeated_question_management):
-    has_next_question, info = get_next_question(_selected_anyou, _selected_suqiu_list, _user_input,
-                                                        _question_answers, _factor_sentence_list, _repeated_question_management)
-    show_debug_info(info.get("debug_info"))
-    if has_next_question:
+def show_next_qa(dialogue_history, dialogue_state, _count):
+    body = {
+        "dialogue_history": dialogue_history,
+        "dialogue_state": dialogue_state
+    }
+    resp_json = requests.post(URL + "/lawsuit_prejudgment", json=body).json()
+    show_debug_info(resp_json["dialogue_state"]["other"]["debug_info"])
+
+    next_action = resp_json["next_action"]
+    if next_action["action_type"] == "ask":
         btn_key = 'ask_btn' + str(_count)
         btn_click_key = btn_key + "_clicked"
-        next_question_info = info
-        next_question = next_question_info["next_question"]
-        answers = next_question_info["answers"]
-        single_or_multi = next_question_info["single_or_multi"]
+        next_question = next_action["content"]["question"]
+        answers = next_action["content"]["candidate_answers"]
+        single_or_multi = next_action["content"]["question_type"]
 
         st.markdown('**{}**'.format(next_question))
         if single_or_multi == "single":
@@ -322,14 +312,16 @@ def show_next_qa(_selected_anyou, _selected_suqiu_list, _user_input, _question_a
         if st.button("确定", key=btn_key):
             st.session_state[btn_click_key] = True
         if btn_click_key in st.session_state:
-            _question_answers[next_question + ":" + ";".join(answers)] = ";".join(selected_answers)
-            _factor_sentence_list = next_question_info['factor_sentence_list']
-            _repeated_question_management = next_question_info['repeated_question_management']
-            _count += 1
-            show_next_qa(_selected_anyou, _selected_suqiu_list, _user_input, _question_answers, _factor_sentence_list,
-                         _count, _repeated_question_management)
-    else:
-        show_report(info.get("result"))
+            last_question_info = next_action["content"]
+            last_question_info["user_answer"] = selected_answers
+
+            if not dialogue_history["question_answers"]:
+                dialogue_history["question_answers"] = []
+            dialogue_history["question_answers"].append(last_question_info)
+
+            show_next_qa(dialogue_history, resp_json["dialogue_state"], _count+1)
+    elif next_action["action_type"] == "report":
+        show_report(next_action["content"])
     pass
 
 
@@ -361,9 +353,9 @@ def show_report(result):
     pass
 
 
-def show_extracted_features(_selected_anyou, _selected_suqiu_list, _user_input):
+def show_extracted_features(dialogue_history, dialogue_state):
     st.subheader("从用户描述提取到的特征")
-    df = pd.DataFrame(data=get_extracted_features(_selected_anyou, _selected_suqiu_list, _user_input))
+    df = pd.DataFrame(data=get_extracted_features(dialogue_history, dialogue_state))
     st.dataframe(df)
 
 
@@ -386,14 +378,20 @@ def civil_prejudgment_testing_page():
     if st.button("提交评估"):
         st.session_state["submit_desp"] = True
     if "submit_desp" in st.session_state:
-        show_extracted_features(selected_anyou, selected_suqiu_list, user_input)
-
-        st.subheader("进行提问")
-        question_answers = {}
-        factor_sentence_list = []
+        dialogue_history = {
+            "user_input": user_input,
+            "question_answers": None
+        }
+        dialogue_state = {
+            "domain": "civil",
+            "problem": selected_anyou,
+            "claim_list": selected_suqiu_list,
+            "other": None
+        }
         count = 1
-        repeated_question_management = None
-        show_next_qa(selected_anyou, selected_suqiu_list, user_input, question_answers, factor_sentence_list, count, repeated_question_management)
+
+        show_extracted_features(dialogue_history, dialogue_state)
+        show_next_qa(dialogue_history, dialogue_state, count)
         
         
 def lawsuit_prejudgment_testing_page():
