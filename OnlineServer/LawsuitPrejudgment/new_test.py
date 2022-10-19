@@ -51,7 +51,7 @@ def test_administrative_judgment2():
                     "other": {
                         "slot": "anyou"
                     },
-                    "user_answer": "税务处罚预判"
+                    "user_answer": ["税务处罚预判"]
                 }
             ]
         },
@@ -95,7 +95,7 @@ def test_administrative_judgment3():
                     "other": {
                         "slot": "anyou"
                     },
-                    "user_answer": "税务处罚预判"
+                    "user_answer": ["税务处罚预判"]
                 },
                 {
                     "question": "请选择你遇到的问题",
@@ -104,7 +104,7 @@ def test_administrative_judgment3():
                     "other": {
                         "slot": "problem"
                     },
-                    "user_answer": "发票问题"
+                    "user_answer": ["发票问题"]
                 }
             ]
         },
@@ -148,7 +148,7 @@ def test_administrative_judgment4():
                     "other": {
                         "slot": "anyou"
                     },
-                    "user_answer": "税务处罚预判"
+                    "user_answer": ["税务处罚预判"]
                 },
                 {
                     "question": "请选择你遇到的问题",
@@ -157,7 +157,7 @@ def test_administrative_judgment4():
                     "other": {
                         "slot": "problem"
                     },
-                    "user_answer": "发票问题"
+                    "user_answer": ["发票问题"]
                 },
                 {
                     "question": "请选择具体的情形：",
@@ -166,7 +166,7 @@ def test_administrative_judgment4():
                     "other": {
                         "slot": "situation"
                     },
-                    "user_answer": "虚开增值税发票"
+                    "user_answer": ["虚开增值税发票"]
                 }
             ]
         },

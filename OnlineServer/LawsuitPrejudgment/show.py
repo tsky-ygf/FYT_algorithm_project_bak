@@ -75,10 +75,7 @@ def _show_administrative_next_qa(dialogue_history, dialogue_state, _count):
             st.session_state[btn_click_key] = True
         if btn_click_key in st.session_state:
             last_question_info = next_action["content"]
-            if single_or_multi == "single":
-                last_question_info["user_answer"] = selected_answers[0]
-            else:
-                last_question_info["user_answer"] = selected_answers
+            last_question_info["user_answer"] = selected_answers
 
             if not dialogue_history["question_answers"]:
                 dialogue_history["question_answers"] = []

@@ -149,7 +149,7 @@ class AdministrativePrejudgment(PrejudgmentPipeline):
             return
 
         filled_slot = last_question_answer_info["other"]["slot"]
-        filled_value = last_question_answer_info["user_answer"]
+        filled_value = last_question_answer_info["user_answer"][0]  # TODO: 行政、刑事预判，user_answer是多选时，怎么处理？
         self.context["slots"][filled_slot] = filled_value
 
     def decide_next_action(self, **kwargs) -> str:
@@ -188,7 +188,8 @@ class AdministrativePrejudgment(PrejudgmentPipeline):
             }
 
         if slot == "situation":
-            candidate_answers = _get_situations_by_anyou_and_problem(self.context["slots"]["anyou"], self.context["slots"]["problem"])
+            candidate_answers = _get_situations_by_anyou_and_problem(self.context["slots"]["anyou"],
+                                                                     self.context["slots"]["problem"])
             return {
                 "question": slot2question[slot],
                 "candidate_answers": candidate_answers,
