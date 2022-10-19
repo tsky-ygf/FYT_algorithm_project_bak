@@ -27,13 +27,15 @@ def get_civil_problem_summary():
 
 def _get_problem(problem_id):
     problem_id_mapping_list = read_json_attribute_value(CIVIL_PROBLEM_ID_MAPPING_CONFIG_PATH, "value")
-    return next((item.get("problem") for item in problem_id_mapping_list if str(item.get("id")) == str(problem_id)), None)
+    return next((item.get("problem") for item in problem_id_mapping_list if str(item.get("id")) == str(problem_id)),
+                None)
 
 
 def get_template_by_problem_id(problem_id):
     problem = _get_problem(problem_id)
     df = pd.read_csv(CIVIL_PROBLEM_TEMPLATE_CONFIG_PATH, encoding="utf-8")
-    template = next((row["描述模板"] for index, row in df.iterrows() if str(row["案由名称"]).strip() == str(problem).strip()), "")
+    template = next((row["描述模板"] for index, row in df.iterrows() if str(row["案由名称"]).strip() == str(problem).strip()),
+                    "")
     return {"success": True, "error_msg": "", "value": {"template": template}}
 
 
@@ -48,7 +50,8 @@ def _get_mapped_problem(attribute_value, attribute_name="id"):
         mapped problem.
     """
     problem_id_mapping_list = read_json_attribute_value(CIVIL_PROBLEM_ID_MAPPING_CONFIG_PATH, "value")
-    return next((item.get("mapped_problem") for item in problem_id_mapping_list if str(item.get(attribute_name)) == str(attribute_value)), None)
+    return next((item.get("mapped_problem") for item in problem_id_mapping_list if
+                 str(item.get(attribute_name)) == str(attribute_value)), None)
 
 
 def get_claim_list_by_problem_id(problem_id, fact):
@@ -68,13 +71,15 @@ def get_claim_list_by_problem_id(problem_id, fact):
     return {
         "success": True,
         "error_msg": "",
-        "value": [{"id": idx, "claim": claim, "is_recommended": False} for idx, claim in enumerate(displayed_claim_list)]
+        "value": [{"id": idx, "claim": claim, "is_recommended": False} for idx, claim in
+                  enumerate(displayed_claim_list)]
     }
 
 
 def _get_mapped_problem_id_by_name(problem):
     problem_id_mapping_list = read_json_attribute_value(CIVIL_PROBLEM_ID_MAPPING_CONFIG_PATH, "value")
-    return next((item.get("mapped_id") for item in problem_id_mapping_list if str(item.get("problem")) == str(problem)), None)
+    return next((item.get("mapped_id") for item in problem_id_mapping_list if str(item.get("problem")) == str(problem)),
+                None)
 
 
 def reasoning_graph_result(problem, claim_list, fact, question_answers, factor_sentence_list):
@@ -148,12 +153,45 @@ def reasoning_graph_result(problem, claim_list, fact, question_answers, factor_s
 
 
 def lawsuit_prejudgment(dialogue_history: DialogueHistory, dialogue_state: DialogueState):
-    prejudgment_config = {
-        "log_level": "info",
-        "log_path": "log/lawsuit_prejudgment/",
-        "prejudgment_type": "civil"
+    # init params
+    question_answers = {}
+    if dialogue_history.question_answers:
+        for item in dialogue_history.question_answers:
+            question_answers[item["question"] + ":" + ";".join(item["candidate_answers"])] = ";".join(item["user_answer"])
+
+    if dialogue_state.other:
+        factor_sentence_list = dialogue_state.other.get("factor_sentence_list", [])
+    else:
+        factor_sentence_list = []
+
+    # main process
+    result = reasoning_graph_result(dialogue_state.problem, dialogue_state.claim_list, dialogue_history.user_input,
+                                    question_answers,
+                                    factor_sentence_list)
+
+    # reformat result
+    if result["question_next"]:
+        next_action = {
+            "action_type": "ask",
+            "content": {
+                "question": result["question_next"].split(":")[0],
+                "candidate_answers": result["question_next"].split(":")[1].split(";"),
+                "question_type": "single" if result["question_type"] == "1" else "multiple",
+                "other": None
+            }
+        }
+    else:
+        next_action = {
+            "action_type": "report",
+            "content": result["result"]
+        }
+
+    dialogue_state.other = {
+        "factor_sentence_list": result["factor_sentence_list"]
     }
-    civil_prejudgment = CivilPrejudgment(**prejudgment_config)
-    result = civil_prejudgment(dialogue_history=dialogue_history, dialogue_state=dialogue_state, context=dialogue_state.other)
-    result["success"] = True
-    return result
+    return {
+        "success": True,
+        "dialogue_history": dialogue_history,
+        "dialogue_state": dialogue_state,
+        "next_action": next_action
+    }

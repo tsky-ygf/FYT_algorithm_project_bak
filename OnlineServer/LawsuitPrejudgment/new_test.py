@@ -7,7 +7,7 @@
 """
 import requests
 
-URL = "http://127.0.0.1:8105"
+URL = "http://127.0.0.1:8133"
 
 
 def test_administrative_judgment1():
@@ -244,7 +244,7 @@ def test_civil_judgment2():
             "problem": "婚姻家庭",
             "claim_list": ["请求离婚", "返还彩礼"],
             "other": {
-                "factor_sentence_list":[["","",1],["","",-1]]
+                "factor_sentence_list": [['对方经常家暴', '一方家暴', 1, ''], ['对方经常家暴', '遗弃虐待家庭成员', 1, '']]
             }
         }
     }
@@ -289,7 +289,7 @@ def test_civil_judgment3():
             "problem": "婚姻家庭",
             "claim_list": ["请求离婚", "返还彩礼"],
             "other": {
-                "factor_sentence_list": [["","",1],["","",-1]]
+                "factor_sentence_list": [['对方经常家暴', '一方家暴', 1, ''], ['对方经常家暴', '遗弃虐待家庭成员', 1, '']]
             }
         }
     }
