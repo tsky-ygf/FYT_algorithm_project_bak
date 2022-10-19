@@ -1,3 +1,4 @@
+import json
 import time
 import sys
 import requests
@@ -10,9 +11,10 @@ def similar_case_bug():
     fact = "借钱不还"
     payload = {"problem": "民间借贷纠纷", "claim_list": [], "fact": fact}
     r = requests.post(
-        "http://172.19.82.199:8163/top_k_similar_narrative", json=payload
-    )  # 47.99.90.181
-    print(r.text)
+        "http://0.0.0.0:8162/top_k_similar_narrative", json=payload
+    ).json()  # 47.99.90.181
+    print(type(r))
+    print(json.loads(r)["dids"])
 
 
 if __name__ == '__main__':

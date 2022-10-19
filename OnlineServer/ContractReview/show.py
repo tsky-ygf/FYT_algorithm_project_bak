@@ -76,8 +76,10 @@ def contract_review_main():
     if correct:
         import requests
         from OnlineServer.ContractCorrector.show import corrector_main
+        st.write("文本纠错start")
         r = requests.post("http://127.0.0.1:6598/get_corrected_contract_result", json={"text": text})
         result = r.json()
+        st.write(result)
         corrector_main(text, result)
 
     if run:
