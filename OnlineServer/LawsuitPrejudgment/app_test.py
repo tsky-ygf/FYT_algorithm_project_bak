@@ -10,47 +10,6 @@ import requests
 URL = "http://127.0.0.1:8133"
 
 
-# def test_get_administrative_type():
-#     # 执行被测试程序
-#     resp_json = requests.get(URL + "/get_administrative_type").json()
-#     print(resp_json)
-#
-#     # 验证测试条件
-#     assert resp_json.get("success")
-#     assert resp_json.get("result")
-
-
-# def test_get_administrative_problem_and_situation_by_type_id():
-#     # 准备测试数据
-#     body = {
-#         "type_id": "tax"
-#     }
-#
-#     # 执行被测试程序
-#     resp_json = requests.get(URL + "/get_administrative_problem_and_situation_by_type_id", params=body).json()
-#     print(resp_json)
-#
-#     # 验证测试条件
-#     assert resp_json.get("success")
-#     assert resp_json.get("result")
-
-
-# def test_get_administrative_result():
-#     # 准备测试数据
-#     body = {
-#         "type_id": "tax",
-#         "situation": "逃避税务机关检查"
-#     }
-#
-#     # 执行被测试程序
-#     resp_json = requests.post(URL + "/get_administrative_result", json=body).json()
-#     print(resp_json)
-#
-#     # 验证测试条件
-#     assert resp_json.get("success")
-#     assert resp_json.get("result")
-
-
 def test_get_civil_problem_summary():
     # 执行被测试程序
     resp_json = requests.get(URL + "/get_civil_problem_summary").json()
@@ -181,7 +140,7 @@ def test_administrative_judgment2():
                     "other": {
                         "slot": "anyou"
                     },
-                    "user_answer": "税务处罚预判"
+                    "user_answer": ["税务处罚预判"]
                 }
             ]
         },
@@ -225,7 +184,7 @@ def test_administrative_judgment3():
                     "other": {
                         "slot": "anyou"
                     },
-                    "user_answer": "税务处罚预判"
+                    "user_answer": ["税务处罚预判"]
                 },
                 {
                     "question": "请选择你遇到的问题",
@@ -234,7 +193,7 @@ def test_administrative_judgment3():
                     "other": {
                         "slot": "problem"
                     },
-                    "user_answer": "发票问题"
+                    "user_answer": ["发票问题"]
                 }
             ]
         },
@@ -278,7 +237,7 @@ def test_administrative_judgment4():
                     "other": {
                         "slot": "anyou"
                     },
-                    "user_answer": "税务处罚预判"
+                    "user_answer": ["税务处罚预判"]
                 },
                 {
                     "question": "请选择你遇到的问题",
@@ -287,7 +246,7 @@ def test_administrative_judgment4():
                     "other": {
                         "slot": "problem"
                     },
-                    "user_answer": "发票问题"
+                    "user_answer": ["发票问题"]
                 },
                 {
                     "question": "请选择具体的情形：",
@@ -296,7 +255,7 @@ def test_administrative_judgment4():
                     "other": {
                         "slot": "situation"
                     },
-                    "user_answer": "虚开增值税发票"
+                    "user_answer": ["虚开增值税发票"]
                 }
             ]
         },
@@ -310,6 +269,116 @@ def test_administrative_judgment4():
                     "problem": "发票问题",
                     "situation": None
                 }
+            }
+        }
+    }
+
+    # 执行被测试程序
+    resp_json = requests.post(URL + "/lawsuit_prejudgment", json=body).json()
+    print(resp_json)
+
+    # 验证测试条件
+    assert resp_json
+    assert resp_json.get("success")
+    assert resp_json.get("next_action")
+    assert resp_json["next_action"]["action_type"] == "report"
+    assert "report" in resp_json["next_action"]["content"]
+
+
+def test_civil_judgment1():
+    # 准备测试数据
+    body = {
+        "dialogue_history": {
+            "user_input": "对方经常家暴，我想要离婚。",
+            "question_answers": None
+        },
+        "dialogue_state": {
+            "domain": "civil",
+            "problem": "婚姻家庭",
+            "claim_list": ["请求离婚", "返还彩礼"],
+            "other": None
+        }
+    }
+
+    # 执行被测试程序
+    resp_json = requests.post(URL + "/lawsuit_prejudgment", json=body).json()
+    print(resp_json)
+
+    # 验证测试条件
+    assert resp_json
+    assert resp_json.get("success")
+    assert resp_json.get("next_action")
+    assert resp_json["next_action"]["action_type"] == "ask"
+    assert resp_json["next_action"]["content"]["question"] == "是否存在以下情形？"
+    assert "双方未共同生活" in resp_json["next_action"]["content"]["candidate_answers"]
+
+
+def test_civil_judgment2():
+    # 准备测试数据
+    body = {
+        "dialogue_history": {
+            "user_input": "对方经常家暴，我想要离婚。",
+            "question_answers": [
+                {
+                    "question": "是否存在以下情形？",
+                    "candidate_answers": ["双方未共同生活", "给付彩礼导致给付方生活困难", "双方未登记结婚", "以上都没有"],
+                    "question_type": "multiple",
+                    "other": None,
+                    "user_answer": ["双方未共同生活", "给付彩礼导致给付方生活困难"]
+                }
+            ]
+        },
+        "dialogue_state": {
+            "domain": "civil",
+            "problem": "婚姻家庭",
+            "claim_list": ["请求离婚", "返还彩礼"],
+            "other": {
+                "factor_sentence_list": [['对方经常家暴', '一方家暴', 1, ''], ['对方经常家暴', '遗弃虐待家庭成员', 1, '']]
+            }
+        }
+    }
+
+    # 执行被测试程序
+    resp_json = requests.post(URL + "/lawsuit_prejudgment", json=body).json()
+    print(resp_json)
+
+    # 验证测试条件
+    assert resp_json
+    assert resp_json.get("success")
+    assert resp_json.get("next_action")
+    assert resp_json["next_action"]["action_type"] == "ask"
+    assert resp_json["next_action"]["content"]["question"] == "双方是否办理结婚登记？"
+    assert "是" in resp_json["next_action"]["content"]["candidate_answers"]
+
+
+def test_civil_judgment3():
+    # 准备测试数据
+    body = {
+        "dialogue_history": {
+            "user_input": "对方经常家暴，我想要离婚。",
+            "question_answers": [
+                {
+                    "question": "是否存在以下情形？",
+                    "candidate_answers": ["双方未共同生活", "给付彩礼导致给付方生活困难", "双方未登记结婚", "以上都没有"],
+                    "question_type": "multiple",
+                    "other": None,
+                    "user_answer": ["双方未共同生活", "给付彩礼导致给付方生活困难"]
+                },
+                {
+                    "question": "双方是否办理结婚登记？",
+                    "candidate_answers": ["是","否"],
+                    "question_type": "single",
+                    "other": None,
+                    "user_answer": ["是"]
+                }
+            ]
+        },
+        "dialogue_state": {
+            "domain": "civil",
+            "problem": "婚姻家庭",
+            "claim_list": ["请求离婚", "返还彩礼"],
+            "other": {
+                "factor_sentence_list": [['对方经常家暴', '一方家暴', 1, ''], ['对方经常家暴', '遗弃虐待家庭成员', 1, '']]
             }
         }
     }
