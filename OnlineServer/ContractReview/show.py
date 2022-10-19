@@ -10,6 +10,7 @@ import re
 import streamlit as st
 from annotated_text import annotated_text
 from docx import Document
+import json
 
 from loguru import logger
 
@@ -40,7 +41,7 @@ def get_data(_file):
 
 def contract_review_main():
     import requests
-    contract_type_list = requests.get("http://127.0.0.1:8112/get_contract_type").json()["result"]
+    contract_type_list = requests.get("http://127.0.0.1:8131/get_contract_type").json()["result"]
 
     contract_mapping = {one["contract_type"]: one["type_id"] for one in contract_type_list}
 
@@ -49,7 +50,7 @@ def contract_review_main():
                                          key="合同类型")
     mode_type = st.sidebar.selectbox("请选择上传数据格式", ["docx", "文本", "txt"], key="text")
 
-    usr_list = requests.get("http://127.0.0.1:8112/get_user_standpoint").json()["result"]
+    usr_list = requests.get("http://127.0.0.1:8131/get_user_standpoint").json()["result"]
     usr_mapping = {one["standpoint"]: one["id"] for one in usr_list}
 
     usr = st.sidebar.selectbox("请选择立场", [usr["standpoint"] for usr in usr_list], key="中立方")
@@ -76,14 +77,12 @@ def contract_review_main():
     if correct:
         import requests
         from OnlineServer.ContractCorrector.show import corrector_main
-        st.write("文本纠错start")
         r = requests.post("http://127.0.0.1:6598/get_corrected_contract_result", json={"text": text})
-        result = r.json()
-        st.write(result)
+        result = json.loads(r.json())
         corrector_main(text, result)
 
     if run:
-        url = "http://127.0.0.1:8112/get_contract_review_result"
+        url = "http://127.0.0.1:8131/get_contract_review_result"
         req_data = {
             "contract_type_id": contract_mapping[contract_type],
             "user_standpoint_id": usr_mapping[usr],

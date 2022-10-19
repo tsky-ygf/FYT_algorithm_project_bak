@@ -121,4 +121,4 @@ async def _get_text_from_file_link_path(file_link_input: FileLinkInput):
 
 if __name__ == "__main__":
     # 日志设置
-    uvicorn.run('OnlineServer.ContractReview.server:app', host="0.0.0.0", port=8112, reload=False, workers=1)
+    uvicorn.run('OnlineServer.ContractReview.server:app', host="0.0.0.0", port=8131, reload=False, workers=1)
