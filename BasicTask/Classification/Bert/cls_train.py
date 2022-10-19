@@ -5,8 +5,11 @@
 # @File    : cls_train.py
 # @Software: PyCharm
 # import os
+import pandas as pd
 import torch
 from Tools.train_tool import BaseTrainTool
+from Tools.data_pipeline import InputExample
+
 from transformers import AutoConfig, AutoTokenizer, AutoModelForSequenceClassification
 
 
@@ -15,19 +18,25 @@ from transformers import AutoConfig, AutoTokenizer, AutoModelForSequenceClassifi
 
 class TrainClassification(BaseTrainTool):
     def init_model(self):
-        tokenizer = AutoTokenizer.from_pretrained(self.config["pre_train_tokenizer"])
-        # model = MultiLabelClsModel(self.config)
-        model_config = AutoConfig.from_pretrained(self.config["pre_train_model"], num_labels=self.config["num_labels"])
+        tokenizer = AutoTokenizer.from_pretrained(self.model_args.tokenizer_name)
+        model_config = AutoConfig.from_pretrained(self.model_args.config_name, self.model_args.num_labels)
         model = AutoModelForSequenceClassification.from_pretrained(
-            self.config["pre_train_model"],
+            self.model_args.model_name_or_path,
             config=model_config,
-            from_tf=False,
         )
-
         return tokenizer, model
 
     def create_examples(self, data_path, mode):
-        pass
+        self.logger.info("Creating {} examples".format(mode))
+        self.logger.info("Creating examples from {} ".format(data_path))
+        examples = []
+
+        data_df = pd.read_csv(data_path)
+        for index, row in data_df.iterrows():
+            print(row)
+            exit()
+            # examples.append(InputExample(guid=guid, texts=text, label=label))
+        return examples
 
 
 if __name__ == '__main__':
