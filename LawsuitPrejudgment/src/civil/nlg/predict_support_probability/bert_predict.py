@@ -21,6 +21,10 @@ from __future__ import print_function
 import traceback
 import configparser
 
+import os
+# 设置只使用CPU
+os.environ["CUDA_VISIBLE_DEVICES"]="-1"
+
 import tensorflow.compat.v1 as tf
 tf.disable_v2_behavior()
 from LawsuitPrejudgment.src.civil.utils.config_loader import prob_ps_desc

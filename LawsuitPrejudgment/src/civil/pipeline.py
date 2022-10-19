@@ -250,7 +250,6 @@ def _predict_by_factor(problem, claim_list, fact, question_answers, factor_sente
             if prob_problem_suqiu in ['交通事故_违章扣分', '劳动社保_确认劳动劳务关系', '知识产权_确认著作权归属']:
                 possibility_support = None
             else:
-                # possibility_support = None
                 possibility_support = predict(problem, prob_suqiu, inputs)
             logging.info('%s support probability: %s' % (prob_suqiu, possibility_support))
 
