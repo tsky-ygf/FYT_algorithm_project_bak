@@ -23,6 +23,7 @@ from ProfessionalSearch.service_use.similar_case_retrival.similar_case_retrieval
     get_filter_conditions_of_case,
     _get_case_result,
 )
+from ProfessionalSearch.src.similar_case_retrival.similar_case.util import desensitization
 from Utils.http_response import response_successful_result, response_failed_result
 
 app = FastAPI()
@@ -172,44 +173,51 @@ def get_similar_case(search_query: Similar_case_input):
     @problem: 用户输入的纠纷类型
     @claim_list: 诉求类型
     """
-    # try:
-    if search_query is not None:
-        fact = search_query.fact
-        problem = search_query.problem
-        claim_list = search_query.claim_list
-        (
-            doc_id_list,
-            sim_list,
-            # win_los_list,
-            reason_name_list,
-            appeal_name_list,
-            tags_list,
-            keywords,
-            pubDate_list,
-        ) = predict_fn_similar_cases(fact, problem, claim_list)
+    try:
+        if search_query is not None:
+            fact = search_query.fact
+            problem = search_query.problem
+            claim_list = search_query.claim_list
+            (
+                doc_id_list,
+                sim_list,
+                # win_los_list,
+                reason_name_list,
+                appeal_name_list,
+                tags_list,
+                keywords,
+                pubDate_list,
+            ) = predict_fn_similar_cases(fact, problem, claim_list)
 
-        return json.dumps(
-            {
-                "dids": doc_id_list,
-                "sims": sim_list,
-                # "winLos": win_los_list,
-                "reasonNames": reason_name_list,
-                "appealNames": appeal_name_list,
-                "tags": tags_list,
-                "pubDates": pubDate_list,
-                "keywords": keywords,
-                "error_msg": "",
-                "status": 0,
-            },
-            ensure_ascii=False,
-        )
+            return json.dumps(
+                {
+                    "dids": doc_id_list,
+                    "sims": sim_list,
+                    # "winLos": win_los_list,
+                    "reasonNames": reason_name_list,
+                    "appealNames": appeal_name_list,
+                    "tags": tags_list,
+                    "pubDates": pubDate_list,
+                    "keywords": keywords,
+                    "error_msg": "",
+                    "status": 0,
+                },
+                ensure_ascii=False,
+            )
 
-    else:
-        return json.dumps(
-            {"error_msg": "data is None", "status": 1}, ensure_ascii=False
-        )
-    # except Exception as e:
-    #     return response_failed_result("error:" + repr(e))
+        else:
+            return json.dumps(
+                {"error_msg": "data is None", "status": 1}, ensure_ascii=False
+            )
+    except Exception as e:
+        return response_failed_result("error:" + repr(e))
+
+
+@app.post("/desensitization")
+def get_text_desen(text: str) -> str:
+    res = ''
+    res = desensitization(text)
+    return res
 
 
 if __name__ == "__main__":
@@ -217,7 +225,7 @@ if __name__ == "__main__":
     uvicorn.run(
         "OnlineServer.ProfessionalSearch.server:app",
         host="0.0.0.0",
-        port=8162,
+        port=8132,
         reload=False,
         workers=1,
     )
