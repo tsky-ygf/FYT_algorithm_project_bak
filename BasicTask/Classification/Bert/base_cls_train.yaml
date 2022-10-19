@@ -7,7 +7,7 @@ TrainingArguments:
   eval_batch_size: 128
   lr_scheduler_type: "linear"
   learning_rate: 0.00005
-  num_train_epochs: 4
+  num_train_epochs: 20
   accelerator_params:
     fp16: True
 
