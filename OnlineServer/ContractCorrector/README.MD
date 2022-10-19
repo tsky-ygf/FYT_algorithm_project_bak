@@ -22,4 +22,4 @@ kill进程: `ps -ef | grep ContractCorrector.server | awk {'print $2'} |xargs ki
 pass
 
 ## 6. 测试页面
-http://172.19.82.199:6598/
+http://172.19.82.199:8135/

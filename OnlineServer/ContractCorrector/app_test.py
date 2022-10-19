@@ -25,7 +25,7 @@ error_sentences = [
 
     ]
 for sentence in error_sentences:
-    url = 'http://172.19.82.227:6598/get_corrected_contract_result'
+    url = 'http://172.19.82.227:8150/get_corrected_contract_result'
     payload = json.dumps({
     "text": sentence
     })
