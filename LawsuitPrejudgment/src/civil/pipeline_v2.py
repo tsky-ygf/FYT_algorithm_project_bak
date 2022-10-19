@@ -109,38 +109,7 @@ def _predict_by_factor(problem, claim_list, fact, question_answers, factor_sente
                 suqiu_factor[f] = v
 
     # 3. 特征匹配
-    logging.info('5.3. factor match')
-    factor_sentence_list = {}
-    if len(factor_sentence_list_) > 0 or len(question_answers) > 0:
-        # KIWI:不是首轮，已经匹配过特征，直接取出来就行。
-        for factor_flags in factor_sentence_list_:
-            if len(factor_flags) == 3:
-                # 适配第三方app的参数问题
-                factor, flag, _ = factor_flags
-                sentence_matched = None
-            else:
-                sentence_matched, factor, flag, _ = factor_flags
-            factor_sentence_list[factor] = [sentence_matched, flag]
-    else:
-        # 为什么在所有的logic_problem_suqius中匹配特征？
-        for problem in set([ps.split('_')[0] for ps in logic_problem_suqius]):
-            sentence_factor_dict = single_case_match(fact, problem, None)  # 返回字典：{factor: [匹配的句子，0/1/-1]}
-            for factor, sentence in sentence_factor_dict.items():
-                sentence_matched, flag = sentence
-                factor_sentence_list[factor] = [sentence_matched, flag]
 
-                # KIWI:我理解是，如['金融借贷', '个人之间借贷','企业之间借贷','个人与企业之间借贷']是互斥的。
-                # KIWI:正向匹配到其中一个特征，则设置其余特征为负向匹配。
-                if flag == -1:
-                    continue
-                if problem not in match_factor_group:
-                    continue
-                # problem是劳动社保，借贷纠纷之一，特定factor全部设置为-1 ？
-                for factor_group in match_factor_group[problem]:
-                    if factor in factor_group:
-                        for f in factor_group:
-                            if f not in factor_sentence_list:
-                                factor_sentence_list[f] = [sentence_matched, -1]
 
     # 4. 设置树的状态, 并提取下一个问题
     logging.info('5.4. create tree and get next question')
@@ -348,7 +317,40 @@ class CivilPrejudgment(PrejudgmentPipeline):
             }
 
     def nlu(self, **kwargs):
-        raise NotImplemented
+        # factor_sentence_list_: List -> factor_sentence_list: Dict
+        logging.info('5.3. factor match')
+        factor_sentence_list_ = self.context["factor_sentence_list"]
+        factor_sentence_list = {}
+        if factor_sentence_list_ or self.dialogue_history.question_answers:
+            # KIWI:不是首轮，已经匹配过特征，直接取出来就行。
+            for factor_flags in factor_sentence_list_:
+                if len(factor_flags) == 3:
+                    # 适配第三方app的参数问题
+                    factor, flag, _ = factor_flags
+                    sentence_matched = None
+                else:
+                    sentence_matched, factor, flag, _ = factor_flags
+                factor_sentence_list[factor] = [sentence_matched, flag]
+        else:
+            # 为什么在所有的logic_problem_suqius中匹配特征？
+            for problem in set([ps.split('_')[0] for ps in logic_problem_suqius]):
+                sentence_factor_dict = single_case_match(fact, problem, None)  # 返回字典：{factor: [匹配的句子，0/1/-1]}
+                for factor, sentence in sentence_factor_dict.items():
+                    sentence_matched, flag = sentence
+                    factor_sentence_list[factor] = [sentence_matched, flag]
+
+                    # KIWI:我理解是，如['金融借贷', '个人之间借贷','企业之间借贷','个人与企业之间借贷']是互斥的。
+                    # KIWI:正向匹配到其中一个特征，则设置其余特征为负向匹配。
+                    if flag == -1:
+                        continue
+                    if problem not in match_factor_group:
+                        continue
+                    # problem是劳动社保，借贷纠纷之一，特定factor全部设置为-1 ？
+                    for factor_group in match_factor_group[problem]:
+                        if factor in factor_group:
+                            for f in factor_group:
+                                if f not in factor_sentence_list:
+                                    factor_sentence_list[f] = [sentence_matched, -1]
 
     def update_context(self, **kwargs):
         raise NotImplemented
