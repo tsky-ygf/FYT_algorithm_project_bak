@@ -337,7 +337,7 @@ class BaseTrainTool:
                 self.post_process_function(batch, output)
 
                 #  设置进度条左边显示的信息
-                process_bar.set_description("Train epoch {}".format(epoch))
+                process_bar.set_description("Eval epoch {}".format(epoch))
                 #  设置进度条右边显示的信息
                 process_bar.set_postfix(eval_loss=eval_loss.item())
 

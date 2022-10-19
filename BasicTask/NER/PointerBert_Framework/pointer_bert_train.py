@@ -122,7 +122,6 @@ class TrainPointerBert(BaseTrainTool):
         return outputs, loss
 
     def eval_epoch(self):
-
         eval_loss_res = 0
         cir = SpanEntityScore()
         for step, batch in enumerate(self.eval_dataloader):
