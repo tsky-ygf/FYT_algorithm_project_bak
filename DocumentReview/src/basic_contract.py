@@ -164,21 +164,21 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
         self.data = ""
         self.schema_dict = dict()
         # =================================
-        # _labels, _common2alias_dict = _read_common_schema('DocumentReview/Config/config_common.csv', self.contract_type_list)
+        _labels, _common2alias_dict = _read_common_schema('DocumentReview/Config/config_common.csv', self.contract_type_list)
         # =================================
         for contract_type in self.contract_type_list:
             schema = self.config_dict[contract_type]['schema'].tolist()
             # ================================================
             # remove common schema from uie schemas
             # note: 如果要运行basic_contract.py 需要注释以下代码
-            # common2alias = _common2alias_dict[contract_type]
-            # common_schemas = ["标题",'甲方','甲方身份证号/统一社会信用代码','甲方地址','甲方联系方式','甲方法定代表人/授权代表人',
-            #   '乙方','乙方身份证号/统一社会信用代码','乙方地址','乙方联系方式','乙方法定代表人/授权代表',
-            #   '开户名称','账号','开户行','鉴于条款','合同生效','附件','签字和盖章','签订日期','签订地点']
-            # common_schemas = [common2alias[csche] for csche in common_schemas]
-            # for csche in common_schemas:
-            #     if csche in schema:
-            #         schema.remove(csche)
+            common2alias = _common2alias_dict[contract_type]
+            common_schemas = ["标题",'甲方','甲方身份证号/统一社会信用代码','甲方地址','甲方联系方式','甲方法定代表人/授权代表人',
+              '乙方','乙方身份证号/统一社会信用代码','乙方地址','乙方联系方式','乙方法定代表人/授权代表',
+              '开户名称','账号','开户行','鉴于条款','合同生效','附件','签字和盖章','签订日期','签订地点']
+            common_schemas = [common2alias[csche] for csche in common_schemas]
+            for csche in common_schemas:
+                if csche in schema:
+                    schema.remove(csche)
             # ================================================
             self.schema_dict[contract_type] = [sche for sche in schema if sche != ""]
 
