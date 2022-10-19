@@ -155,10 +155,26 @@ if __name__ == "__main__":
     # fun1()  # 查看标注
     # fun2()  # 验证连续的标签
     # fun3() # 检查重叠
+    def a_new_decorator(a_func):
 
-    text = read_docx_file('data/DocData/maimai/包子馅供货合同.docx')
-    print(len(text))
-    print(text[:256])
-    print('-'*50)
-    print(text[-256:])
+        def wrapTheFunction():
+            print("I am doing some boring work before executing a_func()")
+
+            a_func()
+
+            print("I am doing some boring work after executing a_func()")
+
+        return wrapTheFunction
+
+
+    @a_new_decorator
+    def a_function_requiring_decoration():
+        """Hey you! Decorate me!"""
+        print("I am the function which needs some decoration to "
+              "remove my foul smell")
+
+
+    a_function_requiring_decoration()
+    print(a_function_requiring_decoration.__name__)
+
     pass
