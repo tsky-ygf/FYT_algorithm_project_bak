@@ -556,6 +556,7 @@ def check_illegal(row, extraction_con, res_dict):
     res_dict["风险点"] = row["risk statement"]
     if row['pos keywords'] in text:
         res_dict["审核结果"] = "不通过"
+        res_dict['法律建议'] = row['jiaoyan error advice']
     else:
         res_dict["审核结果"] = "通过"
         res_dict["法律建议"] = ''
