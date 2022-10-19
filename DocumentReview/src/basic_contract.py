@@ -349,7 +349,9 @@ class BasicUIEAcknowledgement(BasicAcknowledgement):
                 except Exception:
                     pass
             elif row['neg rule'] == "未识别，不作审核" or row['neg rule'] == "未识别，不做审核":
-                res_dict = {}
+                res_dict = {'审核结果':'通过',
+                            '内容':'未识别，不做审核'
+                            }
             else:
                 res_dict["审核结果"] = "不通过"
                 res_dict["内容"] = "没有该项目内容"
