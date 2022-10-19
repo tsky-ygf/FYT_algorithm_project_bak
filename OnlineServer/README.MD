@@ -191,11 +191,11 @@
 
 相应参数:
 
-| Param               | Type    | Description |
-|---------------------|---------|-------------|
-| success              | boolean | 是否成功调用     |
+| Param     | Type    | Description  |
+|-----------|---------|--------------|
+| success   | boolean | 是否成功调用       |
 | error_msg | string  | 失败时的错误信息     |
-| value | List    | 数据列表     |
+| value     | List    | 数据列表         |
 
 value的内容如下:
 
@@ -212,17 +212,17 @@ value的内容如下:
 
 请求参数:
 
-| Param               | Type    | Description |
-|---------------------|---------|-------------|
-| problem_id              | int | 纠纷id     |
+| Param      | Type | Description |
+|------------|------|-------------|
+| problem_id | int  | 纠纷id        |
 
 响应参数:
 
-| Param               | Type    | Description |
-|---------------------|---------|-------------|
-| success              | boolean | 是否成功调用     |
-| error_msg | string  | 失败时的错误信息     |
-| value | Dict    | 数据字典     |
+| Param     | Type    | Description |
+|-----------|---------|-------------|
+| success   | boolean | 是否成功调用      |
+| error_msg | string  | 失败时的错误信息    |
+| value     | Dict    | 数据字典        |
 
 value的内容如下:
 
@@ -234,20 +234,20 @@ value的内容如下:
 请求参数:
 
 
-| Param               | Type    | Description |
-|---------------------|---------|-------------|
-| problem_id              | int | 纠纷id     |
-| fact              | string | 事实描述     |
+| Param      | Type   | Description |
+|------------|--------|-------------|
+| problem_id | int    | 纠纷id        |
+| fact       | string | 事实描述        |
 
 
 响应参数:
 
 
-| Param               | Type    | Description |
-|---------------------|---------|-------------|
-| success              | boolean | 是否成功调用     |
-| error_msg | string  | 失败时的错误信息     |
-| value | List    | 数据列表     |
+| Param     | Type    | Description |
+|-----------|---------|-------------|
+| success   | boolean | 是否成功调用      |
+| error_msg | string  | 失败时的错误信息    |
+| value     | List    | 数据列表        |
 
 value的内容如下:
     
@@ -263,10 +263,10 @@ value的内容如下:
 请求参数:
 
 
-| Param               | Type    | Description |
-|---------------------|---------|-------------|
-| dialogue_history              | Dict | 对话历史     |
-| dialogue_state              | Dict | 对话状态     |
+| Param            | Type | Description |
+|------------------|------|-------------|
+| dialogue_history | Dict | 对话历史        |
+| dialogue_state   | Dict | 对话状态        |
 
 dialogue_history的内容如下:
 * user_input: string, 事实描述
@@ -286,12 +286,12 @@ dialogue_state的内容如下:
 响应参数:
 
 
-| Param               | Type    | Description |
-|---------------------|---------|-------------|
-| success              | boolean | 是否成功调用     |
-| dialogue_history | Dict  | 对话历史     |
-| dialogue_state | Dict    | 对话状态     |
-| next_action | Dict    | 下一次行动的信息     |
+| Param            | Type    | Description |
+|------------------|---------|-------------|
+| success          | boolean | 是否成功调用      |
+| dialogue_history | Dict    | 对话历史        |
+| dialogue_state   | Dict    | 对话状态        |
+| next_action      | Dict    | 下一次行动的信息    |
 
 next_action的内容如下:
     
