@@ -119,7 +119,7 @@ def extract_name_hanlp(text: str) -> list:
 def extract_name_LTP(text: str) -> list:
     from ltp import LTP
 
-    ltp = LTP()  # 默认加载 Small 模型，下载的路径是：~/.cache/torch/ltp
+    ltp = LTP(pretrained_model_name_or_path='model/search/ltp/small', use_auth_token=True, local_files_only=True)  # 默认加载 Small 模型，下载的路径是：~/.cache/torch/ltp
     cws, pos, ner = ltp.pipeline([text], tasks=["cws", "pos", "ner"]).to_tuple()
     print("ner", ner)
     nh_user_list = []
