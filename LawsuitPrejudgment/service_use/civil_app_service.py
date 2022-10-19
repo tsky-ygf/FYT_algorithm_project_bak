@@ -148,4 +148,12 @@ def reasoning_graph_result(problem, claim_list, fact, question_answers, factor_s
 
 
 def lawsuit_prejudgment(dialogue_history: DialogueHistory, dialogue_state: DialogueState):
-    pass
+    prejudgment_config = {
+        "log_level": "info",
+        "log_path": "log/lawsuit_prejudgment/",
+        "prejudgment_type": "civil"
+    }
+    civil_prejudgment = CivilPrejudgment(**prejudgment_config)
+    result = civil_prejudgment(dialogue_history=dialogue_history, dialogue_state=dialogue_state, context=dialogue_state.other)
+    result["success"] = True
+    return result
