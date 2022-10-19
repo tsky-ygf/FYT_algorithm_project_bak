@@ -11,7 +11,7 @@
 ## 2. 接口在线文档
 内网地址: "http://172.19.82.227:8134/docs"
 
-外网地址: "http://101.69.229.227:8134/docs"
+外网地址: "http://101.69.229.138:8134/docs"
 
 ## 3. 接口测试
 使用`pytest`进行接口测试，测试文件为`OnlineServer/IntelligentConsultation/app_test.py`
