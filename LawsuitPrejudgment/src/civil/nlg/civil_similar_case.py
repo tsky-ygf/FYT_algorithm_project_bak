@@ -5,6 +5,8 @@
 @Time    : 3/9/2022 12:12 
 @Desc    : None
 """
+import json
+
 import pandas as pd
 import requests
 
@@ -259,13 +261,16 @@ class RecentCivilSimilarCase:
 
     def get_similar_cases(self):
         try:
-            url = "http://127.0.0.1:5011/top_k_similar_narrative"
+            url = "http://127.0.0.1:8132/top_k_similar_narrative"
             body = {
                 "fact": str(self.fact) + " " + self.problem + " " + "".join(self.claim_list),
                 "problem": self.problem,
                 "claim_list": self.claim_list
             }
             resp_json = requests.post(url, json=body).json()
+            # 接口返回的是str,所以处理了下。
+            if isinstance(resp_json, str):
+                resp_json = json.loads(resp_json)
             return self._get_short_document(resp_json)
         except Exception as e:
             logging.exception(repr(e))

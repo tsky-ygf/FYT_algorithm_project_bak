@@ -11,7 +11,7 @@ import requests
 
 
 def get_filter_conditions():
-    url = "http://0.0.0.0:8162/get_filter_conditions_of_law"
+    url = "http://0.0.0.0:8132/get_filter_conditions_of_law"
     resp_json = requests.get(url).json()
     print(type(resp_json))
     print(resp_json)
@@ -27,7 +27,7 @@ def get_filter_conditions():
 
 def search_laws():
     url = "http://101.69.229.138:8135/search_laws"
-    url = "http://0.0.0.0:8162/search_laws"
+    url = "http://0.0.0.0:8132/search_laws"
     body = {
         "query": "侵权",
         "filter_conditions": {
@@ -65,6 +65,6 @@ def get_law_by_law_id():
 
 
 if __name__ == "__main__":
-    get_filter_conditions()
+    # get_filter_conditions()
     search_laws()
     # get_law_by_law_id()

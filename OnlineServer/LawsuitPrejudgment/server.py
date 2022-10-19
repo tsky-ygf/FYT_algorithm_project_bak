@@ -165,4 +165,4 @@ def _lawsuit_prejudgment(param: DialogueInput):
 
 
 if __name__ == '__main__':
-    uvicorn.run('OnlineServer.LawsuitPrejudgment.server:app', host="0.0.0.0", port=8105, reload=False, workers=1)
+    uvicorn.run('OnlineServer.LawsuitPrejudgment.server:app', host="0.0.0.0", port=8133, reload=False, workers=1)
