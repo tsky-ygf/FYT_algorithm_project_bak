@@ -14,7 +14,7 @@ def corrector_main(text, result):
             error_text = ""
             for err in result['detail_info']:
                 error_text += err[0] + "===>" + err[1] + "\n"
-            st.write(error_text)
+            #st.write(error_text)
             error_list.append(error_text)
         res_dict = {"原始文本": text, "纠错后的文本": result['corrected_pred'], "错别字": error_list}
         my_df = pd.DataFrame.from_dict(res_dict)
