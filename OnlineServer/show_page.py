@@ -70,7 +70,7 @@ def welcome():
     st.markdown("* [测试接口文档](http://172.19.82.227:8105/docs)")
 
     st.markdown("#### 智能咨询")
-    st.markdown("* [测试接口文档](http://172.19.82.227:8130/docs)")
+    st.markdown("* [测试接口文档](http://172.19.82.227:8134/docs)")
 
 
 app = MultiApp()
