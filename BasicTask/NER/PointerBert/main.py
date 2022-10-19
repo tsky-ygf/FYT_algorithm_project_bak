@@ -75,7 +75,7 @@ def main(args):
 
     model = PointerNERBERT(args).to(args.device)
     # ===============================================================================
-    state = torch.load("model/PointerBert/PBert1014_common_all_20sche.pt")
+    state = torch.load("model/PointerBert/PBert1014_common_all_20sche_auged.pt")
     model.load_state_dict(state['model_state'])
     # ===============================================================================
 
@@ -172,13 +172,12 @@ def main(args):
         f1 = score['f1']
         print("epoch:", e, "  p: {0}, r: {1}, f1: {2}".format(score['acc'], score['recall'], score['f1']))
         pprint(class_info)
-        assert False
         if f1 > best_f1:
             print("f1 score increased  {0}==>{1}".format(best_f1, f1))
             best_f1 = f1
             PATH = args.model_save_path
             state = {'model_state': model.state_dict(), 'e': e, 'optimizer': optimizer.state_dict()}
-            # torch.save(state, PATH)
+            torch.save(state, PATH)
             # 加载
             # PATH = './model.pth'  # 定义模型保存路径
             # state = torch.load(PATH, map_location="cpu")
@@ -196,7 +195,7 @@ if __name__ == '__main__':
     parser.add_argument("--local_rank", type=int, default=-1, help="For distributed training: local_rank")
     parser.add_argument("--do_train", default=True, type=bool)
     parser.add_argument("--is_inference", default=False, type=bool)
-    parser.add_argument("--model_save_path", default='model/PointerBert/PBert1014_common_all_20sche_auged.pt')
+    parser.add_argument("--model_save_path", default='model/PointerBert/PBert1018_common_all_20sche_auged2.pt')
     parser.add_argument("--batch_size", default=8, type=int, help="Batch size per GPU/CPU for training.")
     parser.add_argument("--learning_rate", default=5e-5, type=float, help="The initial learning rate for Adam.")
     parser.add_argument("--train_path", default=None, type=str, help="The path of train set.")
@@ -222,8 +221,8 @@ if __name__ == '__main__':
                         help="The path of model parameters for initialization.")
     args = parser.parse_args()
 
-    args.train_path = 'data/data_src/common_all/train.json'
-    args.dev_path = 'data/data_src/common_all/dev.json'
+    args.train_path = 'data/data_src/common_aug/train.json'
+    args.dev_path = 'data/data_src/common_aug/dev.json'
     args.model = 'model/language_model/chinese-roberta-wwm-ext'
     labels, alias2label = read_config_to_label(args, is_long=False)
     args.labels = labels
@@ -231,4 +230,4 @@ if __name__ == '__main__':
 
     main(args)
     # export PYTHONPATH=$(pwd):$PYTHONPATH
-    # nohup python -u BasicTask/NER/PointerBert/main.py > log/PointerBert/pBert_1014_common_all_20sche_auged.log 2>&1 &
+    # nohup python -u BasicTask/NER/PointerBert/main.py > log/PointerBert/pBert_1018_common_all_20sche_auged2.log 2>&1 &

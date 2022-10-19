@@ -8,6 +8,7 @@
 # 读取docx 文件
 import json
 import os
+import random
 import re
 import pandas as pd
 from docx import Document
@@ -31,16 +32,14 @@ def read_docx_file(docx_path):
 
 
 def gen_fake_by_template():
-    with open('data/data_src/data_aug/template.json', 'r', encoding='utf-8') as f:
+    with open('data/data_src/data_aug/template2.json', 'r', encoding='utf-8') as f:
         line = f.readlines()[0]
         template_text = json.loads(line)['text']
 
-    print(template_text)
-    assert False
 
-    W = open('data/data_src/data_aug/data_auged.json', 'w', encoding='utf-8')
+    W = open('data/data_src/data_aug/data_auged2.json', 'w', encoding='utf-8')
     fake_data = pd.read_csv('data/data_src/data_aug/faker_data.csv').values
-    for i in range(200, len(fake_data),2):
+    for i in range(0, len(fake_data)-200,2):
         name = str(fake_data[i][1])
         idcard = str(fake_data[i][2])
         address = str(fake_data[i][3])
@@ -50,38 +49,49 @@ def gen_fake_by_template():
         address2 = str(fake_data[i+1][3])
         phone2 = str(fake_data[i+1][4])
 
+        # 需要注意顺序
         entities = []
-        text = template_text.replace('[NAME1]',name)
-        index = text.index(name)
-        entities.append({'label':'甲方','start_offset':index,'end_offset':index+len(name)})
-
-        text = text.replace('[NAME2]',name2)
+        text = template_text.replace('[NAME2]', name2)
         index = text.index(name2)
         entities.append({'label': '乙方', 'start_offset': index, 'end_offset': index + len(name2)})
-
-        text = text.replace('[ID1]', idcard)
-        index = text.index(idcard)
-        entities.append({'label': '甲方身份证号/统一社会信用代码', 'start_offset': index, 'end_offset': index + len(idcard)})
 
         text = text.replace('[ID2]', idcard2)
         index = text.index(idcard2)
         entities.append({'label': '乙方身份证号/统一社会信用代码', 'start_offset': index, 'end_offset': index + len(idcard2)})
 
-        text = text.replace('[ADDR1]', address)
-        index = text.index(address)
-        entities.append({'label': '甲方地址', 'start_offset': index, 'end_offset': index + len(address)})
+        r = random.random()
+        if r > 0.7:
+            text = text.replace('（供货商）', '（供方）')
+        elif 0.5 < r < 0.6:
+            text = text.replace('（供货商）', '（卖方）')
+
+        text = text.replace('[NAME1]',name)
+        index = text.index(name)
+        entities.append({'label':'甲方','start_offset':index,'end_offset':index+len(name)})
+
+        text = text.replace('[ID1]', idcard)
+        index = text.index(idcard)
+        entities.append({'label': '甲方身份证号/统一社会信用代码', 'start_offset': index, 'end_offset': index + len(idcard)})
+
+        text = text.replace('[NAME3]', fake_data[i + 3][1])
+
+        text = text.replace('[CALL2]', phone2)
+        index = text.index(phone2)
+        entities.append({'label': '乙方联系方式', 'start_offset': index, 'end_offset': index + len(phone2)})
 
         text = text.replace('[ADDR2]', address2)
         index = text.index(address2)
         entities.append({'label': '乙方地址', 'start_offset': index, 'end_offset': index + len(address2)})
 
+        text = text.replace('[NAME4]', fake_data[i + 5][1])
+
         text = text.replace('[CALL1]', phone)
         index = text.index(phone)
         entities.append({'label': '甲方联系方式', 'start_offset': index, 'end_offset': index + len(phone)})
 
-        text = text.replace('[CALL2]', phone2)
-        index = text.index(phone2)
-        entities.append({'label': '乙方联系方式', 'start_offset': index, 'end_offset': index + len(phone2)})
+        text = text.replace('[ADDR1]', address)
+        index = text.index(address)
+        entities.append({'label': '甲方地址', 'start_offset': index, 'end_offset': index + len(address)})
 
         W.write(json.dumps({'id':i, 'text':text, 'entities':entities}, ensure_ascii=False)+'\n')
 
@@ -90,7 +100,7 @@ def gen_fake_by_template():
 
 def divided():
     import numpy as np
-    file = 'data/data_src/data_aug/data_auged.json'
+    file = 'data/data_src/data_aug/data_auged2.json'
     to_path = 'data/data_src/common_aug'
 
     with open(file, 'r', encoding='utf-8') as f:
@@ -98,6 +108,7 @@ def divided():
     l = len(data)
     print("samples number", l)
     arr_index = list(range(l))
+    random.shuffle(arr_index)
 
     p = int(l * 0.81)
     train_index = arr_index[:p]
@@ -117,11 +128,12 @@ def divided():
 
 
 if __name__ == "__main__":
-    # text = read_docx_file('data/data_src/data_aug/template.docx')
+    # text = read_docx_file('data/data_src/data_aug/template2.docx')
     # print(text)
-    # with open('data/data_src/data_aug/template.json', 'w', encoding='utf-8') as f:
+    # print(len(text))
+    # with open('data/data_src/data_aug/template2.json', 'w', encoding='utf-8') as f:
     #     text = json.dumps({'text':text}, ensure_ascii=False)
     #     f.write(text)
     gen_fake_by_template()
-    # divided()
+    divided()
     pass

@@ -267,7 +267,7 @@ if __name__ == "__main__":
                                              device="cpu")
     print('=' * 50, '开始预测', '=' * 50)
     localtime = time.time()
-    acknowledgement.review_main(content="data/DocData/{}/maimai3.docx".format(contract_type), mode="docx",
+    acknowledgement.review_main(content="data/DocData/{}/包子馅供货合同.docx".format(contract_type), mode="docx",
                                 contract_type=contract_type, usr="Part B")
     print('=' * 50, '结束', '=' * 50)
     print('use time: {}'.format(time.time() - localtime))
