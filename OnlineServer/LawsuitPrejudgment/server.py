@@ -16,26 +16,6 @@ from LawsuitPrejudgment.src.common.dialouge_management_parameter import Dialogue
 app = FastAPI()
 
 
-# @app.get("/get_administrative_type")
-# def _get_administrative_type():
-#     return administrative_app_service.get_administrative_type()
-#
-#
-# @app.get("/get_administrative_problem_and_situation_by_type_id")
-# def _get_administrative_problem_and_situation_by_type_id(type_id: str):
-#     return administrative_app_service.get_administrative_problem_and_situation_by_type_id(type_id)
-#
-#
-# class AdministrativeInput(BaseModel):
-#     type_id: str = "tax"
-#     situation: str = "逃避税务机关检查"
-#
-#
-# @app.post("/get_administrative_result")
-# def _get_administrative_result(param: AdministrativeInput):
-#     return administrative_app_service.get_administrative_result(param.type_id, param.situation)
-
-
 class CriminalInput(BaseModel):
     fact: str = "我偷了同事的3000元"
     question_answers: typing.Dict
@@ -115,24 +95,6 @@ def _get_claim_list_by_problem_id(param: GetClaimListParam):
         }
     """
     return civil_app_service.get_claim_list_by_problem_id(param.problem_id, param.fact)
-
-
-# class GetCivilResultParam(BaseModel):
-#     problem: str
-#     claim_list: typing.List
-#     fact: str
-#     question_answers: typing.Dict
-#     factor_sentence_list: typing.List
-
-
-# @app.post("/reasoning_graph_result")
-# def _reasoning_graph_result(param: GetCivilResultParam):
-#     """
-#     民事预判的主流程。
-#     本接口即将废弃。
-#     """
-#     return civil_app_service.reasoning_graph_result(param.problem, param.claim_list, param.fact, param.question_answers,
-#                                                     param.factor_sentence_list)
 
 
 class DialogueInput(BaseModel):
