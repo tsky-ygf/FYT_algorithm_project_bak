@@ -59,7 +59,6 @@ type：str
 ## 2. 检索
 ## 3. 诉讼预判
 ## 4. 智能咨询
-
 ### 4.1 获取智能咨询的结果:
 `POST http://101.69.229.138:8134/get_query_answer_with_source`
 输入参数:
@@ -75,3 +74,15 @@ type：str
 @answer: str, 智能咨询的答案
 
 @similarity_question: Optional[List]: 返回的相似问题
+
+## 5.纠错模块
+### 5.1 获取输入文本的纠错结果及详细信息
+`POST http://101.69.229.138:8150/get_corrected_contract_result`
+
+输入参数：
+
+@text: str, 输入文本
+
+输出参数：
+
+@result:dict, 文本的纠错结果及详细信息
