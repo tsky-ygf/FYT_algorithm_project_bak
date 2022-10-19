@@ -57,6 +57,102 @@ type：list
 
 type：str
 ## 2. 检索
+### 2.1 获取案例检索的过滤条件:
+`GET http://101.69.229.138:8132/get_filter_conditions_of_case`
+输入参数:
+
+无
+输出参数:
+
+@result: dict, 案例检索的过滤条件
+
+### 2.2 获取案例检索的结果:
+`GET http://101.69.229.138:8132/search_cases`
+输入参数:
+@query: str, 用户输入的查询内容
+
+@filter_conditions: dict, 用户输入的条件
+
+    @type_of_case: list, 用户输入的案件类型
+
+    @court_level: list, 用户输入的法院层级
+
+    @type_of_document: list, 用户输入的文书类型
+
+    @region: list, 用户输入的地域
+
+@page_number: int, 第几页
+
+@page_size: int, 页大小
+
+输出参数:
+
+@result: list, 搜索的返回结果
+
+@total_amount: int 若搜索的结果有200条以上则返回200，小于就返回搜索结果的长度
+
+### 2.3 获取法律检索的过滤条件:
+`GET http://101.69.229.138:8132/get_filter_conditions_of_law`
+输入参数:
+
+无
+输出参数:
+
+@result: dict, 法律检索的过滤条件
+
+### 2.4 获取法律检索的结果:
+`GET http://101.69.229.138:8132/search_laws`
+输入参数:
+@query: str, 用户输入的查询内容
+
+@filter_conditions: dict, 用户输入的条件
+
+    @timeliness: str,  用户输入的时效性
+
+    @types_of_law：str, 用户输入的法律种类
+
+    @scope_of_use：str, 用户输入的使用范围
+
+@page_number: int, 第几页
+
+@page_size: int, 页大小
+
+输出参数:
+
+@result: list, 搜索的返回结果
+
+@total_amount: int 若搜索的结果有200条以上则返回200，小于就返回搜索结果的长度
+
+### 2.5 获取相似类案的结果:
+`GET http://101.69.229.138:8132/top_k_similar_narrative`
+输入参数:
+
+@fact: str, 用户输入的事实描述
+
+@problem: str, 用户输入的纠纷类型
+
+@claim_list: list, 诉求类型
+
+输出参数:
+
+@dids: list, 裁判文书的uq_id
+
+@sims: list, 相似类案的相似率
+
+@reasonNames: list, 纠纷类型
+
+@tags: list, 关键词
+
+### 2.6 获取文本人名脱敏的结果:
+`GET http://101.69.229.138:8132/desensitization`
+输入参数:
+
+@text: str, 待脱敏的文本
+
+输出参数:
+
+@result: str, 人名脱敏后的文本
+
 ## 3. 诉讼预判
 ## 4. 智能咨询
 

@@ -46,7 +46,7 @@ def get_filter_conditions_of_case():
             "ProfessionalSearch/config/similar_case_retrival/filter_conditions.json",
             "filter_conditions",
         )
-        return response_successful_result(filter_conditions)
+        return filter_conditions
     except Exception as e:
         return response_failed_result("error:" + repr(e))
 
@@ -74,9 +74,9 @@ def _get_case_result(query, filter_conditions, page_num, page_size):
         )
     result, total_num = _construct_result_format(search_result, total_num)
     if total_num >= 200:
-        return response_successful_result(result, {"total_amount": 200})
+        return {"result": result, "total_amount": 200}
     else:
-        return response_successful_result(result, {"total_amount": len(result)})
+        return {"result": result, "total_amount": len(result)}
 
 
 @app.route("/search_cases", methods=["post"])
