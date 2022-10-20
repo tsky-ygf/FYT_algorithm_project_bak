@@ -57,7 +57,7 @@ result包含若干个如下的dict：
 
 | Param  | Type  | Description  |   
 |--------|-------|--------------|
-| result | list  | 合同审核结果    |
+| result | list[Dict]  | 合同审核结果    |
 
 result包含若干个如下的dict：  
   * review_point: str 审核点
