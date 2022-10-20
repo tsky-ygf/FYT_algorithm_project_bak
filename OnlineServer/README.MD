@@ -368,3 +368,13 @@ next_action的内容如下:
 | Param   | Type   | Description    |
 |---------|--------|----------------|
 | result  | dict   | 文本的纠错结果及详细信息   |
+
+result的内容如下:
+* corrected_pred: string, 纠错后的结果
+* msg: string, 错误信息
+* success: boolean, 服务调用是否成功
+* detail_info: List[Tuple], 具体纠错信息
+  * 元素0: string, 原始字
+  * 元素1: string, 纠错后的字
+  * 元素2: int, 在输入文本中的起始位置
+  * 元素3: int, 在输入文本中的结束为止
