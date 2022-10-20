@@ -23,14 +23,19 @@ async def _get_support_contract_types():
     """
     获取能审核的合同类型
 
-    输入参数：
+    请求参数:
+
     无
 
-    输出参数：
+    响应参数：
 
-    @result：支持的合同类型
+    | Param  | Type       | Description  |
+    |--------|------------|--------------|
+    | result | List[Dict] | 支持的合同类型   |
 
-    type：list 里 包含若干个dict
+    result包含若干个如下的dict：
+       * type_id : str 合同类型的id
+       * contract_type : str 合同类型
 
     """
     return {"result": get_support_contract_types()}
@@ -41,14 +46,19 @@ async def _get_user_standpoint():
     """
     获取甲乙方代表
 
-    输入参数：
+    请求参数：
+
     无
 
-    输出参数：
+    响应参数：
 
-    @result：获取双方代表
+    | Param  | Type       | Description  |
+    |--------|------------|--------------|
+    | result | List[Dict] | 支持的甲乙双方  |
 
-    type：list 里包含两个dict
+    result包含若干个如下的dict：
+       * id : str 甲乙方代表id
+       * standpoint : str 甲乙方代表
 
     """
     return {"result": get_user_standpoint()}
@@ -92,19 +102,32 @@ async def _get_contract_review_result(contract_input: ContractInput):
     """
     获取合同审核结果
 
-    输入参数：
+    请求参数：
 
-    @contract_type_id：合同类型
+    | Param             | Type  | Description  |
+    |-------------------|-------|--------------|
+    | contract_type_id  | str   | 合同类型       |
+    | filter_conditions | str   | 甲乙方代表      |
+    | type_of_case      | str   | 合同内容       |
 
-    @usr： 甲乙方代表
 
-    @contract_content： 合同内容
+    响应参数：
 
-    输出参数：
+    | Param  | Type  | Description  |
+    |--------|-------|--------------|
+    | result | list[Dict]  | 合同审核结果  |
 
-    @result：合同审核结果
-
-    type：list
+    result包含若干个如下的dict：
+      * review_point: str 审核点
+      * show_name: str 展示名称
+      * review_result: str 审核结果
+      * review_content: str 审核内容
+      * review_content_start: str 审核内容在文档中的起始坐标(多个坐标时，用#拼接)
+      * review_content_end: str 审核内容在文档中的末尾坐标(多个坐标时，用#拼接)
+      * legal_advice: str 法律建议
+      * legal_basis: str 法律依据
+      * risk_level: str 风险等级
+      * risk_point: str 风险点
 
     """
     result = get_contract_review_result(content=contract_input.contract_content, mode="text",
@@ -122,15 +145,17 @@ async def _get_text_from_file_link_path(file_link_input: FileLinkInput):
     """
     从文件链接获取文件文本内容
 
-    输入参数：
+    请求参数：
 
-    @file_path: 文件链接
+    | Param     | Type  | Description  |
+    |-----------|-------|--------------|
+    | file_path | str   | 文件链接       |
 
-    输出参数：
+    响应参数：
 
-    @result:文件文本内容
-
-    type：str
+    | Param  | Type  | Description  |
+    |--------|-------|--------------|
+    | result | str   | 文件文本内容     |
     """
 
     return {"result": get_text_from_file_link_path(file_link_input.file_path)}
