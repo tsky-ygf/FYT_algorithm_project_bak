@@ -43,16 +43,6 @@ class QueryResult(BaseModel):
     answer: str
     similarity_question: list[dict]
 
-    class Config:
-        schema_extra = {
-            "example": {
-                "answer": "回答内容",
-                "similarity_question": [
-                    {"question": "相似问题1", "answer": "回答内容1"},
-                ]
-            }
-        }
-
 
 @app.post("/get_query_answer_with_source", response_model=QueryResult)
 def _get_query_answer_with_source(query_input: QueryInput):
@@ -62,12 +52,10 @@ def _get_query_answer_with_source(query_input: QueryInput):
     result = consultation_service.get_answer_for_question(question=query_input.question,
                                                           query_type=query_input.query_type,
                                                           query_sub_type=query_input.query_sub_type)
-    # response_model.answer = result.get("answer", "")
-    # response_model.similarity_question = result.get("similarity_question", [])
 
     return result
 
 
 if __name__ == '__main__':
     # 真实使用8134端口
-    uvicorn.run('OnlineServer.IntelligentConsultation.server:app', host="0.0.0.0", port=8134, reload=True, workers=1)
+    uvicorn.run('OnlineServer.IntelligentConsultation.server:app', host="0.0.0.0", port=8134, reload=False, workers=2)
