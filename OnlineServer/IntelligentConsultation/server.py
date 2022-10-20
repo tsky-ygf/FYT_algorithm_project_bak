@@ -30,8 +30,8 @@ class QueryInput(BaseModel):
 
 
 class QueryResult(BaseModel):
-    answer: str = "问题答案"
-    similarity_question: list[dict] = [{"question": "相似问题", "answer": "相关答案"}]
+    answer: str
+    similarity_question: list[dict]
 
 
 @app.post("/get_query_answer_with_source", response_model=QueryResult)
