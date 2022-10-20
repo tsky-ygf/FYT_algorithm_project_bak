@@ -99,9 +99,40 @@ result包含若干个如下的dict：
 
 响应参数:
 
-| Param  | Type  | Description  |
-|--------|-------|--------------|
-| result | dict  | 案例检索的过滤条件    |
+| Param  | Type | Description  |
+|--------|------|--------------|
+| result | Dict | 案例检索的过滤条件    |
+
+result的内容如下:
+
+* type_of_case: Dict, 案件类型
+
+  * name: string, 案件类型
+
+  * is_multiple_choice: boolean, 是否支持多选
+  
+  * value: List, 案件类型的选项
+* court_level: Dict, 法院层级
+
+  * name: string, 法院层级
+
+  * is_multiple_choice: boolean, 是否支持多选
+  
+  * value: List, 法院层级的选项
+* type_of_document: Dict, 文书类型
+
+  * name: string, 文书类型
+
+  * is_multiple_choice: boolean, 是否支持多选
+  
+  * value: List, 文书类型的选项
+* region: Dict, 地域
+
+  * name: string, 地域
+
+  * is_multiple_choice: boolean, 是否支持多选
+  
+  * value: List, 地域的选项
 
 ### 2.2 获取案例检索的结果:
 
@@ -109,23 +140,41 @@ result包含若干个如下的dict：
 
 请求参数:
 
-| Param             | Type  | Description  |
-|-------------------|-------|--------------|
-| query             | str   | 用户输入的查询内容    |
-| filter_conditions | dict  | 用户输入的条件      |
-| type_of_case      | list  | 用户输入的案件类型    |
-| court_level       | list  | 用户输入的法院层级    |
-| type_of_document  | list  | 用户输入的文书类型    |
-| region            | list  | 用户输入的地域      |
-| page_number       | int   | 第几页          |
-| page_size         | int   | 页大小          |
+| Param             | Type   | Description  |
+|-------------------|--------|--------------|
+| query             | string | 用户输入的查询内容    |
+| filter_conditions | Dict   | 用户输入的条件      |
+| page_number       | int    | 第几页          |
+| page_size         | int    | 页大小          |
+
+filter_conditions的内容如下:
+
+* type_of_case: List, 案件类型
+
+* court_level: List, 法院层级
+
+* type_of_document: List, 文书类型
+  
+* region: List, 地域
 
 响应参数:
 
-| Param        | Type  | Description                      |
-|--------------|-------|----------------------------------|
-| result       | list  | 搜索的返回结果                          |
-| total_amount | int   | 若搜索的结果有200条以上则返回200，小于就返回搜索结果的长度 |
+| Param        | Type | Description                      |
+|--------------|------|----------------------------------|
+| result       | List | 搜索的返回结果                          |
+| total_amount | int  | 若搜索的结果有200条以上则返回200，小于就返回搜索结果的长度 |
+
+result的内容如下:
+
+* doc_id: string, 数据库表名 + 分隔符 + 裁判文书的uq_id
+
+* court: string, 法院名称
+
+* case_number: string, 文书号
+  
+* jfType: string, 纠纷类型
+
+* content: string, 裁判文书内容
 
 ### 2.3 获取法律检索的过滤条件:
 
@@ -136,53 +185,97 @@ result包含若干个如下的dict：
 
 响应参数:
 
-| Param  | Type  | Description  |
-|--------|-------|--------------|
-| result | dict  | 法律检索的过滤条件    |
+| Param  | Type | Description  |
+|--------|------|--------------|
+| result | Dict | 法律检索的过滤条件    |
 
+result的内容如下:
+
+* types_of_law: Dict, 法条种类
+
+  * name: string, 法条种类
+
+  * is_multiple_choice: boolean, 是否支持多选
+  
+  * value: List, 法条种类的选项
+* timeliness: Dict, 时效性
+
+  * name: string, 时效性
+
+  * is_multiple_choice: boolean, 是否支持多选
+  
+  * value: List, 时效性的选项
+* scope_of_use: Dict, 使用范围
+
+  * name: string, 使用范围
+
+  * is_multiple_choice: boolean, 是否支持多选
+  
+  * value: List, 使用范围的选项
 ### 2.4 获取法律检索的结果:
 
 `GET http://101.69.229.138:8132/search_laws`
 
 请求参数:
 
-| Param             | Type  | Description          |
-|-------------------|-------|----------------------|
-| query             | str   | 用户输入的查询内容            |
-| filter_conditions | dict  | 用户输入的条件，小于就返回搜索结果的长度 |
-| timeliness        | str   | 用户输入的时效性             |
-| types_of_law      | str   | 用户输入的法律种类            |
-| scope_of_use      | str   | 用户输入的使用范围            |
-| page_number       | int   | 第几页                  |
-| page_size         | int   | 页大小                  |
+| Param             | Type   | Description          |
+|-------------------|--------|----------------------|
+| query             | string | 用户输入的查询内容            |
+| filter_conditions | Dict   | 用户输入的条件，小于就返回搜索结果的长度 |
+| page_number       | int    | 第几页                  |
+| page_size         | int    | 页大小                  |
 
+filter_conditions的内容如下:
+
+* timeliness: List, 时效性
+
+* types_of_law: List, 法条种类
+
+* scope_of_use: List, 地域
 响应参数:
 
-| Param        | Type  | Description                      |
-|--------------|-------|----------------------------------|
-| result       | list  | 搜索的返回结果                          |
-| total_amount | int   | 若搜索的结果有200条以上则返回200，小于就返回搜索结果的长度 |
+| Param        | Type | Description                      |
+|--------------|------|----------------------------------|
+| result       | List | 搜索的返回结果                          |
+| total_amount | int  | 若搜索的结果有200条以上则返回200，小于就返回搜索结果的长度 |
 
+result的内容如下:
+
+* law_id: string, 数据库表名 + 分隔符 + 法条的md5Clause
+
+* law_name: string, 标题
+
+* law_type: string, 国家法律法规网页标题
+  
+* timeliness: string, 时效性
+
+* using_range: string, 省份
+
+* law_chapter: string, 章
+
+* law_item: string, 节
+
+* law_content: string, 条
 ### 2.5 获取相似类案的结果:
 
 `GET http://101.69.229.138:8132/top_k_similar_narrative`
 
 请求参数:
 
-| Param      | Type | Description |
-|------------|------|-------------|
-| fact       | str  | 用户输入的事实描述   |
-| problem    | str  | 用户输入的纠纷类型   |
-| claim_list | list | 诉求类型        |
+| Param      | Type   | Description |
+|------------|--------|-------------|
+| fact       | string | 用户输入的事实描述   |
+| problem    | string | 用户输入的纠纷类型   |
+| claim_list | List   | 诉求类型        |
 
 响应参数:
 
 | Param       | Type | Description     |
 |-------------|------|-----------------|
-| dids        | list | 裁判文书的uq_id      |
-| sims        | list | 相似类案的相似率        |
-| reasonNames | list | 纠纷类型            |
-| tags        | list | 关键词             |
+| dids        | List | 裁判文书的uq_id      |
+| sims        | List | 相似类案的相似率        |
+| reasonNames | List | 纠纷类型            |
+| tags        | List | 关键词             |
 
 ### 2.6 获取文本人名脱敏的结果:
 
@@ -190,15 +283,15 @@ result包含若干个如下的dict：
 
 请求参数:
 
-| Param    | Type  | Description     |
-|----------|-------|-----------------|
-| text     | str   | 待脱敏的文本          |
+| Param    | Type   | Description     |
+|----------|--------|-----------------|
+| text     | string | 待脱敏的文本          |
 
 响应参数:
 
 | Param   | Type   | Description    |
 |---------|--------|----------------|
-| result  | str    | 人名脱敏后的文本       |
+| result  | string | 人名脱敏后的文本       |
 
 ## 3. 诉讼预判
 
