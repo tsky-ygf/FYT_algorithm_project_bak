@@ -471,3 +471,23 @@ result的内容如下:
   * 元素1: string, 纠错后的字
   * 元素2: int, 在输入文本中的起始位置
   * 元素3: int, 在输入文本中的结束为止
+
+## 6.普法专栏
+
+### 6.1 获取专栏信息
+
+`POST http://101.69.229.138:8149/getNews`
+
+请求参数：
+
+| Param    | Type  | Description  |
+|----------|-------|--------------|
+| category | str   | 输入文本 专栏名称    |
+
+响应参数：
+
+| Param     | Type | Description |
+|-----------|------|-------------|
+| res_data  | list | 专栏信息结果      |
+| error_msg | dict | 报错信息        |
+| status    | dict | 查询状态        |

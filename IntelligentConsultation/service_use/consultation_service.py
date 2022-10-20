@@ -67,6 +67,26 @@ def get_query_answer_with_source(question: str, source=None, sub_source=None):
     return {"answer": answer, "similarity_question": similarity_question}
 
 
+def get_answer_for_question(question: str, query_type=None, query_sub_type=None):
+    """
+    目前一级主题支持: 专题/旧版
+    二级主题支持: 法院、公安、环保、交通、金融、科技、市场监管、税务、司法、文旅
+    :param question: 用户问题
+    :param query_type: 一级主题
+    :param query_sub_type: 二级主题
+    :return:
+    """
+
+    if query_type == "旧版":
+        return get_query_answer(question)
+
+    else:
+        if query_sub_type == "通用":
+            return get_query_answer_with_source(question=question, source=query_type)
+        else:
+            return get_query_answer_with_source(question=question, source=query_type, sub_source=query_sub_type)
+
+
 if __name__ == '__main__':
     _question = "公司交不起税怎么办"
     print(get_query_answer_with_source(question=_question, source="专题"))

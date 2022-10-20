@@ -16,17 +16,20 @@ from fastapi.responses import JSONResponse
 
 app = FastAPI()
 
+
 @app.exception_handler(RequestValidationError)
 async def request_validation_exception_handler(request: Request, exc: RequestValidationError):
     print(f"参数不对{request.method} {request.url}")
-    return JSONResponse({"code": "400", "error_msg": exc.errors(),"status": 1})
+    return JSONResponse({"code": "400", "error_msg": exc.errors(), "status": 1})
+
 
 @app.post("/getNews")
 async def get_news(category: str = Body(1, title='专栏名称', embed=True)):
     print(category)
     tabName = get_tabName(category)
     res = get_content(tabName)
-    return {'res_data': res, "error_msg": "", "status": 0}
+    return {'res_data': res}
+
 
 def get_tabName(category):
     if category == "税法专栏":
@@ -52,9 +55,11 @@ def get_tabName(category):
     else:
         return ""
 
+
 def get_content(tabName):
     select_sql = f"""select url,htmlContent,title,pubDate,source,content from {tabName} order by pubDate desc limit 30"""
-    conn = pymysql.connect(host='172.19.82.227',db='hot_news',user='root',password='Nblh@2022',cursorclass=pymysql.cursors.DictCursor)
+    conn = pymysql.connect(host='172.19.82.227', db='hot_news', user='root', password='Nblh@2022',
+                           cursorclass=pymysql.cursors.DictCursor)
     curs = conn.cursor()
     curs.execute(select_sql)
     res = curs.fetchall()
@@ -65,9 +70,7 @@ def get_content(tabName):
     else:
         return ''
 
-# if __name__ == '__main__':
-#     import uvicorn
-#     uvicorn.run(app, host="127.0.0.1", port=7000)
+
 if __name__ == "__main__":
     # 日志设置
     uvicorn.run('OnlineServer.CommonLaws.server:app', host="0.0.0.0", port=8149, reload=False, workers=1)
