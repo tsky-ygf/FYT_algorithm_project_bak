@@ -14,7 +14,7 @@ def similar_case_bug():
         "http://127.0.0.1:8132/top_k_similar_narrative", json=payload
     ).json()  # 47.99.90.181
     print(type(r))
-    print(r["dids"])
+    print(r)
 
 
 if __name__ == '__main__':
