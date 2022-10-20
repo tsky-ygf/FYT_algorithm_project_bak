@@ -164,6 +164,6 @@ if __name__ == '__main__':
     # _index_name = "topic_qa_test"
     # #
     # insert_data(data_path=_data_path, model_name=_model_name, index_name=_index_name)
-    acc, res_df = test_acc(index_name=_index_name, model_name=_model_name)  # , level="DEBUG")
-    res_df.to_csv("data/fyt_train_use_data/QA/pro_qa_res.csv", index=False)
-    print(acc)
+    _acc, _res_df = test_acc(index_name=_index_name, model_name=_model_name)  # , level="DEBUG")
+    _res_df.to_csv("data/fyt_train_use_data/QA/pro_qa_res.csv", index=False)
+    print(_acc)
