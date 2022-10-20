@@ -115,7 +115,7 @@ def contract_review_main():
                 if value['审核结果'] == "通过" and value["风险等级"] == "低":
                     continue
 
-                # 未识别，不做审核
+                # 未识别，不做审核 在测试页面上显示通过、风险点、风险等级
                 if value['内容'] == '未识别，不做审核' and value['审核结果'] == '通过':
                     if "风险点" in value and value["风险点"] != "":
                         st.markdown("风险点：{}".format(value['风险点']))
