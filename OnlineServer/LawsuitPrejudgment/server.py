@@ -9,7 +9,7 @@ import typing
 
 import uvicorn
 from fastapi import FastAPI
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from LawsuitPrejudgment.service_use import administrative_app_service, civil_app_service, criminal_app_service
 from LawsuitPrejudgment.src.common.dialouge_management_parameter import DialogueHistory, DialogueState
 
@@ -17,8 +17,16 @@ app = FastAPI()
 
 
 class CriminalInput(BaseModel):
-    fact: str = "我偷了同事的3000元"
-    question_answers: typing.Dict
+    fact: str = Field(example="我偷了同事的3000元")
+    question_answers: typing.Dict = Field(example={})
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "fact": "我偷了同事的3000元",
+                "question_answers": {}
+            }
+        }
 
 
 @app.post("/get_criminal_result")
