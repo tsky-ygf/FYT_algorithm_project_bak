@@ -41,8 +41,8 @@ async def get_example_model_data(category: CategoryInput):
     return {"data_list":preview_data_list}
 
 class NewsInput(BaseModel):
-    table_name: str = Field(default="", description="数据库表名称")
-    uq_id: str = Field(default="", description="数据表主键")
+    table_name: str = Field(default="swj_hot_news", description="数据库表名称")
+    uq_id: str = Field(default="e9b672a97cf1d68e57d1cbcd38f6237f", description="数据表主键")
 
     class Config:
         schema_extra = {
