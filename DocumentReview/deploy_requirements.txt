@@ -16,5 +16,6 @@ python-docx
 pytorch-lightning==1.6.5
 pytorch-metric-learning==1.3.2
 pytorch-wpe==0.0.1
+onnx==1.12.0
 onnxruntime==1.12.1
 id_validator==1.0.20

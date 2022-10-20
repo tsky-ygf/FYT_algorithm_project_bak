@@ -111,7 +111,7 @@ def merge_all_data4common():
                 line = json.loads(line.strip())
                 idd = line['id']
                 text = line['text'].replace('\xa0', ' ')
-                if 'caigou' in file or 'common.jsonl' in file or 'jietiao' in file:
+                if 'entities' in line:
                     labels = line['entities']
                     flag_d = True
                 else:
@@ -195,12 +195,12 @@ if __name__ == "__main__":
     # convert_format_bmes()
 
     # 先这两条，准备好数据， 再核实schema， 再更改log、model名称， 再运行
-    # merge_all_data4common()
-    # divided_train_dev('data/data_src/common_all/common_all.json', 'data/data_src/common_all/')
+    merge_all_data4common()
+    divided_train_dev('data/data_src/common_all/common_all.json', 'data/data_src/common_all/')
 
     # merge_all_data4common()
     # divided_train_dev('data/data_src/common_long/common_long.json', 'data/data_src/common_long')
 
-    merge_all_data4common_wt_bias()
+    # merge_all_data4common_wt_bias()
 
     pass

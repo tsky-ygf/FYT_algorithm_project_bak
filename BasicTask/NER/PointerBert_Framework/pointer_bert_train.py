@@ -31,7 +31,6 @@ class TrainPointerBert(BaseTrainTool):
         self.model_args.mode = self.model_args.model_name_or_path
         self.model_args.num_labels = self.num_labels
         model = PointerNERBERTInFramework(self.model_args)
-        # model.resize_token_embeddings(len(tokenizer))
         return tokenizer, model
 
     def create_examples(self, data_path, mode="train"):
@@ -43,8 +42,8 @@ class TrainPointerBert(BaseTrainTool):
             for line in f.readlines():
                 line = json.loads(line.strip())
                 # -2 for cls and sep
-                start_seq = [[0] * (self.data_train_args.max_length-2) for _ in range(self.num_labels)]
-                end_seq = [[0] * (self.data_train_args.max_length-2) for _ in range(self.num_labels)]
+                start_seq = [[0] * (self.data_train_args.max_length - 2) for _ in range(self.num_labels)]
+                end_seq = [[0] * (self.data_train_args.max_length - 2) for _ in range(self.num_labels)]
                 entities = []
                 text = line['text']
                 for entity in line['entities']:
@@ -77,16 +76,16 @@ class TrainPointerBert(BaseTrainTool):
         #                         return_offsets_mapping=False,
         #                         return_tensors="pt")
         token_ids = self.tokenizer.convert_tokens_to_ids(list(text))
-        input_ids = [101]+token_ids+[102]+[0]*(512-len(token_ids)-2)
-        attention_mask = [1]*(len(token_ids)+2)+[0]*(512-len(token_ids)-2)
+        input_ids = [101] + token_ids + [102] + [0] * (512 - len(token_ids) - 2)
+        attention_mask = [1] * (len(token_ids) + 2) + [0] * (512 - len(token_ids) - 2)
         token_type_ids = [0] * 512
         inputs = {'input_ids': torch.LongTensor([input_ids]),
                   'attention_mask': torch.LongTensor([attention_mask]),
                   'token_type_ids': torch.LongTensor([token_type_ids]),
                   'label': label}
 
-        assert sum(inputs['attention_mask'][0]) == len(text)+2, text
-        assert len(inputs['input_ids'][0]) == len(inputs['attention_mask'][0]) == 512
+        assert sum(inputs['attention_mask'][0]) == len(text) + 2, text
+        assert len(inputs['input_ids'][0]) == len(inputs['attention_mask'][0]) == 512, text
         return inputs
 
     def data_collator(self, batch):
@@ -121,7 +120,7 @@ class TrainPointerBert(BaseTrainTool):
         outputs, loss = self.model(batch)
         return outputs, loss
 
-    def eval_epoch(self):
+    def eval_epoch(self, epoch):
         eval_loss_res = 0
         cir = SpanEntityScore()
         for step, batch in enumerate(self.eval_dataloader):
@@ -133,16 +132,15 @@ class TrainPointerBert(BaseTrainTool):
                 true_entities, pred_entities = self.post_process_function(batch, output)
                 cir.update(true_entities, pred_entities)
         self.logger.info("number of true_entities " + str(len(cir.origins)))
-        if len(cir.origins)>0:
+        if len(cir.origins) > 0:
             self.logger.info(cir.origins[0])
         self.logger.info("number of pred_entities" + str(len(cir.founds)))
-        if len(cir.founds)>0:
+        if len(cir.founds) > 0:
             self.logger.info(cir.founds[0])
         score, class_info = cir.result()
         f1 = score['f1']
         self.logger.info("p: {0}, r: {1}, f1: {2}".format(score['acc'], score['recall'], score['f1']))
         self.logger.info(pformat(class_info))
-
 
         eval_loss_res /= len(self.eval_dataloader)
         return eval_loss_res
@@ -173,6 +171,43 @@ class TrainPointerBert(BaseTrainTool):
                 for end_ind in range(len(end_seq)):
                     if end_seq[end_ind]:
                         end_index.append(end_ind)
+                '''
+                                if len(start_index) == len(end_index):
+                    for _start, _end in zip(start_index, end_index):
+                        pred_entities.append([self.id2schema[li], sentence[_start:_end]])
+                elif not start_index:
+                    continue
+                elif not end_index:
+                    continue
+                elif start_index[0] > end_index[-1]:
+                    continue
+                else:
+                    while start_index and end_index and start_index[0] > end_index[0]:
+                        end_index = end_index[1:]
+                    while start_index and end_index and start_index[-1] > end_index[-1]:
+                        start_index = start_index[:-1]
+                    # 1. 数量相等
+                    if len(start_index) == len(end_index):
+                        pass
+                    # 2. 数量不等, 删去置信度最低的
+                    else:
+                        diff = abs(len(start_index) - len(end_index))
+                        if len(start_index) > len(end_index):
+                            start_index_wt_prob = [[_start, start_prob[bi][_start][li].item()] for _start in
+                                                   start_index]
+                            start_index_wt_prob.sort(key=lambda x: x[1])
+                            start_index_wt_prob = start_index_wt_prob[diff:]
+                            start_index = [_[0] for _ in start_index_wt_prob]
+                            start_index.sort()
+                        elif len(start_index) < len(end_index):
+                            end_index_wt_prob = [[_end, end_prob[bi][_end][li].item()] for _end in end_index]
+                            end_index_wt_prob.sort(key=lambda x: x[1])
+                            end_index_wt_prob = end_index_wt_prob[diff:]
+                            end_index = [_[0] for _ in end_index_wt_prob]
+                            end_index.sort()
+                    for _start, _end in zip(start_index, end_index):
+                        pred_entities.append([self.id2schema[li], sentence[_start:_end]])
+                '''
                 min_len = min(len(start_index), len(end_index))
                 for mi in range(min_len):
                     pred_entities.append([self.id2schema[li], sentence[start_index[mi]:end_index[mi]]])
@@ -180,23 +215,22 @@ class TrainPointerBert(BaseTrainTool):
 
         return true_entities, pred_entities
 
-
     def save_model(self, model_path):
         self.accelerator.wait_for_everyone()
         if not os.path.exists(model_path):
             os.makedirs(model_path)
         state = {'model_state': self.model.state_dict()}
-        torch.save(state, model_path+"/pytorch_model.bin")
+        torch.save(state, model_path + "/pytorch_model.bin")
 
         if self.accelerator.is_main_process:
             self.tokenizer.save_pretrained(model_path)
 
 
 if __name__ == "__main__":
+    print('='*50, '模型开始初始化','='*50)
     t = TrainPointerBert(config_path="BasicTask/NER/PointerBert_Framework/base_p.yaml",
                          config_schema='data/data_src/config.csv', is_long=False)
     t.run()
     pass
     # export PYTHONPATH=$(pwd):$PYTHONPATH
-    # nohup python -u BasicTask/NER/PointerBert_Framework/pointer_bert_train.py > log/PointerBert/framework/pb_1017_nohup.log 2>&1 &
-
+    # nohup python -u BasicTask/NER/PointerBert_Framework/pointer_bert_train.py > log/PointerBert/framework/pb_1020_nohup.log 2>&1 &
