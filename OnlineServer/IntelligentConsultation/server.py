@@ -6,21 +6,11 @@
 # @File    : server.py
 # @Software: PyCharm
 import uvicorn
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from pydantic import BaseModel, Field
 from IntelligentConsultation.service_use import consultation_service
 
-# from fastapi.exceptions import RequestValidationError
-# from fastapi.responses import JSONResponse
-
-
 app = FastAPI()
-
-
-# @app.exception_handler(RequestValidationError)
-# async def request_validation_exception_handler(request: Request, exc: RequestValidationError):
-#     print(f"参数不对{request.method} {request.url}")
-#     return JSONResponse({"code": "400", "error_msg": exc.errors()})
 
 
 class QueryInput(BaseModel):
@@ -40,8 +30,8 @@ class QueryInput(BaseModel):
 
 
 class QueryResult(BaseModel):
-    answer: str
-    similarity_question: list[dict]
+    answer: str = "问题答案"
+    similarity_question: list[dict] = [{"question": "相似问题", "answer": "相关答案"}]
 
 
 @app.post("/get_query_answer_with_source", response_model=QueryResult)
@@ -49,11 +39,9 @@ def _get_query_answer_with_source(query_input: QueryInput):
     """
     获取智能咨询的结果和相似问答
     """
-    result = consultation_service.get_answer_for_question(question=query_input.question,
-                                                          query_type=query_input.query_type,
-                                                          query_sub_type=query_input.query_sub_type)
-
-    return result
+    return consultation_service.get_answer_for_question(question=query_input.question,
+                                                        query_type=query_input.query_type,
+                                                        query_sub_type=query_input.query_sub_type)
 
 
 if __name__ == '__main__':
