@@ -46,19 +46,20 @@ def _get_query_answer_with_source(query_input: QueryInput):
     """
     获取智能咨询的结果
 
-    输入参数:
+    请求参数:
 
-    @question: str , 用户输入的问题
+    | Param           | Type | Description                                       |
+    |-----------------|------|---------------------------------------------------|
+    | question        | str  | 用户输入的问题                                           |
+    | query_type      | str  | 选择一级主题分类，可选项:(旧版/专题)                              |
+    | query_sub_type  | str  | 选择二级主题分类，可选项:(通用/法院/公安/环保/交通/金融/科技/市场监管/税务/司法/文旅) |
 
-    @query_type: str, 选择一级主题分类，可选项:(旧版/专题)
+    响应参数:
 
-    @query_sub_type: str, 选择二级主题分类，可选项:(通用/法院/公安/环保/交通/金融/科技/市场监管/税务/司法/文旅)
-
-    输出参数:
-
-    @answer: str, 智能咨询的答案
-
-    @similarity_question: Optional[List]: 返回的相似问题
+    | Param               | Type           | Description |
+    |---------------------|----------------|-------------|
+    | answer              | str            | 智能咨询的答案     |
+    | similarity_question | Optional[List] | 返回的相似问题     |
     """
     return consultation_service.get_answer_for_question(question=query_input.question,
                                                         query_type=query_input.query_type,
