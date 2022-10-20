@@ -25,12 +25,8 @@ def get_table(category):
     table_name = common_laws_map.get(category)
     return table_name
 
-
-def get_preview(tabName):
-    get_preview_data(tabName)
-
 def get_preview_data(tableName):
-    select_sql = f"""select uq_id,title,pubDate,source,content from {tableName} order by pubDate desc limit 30;"""
+    select_sql = f"""select uq_id,title,pubDate,source,content from hot_news.{tableName} order by pubDate desc limit 30;"""
     conn = pymysql.connect(
         host="101.69.229.138",
         port=8501,
@@ -57,7 +53,7 @@ def get_preview_data(tableName):
     return preview_data_list
 
 def get_news(uq_id,tableName):
-    select_sql = f"""select url,htmlContent,title,pubDate,source,content from {tableName} where uq_id='{uq_id}';"""
+    select_sql = f"""select url,htmlContent,title,pubDate,source,content from hot_news.{tableName} where uq_id='{uq_id}';"""
     conn = pymysql.connect(
         host="101.69.229.138",
         port=8501,
@@ -83,4 +79,4 @@ def get_news(uq_id,tableName):
     return preview_data_list
 
 if __name__ == '__main__':
-    print(get_preview_data("kj_hot_news"))
+    print(get_preview_data("swj_hot_news"))
