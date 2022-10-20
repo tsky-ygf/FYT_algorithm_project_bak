@@ -60,16 +60,16 @@ result包含若干个如下的dict：
 | result | list  | 合同审核结果    |
 
 result包含若干个如下的dict：  
-  * review_point: 审核点
-  * show_name: 展示名称
-  * review_result: 审核结果  
-  * review_content: 审核内容
-  * review_content_start: 审核内容在文档中的起始坐标
-  * review_content_end: 审核内容在文档中的末尾坐标
-  * legal_advice: 法律建议
-  * legal_basis: 法律依据  
-  * risk_level: 风险等级
-  * risk_point: 风险点
+  * review_point: str 审核点
+  * show_name: str 展示名称
+  * review_result: str 审核结果  
+  * review_content: str 审核内容
+  * review_content_start: str 审核内容在文档中的起始坐标(多个坐标时，用#拼接)
+  * review_content_end: str 审核内容在文档中的末尾坐标(多个坐标时，用#拼接)
+  * legal_advice: str 法律建议
+  * legal_basis: str 法律依据  
+  * risk_level: str 风险等级
+  * risk_point: str 风险点
 
 ### 1.4 从文件链接获取文件文本内容
 
