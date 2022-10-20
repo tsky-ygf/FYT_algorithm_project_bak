@@ -173,6 +173,31 @@ class BaseESTool:
             if not success:
                 raise RuntimeError(f"Error indexando query a ES: {info}")
 
+    def create_es_parall(self, df_data, *args, **kwargs):
+        for index, row in df_data.iterrows():
+            data_ori = row.to_dict()
+            yield {
+                "_op_type": "create",
+                "_index": self.index_name,
+                "_type": "_doc",
+                "_source": data_ori,
+            }
+
+    # 多线程更新 create
+    def create_data_from_es_parall(
+        self, thread_count=5, chunk_size=500, *args, **kwargs
+    ):
+        es = Elasticsearch(hosts=self.es_host, timeout=30)
+        # 更新数据
+        for success, info in helpers.parallel_bulk(
+            es,
+            self.create_es_parall(*args, **kwargs),
+            thread_count=thread_count,
+            chunk_size=chunk_size,
+        ):
+            if not success:
+                raise RuntimeError(f"Error indexando query a ES: {info}")
+
     def __call__(self):
         self.es_init()
 
