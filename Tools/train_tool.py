@@ -80,7 +80,6 @@ class FGM:
 class BaseTrainTool:
     def __init__(self, config_path):
         """
-
         :param config_path: config file path
         """
         self.config = parse_config_file(config_path)
