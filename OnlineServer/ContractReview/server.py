@@ -105,8 +105,11 @@ class ContractInput(BaseModel):
             }
         }
 
+class ContractResponse(BaseModel):
+    result: list[dict]
 
-@app.post("/get_contract_review_result")
+
+@app.post("/get_contract_review_result", response_model=ContractResponse)
 async def _get_contract_review_result(contract_input: ContractInput):
     """
     获取合同审核结果
