@@ -16,7 +16,11 @@
 
 | Param  | Type       | Description  |
 |--------|------------|--------------|
-| result | List[Dict] | 支持的合同类型      |
+| result | List[Dict] | 支持的合同类型   |
+
+result包含若干个如下的dict：
+   * type_id : str 合同类型的id  
+   * contract_type : str 合同类型
 
 ### 1.2 获取甲乙方代表
 
@@ -30,7 +34,11 @@
 
 | Param  | Type       | Description  |
 |--------|------------|--------------|
-| result | List[Dict] | 合同审核结果       |
+| result | List[Dict] | 支持的甲乙双方  |
+
+result包含若干个如下的dict：
+   * id : str 甲乙方代表id  
+   * standpoint : str 甲乙方代表
 
 ### 1.3 获取合同审核结果
 
@@ -43,13 +51,25 @@
 | contract_type_id  | str   | 合同类型         |
 | filter_conditions | str   | 甲乙方代表        |
 | type_of_case      | str   | 合同内容         |
-| court_level       | list  | 用户输入的法院层级    |
+
 
 响应参数：
 
-| Param  | Type  | Description  |
+| Param  | Type  | Description  |   
 |--------|-------|--------------|
-| result | list  | 合同审核结果       |
+| result | list  | 合同审核结果    |
+
+result包含若干个如下的dict：  
+  * review_point: 审核点
+  * show_name: 展示名称
+  * review_result: 审核结果  
+  * review_content: 审核内容
+  * review_content_start: 审核内容在文档中的起始坐标
+  * review_content_end: 审核内容在文档中的末尾坐标
+  * legal_advice: 法律建议
+  * legal_basis: 法律依据  
+  * risk_level: 风险等级
+  * risk_point: 风险点
 
 ### 1.4 从文件链接获取文件文本内容
 
@@ -59,13 +79,13 @@
 
 | Param     | Type  | Description  |
 |-----------|-------|--------------|
-| file_path | str   | 文件链接         |
+| file_path | str   | 文件链接       |
 
 响应参数：
 
 | Param  | Type  | Description  |
 |--------|-------|--------------|
-| result | str   | 文件文本内容       |
+| result | str   | 文件文本内容     |
 
 ## 2. 检索
 
