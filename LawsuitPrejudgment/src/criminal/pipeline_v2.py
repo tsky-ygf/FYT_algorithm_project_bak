@@ -74,7 +74,6 @@ class CriminalPrejudgmentV2(PrejudgmentPipeline):
         self.context["event"] = post_process_uie_results(predictor=self.predictor_dict[criminal_type],
                                                          criminal_type=criminal_type,
                                                          fact=self.context["fact"])
-
         self.logger.info("模型抽取耗时:", time.time() - t0)
         # self.logger.debug(self.context)
 
@@ -221,11 +220,7 @@ class CriminalPrejudgmentV2(PrejudgmentPipeline):
                 qa_dict["usr_answer"] = ""
                 qa_dict["status"] = 0
                 self.context["question_answers"][key] = qa_dict
-                print("##debug######")
-                print(key, value)
-                print(qa_dict)
                 return qa_dict
-        print("#########response none###########")
         # self.logger.debug(self.context["question_answers"])
 
     def get_report(self):
