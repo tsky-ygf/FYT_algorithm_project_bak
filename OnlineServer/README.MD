@@ -475,9 +475,9 @@ result的内容如下:
 
 ## 6.普法专栏
 
-### 6.1 获取专栏信息
+### 6.1 获取专栏预览信息
 
-`POST http://101.69.229.138:8149/getNews`
+`POST http://101.69.229.138:8149/get_preview_commonLaws_data`
 
 请求参数：
 
@@ -488,7 +488,22 @@ result的内容如下:
 响应参数：
 
 | Param     | Type | Description |
-|-----------|------|-------------|
-| res_data  | list | 专栏信息结果      |
-| error_msg | dict | 报错信息        |
-| status    | dict | 查询状态        |
+|-----------|------|-----------|
+| res_data  | list | 预览信息      |
+
+### 6.2 查询专栏信息
+
+`POST http://101.69.229.138:8149/get_commonLaws_news_by_id`
+
+请求参数：
+
+| Param      | Type  | Description |
+|------------|-------|-------------|
+| uq_id      | str   | 输入文本 数据库主键  |
+| table_name | str   | 输入文本 表名称    |
+
+响应参数：
+
+| Param     | Type | Description  |
+|-----------|------|--------------|
+| res_data  | list | 专栏信息结果       |

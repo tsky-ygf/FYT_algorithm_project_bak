@@ -24,7 +24,7 @@ app = FastAPI()
 #     return JSONResponse({"code": "400", "error_msg": exc.errors(),"status": 1})
 
 class CategoryInput(BaseModel):
-    category: str = Field(default="", description="专栏名称:可选项:(税法专栏/司法专栏/金融专栏/市场监督/法院专栏/公安专栏/文旅专栏/环保专栏/交通专栏/科技专栏)")
+    category: str = Field(default="", description="专栏名称->可选项:(税法专栏/司法专栏/金融专栏/市场监督/法院专栏/公安专栏/文旅专栏/环保专栏/交通专栏/科技专栏)")
     class Config:
         schema_extra = {
             "example": {
@@ -34,7 +34,7 @@ class CategoryInput(BaseModel):
 class CategoryResult(BaseModel):
     data_list: list[dict]
 
-@app.post("/exampleData", response_model=CategoryResult)
+@app.post("/get_preview_commonLaws_data", response_model=CategoryResult)
 async def get_example_model_data(category: CategoryInput):
     tabName = common_laws_service.get_table(category.category)
     preview_data_list = common_laws_service.get_preview_data(tableName=tabName)
@@ -55,7 +55,7 @@ class NewsInput(BaseModel):
 class NewsResult(BaseModel):
     data_list: list[dict]
 
-@app.post("/getNews", response_model=NewsResult)
+@app.post("/get_commonLaws_news_by_id", response_model=NewsResult)
 async def get_news(info_input: NewsInput):
     data_list = common_laws_service.get_news(uq_id=info_input.uq_id,
                                              tableName=info_input.table_name)
