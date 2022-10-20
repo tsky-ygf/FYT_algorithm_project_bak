@@ -18,27 +18,34 @@ from pydantic import BaseModel, Field
 
 app = FastAPI()
 
+
 @app.exception_handler(RequestValidationError)
 async def request_validation_exception_handler(request: Request, exc: RequestValidationError):
     print(f"参数不对{request.method} {request.url}")
-    return JSONResponse({"code": "400", "error_msg": exc.errors(),"status": 1})
+    return JSONResponse({"code": "400", "error_msg": exc.errors(), "status": 1})
+
 
 class CategoryInput(BaseModel):
     category: str = Field(default="", description="专栏名称")
+
     class Config:
         schema_extra = {
             "example": {
                 "category": "税法专栏",
             }
         }
+
+
 class CategoryResult(BaseModel):
     data_list: list[dict]
+
 
 @app.post("/exampleData", response_model=CategoryResult)
 async def get_example_model_data(category: CategoryInput):
     tabName = common_laws_service.get_table(category.category)
     preview_data_list = common_laws_service.get_preview(tabName=tabName)
     return preview_data_list
+
 
 class NewsInput(BaseModel):
     table_name: str = Field(default="", description="数据库表名称")
@@ -52,14 +59,17 @@ class NewsInput(BaseModel):
             }
         }
 
+
 class NewsResult(BaseModel):
     data_list: list[dict]
+
 
 @app.post("/getNews", response_model=NewsResult)
 async def get_news(info_input: NewsInput):
     data_list = common_laws_service.get_news(uq_id=info_input.uq_id,
                                              tableName=info_input.table_name)
     return data_list
+
 
 if __name__ == "__main__":
     # 日志设置
