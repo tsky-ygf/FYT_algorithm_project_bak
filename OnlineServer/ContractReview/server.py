@@ -65,9 +65,16 @@ async def _get_user_standpoint():
 
 
 class ContractInput(BaseModel):
-    contract_type_id: str = "laowu"
-    usr: str = "party_a"
-    contract_content: str = "劳务雇佣合同甲⽅（⽤⼈单位）：太极信息有限公司地址：浙江省杭州市滨江区物联网大街222号电话：13662677827⼄⽅（员⼯）姓" \
+    contract_type_id: str
+    usr: str
+    contract_content: str
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "contract_type_id": "laowu",
+                "usr": "party_a",
+                "contract_content":  "劳务雇佣合同甲⽅（⽤⼈单位）：太极信息有限公司地址：浙江省杭州市滨江区物联网大街222号电话：13662677827⼄⽅（员⼯）姓" \
                             "名：陈斌性别：女年龄：34⽂化程度：高中电话：13444327837住址：浙江省杭州市萧山区鸿宁路23号⾝份证号：320102199709" \
                             "120098根据国家《劳动法》、《劳动合同法》和甲⽅的劳动⽤⼯管理等制度规定，遵循合法、公平、平等⾃愿、诚实信⽤的原则，经甲⼄" \
                             "双⽅协商⼀致，同意签订本劳动合同，共同遵守各严格履⾏约定的义务。第⼀条劳动合同期限本劳动合同期限从2022年3⽉5⽇起⾄2025" \
@@ -95,6 +102,8 @@ class ContractInput(BaseModel):
                             "可⾃发⽣劳动争议之⽇起60⽇内向当地劳动仲裁机关申诉。第⼗三条本合同如有与国家法律法规相抵触的，则按国家相关的规定处理。第⼗四" \
                             "条甲、⼄双⽅需要协商约定的其他内容。 第⼗五条本合同⼀式⼆份经甲⼄双⽅签字（盖章）后⽣效，甲⼄双⽅各执⼀份。甲⽅盖章：太极信息" \
                             "有限公司⼄⽅签字：陈斌代表⼈签字：马西西2022年3⽉1⽇"
+            }
+        }
 
 
 @app.post("/get_contract_review_result")
