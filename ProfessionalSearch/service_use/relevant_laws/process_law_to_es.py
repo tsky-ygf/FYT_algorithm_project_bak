@@ -9,12 +9,12 @@ from ProfessionalSearch.src.relevant_laws.process_by_es.laws_items_es import (
 # 执行命令:  elasticdump --input flfg.json --output http://127.0.0.1:9200/ --type=data
 
 # 从数据库新建索引， 暂时写方法入口，方法入参待优化
-parser = argparse.ArgumentParser()
-
-parser.add_argument("--way", default='update', type=str,
-                    help="操作方法，insert or update")
-argus = parser.parse_args()
-print(argus.way)
+# parser = argparse.ArgumentParser()
+#
+# parser.add_argument("--way", default='update', type=str,
+#                     help="操作方法，insert or update")
+# argus = parser.parse_args()
+# print(argus.way)
 # if argus.way == 'insert':
 #     process_law_to_es(argus.way)
 # elif argus.way == 'update':
