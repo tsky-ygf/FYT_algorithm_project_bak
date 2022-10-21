@@ -156,4 +156,8 @@ if __name__ == "__main__":
     # fun2()  # 验证连续的标签
     # fun3() # 检查重叠
 
+    text = list(range(1000))
+    wind = 510
+    print(len(text)-wind//2+1)
+
     pass
