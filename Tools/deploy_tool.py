@@ -14,7 +14,7 @@ def pt2onnx(model_ckpt_path, out_model_path, in_shape):
     model.eval()
 
     input_data_shape = torch.rand(in_shape, device=device).long()
-    torch.onnx._export(model, input_data_shape, out_model_path)
+    torch.onnx.export(model, input_data_shape, out_model_path)
 
 
 def infer_onnx_example(lang_model_path, onnx_model_path, content_test):
@@ -35,24 +35,24 @@ def infer_onnx_example(lang_model_path, onnx_model_path, content_test):
     outputs = session.run(
         output_names=[label_name], input_feed={input_name: inputs["input_ids"]}
     )
-    print(outputs)
     predictions = torch.sigmoid(torch.tensor(outputs[0])) > 0.5
     predictions = predictions.detach().cpu().numpy().astype(int)
     probability = torch.sigmoid(torch.tensor(outputs)).detach().cpu().numpy()[0]
-    print(predictions, probability)
+
+    return predictions, probability
 
 
 if __name__ == "__main__":
-    model_ckpt_path = "model/onnx_model/test/ckpt/reuters_chinese-roberta-wwm-ext_FL_json_epoch3para_ckpt"
-    out_model_path = "model/onnx_model/test/output/test_model.onnx"
-    in_shape = (1, 512)  # (bathsize, max_length)
+    _model_ckpt_path = "model/onnx_model/test/ckpt/reuters_chinese-roberta-wwm-ext_FL_json_epoch3para_ckpt"
+    _out_model_path = "model/onnx_model/test/output/test_model.onnx"
+    _in_shape = (1, 512)  # (batch_size, max_length)
 
-    onnx_model_path = "model/onnx_model/test_model.onnx"
-    lang_model_path = "model/language_model/chinese-roberta-wwm-ext"
-    content_test = "经审理查明，被告向原告分别于2017年12月12日借款22000元，2017年12月29日借款28000元，2018年2月27日借款25000元，" \
-                   "2018年3月15日借款20000元，2018年4月30日借款45000元，2017年8月13日借款8000元，共计148000元。并出具了欠条，" \
-                   "借款后被告没有偿还，后原告诉至法院。;"
+    _onnx_model_path = "model/onnx_model/test_model.onnx"
+    _lang_model_path = "model/language_model/chinese-roberta-wwm-ext"
+    _content_test = "经审理查明，被告向原告分别于2017年12月12日借款22000元，2017年12月29日借款28000元，2018年2月27日借款25000元，" \
+                    "2018年3月15日借款20000元，2018年4月30日借款45000元，2017年8月13日借款8000元，共计148000元。并出具了欠条，" \
+                    "借款后被告没有偿还，后原告诉至法院。;"
 
-    pt2onnx(model_ckpt_path, out_model_path, in_shape)
-    infer_onnx_example(lang_model_path, onnx_model_path, content_test)
+    pt2onnx(_model_ckpt_path, _out_model_path, _in_shape)
+    infer_onnx_example(_lang_model_path, _onnx_model_path, _content_test)
     # exp_one(in_shape=in_shape)

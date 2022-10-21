@@ -50,14 +50,10 @@ class LawItemsESTool(BaseESTool):
             "地方性法规": 4,
         }
 
-        with open(
-                "ProfessionalSearch/config/relevant_laws/minshi_item.json"
-        ) as f:
+        with open("ProfessionalSearch/config/relevant_laws/minshi_item.json") as f:
             self.minshi_item = json.load(f)
 
-        with open(
-                "ProfessionalSearch/config/relevant_laws/xingshi_item.json"
-        ) as f:
+        with open("ProfessionalSearch/config/relevant_laws/xingshi_item.json") as f:
             self.xingshi_item = json.load(f)
 
     @staticmethod
@@ -70,16 +66,16 @@ class LawItemsESTool(BaseESTool):
         if self.debug:
             query = "select * from {} limit 1000".format(table_name)
         else:
-            if way == 'insert':
+            if way == "insert":
                 query = "select id,isValid,resultChapter,resultClause,resultSection,title,md5Clause,source,prov from {}".format(
                     table_name
                 )
-            elif way == 'update':
-                query = "select id,isValid,resultChapter,resultClause,resultSection,title,md5Clause,source,prov,update_time from {} where DATE_SUB(CURDATE(),INTERVAL 2 DAY) <= DATE(update_time)".format(
+            elif way == "update":
+                query = "select id,isValid,resultChapter,resultClause,resultSection,title,md5Clause,source,prov,update_time from {}".format(
                     table_name
                 )
-            elif way == 'create':
-                query = "select id,isValid,resultChapter,resultClause,resultSection,title,md5Clause,source,prov from {}".format(
+            elif way == "create":
+                query = "select id,isValid,resultChapter,resultClause,resultSection,title,md5Clause,source,prov,update_time from {} where DATE_SUB(CURDATE(),INTERVAL 0 DAY) <= DATE(update_time)".format(
                     table_name
                 )
         logger.info(query)
@@ -100,23 +96,23 @@ class LawItemsESTool(BaseESTool):
         return res_df
 
     def __call__(self, way):
-        if way == 'insert':
+        if way == "insert":
             self.es_init()
         for table_name in self.table_list:
-            if way == 'insert':
+            if way == "insert":
                 print("table_name", table_name)
                 df_data = self.get_df_data_from_db(table_name, 0, 0, way)
                 self.insert_data_to_es(df_data)
                 logger.info("insert data to es success from {}".format(table_name))
-            elif way == 'update':
+            elif way == "update":
                 print("table_name", table_name)
                 df_data = self.get_df_data_from_db(table_name, 0, 0, way)
                 self.update_data_from_es_parall(6, 1000, df_data, table_name)
                 logger.info("update data to es success from {}".format(table_name))
-            elif way == 'create':
+            elif way == "create":
                 print("table_name", table_name)
                 df_data = self.get_df_data_from_db(table_name, 0, 0, way)
-                self.update_data_from_es_parall(6, 1000, df_data, table_name)
+                self.create_data_from_es_parall(6, 1000, df_data, table_name)
                 logger.info("update data to es success from {}".format(table_name))
 
     def handle_es(self, df_data):
@@ -193,7 +189,12 @@ class LawItemsESTool(BaseESTool):
                 data_body["title_weight"] += self.xingshi_item[title]
 
             if count < 30:
-                print("doc_id:", data_body["id"], ";resultChapter:", data_body["resultChapter"])
+                print(
+                    "doc_id:",
+                    data_body["id"],
+                    ";resultChapter:",
+                    data_body["resultChapter"],
+                )
                 print("title:", data_body["title"])
                 print("source:", data_body["source"])
                 print("prov:", data_body["prov"])
@@ -202,13 +203,74 @@ class LawItemsESTool(BaseESTool):
                 print(count)
             count = count + 1
 
-
             yield {
                 "_op_type": "update",
                 "_index": self.index_name,
                 "_type": "_doc",
                 "_id": row["md5Clause"],
                 "doc": data_body,
+            }
+
+    def create_es_parall(self, df_data, table_name):
+        count = 0
+        for index, row in df_data.iterrows():
+            data_ori = row.to_dict()
+            use_data = [
+                "id",
+                "isValid",
+                "resultChapter",
+                "resultClause",
+                "resultSection",
+                "title",
+                "md5Clause",
+                "source",
+                "prov",
+            ]
+            data_body = {
+                key: value for key, value in data_ori.items() if key in use_data
+            }
+            data_body["isValid_weight"] = self.valid_mapping[data_body["isValid"]]
+            data_body["legal_type_weight"] = self.legal_mapping[data_body["source"]]
+            title = self.chuli_title(data_body["title"])
+            data_body["title_weight"] = 0
+            if data_body["resultChapter"]:
+                data_body["resultChapter"] = bytes.decode(data_body["resultChapter"])
+            else:
+                data_body["resultChapter"] = ""
+            if data_body["resultClause"]:
+                data_body["resultClause"] = bytes.decode(data_body["resultClause"])
+            else:
+                data_body["resultClause"] = ""
+            if data_body["resultSection"]:
+                data_body["resultSection"] = bytes.decode(data_body["resultSection"])
+            else:
+                data_body["resultSection"] = ""
+
+            if title in self.minshi_item:
+                data_body["title_weight"] += self.minshi_item[title]
+            if title in self.xingshi_item:
+                data_body["title_weight"] += self.xingshi_item[title]
+
+            if count < 30:
+                print(
+                    "doc_id:",
+                    data_body["id"],
+                    ";resultChapter:",
+                    data_body["resultChapter"],
+                )
+                print("title:", data_body["title"])
+                print("source:", data_body["source"])
+                print("prov:", data_body["prov"])
+                print("==============================")
+            if count % 10000 == 0:
+                print(count)
+            count = count + 1
+            yield {
+                "_op_type": "create",
+                "_index": self.index_name,
+                "_type": "_doc",
+                "_id": row["md5Clause"],
+                "_source": data_body,
             }
 
 

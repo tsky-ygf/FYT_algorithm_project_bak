@@ -23,14 +23,19 @@ async def _get_support_contract_types():
     """
     获取能审核的合同类型
 
-    输入参数：
+    请求参数:
+
     无
 
-    输出参数：
+    响应参数：
 
-    @result：支持的合同类型
+    | Param  | Type       | Description  |
+    |--------|------------|--------------|
+    | result | List[Dict] | 支持的合同类型   |
 
-    type：list 里 包含若干个dict
+    result包含若干个如下的dict：
+       * type_id : str 合同类型的id
+       * contract_type : str 合同类型
 
     """
     return {"result": get_support_contract_types()}
@@ -41,23 +46,35 @@ async def _get_user_standpoint():
     """
     获取甲乙方代表
 
-    输入参数：
+    请求参数：
+
     无
 
-    输出参数：
+    响应参数：
 
-    @result：获取双方代表
+    | Param  | Type       | Description  |
+    |--------|------------|--------------|
+    | result | List[Dict] | 支持的甲乙双方  |
 
-    type：list 里包含两个dict
+    result包含若干个如下的dict：
+       * id : str 甲乙方代表id
+       * standpoint : str 甲乙方代表
 
     """
     return {"result": get_user_standpoint()}
 
 
 class ContractInput(BaseModel):
-    contract_type_id: str = "laowu"
-    usr: str = "party_a"
-    contract_content: str = "劳务雇佣合同甲⽅（⽤⼈单位）：太极信息有限公司地址：浙江省杭州市滨江区物联网大街222号电话：13662677827⼄⽅（员⼯）姓" \
+    contract_type_id: str
+    usr: str
+    contract_content: str
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "contract_type_id": "laowu",
+                "usr": "party_a",
+                "contract_content":  "劳务雇佣合同甲⽅（⽤⼈单位）：太极信息有限公司地址：浙江省杭州市滨江区物联网大街222号电话：13662677827⼄⽅（员⼯）姓" \
                             "名：陈斌性别：女年龄：34⽂化程度：高中电话：13444327837住址：浙江省杭州市萧山区鸿宁路23号⾝份证号：320102199709" \
                             "120098根据国家《劳动法》、《劳动合同法》和甲⽅的劳动⽤⼯管理等制度规定，遵循合法、公平、平等⾃愿、诚实信⽤的原则，经甲⼄" \
                             "双⽅协商⼀致，同意签订本劳动合同，共同遵守各严格履⾏约定的义务。第⼀条劳动合同期限本劳动合同期限从2022年3⽉5⽇起⾄2025" \
@@ -85,26 +102,44 @@ class ContractInput(BaseModel):
                             "可⾃发⽣劳动争议之⽇起60⽇内向当地劳动仲裁机关申诉。第⼗三条本合同如有与国家法律法规相抵触的，则按国家相关的规定处理。第⼗四" \
                             "条甲、⼄双⽅需要协商约定的其他内容。 第⼗五条本合同⼀式⼆份经甲⼄双⽅签字（盖章）后⽣效，甲⼄双⽅各执⼀份。甲⽅盖章：太极信息" \
                             "有限公司⼄⽅签字：陈斌代表⼈签字：马西西2022年3⽉1⽇"
+            }
+        }
+
+class ContractResponse(BaseModel):
+    result: list[dict]
 
 
-@app.post("/get_contract_review_result")
+@app.post("/get_contract_review_result", response_model=ContractResponse)
 async def _get_contract_review_result(contract_input: ContractInput):
     """
     获取合同审核结果
 
-    输入参数：
+    请求参数：
 
-    @contract_type_id：合同类型
+    | Param             | Type  | Description  |
+    |-------------------|-------|--------------|
+    | contract_type_id  | str   | 合同类型       |
+    | filter_conditions | str   | 甲乙方代表      |
+    | type_of_case      | str   | 合同内容       |
 
-    @usr： 甲乙方代表
 
-    @contract_content： 合同内容
+    响应参数：
 
-    输出参数：
+    | Param  | Type  | Description  |
+    |--------|-------|--------------|
+    | result | list[Dict]  | 合同审核结果  |
 
-    @result：合同审核结果
-
-    type：list
+    result包含若干个如下的dict：
+      * review_point: str 审核点
+      * show_name: str 展示名称
+      * review_result: str 审核结果
+      * review_content: str 审核内容
+      * review_content_start: str 审核内容在文档中的起始坐标(多个坐标时，用#拼接)
+      * review_content_end: str 审核内容在文档中的末尾坐标(多个坐标时，用#拼接)
+      * legal_advice: str 法律建议
+      * legal_basis: str 法律依据
+      * risk_level: str 风险等级
+      * risk_point: str 风险点
 
     """
     result = get_contract_review_result(content=contract_input.contract_content, mode="text",
@@ -122,15 +157,17 @@ async def _get_text_from_file_link_path(file_link_input: FileLinkInput):
     """
     从文件链接获取文件文本内容
 
-    输入参数：
+    请求参数：
 
-    @file_path: 文件链接
+    | Param     | Type  | Description  |
+    |-----------|-------|--------------|
+    | file_path | str   | 文件链接       |
 
-    输出参数：
+    响应参数：
 
-    @result:文件文本内容
-
-    type：str
+    | Param  | Type  | Description  |
+    |--------|-------|--------------|
+    | result | str   | 文件文本内容     |
     """
 
     return {"result": get_text_from_file_link_path(file_link_input.file_path)}

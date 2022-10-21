@@ -87,9 +87,10 @@ def _get_law_result(query, filter_conditions, page_number, page_size):
         )
     result = _construct_result_format(search_result)
     if total_num >= 200:
-        return {"result": result, "total_amount": 200}
+        result.append()
+        return {"laws": result, "total_amount": 200}
     else:
-        return {"result": result, "total_amount": len(result)}
+        return {"laws": result, "total_amount": len(result)}
 
 
 @app.route("/search_laws", methods=["post"])

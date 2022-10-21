@@ -20,17 +20,45 @@ app = FastAPI()
 
 
 class TextInput(BaseModel):
-    text: str = Field(default="", description="输入的文本")
+    text: str = Field(default="真麻烦你了。 希望你们好好的跳无", description="输入的文本")
+    class Config:
+        schema_extra = {
+            "example": {
+                "text": "真麻烦你了。 希望你们好好的跳无"
+            }
+        }
 
 
-@app.post("/get_corrected_contract_result")
+class TextResult(BaseModel):
+    result: dict
+
+
+@app.post("/get_corrected_contract_result", response_model=TextResult)
 async def _get_corrected_contract_result(text_input: TextInput):
     """
     获取纠错的结果及详情
 
-    参数设定；
+    请求参数：
 
-    @text: 输入文本
+    | Param             | Type  | Description  |
+    |-------------------|-------|--------------|
+    |        text       |  str  |    输入文本   |
+
+    响应参数：
+
+    | Param  | Type  | Description  |
+    |--------|-------|--------------|
+    | result | Dict  |  合同审核结果  |
+
+    result的内容如下:
+    * corrected_pred: string, 纠错后的结果
+    * msg: string, 错误信息
+    * success: boolean, 服务调用是否成功
+    * detail_info: List[Tuple], 具体纠错信息
+        * 元素0: string, 原始字
+        * 元素1: string, 纠错后的字
+        * 元素2: int, 在输入文本中的起始位置
+        * 元素3: int, 在输入文本中的结束为止
     """
     result = {'corrected_pred': '', 'detail_info': [], 'msg': '', 'success': True}
     try:

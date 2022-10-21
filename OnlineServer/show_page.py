@@ -72,6 +72,9 @@ def welcome():
     st.markdown("#### 智能咨询")
     st.markdown("* [测试接口文档](http://101.69.229.138:8134/docs)")
 
+    st.markdown("#### 普法常识")
+    st.markdown("* [测试接口文档](http://101.69.229.138:8149/docs)")
+
 
 app = MultiApp()
 app.add_app("首页", welcome)
