@@ -101,10 +101,10 @@ result包含若干个如下的dict：
 
 | Param            | Type | Description |
 |------------------|------|-------------|
-| type_of_case     | Dict | 案例检索的过滤条件   |
-| court_level      | Dict | 案例检索的过滤条件   |
-| type_of_document | Dict | 案例检索的过滤条件   |
-| region           | Dict | 案例检索的过滤条件   |
+| type_of_case     | Dict | 案例类型        |
+| court_level      | Dict | 法院层级        |
+| type_of_document | Dict | 文书类型        |
+| region           | Dict | 地域          |
 
 type_of_case的内容如下:
   * name: str, 案件类型
@@ -262,10 +262,9 @@ laws的内容如下:
 *   law_type:      str,    国家法律法规网页标题                       
 *   timeliness:    str,    时效性                              
 *   using_range:   str,    省份                               
-*   law_chapter:   str,    章                                 
-*   law_item:      str,    节                                 
-*   result:        str,    条                                 
-*   law_content:   str,    返回具体法律内容 
+*   law_chapter:   str,    法条章节                                 
+*   law_item:      str,    法条条目                                  
+*   law_content:   str,    法条内容 
 
 ### 2.5 获取相似类案的结果:
 
