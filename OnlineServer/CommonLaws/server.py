@@ -106,4 +106,4 @@ async def get_news(info_input: NewsInput):
 
 if __name__ == "__main__":
     # 日志设置
-    uvicorn.run('OnlineServer.CommonLaws.server:app', host="0.0.0.0", port=8149, reload=False, workers=1)
+    uvicorn.run('OnlineServer.CommonLaws.server:app', host="0.0.0.0", port=8148, reload=False, workers=1)
