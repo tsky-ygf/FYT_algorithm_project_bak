@@ -108,18 +108,24 @@ class Case_id(BaseModel):
 
 
 class conditions_law_result(BaseModel):
-    type_of_case: typing.Dict
-    court_level: typing.Dict
-    type_of_document: typing.Dict
-    region: typing.Dict
+    types_of_law: typing.Dict
+    timeliness: typing.Dict
+    scope_of_use: typing.Dict
+
+
+class laws(BaseModel):
+    law_id: str
+    law_name: str
+    law_type: str
+    timeliness: str
+    using_range: str
+    law_chapter: str
+    law_item: str
+    law_content: str
 
 
 class search_laws_result(BaseModel):
-    doc_id: str
-    court: str
-    case_number: str
-    jfType: str
-    content: str
+    laws: typing.List[laws]
     total_amount: int
 
 
@@ -130,12 +136,16 @@ class conditions_case_result(BaseModel):
     region: dict
 
 
-class search_cases_result(BaseModel):
+class cases(BaseModel):
     doc_id: str
     court: str
     case_number: str
     jfType: str
     content: str
+
+
+class search_cases_result(BaseModel):
+    cases: typing.List[cases]
     total_amount: int
 
 
@@ -157,13 +167,13 @@ class desensitization_input(BaseModel):
         schema_extra = {
             "example": {
 
-                    "text": "《八佰》（英語：The Eight Hundred）是一部于2020年上映的以中国历史上的战争为题材的电影，由管虎执导，黄志忠、黄骏豪、张俊一、张一山....."
+                "text": "《八佰》（英語：The Eight Hundred）是一部于2020年上映的以中国历史上的战争为题材的电影，由管虎执导，黄志忠、黄骏豪、张俊一、张一山....."
 
             }
         }
 
 
-@app.get("/get_filter_conditions_of_law")
+@app.get("/get_filter_conditions_of_law", response_model=conditions_law_result)
 async def _get_filter_conditions() -> dict:
     """
         返回法条检索的输入条件
@@ -211,7 +221,7 @@ async def _get_filter_conditions() -> dict:
     return get_filter_conditions()
 
 
-@app.post("/search_laws")
+@app.post("/search_laws", response_model=search_laws_result)
 async def search_laws(search_query: Search_laws_input) -> dict:
     """
     获取法律检索的结果
@@ -272,7 +282,7 @@ async def search_laws(search_query: Search_laws_input) -> dict:
 #     return {"result": ""}
 
 
-@app.get("/get_filter_conditions_of_case")
+@app.get("/get_filter_conditions_of_case", response_model=conditions_case_result)
 async def _get_filter_conditions() -> dict:
     """
         返回案例检索的过滤条件
@@ -327,7 +337,7 @@ async def _get_filter_conditions() -> dict:
     return get_filter_conditions_of_case()
 
 
-@app.post("/search_cases")
+@app.post("/search_cases", response_model=search_cases_result)
 async def search_cases(search_query: Search_cases_input) -> dict:
     """
         获取法律检索的结果
@@ -384,7 +394,7 @@ async def search_cases(search_query: Search_cases_input) -> dict:
             else:
                 return response_successful_result([], {"total_amount": len([])})
         else:
-            return json.dumps({"error_msg": "no data", "status": 1}, ensure_ascii=False)
+            return {"error_msg": "no data", "status": 1}
     except Exception as e:
         return response_failed_result("error:" + repr(e))
 
@@ -395,7 +405,7 @@ async def search_cases(search_query: Search_cases_input) -> dict:
 #     return {"result": ""}
 
 
-@app.post("/top_k_similar_narrative")
+@app.post("/top_k_similar_narrative", response_model=similar_narrative_result)
 async def get_similar_case(search_query: Similar_case_input) -> dict:
     """
         返回相似类案的结果
@@ -452,8 +462,8 @@ async def get_similar_case(search_query: Similar_case_input) -> dict:
         return {"error_msg:": repr(e), "status": 1}
 
 
-@app.post("/desensitization")
-async def get_text_desen(dese_in: desensitization_input) -> str:
+@app.post("/desensitization", response_model=desensitization_result)
+async def get_text_desen(dese_in: desensitization_input) -> dict:
     """
         返回人名脱敏的结果
 
@@ -469,7 +479,7 @@ async def get_text_desen(dese_in: desensitization_input) -> str:
             |--------|------|-------------|
             | result | str  | 人名脱敏后的文本    |
     """
-    return desensitization(dese_in.text)
+    return {"res": desensitization(dese_in.text)}
 
 
 if __name__ == "__main__":

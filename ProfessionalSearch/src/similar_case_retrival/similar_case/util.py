@@ -89,7 +89,7 @@ def get_index_list(text):
     return index_text
 
 
-def desensitization(text: str) -> list:
+def desensitization(text: str) -> str:
     # 脱敏人名, 如果陈重姓，使用陈某1，陈某2
     res = ""
     # 抽取人名
@@ -100,20 +100,6 @@ def desensitization(text: str) -> list:
 
     return res
 
-
-def extract_name_hanlp(text: str) -> list:
-    from pyhanlp import HanLP
-
-    if not text:
-        return []
-    segment = HanLP.newSegment().enableNameRecognize(True)
-    user_list = []
-    for i in segment.seg(text):
-        split_words = str(i).split("/")
-        word, tag = split_words[0], split_words[-1]
-        if tag == "nr":
-            user_list.append(word)
-    return user_list
 
 
 def extract_name_LTP(text: str) -> list:
