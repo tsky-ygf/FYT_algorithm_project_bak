@@ -168,14 +168,19 @@ filter_conditions的内容如下:
 
 响应参数:
 
-| Param        | Type | Description                      |
-|--------------|------|----------------------------------|
-| doc_id       | str  | 数据库表名 + 分隔符 + 裁判文书的uq_id         |
-| court        | str  | 法院名称                             |
-| case_number  | str  | 文书号                              |
-| jfType       | str  | 纠纷类型                             |
-| content      | str  | 裁判文书内容                           |
-| total_amount | int  | 若搜索的结果有200条以上则返回200，小于就返回搜索结果的长度 |
+| Param        | Type       | Description                      |
+|--------------|------------|----------------------------------|
+| cases        | List[dict] | 返回案例的list集合                      |
+| total_amount | int        | 若搜索的结果有200条以上则返回200，小于就返回搜索结果的长度 |
+
+cases的内容如下:
+
+* doc_id:        str,  数据库表名 + 分隔符 + 裁判文书的uq_id         
+* court:         str,  法院名称                             
+* case_number:   str,  文书号                              
+* jfType:        str,  纠纷类型                             
+* content:       str,  裁判文书内容
+
 
 
 ### 2.3 获取法律检索的过滤条件:
@@ -245,17 +250,22 @@ filter_conditions的内容如下:
   西藏自治区/新疆维吾尔自治区/云南省/浙江省）
 响应参数:
 
-| Param       | Type | Description                      |
-|-------------|------|----------------------------------|
-| law_id      | str  | 数据库表名 + 分隔符 + 法条的md5Clause       |
-| law_name    | str  | 标题                               |
-| law_type    | str  | 国家法律法规网页标题                       |
-| timeliness  | str  | 时效性                              |
-| using_range | str  | 省份                               |
-| law_chapter | str  | 章                                |
-| law_item    | str  | 节                                |
-| result      | str  | 条                                |
-| law_content | int  | 若搜索的结果有200条以上则返回200，小于就返回搜索结果的长度 |
+| Param        | Type       | Description                      |
+|--------------|------------|----------------------------------|
+| laws         | List[dict] | 返回的法律list集合                      |
+| total_amount | int        | 若搜索的结果有200条以上则返回200，小于就返回搜索结果的长度 |
+
+laws的内容如下:
+
+*   law_id:        str,    数据库表名 + 分隔符 + 法条的md5Clause       
+*   law_name:      str,    标题                              
+*   law_type:      str,    国家法律法规网页标题                       
+*   timeliness:    str,    时效性                              
+*   using_range:   str,    省份                               
+*   law_chapter:   str,    章                                 
+*   law_item:      str,    节                                 
+*   result:        str,    条                                 
+*   law_content:   str,    返回具体法律内容 
 
 ### 2.5 获取相似类案的结果:
 
@@ -472,38 +482,3 @@ result的内容如下:
   * 元素1: string, 纠错后的字
   * 元素2: int, 在输入文本中的起始位置
   * 元素3: int, 在输入文本中的结束为止
-
-## 6.普法专栏
-
-### 6.1 获取专栏预览信息
-
-`POST http://101.69.229.138:8149/get_preview_commonLaws_data`
-
-请求参数：
-
-| Param    | Type  | Description  |
-|----------|-------|--------------|
-| category | str   | 输入文本 专栏名称    |
-
-响应参数：
-
-| Param     | Type | Description |
-|-----------|------|-----------|
-| res_data  | list | 预览信息      |
-
-### 6.2 查询专栏信息
-
-`POST http://101.69.229.138:8149/get_commonLaws_news_by_id`
-
-请求参数：
-
-| Param      | Type  | Description |
-|------------|-------|-------------|
-| uq_id      | str   | 输入文本 数据库主键  |
-| table_name | str   | 输入文本 表名称    |
-
-响应参数：
-
-| Param     | Type | Description  |
-|-----------|------|--------------|
-| res_data  | list | 专栏信息结果       |
