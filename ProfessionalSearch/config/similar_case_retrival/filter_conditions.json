@@ -5,12 +5,6 @@
             "is_multiple_choice": true,
             "value": ["全部", "刑事", "民事", "行政", "执行"]
         },
-        "jfType_level_one":{
-
-        },
-        "jfType_level_two":{
-
-        },
         "court_level": {
             "name": "法院层级",
             "is_multiple_choice": true,
