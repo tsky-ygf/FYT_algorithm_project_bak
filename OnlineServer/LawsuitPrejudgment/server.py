@@ -99,29 +99,54 @@ def _get_template_by_problem_id(param: GetTemplateByProblemIdInput):
     return civil_app_service.get_template_by_problem_id(param.problem_id)
 
 
-class GetClaimListParam(BaseModel):
-    problem_id: int
-    fact: str
+class GetClaimListByProblemIdInput(BaseModel):
+    problem_id: int = Field(description="纠纷id", example=1531)
+    fact: str = Field(description="用户输入的事实描述", example="对方经常家暴，我想离婚。")
 
 
-@app.post("/get_claim_list_by_problem_id")
-def _get_claim_list_by_problem_id(param: GetClaimListParam):
+class ClaimItem(BaseModel):
+    id: int = Field(description="诉求id")
+    claim: str = Field(description="诉求名称")
+    is_recommended: bool = Field(description="是否推荐该诉求。如果为true，则前端把该诉求设置为选中。")
+
+
+class GetClaimListByProblemIdResult(BaseModel):
+    success: bool = Field(description="是否成功调用")
+    error_msg: str = Field(description="失败时的错误信息")
+    value: List[ClaimItem] = Field(description="数据列表")
+
+
+@app.post("/get_claim_list_by_problem_id", summary="获取纠纷对应的诉求列表", response_model=GetClaimListByProblemIdResult)
+def _get_claim_list_by_problem_id(param: GetClaimListByProblemIdInput):
     """
     获取纠纷对应的诉求列表。
 
-    Returns:
-        示例
-        {
-            "success": true,
-            "error_msg": "",
-            "value": [
-                {
-                    "id": 461,
-                    "claim": "请求离婚",
-                    "is_recommended": true
-                }
-            ]
-        }
+    请求参数:
+
+
+    | Param      | Type   | Description |
+    |------------|--------|-------------|
+    | problem_id | int    | 纠纷id        |
+    | fact       | string | 事实描述        |
+
+
+    响应参数:
+
+
+    | Param     | Type    | Description |
+    |-----------|---------|-------------|
+    | success   | boolean | 是否成功调用      |
+    | error_msg | string  | 失败时的错误信息    |
+    | value     | List    | 数据列表        |
+
+    value的内容如下:
+
+      * id: int, 诉求id
+
+      * claim: string, 诉求名称
+
+      * is_recommended: boolean, 是否推荐该诉求，示例：true。如果为true，则前端把该诉求设置为选中。
+      
     """
     return civil_app_service.get_claim_list_by_problem_id(param.problem_id, param.fact)
 
