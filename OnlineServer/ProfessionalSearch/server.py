@@ -33,16 +33,16 @@ app = FastAPI()
 
 
 class Filter_conditions_law(BaseModel):
-    timeliness: list
-    types_of_law: list
-    scope_of_use: list
+    timeliness: list = Field(description="时效性")
+    types_of_law: list = Field(description="法律种类")
+    scope_of_use: list = Field(description="地域")
 
 
 class Search_laws_input(BaseModel):
-    query: str
+    query: str = Field(description="用户输入的查询内容")
     filter_conditions: Union[Filter_conditions_law, None] = None
-    page_number: int
-    page_size: int
+    page_number: int = Field(description="页")
+    page_size: int = Field(description="页大小")
 
     class Config:
         schema_extra = {
@@ -64,17 +64,17 @@ class Law_id(BaseModel):
 
 
 class Filter_conditions_case(BaseModel):
-    type_of_case: list
-    court_level: list
-    type_of_document: list
-    region: list
+    type_of_case: list = Field(description="案例类型")
+    court_level: list = Field(description="法院层级")
+    type_of_document: list = Field(description="文书类型")
+    region: list = Field(description="地域")
 
 
 class Search_cases_input(BaseModel):
-    query: str
+    query: str = Field(description="用户输入的检索内容")
     filter_conditions: Union[Filter_conditions_case, None] = None
-    page_number: int
-    page_size: int
+    page_number: int = Field(description="页")
+    page_size: int = Field(description="页大小")
 
     class Config:
         schema_extra = {
@@ -93,9 +93,9 @@ class Search_cases_input(BaseModel):
 
 
 class Similar_case_input(BaseModel):
-    fact: str
-    problem: str
-    claim_list: list
+    fact: str = Field(description="用户输入的查询内容")
+    problem: str = Field(description="纠纷类型")
+    claim_list: list = Field(description="诉求类型")
 
     class Config:
         schema_extra = {
@@ -108,60 +108,60 @@ class Case_id(BaseModel):
 
 
 class conditions_law_result(BaseModel):
-    types_of_law: typing.Dict
-    timeliness: typing.Dict
-    scope_of_use: typing.Dict
+    types_of_law: typing.Dict = Field(description="法律种类")
+    timeliness: typing.Dict = Field(description="时效性")
+    scope_of_use: typing.Dict = Field(description="地域")
 
 
 class laws(BaseModel):
-    law_id: str
-    law_name: str
-    law_type: str
-    timeliness: str
-    using_range: str
-    law_chapter: str
-    law_item: str
-    law_content: str
+    law_id: str = Field(description="数据库表明+_SEP_+法条的md5Clause")
+    law_name: str = Field(description="标题")
+    law_type: str = Field(description="国家法律法规网页标题")
+    timeliness: str = Field(description="时效性")
+    using_range: str = Field(description="省")
+    law_chapter: str = Field(description="法条章节")
+    law_item: str = Field(description="法条条目")
+    law_content: str = Field(description="法条内容")
 
 
 class search_laws_result(BaseModel):
     laws: typing.List[laws]
-    total_amount: int
+    total_amount: int = Field(description="返回总量, 大于200条，默认200")
 
 
 class conditions_case_result(BaseModel):
-    type_of_case: dict
-    court_level: dict
-    type_of_document: dict
-    region: dict
+    type_of_case: dict = Field(description="案例类型")
+    court_level: dict = Field(description="法院层级")
+    type_of_document: dict = Field(description="文书类型")
+    region: dict = Field(description="地域")
 
 
 class cases(BaseModel):
-    doc_id: str
-    court: str
-    case_number: str
-    jfType: str
-    content: str
+    doc_id: str = Field(description=" +数据库表名+ _SEP_ + uq_id")
+    court: str = Field(description="法院名字")
+    case_number: str = Field(description="文书号")
+    jfType: str = Field(description="纠纷类型")
+    content: str = Field(description="裁判文书内容")
 
 
 class search_cases_result(BaseModel):
     cases: typing.List[cases]
-    total_amount: int
+    total_amount: int = Field(description="案例返回的总量，大于200， 默认200")
 
 
 class similar_narrative_result(BaseModel):
-    dids: list[str]
-    sims: list[float]
-    reasonNames: list[str]
-    tags: list[str]
+    dids: list[str] = Field(description="id集合")
+    sims: list[float] = Field(description="相似率")
+    reasonNames: list[str] = Field(description="纠纷类型")
+    tags: list[str] = Field(description="关键词")
 
 
 class desensitization_result(BaseModel):
-    res: str
+    res: str = Field(description="脱敏人名后的文本")
 
 
 class desensitization_input(BaseModel):
-    text: str
+    text: str = Field(description="待人名脱敏的文本")
 
     class Config:
         schema_extra = {
@@ -244,6 +244,7 @@ async def search_laws(search_query: Search_laws_input) -> dict:
       广西壮族自治区/贵州省/海南省/河北省/河南省/黑龙江省/湖北省/湖南省/吉林省/江苏省/江西省/
       辽宁省/内蒙古自治区/宁夏回族自治区/青海省/山东省/山西省/陕西省/上海市/四川省/天津市/
       西藏自治区/新疆维吾尔自治区/云南省/浙江省）
+
     响应参数:
 
     | Param        | Type       | Description                      |
@@ -258,10 +259,10 @@ async def search_laws(search_query: Search_laws_input) -> dict:
     *   law_type:      str,    国家法律法规网页标题
     *   timeliness:    str,    时效性
     *   using_range:   str,    省份
-    *   law_chapter:   str,    章
-    *   law_item:      str,    节
-    *   result:        str,    条
-    *   law_content:   str,    返回具体法律内容
+    *   law_chapter:   str,    法条章节
+    *   law_item:      str,    法条条目
+    *   law_content:   str,    法条内容
+
     """
     try:
         result = _get_law_result(
