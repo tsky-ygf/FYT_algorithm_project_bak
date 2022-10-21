@@ -100,7 +100,7 @@ class FAQPredict:
 
         predictions = self.pipe.run(query=query, params={"Retriever": {"top_k": 20}})["answers"]
 
-        if sub_source is None:
+        if source is None:
             sub_source = pred_sub
 
         answer, similarity_question = self.post_process_result(query, predictions, source, sub_source)

@@ -7,6 +7,7 @@
 # @Software: PyCharm
 import pandas as pd
 from tqdm.auto import tqdm
+from pprint import pprint
 
 from sklearn.model_selection import train_test_split
 
@@ -52,7 +53,16 @@ def create_train_data():
 
 
 def topic_data():
-    pass
+    df = pd.read_csv(origin_data_path)
+    sub_type_mapping = {}
+    print(df)
+    for index, row in df.iterrows():
+        source = row["source"]
+        sub_source = row["sub_source"]
+        sub_type_mapping[sub_source] = source
+
+    print(sub_type_mapping)
+
 
 if __name__ == '__main__':
     # create_label_map()
