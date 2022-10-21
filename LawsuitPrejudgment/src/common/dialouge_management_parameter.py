@@ -10,15 +10,15 @@ from typing import Union, List, Dict
 
 
 class DialogueHistory(BaseModel):
-    user_input: Union[str, None] = Field(default="", description="用户输入的事实描述")
-    question_answers: Union[List, None] = Field(default=[], description="用户的问答历史")
+    user_input: str = Field(default="", description="用户输入的事实描述")
+    question_answers: List = Field(default=[], description="用户的问答历史")
 
 
 class DialogueState(BaseModel):
     domain: str = Field(default="", description="诉讼预判的类型，如'administrative','civil','criminal'")
-    problem: Union[str, None] = Field(default="", description="纠纷类型")
-    claim_list: Union[List, None] = Field(default=[], description="诉求列表")
-    other: Union[Dict, None] = Field(default={}, description="算法的辅助信息，不需要处理")
+    problem: str = Field(default="", description="纠纷类型")
+    claim_list: List = Field(default=[], description="诉求列表")
+    other: Dict = Field(default={}, description="算法的辅助信息，不需要处理")
 
 
 class NextAction(BaseModel):

@@ -8,7 +8,7 @@
 from typing import List, Dict
 
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, Body
 from pydantic import BaseModel, Field
 from LawsuitPrejudgment.service_use import administrative_app_service, civil_app_service, criminal_app_service
 from LawsuitPrejudgment.src.common.dialouge_management_parameter import DialogueHistory, DialogueState
@@ -61,6 +61,12 @@ def _get_civil_problem_summary():
 class GetTemplateByProblemIdInput(BaseModel):
     problem_id: int = Field(description="纠纷id", example=1531)
 
+    class Config:
+        schema_extra = {
+            "example": {
+                "problem_id": 1531
+            }
+        }
 
 class TemplateValue(BaseModel):
     template: str = Field(description="用户描述模板")
@@ -102,6 +108,14 @@ def _get_template_by_problem_id(param: GetTemplateByProblemIdInput):
 class GetClaimListByProblemIdInput(BaseModel):
     problem_id: int = Field(description="纠纷id", example=1531)
     fact: str = Field(description="用户输入的事实描述", example="对方经常家暴，我想离婚。")
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "problem_id": 1531,
+                "fact": "对方经常家暴，我想离婚。"
+            }
+        }
 
 
 class ClaimItem(BaseModel):
@@ -146,18 +160,67 @@ def _get_claim_list_by_problem_id(param: GetClaimListByProblemIdInput):
       * claim: string, 诉求名称
 
       * is_recommended: boolean, 是否推荐该诉求，示例：true。如果为true，则前端把该诉求设置为选中。
-      
+
     """
     return civil_app_service.get_claim_list_by_problem_id(param.problem_id, param.fact)
 
 
 class DialogueInput(BaseModel):
-    dialogue_history: DialogueHistory
-    dialogue_state: DialogueState
+    dialogue_history: DialogueHistory = Field(description="对话历史。包括用户输入和问答历史。")
+    dialogue_state: DialogueState = Field(description="对话状态。初始化后，后续只需要传递该参数，不用做处理。")
 
 
-@app.post("/lawsuit_prejudgment")
-def _lawsuit_prejudgment(param: DialogueInput):
+dialogue_input_examples = {
+    "civil": {
+        "summary": "民事预判参数示例",
+        "value": {
+            "dialogue_history": {
+                "user_input": "对方经常家暴，我想要离婚。",
+                "question_answers": []
+            },
+            "dialogue_state": {
+                "domain": "civil",
+                "problem": "婚姻家庭",
+                "claim_list": ["请求离婚", "返还彩礼"],
+                "other": {}
+            }
+        }
+    },
+    "criminal": {
+        "summary": "刑事预判参数示例",
+        "value": {
+            "dialogue_history": {
+                "user_input": "我偷了舍友500块。",
+                "question_answers": []
+            },
+            "dialogue_state": {
+                "domain": "criminal",
+                "problem": "",
+                "claim_list": [],
+                "other": {}
+            }
+        }
+    },
+    "administrative": {
+        "summary": "行政预判参数示例",
+        "value": {
+            "dialogue_history": {
+                "user_input": "",
+                "question_answers": []
+            },
+            "dialogue_state": {
+                "domain": "administrative",
+                "problem": "",
+                "claim_list": [],
+                "other": {}
+            }
+        }
+    }
+}
+
+
+@app.post("/lawsuit_prejudgment", summary="诉讼预判的主流程")
+def _lawsuit_prejudgment(param: DialogueInput = Body(examples=dialogue_input_examples)):
     """
     诉讼预判的主流程。
 
