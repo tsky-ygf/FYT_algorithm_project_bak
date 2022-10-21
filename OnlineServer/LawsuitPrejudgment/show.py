@@ -89,14 +89,14 @@ def _show_administrative_next_qa(dialogue_history, dialogue_state, _count):
 
 def administrative_prejudgment_testing_page():
     dialogue_history = {
-        "user_input": None,
-        "question_answers": None
+        "user_input": "",
+        "question_answers": []
     }
     dialogue_state = {
         "domain": "administrative",
-        "problem": None,
-        "claim_list": None,
-        "other": None
+        "problem": "",
+        "claim_list": [],
+        "other": {}
     }
     count = 1
     _show_administrative_next_qa(dialogue_history, dialogue_state, count)
@@ -201,13 +201,13 @@ def criminal_prejudgment_testing_page():
         st.subheader("进行提问")
         dialogue_history = {
             "user_input": user_input,
-            "question_answers": None
+            "question_answers": []
         }
         dialogue_state = {
             "domain": "criminal",
-            "problem": None,
-            "claim_list": None,
-            "other": None
+            "problem": "",
+            "claim_list": [],
+            "other": {}
         }
         count = 1
         show_criminal_next_qa(dialogue_history, dialogue_state, count)
@@ -390,13 +390,13 @@ def civil_prejudgment_testing_page():
     if "submit_desp" in st.session_state:
         dialogue_history = {
             "user_input": user_input,
-            "question_answers": None
+            "question_answers": []
         }
         dialogue_state = {
             "domain": "civil",
             "problem": selected_anyou,
             "claim_list": selected_suqiu_list,
-            "other": None
+            "other": {}
         }
         count = 1
 
