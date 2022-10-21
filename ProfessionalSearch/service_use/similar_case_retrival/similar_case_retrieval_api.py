@@ -74,11 +74,9 @@ def _get_case_result(query, filter_conditions, page_num, page_size):
         )
     result, total_num = _construct_result_format(search_result, total_num)
     if total_num >= 200:
-        result["total_amount"] = 200
-        return result
+        return {"cases": result, "total_amount": 200}
     else:
-        result["total_amount"] = len(result)
-        return result
+        return {"cases": result, "total_amount": len(result)}
 
 
 @app.route("/search_cases", methods=["post"])

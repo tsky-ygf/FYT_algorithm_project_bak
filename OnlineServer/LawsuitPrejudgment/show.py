@@ -89,14 +89,14 @@ def _show_administrative_next_qa(dialogue_history, dialogue_state, _count):
 
 def administrative_prejudgment_testing_page():
     dialogue_history = {
-        "user_input": None,
-        "question_answers": None
+        "user_input": "",
+        "question_answers": []
     }
     dialogue_state = {
         "domain": "administrative",
-        "problem": None,
-        "claim_list": None,
-        "other": None
+        "problem": "",
+        "claim_list": [],
+        "other": {}
     }
     count = 1
     _show_administrative_next_qa(dialogue_history, dialogue_state, count)
@@ -138,16 +138,19 @@ def _remove_criminal_click_state(_count):
     pass
 
 
-def show_criminal_next_qa(_user_input, _question_answers, _factor_sentence_list, _anyou, _event, _count):
-    has_next_question, info = get_criminal_result(_user_input, _question_answers, _factor_sentence_list, _anyou,
-                                                          _event)
-    if has_next_question:
+def show_criminal_next_qa(dialogue_history, dialogue_state, _count):
+    body = {
+        "dialogue_history": dialogue_history,
+        "dialogue_state": dialogue_state
+    }
+    resp_json = requests.post(URL + "/lawsuit_prejudgment", json=body).json()
+    next_action = resp_json["next_action"]
+    if next_action["action_type"] == "ask":
         btn_key = 'criminal_ask_btn' + str(_count)
         btn_click_key = btn_key + "_clicked"
-        next_question_info = info
-        next_question = next_question_info["next_question"]
-        answers = next_question_info["answers"]
-        single_or_multi = next_question_info["single_or_multi"]
+        next_question = next_action["content"]["question"]
+        answers = next_action["content"]["candidate_answers"]
+        single_or_multi = next_action["content"]["question_type"]
 
         st.markdown('**{}**'.format(next_question))
         if single_or_multi == "single":
@@ -163,14 +166,15 @@ def show_criminal_next_qa(_user_input, _question_answers, _factor_sentence_list,
         if st.button("确定", key=btn_key):
             st.session_state[btn_click_key] = True
         if btn_click_key in st.session_state:
-            _question_answers[next_question + ":" + ";".join(answers)] = ";".join(selected_answers)
-            _factor_sentence_list = next_question_info.get('factor_sentence_list')
-            _anyou = next_question_info.get('anyou')
-            _event = next_question_info.get('event')
-            _count += 1
-            show_criminal_next_qa(_user_input, _question_answers, _factor_sentence_list, _anyou, _event, _count)
-    else:
-        show_criminal_report(info.get("result"))
+            last_question_info = next_action["content"]
+            last_question_info["user_answer"] = selected_answers
+
+            if not dialogue_history["question_answers"]:
+                dialogue_history["question_answers"] = []
+            dialogue_history["question_answers"].append(last_question_info)
+            show_criminal_next_qa(dialogue_history, resp_json["dialogue_state"], _count+1)
+    elif next_action["action_type"] == "report":
+        show_criminal_report(next_action["content"])
     pass
 
 
@@ -195,12 +199,18 @@ def criminal_prejudgment_testing_page():
         st.session_state["criminal_submit_desp"] = True
     if "criminal_submit_desp" in st.session_state:
         st.subheader("进行提问")
-        question_answers = {}
-        factor_sentence_list = []
-        anyou = None
-        event = None
+        dialogue_history = {
+            "user_input": user_input,
+            "question_answers": []
+        }
+        dialogue_state = {
+            "domain": "criminal",
+            "problem": "",
+            "claim_list": [],
+            "other": {}
+        }
         count = 1
-        show_criminal_next_qa(user_input, question_answers, factor_sentence_list, anyou, event, count)
+        show_criminal_next_qa(dialogue_history, dialogue_state, count)
 
 
 """ 民事预判 """
@@ -380,13 +390,13 @@ def civil_prejudgment_testing_page():
     if "submit_desp" in st.session_state:
         dialogue_history = {
             "user_input": user_input,
-            "question_answers": None
+            "question_answers": []
         }
         dialogue_state = {
             "domain": "civil",
             "problem": selected_anyou,
             "claim_list": selected_suqiu_list,
-            "other": None
+            "other": {}
         }
         count = 1
 

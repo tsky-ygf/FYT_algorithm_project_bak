@@ -9,9 +9,9 @@
 `nohup python -m OnlineServer.CommonLaws.server > log/common_laws/server.log 2>&1 &`
 
 ## 2. 接口在线文档
-内网地址: "http://172.19.82.199:8149/docs"
+内网地址: "http://172.19.82.199:8148/docs"
 
-外网地址: "http://101.69.229.138:8149/docs"
+外网地址: "http://101.69.229.138:8148/docs"
 
 ## 3. 接口测试
 使用`pytest`进行接口测试，测试文件为`OnlineServer/CommonLaws/app_test.py`

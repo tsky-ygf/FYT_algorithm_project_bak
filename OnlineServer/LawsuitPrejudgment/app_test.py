@@ -27,7 +27,7 @@ def test_get_template_by_problem_id():
     }
 
     # 执行被测试程序
-    resp_json = requests.get(URL + "/get_template_by_problem_id", params=body).json()
+    resp_json = requests.post(URL + "/get_template_by_problem_id", json=body).json()
     print(resp_json)
 
     # 验证测试条件
@@ -57,14 +57,14 @@ def test_administrative_judgment1():
     # 准备测试数据
     body = {
         "dialogue_history": {
-            "user_input": None,
-            "question_answers": None
+            "user_input": "",
+            "question_answers": []
         },
         "dialogue_state": {
             "domain": "administrative",
-            "problem": None,
-            "claim_list": None,
-            "other": None
+            "problem": "",
+            "claim_list": [],
+            "other": {}
         }
     }
 
@@ -85,7 +85,7 @@ def test_administrative_judgment2():
     # 准备测试数据
     body = {
         "dialogue_history": {
-            "user_input": None,
+            "user_input": "",
             "question_answers": [
                 {
                     "question": "请选择你遇到的纠纷类型",
@@ -129,7 +129,7 @@ def test_administrative_judgment3():
     # 准备测试数据
     body = {
         "dialogue_history": {
-            "user_input": None,
+            "user_input": "",
             "question_answers": [
                 {
                     "question": "请选择你遇到的纠纷类型",
@@ -182,7 +182,7 @@ def test_administrative_judgment4():
     # 准备测试数据
     body = {
         "dialogue_history": {
-            "user_input": None,
+            "user_input": "",
             "question_answers": [
                 {
                     "question": "请选择你遇到的纠纷类型",
@@ -244,13 +244,13 @@ def test_civil_judgment1():
     body = {
         "dialogue_history": {
             "user_input": "对方经常家暴，我想要离婚。",
-            "question_answers": None
+            "question_answers": []
         },
         "dialogue_state": {
             "domain": "civil",
             "problem": "婚姻家庭",
             "claim_list": ["请求离婚", "返还彩礼"],
-            "other": None
+            "other": {}
         }
     }
 
@@ -277,7 +277,7 @@ def test_civil_judgment2():
                     "question": "是否存在以下情形？",
                     "candidate_answers": ["双方未共同生活", "给付彩礼导致给付方生活困难", "双方未登记结婚", "以上都没有"],
                     "question_type": "multiple",
-                    "other": None,
+                    "other": {},
                     "user_answer": ["双方未共同生活", "给付彩礼导致给付方生活困难"]
                 }
             ]
@@ -315,14 +315,14 @@ def test_civil_judgment3():
                     "question": "是否存在以下情形？",
                     "candidate_answers": ["双方未共同生活", "给付彩礼导致给付方生活困难", "双方未登记结婚", "以上都没有"],
                     "question_type": "multiple",
-                    "other": None,
+                    "other": {},
                     "user_answer": ["双方未共同生活", "给付彩礼导致给付方生活困难"]
                 },
                 {
                     "question": "双方是否办理结婚登记？",
                     "candidate_answers": ["是","否"],
                     "question_type": "single",
-                    "other": None,
+                    "other": {},
                     "user_answer": ["是"]
                 }
             ]
@@ -334,6 +334,97 @@ def test_civil_judgment3():
             "other": {
                 "factor_sentence_list": [['对方经常家暴', '一方家暴', 1, ''], ['对方经常家暴', '遗弃虐待家庭成员', 1, '']]
             }
+        }
+    }
+
+    # 执行被测试程序
+    resp_json = requests.post(URL + "/lawsuit_prejudgment", json=body).json()
+    print(resp_json)
+
+    # 验证测试条件
+    assert resp_json
+    assert resp_json.get("success")
+    assert resp_json.get("next_action")
+    assert resp_json["next_action"]["action_type"] == "report"
+    assert "report" in resp_json["next_action"]["content"]
+
+
+def test_criminal_judgment1():
+    # 准备测试数据
+    body = {
+        "dialogue_history": {
+            "user_input": "我偷了舍友500块。",
+            "question_answers": []
+        },
+        "dialogue_state": {
+            "domain": "criminal",
+            "problem": "",
+            "claim_list": [],
+            "other": {}
+        }
+    }
+
+    # 执行被测试程序
+    resp_json = requests.post(URL + "/lawsuit_prejudgment", json=body).json()
+    # print(resp_json)
+
+    # 验证测试条件
+    assert resp_json
+    assert resp_json.get("success")
+    assert resp_json.get("next_action")
+    assert resp_json["next_action"]["action_type"] == "ask"
+    assert resp_json["next_action"]["content"]["question"] == "盗窃人年龄未满十六周岁或者精神状态不正常？"
+    assert "是" in resp_json["next_action"]["content"]["candidate_answers"]
+
+    # 准备测试数据
+    context = resp_json["dialogue_state"]["other"]
+    body = {
+        "dialogue_history": {
+            "user_input": "我偷了舍友500块。",
+            "question_answers": [
+                {
+                    "question": "盗窃人年龄未满十六周岁或者精神状态不正常？",
+                    "candidate_answers": ["是","否"],
+                    "question_type": "single",
+                    "other": {
+                        "circumstances": "前提"
+                    },
+                    "user_answer": ["是"]
+                }
+            ]
+        },
+        "dialogue_state": {
+            "domain": "criminal",
+            "problem": "盗窃",
+            "claim_list": ["量刑推荐"],
+            "other": context
+        }
+    }
+
+    # 执行被测试程序
+    resp_json = requests.post(URL + "/lawsuit_prejudgment", json=body).json()
+    print(resp_json)
+
+    # 验证测试条件
+    assert resp_json
+    assert resp_json.get("success")
+    assert resp_json.get("next_action")
+    assert resp_json["next_action"]["action_type"] == "report"
+    assert "report" in resp_json["next_action"]["content"]
+
+
+def test_criminal_judgment2():
+    # 准备测试数据
+    body = {
+        "dialogue_history": {
+            "user_input": "1111111",
+            "question_answers": []
+        },
+        "dialogue_state": {
+            "domain": "criminal",
+            "problem": "",
+            "claim_list": [],
+            "other": {}
         }
     }
 
