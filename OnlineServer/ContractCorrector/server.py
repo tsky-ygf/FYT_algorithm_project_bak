@@ -73,7 +73,8 @@ async def _get_corrected_contract_result(text_input: TextInput):
         * new_char: string, 纠错后的字
         * start: int, 在输入文本中的起始位置
         * end: int, 在输入文本中的结束为止
-    * type: IntEnum, 错误类型
+    * type: IntEnum, 错误类型。支持的类型如下
+        * 1:拼写错误
     """
     result = {'corrected_pred': '', 'detail_info': [], 'msg': '', 'success': True, "type": ErrType.SPELLERR}
     try:
