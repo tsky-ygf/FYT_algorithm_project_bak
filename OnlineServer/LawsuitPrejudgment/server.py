@@ -5,7 +5,7 @@
 # @Site    : 
 # @File    : server.py
 # @Software: PyCharm
-import typing
+from typing import List
 
 import uvicorn
 from fastapi import FastAPI
@@ -16,46 +16,44 @@ from LawsuitPrejudgment.src.common.dialouge_management_parameter import Dialogue
 app = FastAPI()
 
 
-class CriminalInput(BaseModel):
-    fact: str = Field(example="我偷了同事的3000元")
-    question_answers: typing.Dict = Field(example={})
-
-    class Config:
-        schema_extra = {
-            "example": {
-                "fact": "我偷了同事的3000元",
-                "question_answers": {}
-            }
-        }
+class ProblemItem(BaseModel):
+    id: int = Field(description="纠纷id")
+    problem: str = Field(description="纠纷名称")
 
 
-@app.post("/get_criminal_result")
-def _get_criminal_result(param: CriminalInput):
-    """
-    获取刑事预判的结果。
-    本接口即将废弃。
-    """
-    return criminal_app_service.get_criminal_result(param.fact, param.question_answers)
+class ProblemGroup(BaseModel):
+    groupName: str = Field(description="组名")
+    groupList: List[ProblemItem] = Field(description="数据列表")
 
 
-@app.get("/get_civil_problem_summary")
+class GetCivilProblemSummaryResult(BaseModel):
+    success: bool = Field(description="是否成功调用")
+    error_msg: str = Field(description="失败时的错误信息")
+    value: List[ProblemGroup] = Field(description="数据列表")
+
+
+@app.get("/get_civil_problem_summary", summary="获取民事预判支持的纠纷类型", response_model=GetCivilProblemSummaryResult)
 def _get_civil_problem_summary():
     """
     获取民事预判支持的纠纷类型。
 
-    Returns:
-        示例
-        {
-            "success": true,
-            "error_msg": "",
-            "value": [{
-                "groupName": "婚姻继承",
-                "groupList": [{
-                    "id": 1533,
-                    "problem": "子女抚养"
-                }]
-            }]
-        }
+    响应参数:
+
+    | Param     | Type    | Description  |
+    |-----------|---------|--------------|
+    | success   | boolean | 是否成功调用       |
+    | error_msg | string  | 失败时的错误信息     |
+    | value     | List    | 数据列表         |
+
+    value的内容如下:
+
+    * groupName: string, 组名
+
+    * groupList: List, 数据列表
+
+      * id: int, 纠纷id
+
+      * problem: string, 纠纷名称
     """
     return civil_app_service.get_civil_problem_summary()
 
