@@ -126,7 +126,7 @@ class Model:
                 logger.debug(sentence, tmp_tgt_pred, tmp_pred_detail)
 
             #修正偏移位
-            tmp_pred_detail = [(ele[0], ele[1], ele[2] + start_idx, ele[3] + start_idx) for ele in tmp_pred_detail]            
+            tmp_pred_detail = [{'ori_char': ele[0], 'new_char': ele[1], 'start':ele[2] + start_idx, 'end':ele[3] + start_idx} for ele in tmp_pred_detail]            
             tgt_pred = tgt_pred + tmp_tgt_pred
             pred_detail_list.extend(tmp_pred_detail)
         
