@@ -40,7 +40,9 @@ class Filter_conditions_law(BaseModel):
 
 class Search_laws_input(BaseModel):
     query: str = Field(description="用户输入的查询内容")
-    filter_conditions: Union[Filter_conditions_law, None] = None
+    filter_conditions: Union[Filter_conditions_law, None] = Field(
+        description="法律检索过滤条件"
+    )
     page_number: int = Field(description="页")
     page_size: int = Field(description="页大小")
 
@@ -59,8 +61,8 @@ class Search_laws_input(BaseModel):
         }
 
 
-class Law_id(BaseModel):
-    law_id: str
+# class Law_id(BaseModel):
+#     law_id: str
 
 
 class Filter_conditions_case(BaseModel):
@@ -72,7 +74,9 @@ class Filter_conditions_case(BaseModel):
 
 class Search_cases_input(BaseModel):
     query: str = Field(description="用户输入的检索内容")
-    filter_conditions: Union[Filter_conditions_case, None] = None
+    filter_conditions: Union[Filter_conditions_case, None] = Field(
+        description="案件检索过滤条件"
+    )
     page_number: int = Field(description="页")
     page_size: int = Field(description="页大小")
 
@@ -95,7 +99,7 @@ class Search_cases_input(BaseModel):
 class Similar_case_input(BaseModel):
     fact: str = Field(description="用户输入的查询内容")
     problem: str = Field(description="纠纷类型")
-    claim_list: list = Field(description="诉求类型")
+    claim_list: list = Field(default=None, description="诉求类型")
 
     class Config:
         schema_extra = {
@@ -103,14 +107,14 @@ class Similar_case_input(BaseModel):
         }
 
 
-class Case_id(BaseModel):
-    case_id: str
+# class Case_id(BaseModel):
+#     case_id: str
 
 
 class conditions_law_result(BaseModel):
-    types_of_law: typing.Dict = Field(description="法律种类")
-    timeliness: typing.Dict = Field(description="时效性")
-    scope_of_use: typing.Dict = Field(description="地域")
+    types_of_law: dict = Field(description="法律种类")
+    timeliness: dict = Field(description="时效性")
+    scope_of_use: dict = Field(description="地域")
 
 
 class laws(BaseModel):
@@ -125,7 +129,7 @@ class laws(BaseModel):
 
 
 class search_laws_result(BaseModel):
-    laws: typing.List[laws]
+    laws: list[laws]
     total_amount: int = Field(description="返回总量, 大于200条，默认200")
 
 
@@ -145,7 +149,7 @@ class cases(BaseModel):
 
 
 class search_cases_result(BaseModel):
-    cases: typing.List[cases]
+    cases: list[cases]
     total_amount: int = Field(description="案例返回的总量，大于200， 默认200")
 
 
@@ -166,14 +170,16 @@ class desensitization_input(BaseModel):
     class Config:
         schema_extra = {
             "example": {
-
                 "text": "《八佰》（英語：The Eight Hundred）是一部于2020年上映的以中国历史上的战争为题材的电影，由管虎执导，黄志忠、黄骏豪、张俊一、张一山....."
-
             }
         }
 
 
-@app.get("/get_filter_conditions_of_law", response_model=conditions_law_result)
+@app.get(
+    "/fyt/ai/v1.0.0/get_filter_conditions_of_law",
+    summary="获取法律检索过滤条件",
+    response_model=conditions_law_result,
+)
 async def _get_filter_conditions() -> dict:
     """
     返回法条检索的输入条件
@@ -220,7 +226,9 @@ async def _get_filter_conditions() -> dict:
     return get_filter_conditions()
 
 
-@app.post("/search_laws", response_model=search_laws_result)
+@app.post(
+    "/fyt/ai/v1.0.0/search_laws", summary="获取法律检索结果", response_model=search_laws_result
+)
 async def search_laws(search_query: Search_laws_input) -> dict:
     """
     获取法律检索的结果
@@ -282,7 +290,11 @@ async def search_laws(search_query: Search_laws_input) -> dict:
 #     return {"result": ""}
 
 
-@app.get("/get_filter_conditions_of_case", response_model=conditions_case_result)
+@app.get(
+    "/fyt/ai/v1.0.0/get_filter_conditions_of_case",
+    summary="获取案例检索过滤条件",
+    response_model=conditions_case_result,
+)
 async def _get_filter_conditions() -> dict:
     """
     返回案例检索的过滤条件
@@ -337,7 +349,11 @@ async def _get_filter_conditions() -> dict:
     return get_filter_conditions_of_case()
 
 
-@app.post("/search_cases", response_model=search_cases_result)
+@app.post(
+    "/fyt/ai/v1.0.0/search_cases",
+    summary="获取案例检索结果",
+    response_model=search_cases_result,
+)
 async def search_cases(search_query: Search_cases_input) -> dict:
     """
     获取法律检索的结果
@@ -405,7 +421,11 @@ async def search_cases(search_query: Search_cases_input) -> dict:
 #     return {"result": ""}
 
 
-@app.post("/top_k_similar_narrative", response_model=similar_narrative_result)
+@app.post(
+    "/fyt/ai/v1.0.0/top_k_similar_narrative",
+    summary="获取相似类案结果",
+    response_model=similar_narrative_result,
+)
 async def get_similar_case(search_query: Similar_case_input) -> dict:
     """
     返回相似类案的结果
@@ -462,7 +482,11 @@ async def get_similar_case(search_query: Similar_case_input) -> dict:
         return {"error_msg:": repr(e), "status": 1}
 
 
-@app.post("/desensitization", response_model=desensitization_result)
+@app.post(
+    "/fyt/ai/v1.0.0/desensitization",
+    summary="获取人名脱敏结果",
+    response_model=desensitization_result,
+)
 async def get_text_desen(dese_in: desensitization_input) -> dict:
     """
     返回人名脱敏的结果
