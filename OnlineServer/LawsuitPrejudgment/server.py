@@ -5,7 +5,7 @@
 # @Site    : 
 # @File    : server.py
 # @Software: PyCharm
-from typing import List
+from typing import List, Dict
 
 import uvicorn
 from fastapi import FastAPI
@@ -58,22 +58,45 @@ def _get_civil_problem_summary():
     return civil_app_service.get_civil_problem_summary()
 
 
-@app.get("/get_template_by_problem_id")
-def _get_template_by_problem_id(problem_id: int):
+class GetTemplateByProblemIdInput(BaseModel):
+    problem_id: int = Field(description="纠纷id", example=1531)
+
+
+class TemplateValue(BaseModel):
+    template: str = Field(description="用户描述模板")
+
+
+class GetTemplateByProblemIdResult(BaseModel):
+    success: bool = Field(description="是否成功调用")
+    error_msg: str = Field(description="失败时的错误信息")
+    value: TemplateValue = Field(description="数据字典")
+
+
+@app.post("/get_template_by_problem_id", summary="获取纠纷对应的用户描述模板", response_model=GetTemplateByProblemIdResult)
+def _get_template_by_problem_id(param: GetTemplateByProblemIdInput):
     """
     获取纠纷对应的用户描述模板。
 
-    Returns:
-        示例
-        {
-            "success": true,
-            "error_msg": "",
-            "value": {
-                "template": "男女双方自愿/不自愿（不自愿的原因）登记结婚，婚后育有x子/女，现 x岁， 因xx原因离婚。婚姻/同居期间，有存款x元、房屋x处、车子x辆、债务x元。（双方是否对子女、财产、债务等达成协议或已有法院判决，协议或判决内容，双方对协议或判决的履行情况）。"
-            }
-        }
+    请求参数:
+
+    | Param      | Type | Description |
+    |------------|------|-------------|
+    | problem_id | int  | 纠纷id        |
+
+    响应参数:
+
+    | Param     | Type    | Description |
+    |-----------|---------|-------------|
+    | success   | boolean | 是否成功调用      |
+    | error_msg | string  | 失败时的错误信息    |
+    | value     | Dict    | 数据字典        |
+
+    value的内容如下:
+
+    * template: string, 用户描述模板
+
     """
-    return civil_app_service.get_template_by_problem_id(problem_id)
+    return civil_app_service.get_template_by_problem_id(param.problem_id)
 
 
 class GetClaimListParam(BaseModel):

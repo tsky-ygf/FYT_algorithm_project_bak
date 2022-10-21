@@ -208,7 +208,7 @@ value的内容如下:
   * problem: string, 纠纷名称
 
 ### 3.2 获取民事纠纷对应的用户描述模板
-`GET http://101.69.229.138:8133/get_template_by_problem_id`
+`POST http://101.69.229.138:8133/get_template_by_problem_id`
 
 请求参数:
 

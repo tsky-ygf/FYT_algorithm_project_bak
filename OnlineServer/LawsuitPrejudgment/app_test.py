@@ -27,7 +27,7 @@ def test_get_template_by_problem_id():
     }
 
     # 执行被测试程序
-    resp_json = requests.get(URL + "/get_template_by_problem_id", params=body).json()
+    resp_json = requests.post(URL + "/get_template_by_problem_id", json=body).json()
     print(resp_json)
 
     # 验证测试条件
