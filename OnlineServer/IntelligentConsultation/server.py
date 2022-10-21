@@ -52,7 +52,11 @@ def _get_query_answer_with_source(query_input: QueryInput):
     | Param               | Type           | Description |
     |---------------------|----------------|-------------|
     | answer              | str            | 智能咨询的答案     |
-    | similarity_question | Optional[List] | 返回的相似问题     |
+    | similarity_question | list[dict] | 返回的相似问题     |
+
+    similarity_question的dict结构如下:
+      * question: str, 相似问题
+      * answer: list, 相似问题的答案
 
     """
     return consultation_service.get_answer_for_question(question=query_input.question,
