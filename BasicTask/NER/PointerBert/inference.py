@@ -110,22 +110,22 @@ class CommonPBAcknowledgement:
         step = self.step
 
         if len(text) <= wind:
-            return [{'index_bias': 0, 'text': text, 'head_tail': False}]
+            return [{'index_bias': 0, 'text': text, 'is_head_tail': False}]
 
         text_head_tail = text[:wind // 2] + "\n" + text[-wind // 2 + 1:]
         assert len(text_head_tail) == wind
         # index bias 是tail的开始坐标
-        text_list.append({'index_bias': len(text) - wind // 2 + 1, 'text': text_head_tail, 'head_tail': True})
+        text_list.append({'index_bias': len(text) - wind // 2 + 1, 'text': text_head_tail, 'is_head_tail': True})
 
         text = text[wind // 2:-wind // 2 + 1]
         for i in range(0, len(text), step):
             text_list.append({'index_bias': i + wind // 2,
                               'text': text[i + wind // 2:i + wind // 2 + wind],
-                              'head_tail': False})
+                              'is_head_tail': False})
         return text_list
 
     def post_process(self, start_prob, end_prob, samples):
-        _, index_biass, sentences, is_head_tail_list = samples[0]
+        _, index_biass, sentences, is_head_tail_list = samples
         thred = torch.FloatTensor([0.5]).to('cpu')
         start_pred = start_prob > thred
         end_pred = end_prob > thred
@@ -282,13 +282,13 @@ class CommonPBAcknowledgement:
 if __name__ == "__main__":
     import time
 
-    contract_type = "laowu"
+    contract_type = "maimai"
 
     os.environ['CUDA_VISIBLE_DEVICES'] = "1"
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--model_load_path", default='model/PointerBert/PBert1014_common_all_20sche_auged.pt', type=str)
+    parser.add_argument("--model_load_path", default='model/PointerBert/PBert1021_common_all_20sche_cat.pt', type=str)
     parser.add_argument("--model", default='model/language_model/chinese-roberta-wwm-ext', type=str)
     parser.add_argument("--common_schema_path", default='DocumentReview/Config/config_common.csv', type=str,
                         help="The hidden size of model")
@@ -304,7 +304,7 @@ if __name__ == "__main__":
                                               common_model_args=common_model_args)
     print('=' * 50, '开始预测', '=' * 50)
     localtime = time.time()
-    acknowledgement.review_main(content="data/DocData/{}/laowu4.docx".format(contract_type), mode="docx",
+    acknowledgement.review_main(content="data/DocData/{}/maimai1.docx".format(contract_type), mode="docx",
                                 contract_type=contract_type, usr="Part B")
     print('=' * 50, '结束', '=' * 50)
     print('use time: {}'.format(time.time() - localtime))
