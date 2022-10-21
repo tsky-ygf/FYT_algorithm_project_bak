@@ -3,13 +3,14 @@
 # @Time    : 2022/10/12 13:59
 # @Author  : Adolf
 # @Site    : 
-# @File    : infer.py
+# @File    : query_cls_infer.py
 # @Software: PyCharm
 import pandas as pd
 from jieba import analyse
 
 from IntelligentConsultation.src.faq_pipeline.init_faq_tools import init_haystack_fqa_pipe
-from Utils.logger import get_logger
+from IntelligentConsultation.src.query_classification import query_cls_infer
+from Utils.logger import get_logger, print_run_time
 
 
 class FAQPredict:
@@ -17,14 +18,19 @@ class FAQPredict:
                  level="INFO",
                  console=True,
                  logger_file=None,
-                 index_name="topic_qa_test_v2",
-                 model_name="model/similarity_model/simcse-model-optim"):
+                 index_name="topic_qa_test",
+                 model_name="model/similarity_model/simcse-model-topic-qa",
+                 cls_model="model/similarity_model/query_cls/final"):
         self.logger = get_logger(level=level, console=console, logger_file=logger_file)
         self.pipe = init_haystack_fqa_pipe(index_name=index_name, model_name=model_name)
 
         self.tfidf = analyse.extract_tags
 
         self.proper_noun_config = self.get_base_config()
+
+        self.label_map = query_cls_infer.init_config()
+        self.query_cls_tokenizers, self.query_cls_model = query_cls_infer.init_torch_model(cls_model)
+
         self.logger.success("加载服务完成......")
 
     def get_base_config(self):
@@ -36,13 +42,17 @@ class FAQPredict:
 
     def pre_process_text(self, text):
         self.logger.info(f"text:{text}")
+
+        pred_cls = query_cls_infer.get_torch_model_result(self.query_cls_tokenizers, self.query_cls_model, text)
+        pred_cls = self.label_map[pred_cls[0].item()]
+
         if text in self.proper_noun_config:
             text += "是什么"
 
         keywords = self.tfidf(text, allowPOS=["n", "v", "a", "d"])
         keywords_text = "".join(keywords)
-        text += keywords_text * 3
-        return text
+        text += keywords_text
+        return text, pred_cls
 
     def post_process_result(self, query, predictions, source=None, sub_source=None):
         similarity_question = [{"question": p.meta["query"], "answer": p.meta["answer"]} for p in predictions]
@@ -84,9 +94,14 @@ class FAQPredict:
         return final_answer, similarity_question
 
     def __call__(self, query, source=None, sub_source=None):
-        query = self.pre_process_text(query)
+        query, pred_sub = self.pre_process_text(query)
 
-        predictions = self.pipe.run(query=query, params={"Retriever": {"top_k": 10}})["answers"]
+        self.logger.info(f"query:{query}===>pred_sub:{pred_sub}")
+
+        predictions = self.pipe.run(query=query, params={"Retriever": {"top_k": 20}})["answers"]
+
+        if sub_source is None:
+            sub_source = pred_sub
 
         answer, similarity_question = self.post_process_result(query, predictions, source, sub_source)
 
@@ -95,8 +110,8 @@ class FAQPredict:
 
 if __name__ == '__main__':
     m = FAQPredict(level="DEBUG",
-                   model_name="model/similarity_model/simcse-model-topic-qa",
-                   index_name="topic_qa")
+                   model_name="model/similarity_model/simcse-model-all",
+                   index_name="topic_qa_test")
     _answer, _similarity_question = m("公司交不起税怎么办")
 
     print(_answer)

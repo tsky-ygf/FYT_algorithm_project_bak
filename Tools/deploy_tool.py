@@ -43,9 +43,9 @@ def infer_onnx_example(lang_model_path, onnx_model_path, content_test):
 
 
 if __name__ == "__main__":
-    _model_ckpt_path = "model/onnx_model/test/ckpt/reuters_chinese-roberta-wwm-ext_FL_json_epoch3para_ckpt"
-    _out_model_path = "model/onnx_model/test/output/test_model.onnx"
-    _in_shape = (1, 512)  # (batch_size, max_length)
+    _model_ckpt_path = "model/similarity_model/query_cls/final/pytorch_model.bin"
+    _out_model_path = "/home/fyt/model/similarity_model/query_cls/devlop/model.onnx"
+    _in_shape = (1, 128)  # (batch_size, max_length)
 
     _onnx_model_path = "model/onnx_model/test_model.onnx"
     _lang_model_path = "model/language_model/chinese-roberta-wwm-ext"
@@ -54,5 +54,5 @@ if __name__ == "__main__":
                     "借款后被告没有偿还，后原告诉至法院。;"
 
     pt2onnx(_model_ckpt_path, _out_model_path, _in_shape)
-    infer_onnx_example(_lang_model_path, _onnx_model_path, _content_test)
+    # infer_onnx_example(_lang_model_path, _onnx_model_path, _content_test)
     # exp_one(in_shape=in_shape)

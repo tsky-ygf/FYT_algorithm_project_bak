@@ -51,6 +51,10 @@ def create_train_data():
             f.write(f"{data[0]}\t{data[1]}\n")
 
 
+def topic_data():
+    pass
+
 if __name__ == '__main__':
     # create_label_map()
-    create_train_data()
+    # create_train_data()
+    topic_data()
