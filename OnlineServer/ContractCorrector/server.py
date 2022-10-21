@@ -34,15 +34,22 @@ from enum import IntEnum
 class ErrType(IntEnum):
     SPELLERR = 1#拼写纠错
 
+class ErrInfo(BaseModel):
+    ori_char: str
+    new_char: str
+    start: int
+    end: int
+
+
 class TextResult(BaseModel):
     corrected_pred: str
     msg: str
     success: int
-    detail_info: list[dict]
+    detail_info: list[ErrInfo]
     type: IntEnum
 
 
-@app.post("/get_corrected_contract_result", response_model=TextResult)
+@app.post("/fyt/ai/v1.0.0/get_corrected_contract_result", summary="获取输入文本的纠错结果", response_model=TextResult)
 async def _get_corrected_contract_result(text_input: TextInput):
     """
     获取纠错的结果及详情
@@ -60,7 +67,7 @@ async def _get_corrected_contract_result(text_input: TextInput):
     | corrected_pred |    str     |    纠错结果   |
     |      msg       |    str     |     信息     |
     |    success     |  boolean   |    是否成功   |
-    |   detail_info  | list[dict] |  具体纠错信息  |
+    |   detail_info  | list[ErrInfo] |  具体纠错信息  |
     |      type      |  IntEnum   |    错误类型   |
 
 
@@ -68,7 +75,7 @@ async def _get_corrected_contract_result(text_input: TextInput):
     * corrected_pred: string, 纠错后的结果
     * msg: string, 错误信息
     * success: boolean, 服务调用是否成功
-    * detail_info: List[Dict], 具体纠错信息
+    * detail_info: List[ErrInfo], 具体纠错信息
         * ori_char: string, 原始字
         * new_char: string, 纠错后的字
         * start: int, 在输入文本中的起始位置
@@ -85,10 +92,6 @@ async def _get_corrected_contract_result(text_input: TextInput):
         result['msg'] = traceback.format_exc()
         result['success'] = False
 
-    # import pdb
-    # pdb.set_trace()
-    # result = json.dumps(result, ensure_ascii=False)
-    # print(type(result))
     return result
 
 
