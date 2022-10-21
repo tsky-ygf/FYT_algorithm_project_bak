@@ -19,7 +19,9 @@
 3.1.3 配置相关需求文件
 
 - 需要插入到es的数据文件 ```data/fyt_train_use_data/QA/pro_qa.csv```
-- 使用到的模型文件 ```model/similarity_model/simcse-model-topic-qa```
+- 使用到的模型文件 
+  - ```model/similarity_model/simcse-model-topic-qa```
+  - ```model/similarity_model/query_cls/final```
 
 3.1.4 将数据导入到es库中
 - export PYTHONPATH=$(pwd):$PYTHONPATH
