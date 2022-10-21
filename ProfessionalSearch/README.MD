@@ -65,4 +65,9 @@ similar_case_retrival: `相似类案接口`
 - [ ] tag关键词的计算
 - [ ] index（or database）的数据清洗（例如，文书标题含有李某、李某1，过滤掉1）
 - [ ] 索引中加入标题
-
+- [ ] 类案检索加纠纷类型选择项
+- [ ] case_index_v2和case_index_minshi_v2统一
+- [ ] deploy_tool(load, convert, infer), train_tool编辑
+- [ ] 现有类案检索方案画个流程图
+- [ ] es检索的性能
+- [ ] 和夏聪确认测试集，测试检索性能和top10准确率
