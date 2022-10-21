@@ -34,7 +34,7 @@ class CategoryInput(BaseModel):
 class CategoryResult(BaseModel):
     data_list: list[dict]
 
-@app.post("/get_preview_commonLaws_data", response_model=CategoryResult)
+@app.post("/fyt/ai/v1.0.0/get_preview_commonLaws_data", summary="获取专栏预览信息", response_model=CategoryResult)
 async def get_example_model_data(category: CategoryInput):
     """
         获取 专栏预览 信息
@@ -76,7 +76,7 @@ class NewsInput(BaseModel):
 class NewsResult(BaseModel):
     data_list: list[dict]
 
-@app.post("/get_commonLaws_news_by_id", response_model=NewsResult)
+@app.post("/fyt/ai/v1.0.0/get_commonLaws_news_by_id", summary="根据ID查询专栏信息", response_model=NewsResult)
 async def get_news(info_input: NewsInput):
     """
         根据 ID 查询专栏详细信息

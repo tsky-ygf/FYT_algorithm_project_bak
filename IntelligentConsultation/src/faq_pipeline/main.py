@@ -156,8 +156,8 @@ if __name__ == '__main__':
     # param_optim(use_config)
 
     # _data_path = "data/fyt_train_use_data/QA/pro_qa.csv"
-    _model_name = "model/similarity_model/simcse-model-topic-qa"
-    _index_name = "topic_qa"
+    _model_name = "model/similarity_model/simcse-model-all"
+    _index_name = "topic_qa_test"
 
     # _data_path = "data/fyt_train_use_data/QA/origin_data.csv"
     # _model_name = "model/similarity_model/simcse-model-all"

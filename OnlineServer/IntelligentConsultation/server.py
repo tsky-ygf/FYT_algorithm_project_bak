@@ -10,6 +10,8 @@ from fastapi import FastAPI
 from pydantic import BaseModel, Field
 from IntelligentConsultation.service_use import consultation_service
 
+from typing import List, Union
+
 app = FastAPI()
 
 
@@ -29,12 +31,17 @@ class QueryInput(BaseModel):
         }
 
 
+class SimilarityQuestion(BaseModel):
+    question: str = Field(description="相似的问题")
+    answer: str = Field(description="相似问题的答案")
+
+
 class QueryResult(BaseModel):
     answer: str
-    similarity_question: list[dict]
+    similarity_question: Union[List[SimilarityQuestion], None]
 
 
-@app.post("/get_query_answer_with_source", response_model=QueryResult)
+@app.post("/fyt/ai/v1.0.0/get_query_answer_with_source", summary="获取智能咨询的结果", response_model=QueryResult)
 def _get_query_answer_with_source(query_input: QueryInput):
     """
     获取智能咨询的结果和相似问答

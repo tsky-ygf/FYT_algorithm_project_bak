@@ -1,58 +1,31 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @Time    : 2022/09/20 10:48
+# @Time    : 2022/10/21 11:16
 # @Author  : Czq
 # @File    : inference.py
 # @Software: PyCharm
 import argparse
-import random
-import re
-import time
+import os
+from collections import OrderedDict, defaultdict
 
 import pandas as pd
-from pprint import pprint
-
-# 读取docx 文件
 import torch
-from docx import Document
 from torch.utils.data import Dataset, DataLoader
 from transformers import BertTokenizer
-from DocumentReview.PointerBert.utils import set_seed, read_config_to_label
-from DocumentReview.PointerBert.model_NER import PointerNERBERT
 
+from BasicTask.NER.PointerBert.model_NER import PointerNERBERT
+from DocumentReview.src.ParseFile import read_docx_file
 
-def read_docx_file(docx_path):
-    document = Document(docx_path)
-    # tables = document.tables
-    all_paragraphs = document.paragraphs
-    return_text_list = []
-    for index, paragraph in enumerate(all_paragraphs):
-        one_text = paragraph.text.replace(" ", "").replace("\u3000", "")
-        if one_text != "":
-            return_text_list.append(one_text)
-    # print(return_text_list)
-    data = '\n'.join(return_text_list)
-    data = data.replace('⾄', '至').replace('中华⼈民', '中华人民') \
-        .replace(' ', ' ').replace(u'\xa0', ' ').replace('\r\n', '\n')
-    data = re.sub("[＿_]+", "", data)
-    return data
-
-
-def split_text(args, text):
-    text_list = []
-    wind = args.window_length
-    step = args.window_step
-    index_bias = 0
-    for i in range(0,len(text),step):
-        text_list.append({'index_bias':i,'text':text[i:i+wind]})
-    return text_list
+tokenizer = BertTokenizer.from_pretrained('model/language_model/chinese-roberta-wwm-ext')
 
 
 class TestDataset(Dataset):
     def __init__(self, data):
         self.test_data = data
+
     def __getitem__(self, item):
         return self.test_data[item]
+
     def __len__(self):
         return len(self.test_data)
 
@@ -63,15 +36,17 @@ def batchify_test(batch):
     input_ids = []
     attention_mask = []
     token_type_ids = []
+    is_head_tail_list = []
     for b in batch:
         text = b['text']
         index_bias = b['index_bias']
         sentences.append(text)
         index_biass.append(index_bias)
+        is_head_tail_list.append(b['is_head_tail'])
 
         input_i = [101] + tokenizer.convert_tokens_to_ids(list(text)) + [102]
         input_id = input_i.copy() + [0] * (512 - len(input_i))
-        atten_mask = [1] * len(input_id) + [0] * (512 - len(input_id))
+        atten_mask = [1] * len(input_i) + [0] * (512 - len(input_i))
         token_type_id = [0] * 512
 
         assert len(input_id) == 512, len(input_id)
@@ -84,121 +59,253 @@ def batchify_test(batch):
         'attention_mask': torch.LongTensor(attention_mask).to('cpu'),
         'token_type_ids': torch.LongTensor(token_type_ids).to('cpu')
     }
-    return encoded_dict, index_biass, sentences
+    return encoded_dict, index_biass, sentences, is_head_tail_list
 
 
-def infer(args):
-    set_seed(args.seed)
-    # 测试输入是一个document
-    # 先解析doc 或是 对text处理
-    if args.input_test_file != '':
-        text = read_docx_file(args.input_test_file)
-    elif args.input_test_text != '':
-        text = args.input_test_text
-    else:
-        assert False, "no input"
-    print("length of text:",len(text))
-    labels2id, _ = read_config_to_label(None)
-    args.labels = labels2id
+class CommonPBAcknowledgement:
+    def __init__(self, common_model_args, contract_type_list, config_path_format):
+        self.contract_type_list = contract_type_list
+        self.common2alias = dict()
+        _labels, _common2alias_dict = self._read_common_schema(common_model_args.common_schema_path)
+        self.common_labels = _labels
+        self.common2alias_dict = _common2alias_dict
+        common_model_args.labels = _labels
 
-    # 以滑动窗口的形式切分text
-    # {'index_bias':i,'text':text[i:i+wind]}
-    text_list = split_text(args, text)
-    dataset = TestDataset(text_list)
-    dataloader = DataLoader(dataset, batch_size=args.batch_size, shuffle=False, collate_fn=batchify_test)
+        self.common_model = PointerNERBERT(common_model_args).to('cpu')
+        state = torch.load(common_model_args.model_load_path, map_location="cpu")
+        self.common_model.load_state_dict(state['model_state'])
+        self.common_model.eval()
 
-    model = PointerNERBERT(args).to('cpu')
-    state = torch.load(args.model_load_path, map_location="cpu")
-    model.load_state_dict(state['model_state'])
-    # optimizer.load_state_dict(state['optimizer'])
-    model.eval()
-    entities = []
-    for inputs, index_biass, sentences in dataloader:
-        # batch_size, sentence_length, number_of_label
-        start_prob, end_prob = model(inputs)
-        print(start_prob.shape)
+        self.contract_type = ""
+        self.config = dict()
+        self.review_result = OrderedDict()
+        self.data = ""
+        self.usr = ""
+
+        config_path = config_path_format.format(contract_type_list[0])
+        config = pd.read_csv(config_path).fillna("")
+        self.config = config
+
+        self.wind = common_model_args.wind
+        self.step = common_model_args.step
+
+    def review_main(self, content, mode, contract_type, usr):
+        self.contract_type = contract_type
+        self.data = self.read_origin_content(content, mode)
+        extraction_res = self.check_data_func()
+        self.usr = usr
+        return extraction_res
+
+    def check_data_func(self):
+        self.common2alias = self.common2alias_dict[self.contract_type]
+        res_common = self._get_common_result()
+        print('PB use time', time.time() - localtime)
+        print("common predict result", len(res_common))
+        print(res_common)
+        return res_common
+
+    def _split_text(self, text):
+        text_list = []
+        wind = self.wind
+        step = self.step
+
+        if len(text) <= wind:
+            return [{'index_bias': 0, 'text': text, 'head_tail': False}]
+
+        text_head_tail = text[:wind // 2] + "\n" + text[-wind // 2 + 1:]
+        assert len(text_head_tail) == wind
+        # index bias 是tail的开始坐标
+        text_list.append({'index_bias': len(text) - wind // 2 + 1, 'text': text_head_tail, 'head_tail': True})
+
+        text = text[wind // 2:-wind // 2 + 1]
+        for i in range(0, len(text), step):
+            text_list.append({'index_bias': i + wind // 2,
+                              'text': text[i + wind // 2:i + wind // 2 + wind],
+                              'head_tail': False})
+        return text_list
+
+    def post_process(self, start_prob, end_prob, samples):
+        _, index_biass, sentences, is_head_tail_list = samples[0]
         thred = torch.FloatTensor([0.5]).to('cpu')
-        start_pred = start_prob>thred
-        end_pred = end_prob>thred
+        start_pred = start_prob > thred
+        end_pred = end_prob > thred
         # batch_size, number_of_label, sentence_length
-        start_pred = start_pred.transpose(2,1)
-        end_pred = end_pred.transpose(2,1)
-        # if True in start_pred:
-        #     print("true in start_pred")
-        # if True in end_pred:
-        #     print("true in end_pred")
-        # 0-1 seq to entity
+        start_pred = start_pred.transpose(2, 1)
+        end_pred = end_pred.transpose(2, 1)
         for bi in range(len(start_pred)):
             index_bias = index_biass[bi]
+            is_head_tail = is_head_tail_list[bi]
             sentence = sentences[bi]
             for li in range(len(start_pred[bi])):
                 start_seq = start_pred[bi][li]
                 end_seq = end_pred[bi][li]
-                start_index = []
-                end_index = []
-                # if True in start_seq:
-                for start_ind in range(len(start_seq)):
-                    if start_seq[start_ind]:
-                        start_index.append(start_ind)
-                        print("label:",labels2id[li], "start:", start_ind+index_bias)
-                # if True in end_seq:
-                for end_ind in range(len(end_seq)):
-                    if end_seq[end_ind]:
-                        end_index.append(end_ind)
-                        print("label:", labels2id[li], "end:", end_ind+index_bias)
-                # if len(start_index) == len(end_index):
-                #     for start_ind, end_ind in zip(start_index, end_index):
-                #         entities.append({'start':start_ind+index_bias,'end':end_ind+index_bias,'entity':sentence[start_ind:end_ind]})
-                # else:
-                min_len = min(len(start_index),len(end_index))
-                for mi in range(min_len):
-                    entities.append({'label':args.labels[li],'entity': sentence[start_index[mi]:end_index[mi]],
-                        'start': start_index[mi] + index_bias, 'end': end_index[mi] + index_bias})
+                # ================================================================
+                if is_head_tail:
+                    start_index = []
+                    end_index = []
+                    for start_ind in range(len(start_seq) // 2):
+                        if start_seq[start_ind]:
+                            start_index.append(start_ind)
+                    for end_ind in range(len(end_seq) // 2):
+                        if end_seq[end_ind]:
+                            end_index.append(end_ind)
+                    self.index2entity(start_index, end_index, bi, li, 0, sentence, start_prob, end_prob)
+                    # .................
+                    start_index = []
+                    end_index = []
+                    for start_ind in range(len(start_seq) // 2, len(start_seq)):
+                        if start_seq[start_ind]:
+                            start_index.append(start_ind)
+                    for end_ind in range(len(end_seq) // 2, len(end_seq)):
+                        if end_seq[end_ind]:
+                            end_index.append(end_ind)
+                    self.index2entity(start_index, end_index, bi, li, index_bias, sentence, start_prob, end_prob)
+                # ================================================================
 
-    pprint(entities)
+                else:
+                    start_index = []
+                    end_index = []
+                    for start_ind in range(len(start_seq)):
+                        if start_seq[start_ind]:
+                            start_index.append(start_ind)
+                    for end_ind in range(len(end_seq)):
+                        if end_seq[end_ind]:
+                            end_index.append(end_ind)
+                    # start_index, end_index, li, index_bias, sentence
+                    self.index2entity(start_index, end_index, bi, li, index_bias, sentence, start_prob, end_prob)
+
+    def index2entity(self, start_index, end_index, bi, li, index_bias, sentence, start_prob, end_prob):
+        if len(start_index) == len(end_index):
+            for _start, _end in zip(start_index, end_index):
+                new_label = self.common2alias[self.common_labels[li]]
+                if new_label == "无":
+                    continue
+                tmp_entity = {'text': sentence[_start:_end],
+                              'start': _start + index_bias,
+                              'end': _end + index_bias}
+                if tmp_entity not in self.entities[new_label]:
+                    self.entities[new_label].append(tmp_entity)
+        elif not start_index:
+            return
+        elif not end_index:
+            return
+        elif start_index[0] > end_index[-1]:
+            return
+        else:
+            while start_index and end_index and start_index[0] > end_index[0]:
+                end_index = end_index[1:]
+            while start_index and end_index and start_index[-1] > end_index[-1]:
+                start_index = start_index[:-1]
+            # 1. 数量相等
+            if len(start_index) == len(end_index):
+                pass
+            # 2. 数量不等, 删去置信度最低的
+            else:
+                diff = abs(len(start_index) - len(end_index))
+                if len(start_index) > len(end_index):
+                    start_index_wt_prob = [[_start, start_prob[bi][_start][li].item()] for _start in
+                                           start_index]
+                    start_index_wt_prob.sort(key=lambda x: x[1])
+                    start_index_wt_prob = start_index_wt_prob[diff:]
+                    start_index = [_[0] for _ in start_index_wt_prob]
+                    start_index.sort()
+                elif len(start_index) < len(end_index):
+                    end_index_wt_prob = [[_end, end_prob[bi][_end][li].item()] for _end in end_index]
+                    end_index_wt_prob.sort(key=lambda x: x[1])
+                    end_index_wt_prob = end_index_wt_prob[diff:]
+                    end_index = [_[0] for _ in end_index_wt_prob]
+                    end_index.sort()
+            for _start, _end in zip(start_index, end_index):
+                new_label = self.common2alias[self.common_labels[li]]
+                if new_label == "无":
+                    continue
+                tmp_entity = {'text': sentence[_start:_end],
+                              'start': _start + index_bias,
+                              'end': _end + index_bias}
+                if tmp_entity not in self.entities[new_label]:
+                    self.entities[new_label].append(tmp_entity)
+
+    def _get_common_result(self):
+        # 在通用条款识别前， 需要进行文本分割等操作
+        text_list = self._split_text(self.data)
+        dataset = TestDataset(text_list)
+        dataloader = DataLoader(dataset, batch_size=4, shuffle=False, collate_fn=batchify_test)
+        self.entities = defaultdict(list)
+        for samples in dataloader:
+            inputs = samples[0]
+            # batch_size, sentence_length, number_of_label
+            start_prob, end_prob = self.common_model(inputs)
+
+            self.post_process(start_prob, end_prob, samples)
+
+        return self.entities
+
+    def _read_common_schema(self, path):
+        schema_df = pd.read_csv(path)
+        schemas = schema_df['schema'].values
+        common2alias_dict = dict()
+        for cont_type in self.contract_type_list:
+            columns = schema_df[cont_type].values
+            common2alias = dict()
+            for sche, alias in zip(schemas, columns):
+                if sche in ['争议解决', '通知与送达', '甲方解除合同', '乙方解除合同', '未尽事宜', '金额']:
+                    continue
+                sche = sche.strip()
+                alias = alias.strip()
+                common2alias[sche] = alias
+            common2alias_dict[cont_type] = common2alias
+        schemas = schemas.tolist()
+        schemas.remove('争议解决')
+        schemas.remove('通知与送达')
+        schemas.remove('甲方解除合同')
+        schemas.remove('乙方解除合同')
+        schemas.remove('未尽事宜')
+        schemas.remove('金额')
+
+        return schemas, common2alias_dict
+
+    def read_origin_content(self, content="", mode="text"):
+        if mode == "text":
+            text_list = content  # 数据在通过接口进入时就会清洗整理好， 只使用text模式； 本地使用，只使用docx格式
+        elif mode == "docx":
+            text_list = read_docx_file(docx_path=content)
+        elif mode == "txt":
+            with open(content, encoding='utf-8', mode='r') as f:
+                text_list = f.readlines()
+                text_list = [line.strip() for line in text_list]
+        else:
+            raise Exception("mode error")
+
+        return text_list
 
 
 if __name__ == "__main__":
+    import time
+
+    contract_type = "laowu"
+
+    os.environ['CUDA_VISIBLE_DEVICES'] = "1"
+
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--model_load_path", default='DocumentReview/PointerBert/model_src/PBert0926_common_all_20sche.pt')
-    parser.add_argument("--input_test_file", default='', type=str, help="input file path in inference")
-    parser.add_argument("--input_test_text", default='', type=str, help="input text in inference")
-    # parser.add_argument("--save_path", default='ContractNER/model_src/PointerBert/pBert0920.pt')
-    parser.add_argument("--window_length", default=510, type=int)
-    parser.add_argument("--window_step", default=400, type=int)
-    parser.add_argument("--batch_size", default=1, type=int, help="Batch size per GPU/CPU for training.")
-    # parser.add_argument("--learning_rate", default=1e-5, type=float, help="The initial learning rate for Adam.")
-    # parser.add_argument("--train_path", default=None, type=str, help="The path of train set.")
-    # parser.add_argument("--dev_path", default=None, type=str, help="The path of dev set.")
-    parser.add_argument("--max_seq_len", default=512, type=int, help="The maximum input sequence length. "
-                                                                     "Sequences longer than this will be split automatically.")
+    parser.add_argument("--model_load_path", default='model/PointerBert/PBert1014_common_all_20sche_auged.pt', type=str)
+    parser.add_argument("--model", default='model/language_model/chinese-roberta-wwm-ext', type=str)
+    parser.add_argument("--common_schema_path", default='DocumentReview/Config/config_common.csv', type=str,
+                        help="The hidden size of model")
     parser.add_argument("--bert_emb_size", default=768, type=int, help="The embedding size of pretrained model")
     parser.add_argument("--hidden_size", default=200, type=int, help="The hidden size of model")
-    parser.add_argument("--num_epochs", default=100, type=int, help="Total number of training epochs to perform.")
-    parser.add_argument("--seed", default=1000, type=int, help="Random seed for initialization")
-    parser.add_argument("--logging_steps", default=200, type=int, help="The interval steps to logging.")
-    parser.add_argument("--valid_steps", default=100, type=int,
-                        help="The interval steps to evaluate model performance.")
-    parser.add_argument('--device', choices=['cpu', 'cuda'], default="cuda",
-                        help="Select which device to train model, defaults to gpu.")
-    # parser.add_argument("--model", choices=["uie-base", "uie-tiny", "uie-medium", "uie-mini", "uie-micro", "uie-nano"],
-    #                     default="uie-base", type=str, help="Select the pretrained model for few-shot learning.")
-    parser.add_argument("--model", default="model/language_model/chinese-roberta-wwm-ext", type=str,
-                        help="Select the pretrained model for few-shot learning.")
-    parser.add_argument("--init_from_ckpt", default=None, type=str,
-                        help="The path of model parameters for initialization.")
-    args = parser.parse_args()
+    parser.add_argument("--wind", default=510, type=int)
+    parser.add_argument("--step", default=400, type=int)
+    common_model_args = parser.parse_args()
 
-    pprint(args)
-    tokenizer = BertTokenizer.from_pretrained('model/language_model/chinese-roberta-wwm-ext')
-    # args.input_test_text = """个人借条今胡兵和王英由于夫妻日常生活开销向甘红霞借款贰万元整（人民币20000），借款日期为实际收到借款的当天，出借人甘红霞直接微信向胡兵转账20000元，借款期限为一年，年利率为13%，如不能按时归还，和愿承担产生的一切法律责任。特以此为据借款人1签字：身份证号：542123197402087786借款人2签字：身份证号：220781193602287047借条日期：2022.7.20"""
-    # print(len(args.input_test_text))
-    # args.input_test_text = """借条借款人姓名：孙林身份证号：孙林因生活所需，本人向叶芳（出借人）借到现金人民币（大写）叁仟伍佰圆整（￥3500元），且已经收到出借人支付的上述款项。签署时间：2022年2月1日借款人签字：借款人联系方式：15125822509保证人签名：保证人身份证号：511503197708235948保证人联系方式：13820935531"""
-    # print(len(args.input_test_text))
-    # args.input_test_text = "\n设备租赁合同5出租⽅：珑珑租赁公司(简称甲⽅)承租⽅：花鸟有限公司(简称⼄⽅)甲、⼄双⽅根据《中国⼯商银⾏X市信托部设备租赁业务试⾏办法》的规定，签订设备租赁合同，并商定如下条款，共同遵守执⾏。⼀、甲⽅根据⼄⽅上级批准的项⽬和⼄⽅⾃⾏选定的设备和技术质量标准，购进以下设备租给⼄⽅使⽤。⼆、甲⽅根据与⽣产⼚(商)签订的设备订货合同规定，于2022年春季交货，由供货单位直接发运给⼄⽅。⼄⽅直接到供货单位⾃提⾃运。⼄⽅收货后应⽴即向甲⽅开回设备收据。三、设备的验收、安装、调试、使⽤、保养、维修管理等，均由⼄⽅⾃⾏负责。设备的质量问题由⽣产⼚负责，并在订货合同中予以说明。四、设备在租赁期间的所有权属于甲⽅。⼄⽅收货后，应以甲⽅名义向当地保险公司投保综合险，保险费由⼄⽅负责。⼄⽅应将投保合同交甲⽅作为本合同附件。五、在租赁期间，⼄⽅享有设备的使⽤权，但不得转让或作为财产抵押，未经甲⽅同意亦不得在设备上增加或拆除任何部件和迁移安装地点。甲⽅有权检查设备的使⽤和完好情况，⼄⽅应提供⼀切⽅便。六、设备租赁期限为2年，租期从供货⼚向甲⽅托收货款时算起，租⾦总额为⼈民币24240元(包括⼿续费1%)，分6期交付，每期租金4040元，由甲⽅在每期期末按期向⼄⽅托收。如⼄⽅不能按期承付租⾦，甲⽅则按逾期租⾦总额每天加收万分之三的罚⾦。七、本合同⼀经签订不能撤销。如⼄⽅提前交清租⾦，结束合同，甲⽅给予退还⼀部分利息的优惠。⼋、本合同期满，甲⽅同意按⼈民币20000元的优惠价格将设备所有权转给⼄⽅。九、⼄⽅上级单位同意作为⼄⽅的经济担保⼈，负责⼄⽅切实履⾏本合同各条款规定，如⼄⽅在合同期内不能承担合同中规定的经济责任时，担保⼈应向甲⽅⽀付⼄⽅余下的各期租⾦和其他损失。⼗、本合同经双⽅和⼄⽅担保⼈盖章后⽣效。本合同正本两份，甲、⼄⽅各执⼀份;副本两份份，⼄⽅担保⼈和⼄⽅开户银⾏各⼀份。甲⽅：珑珑租赁公司(签章)⼄⽅：花鸟有限公司(公章)2022年1⽉1⽇\n"
-    # print(len(args.input_test_text))
-    start_time = time.time()
-    args.input_test_file = 'data/DocData/laodong/ld1.docx'
-    infer(args)
-    print('used time:', time.time()-start_time)
+    print('=' * 50, '模型初始化', '=' * 50)
+    acknowledgement = CommonPBAcknowledgement(contract_type_list=[contract_type],
+                                              config_path_format="DocumentReview/Config/schema/{}.csv",
+                                              common_model_args=common_model_args)
+    print('=' * 50, '开始预测', '=' * 50)
+    localtime = time.time()
+    acknowledgement.review_main(content="data/DocData/{}/laowu4.docx".format(contract_type), mode="docx",
+                                contract_type=contract_type, usr="Part B")
+    print('=' * 50, '结束', '=' * 50)
+    print('use time: {}'.format(time.time() - localtime))
+    pass
