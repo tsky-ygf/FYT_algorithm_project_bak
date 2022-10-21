@@ -17,26 +17,25 @@ tokenizer = BertTokenizer.from_pretrained('model/language_model/chinese-roberta-
 
 
 def read_config(config_path):
-    config_data = pd.read_csv(config_path, encoding='utf-8', na_values=' ', keep_default_na=False)
-    config_list = []
-    label2alias = dict()
-    _alias2label = dict()
+    schema_df = pd.read_csv(config_path)
+    schemas = schema_df['schema'].values
+    column_names = schema_df.columns
 
-    for line in config_data.values:
-        config_list.append(line[0])
-        alis = line[1].split('|')
-        if alis:
-            for ali in alis:
-                if ali:
-                    _alias2label[ali] = line[0]
-        _alias2label[line[0]] = line[0]
-    config_list = list(filter(None, config_list))
-    return config_list, _alias2label
+    alias2common = dict()
+    for column in column_names:
+        if column == 'schema':
+            continue
+
+        for sche, alias in zip(schemas, schema_df[column].values):
+            alias = alias.strip()
+            alias2common[alias] = sche.strip()
+
+    return schemas, alias2common
 
 
 # 生成所有的通用label， 包含别称
 def read_config_to_label(args, is_long=False):
-    config_path = 'data/data_src/config.csv'
+    config_path = 'Document/Config/config_common.csv'
     # 读取config，将别称也读为schema
     config_list, _alias2label = read_config(config_path)
 
@@ -347,6 +346,7 @@ if __name__ == "__main__":
     # file = 'data/cluener/dev.json'
     # maxlen = 0 # 52
     # new maxlength of entity  263
+    read_config_to_label(None, is_long=False)
     pass
 
 else:
