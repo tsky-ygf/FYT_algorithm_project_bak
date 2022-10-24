@@ -32,12 +32,12 @@ def read_docx_file(docx_path):
 
 
 def gen_fake_by_template():
-    with open('data/data_src/data_aug/template2.json', 'r', encoding='utf-8') as f:
+    with open('data/data_src/data_aug/template.json', 'r', encoding='utf-8') as f:
         line = f.readlines()[0]
         template_text = json.loads(line)['text']
 
 
-    W = open('data/data_src/data_aug/data_auged2.json', 'w', encoding='utf-8')
+    W = open('data/data_src/data_aug/data_auged.json', 'w', encoding='utf-8')
     fake_data = pd.read_csv('data/data_src/data_aug/faker_data.csv').values
     for i in range(0, len(fake_data)-200,2):
         name = str(fake_data[i][1])
@@ -100,7 +100,7 @@ def gen_fake_by_template():
 
 def divided():
     import numpy as np
-    file = 'data/data_src/data_aug/data_auged2.json'
+    file = 'data/data_src/data_aug/data_auged.json'
     to_path = 'data/data_src/common_aug'
 
     with open(file, 'r', encoding='utf-8') as f:
@@ -134,6 +134,6 @@ if __name__ == "__main__":
     # with open('data/data_src/data_aug/template2.json', 'w', encoding='utf-8') as f:
     #     text = json.dumps({'text':text}, ensure_ascii=False)
     #     f.write(text)
-    gen_fake_by_template()
+    # gen_fake_by_template()
     divided()
     pass

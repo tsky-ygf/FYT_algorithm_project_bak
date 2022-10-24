@@ -282,13 +282,13 @@ class CommonPBAcknowledgement:
 if __name__ == "__main__":
     import time
 
-    contract_type = "maimai"
+    contract_type = "laowu"
 
     os.environ['CUDA_VISIBLE_DEVICES'] = "1"
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--model_load_path", default='model/PointerBert/PBert1021_common_all_20sche_cat.pt', type=str)
+    parser.add_argument("--model_load_path", default='model/PointerBert/PBert1021_common_all_20sche_cat_aug.pt', type=str)
     parser.add_argument("--model", default='model/language_model/chinese-roberta-wwm-ext', type=str)
     parser.add_argument("--common_schema_path", default='DocumentReview/Config/config_common.csv', type=str,
                         help="The hidden size of model")
@@ -304,8 +304,9 @@ if __name__ == "__main__":
                                               common_model_args=common_model_args)
     print('=' * 50, '开始预测', '=' * 50)
     localtime = time.time()
-    acknowledgement.review_main(content="data/DocData/{}/maimai1.docx".format(contract_type), mode="docx",
+    acknowledgement.review_main(content="data/DocData/{}/laowu1_show.docx".format(contract_type), mode="docx",
                                 contract_type=contract_type, usr="Part B")
     print('=' * 50, '结束', '=' * 50)
+    print(acknowledgement.data)
     print('use time: {}'.format(time.time() - localtime))
     pass

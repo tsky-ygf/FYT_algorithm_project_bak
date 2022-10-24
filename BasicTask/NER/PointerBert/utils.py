@@ -35,10 +35,10 @@ def read_config(config_path):
 
 # 生成所有的通用label， 包含别称
 def read_config_to_label(args, is_long=False):
-    config_path = 'Document/Config/config_common.csv'
+    config_path = 'DocumentReview/Config/config_common.csv'
     # 读取config，将别称也读为schema
     config_list, _alias2label = read_config(config_path)
-
+    config_list = config_list.tolist()
     config_list.remove('争议解决')
     config_list.remove('通知与送达')
     config_list.remove('甲方解除合同')
