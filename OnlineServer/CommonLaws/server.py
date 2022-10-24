@@ -74,7 +74,7 @@ class NewsInput(BaseModel):
         }
 
 class NewsResult(BaseModel):
-    data_list: list[dict]
+    data_dict: dict
 
 @app.post("/fyt/ai/v1.0.0/get_commonLaws_news_by_id", summary="根据ID查询专栏信息", response_model=NewsResult)
 async def get_news(info_input: NewsInput):
@@ -100,9 +100,9 @@ async def get_news(info_input: NewsInput):
         | preview             | str            | 内容预览     |
 
         """
-    data_list = common_laws_service.get_news(uq_id=info_input.uq_id,
+    data_item = common_laws_service.get_news(uq_id=info_input.uq_id,
                                              tableName=info_input.table_name)
-    return {"data_list":data_list}
+    return {"data_dict":data_item}
 
 if __name__ == "__main__":
     # 日志设置
