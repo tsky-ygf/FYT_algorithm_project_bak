@@ -65,21 +65,15 @@ def get_news(uq_id,tableName):
     )
     curs = conn.cursor()
     curs.execute(select_sql)
-    res_list = curs.fetchall()
+    data_item = curs.fetchone()
     curs.close()
     conn.close()
-    preview_data_list = []
-    if res_list:
-        for data_item in res_list:
-            content = data_item.pop('content')
-            if content:
-                content = re.sub("\s", "", content)
-                data_item['preview'] = content[:20]
-                preview_data_list.append(data_item)
-    if preview_data_list:
-        return preview_data_list[0]
-    else:
-        return ''
+    print(data_item)
+    content = data_item.pop('content')
+    if content:
+        content = re.sub("\s", "", content)
+        data_item['preview'] = content[:20]
+    return data_item
 
-if __name__ == '__main__':
-    print(get_preview_data("swj_hot_news"))
+# if __name__ == '__main__':
+#     print(get_preview_data("swj_hot_news"))
