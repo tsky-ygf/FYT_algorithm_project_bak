@@ -76,7 +76,10 @@ def get_news(uq_id,tableName):
                 content = re.sub("\s", "", content)
                 data_item['preview'] = content[:20]
                 preview_data_list.append(data_item)
-    return preview_data_list
+    if preview_data_list:
+        return preview_data_list[0]
+    else:
+        return ''
 
 if __name__ == '__main__':
     print(get_preview_data("swj_hot_news"))
